@@ -1,0 +1,7 @@
+openai
+chromadb
+pydantic
+python-docx
+pypdf
+python-dotenv
+tiktoken

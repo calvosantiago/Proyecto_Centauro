@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica - Proyecto Centauro</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 16px;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e74c3c;
+        }
+        pre {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .security-alert {
+            background-color: #e8f8f5;
+            border-left: 5px solid #2ecc71;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .status-mvp {
+            display: inline-block;
+            background-color: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            vertical-align: middle;
+        }
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🦄 Proyecto Centauro: Documentación Técnica</h1>
+        <p><strong>Fecha:</strong> 22 de Diciembre de 2025 | <strong>Versión:</strong> 1.1 (Con Privacidad) | <strong>Estado:</strong> <span class="status-mvp">Prototipo Funcional</span></p>
+    </header>
+
+    <section>
+        <h2>1. Resumen Ejecutivo</h2>
+        <p>Centauro es un agente de Inteligencia Artificial diseñado para <strong>auditar transcripciones de ventas</strong> de forma automática, estricta y escalable. A diferencia de un chat genérico, Centauro utiliza una arquitectura <strong>RAG (Retrieval-Augmented Generation)</strong> para garantizar que cada evaluación se base <strong>exclusivamente</strong> en los manuales oficiales de la organización.</p>
+    </section>
+
+    <section>
+        <h2>2. Arquitectura del Sistema (RAG + Privacy)</h2>
+        <p>El flujo incluye una capa intermedia de seguridad que sanitiza los datos antes de salir de la infraestructura local.</p>
+        
+        <div class="mermaid">
+            graph TD
+            A[Inputs: Documentos y Transcripciones] -->|Texto Plano| B(Ingestión Python)
+            B --> C{ChromaDB <br/> Memoria Vectorial}
+            
+            subgraph "Fase 1: Memoria (R)"
+            C -->|Búsqueda Semántica| D[Recuperación de Reglas]
+            end
+            
+            subgraph "Fase 2: Privacidad y Aumento (A)"
+            E[Nueva Entrevista] --> P(Capa de Privacidad privacy.py)
+            P -->|Texto Sanitizado| F[Script Python]
+            D --> F
+            F -->|Prompt: Reglas + Texto Seguro + JSON Schema| G[Construcción del Contexto]
+            end
+            
+            subgraph "Fase 3: Generación (G)"
+            G --> H[OpenAI GPT-4o-mini]
+            H -->|Salida JSON Estricta| I[Reporte Final]
+            end
+            
+            style P fill:#2ecc71,stroke:#333,stroke-width:2px,color:white
+            style C fill:#f9f,stroke:#333,stroke-width:2px
+            style H fill:#bbf,stroke:#333,stroke-width:2px
+        </div>
+    </section>
+
+    <section>
+        <h2>3. Seguridad y Privacidad (Módulo GDPR)</h2>
+        <p>El sistema incorpora un módulo estricto de privacidad (<code>privacy.py</code>) que actúa como cortafuegos de datos personales. Este proceso ocurre <strong>localmente</strong> en el servidor antes de realizar cualquier llamada a la API de OpenAI.</p>
+        
+        <div class="security-alert">
+            <strong>🔐 Mecanismo de Redacción:</strong> Los datos sensibles se detectan mediante expresiones regulares (Regex) y se sustituyen por tokens anónimos (ej: <code>[REDACTED_PHONE]</code>). El LLM nunca ve los datos reales.
+        </div>
+
+        <h3>Datos Protegidos:</h3>
+        <ul>
+            <li><strong>Emails:</strong> Detecta patrones de correo electrónico.</li>
+            <li><strong>Teléfonos:</strong> Detecta formatos nacionales (+34) e internacionales.</li>
+            <li><strong>DNI/NIE:</strong> Detecta patrones de identificación española (8 dígitos + letra / X,Y,Z + 7 dígitos).</li>
+            <li><strong>IBAN:</strong> Detecta cuentas bancarias españolas.</li>
+        </ul>
+        <p><em>Nota: El modelo de IA es capaz de evaluar si el asesor "confirmó el DNI" viendo el token <code>[REDACTED_DNI]</code>, manteniendo la funcionalidad de auditoría sin comprometer la privacidad.</em></p>
+    </section>
+
+    <section>
+        <h2>4. Valor Estratégico: ¿Por qué un Agente Propio?</h2>
+        <p>Comparativa entre el desarrollo de Centauro (Python/API) frente al uso manual de herramientas web (ChatGPT/Gemini).</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Característica</th>
+                    <th>Chat Web (Manual)</th>
+                    <th>Agente Centauro (Automático)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Escalabilidad</strong></td>
+                    <td>Baja. Requiere copiar/pegar 1 a 1.</td>
+                    <td><strong>Industrial.</strong> Procesa miles de archivos sin intervención humana.</td>
+                </tr>
+                <tr>
+                    <td><strong>Privacidad</strong></td>
+                    <td>Riesgo alto (se envían datos al chat).</td>
+                    <td><strong>Control Total.</strong> Sanitización local antes de salir a la nube.</td>
+                </tr>
+                <tr>
+                    <td><strong>Precisión (RAG)</strong></td>
+                    <td>Sufre alucinaciones con textos largos.</td>
+                    <td><strong>Quirúrgica.</strong> ChromaDB recupera solo la regla exacta necesaria.</td>
+                </tr>
+                <tr>
+                    <td><strong>Datos (Output)</strong></td>
+                    <td>Texto no estructurado.</td>
+                    <td><strong>Base de Datos (JSON).</strong> Permite analítica masiva (Power BI).</td>
+                </tr>
+                <tr>
+                    <td><strong>Integración</strong></td>
+                    <td>Aislado en el navegador.</td>
+                    <td><strong>Conectable.</strong> Se integra con Outlook, Teams y SharePoint.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>5. Estructura de Carpetas</h2>
+        <pre>
+Proyecto_Centauro/
+│
+├── inputs/
+│   ├── docs/          <-- MANUALES (Tu "Ley"). Archivos .txt limpios.
+│   └── transcripts/   <-- ENTREVISTAS. Transcripciones .txt para analizar.
+│
+├── outputs/           <-- RESULTADOS. Archivos .json y logs de gastos.
+│
+├── centauro/          <-- CÓDIGO FUENTE
+│   ├── config.py      <-- Configuración.
+│   ├── privacy.py     <-- Módulo de Seguridad (Regex PII).
+│   ├── rag.py         <-- Motor de Memoria (ChromaDB).
+│   ├── analyze.py     <-- Lógica del Auditor (Prompts).
+│   ├── schema.py      <-- Contrato de Datos (JSON Schema).
+│   └── llm_client.py  <-- Conector OpenAI + Control de Gastos.
+│
+├── .chroma_db/        <-- BASE DE DATOS LOCAL.
+├── main.py            <-- Ejecutable principal.
+└── .env               <-- Credenciales.
+        </pre>
+    </section>
+
+    <section>
+        <h2>6. Stack Tecnológico y Evolución</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Componente</th>
+                    <th>Tecnología MVP (Actual)</th>
+                    <th>Futuro Enterprise (Azure)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Lenguaje</strong></td>
+                    <td>Python 3.10+</td>
+                    <td>Python 3.10+</td>
+                </tr>
+                <tr>
+                    <td><strong>LLM (Cerebro)</strong></td>
+                    <td>OpenAI GPT-4o-mini</td>
+                    <td>Azure OpenAI Service (GPT-4o)</td>
+                </tr>
+                <tr>
+                    <td><strong>Memoria (RAG)</strong></td>
+                    <td><strong>ChromaDB (Local)</strong></td>
+                    <td><strong>Azure AI Search</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Embeddings</strong></td>
+                    <td>OpenAI text-embedding-3-small</td>
+                    <td>Azure OpenAI Embeddings</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>7. Próximos Pasos</h2>
+        <ul>
+            <li>✅ <strong>Fase A: Validación.</strong> Limpiar manuales reales, subir transcripción real y ajustar prompts.</li>
+            <li>✅ <strong>Fase A.2: Seguridad.</strong> Implementación y testeo del módulo de privacidad PII.</li>
+            <li>⬜ <strong>Fase B: Integración.</strong> Generar PDF legible desde el JSON y conectar envío por email.</li>
+            <li>⬜ <strong>Fase C: Escalabilidad.</strong> Migrar a Azure AI Search si el volumen supera las 50k entrevistas.</li>
+        </ul>
+    </section>
+
+    <footer>
+        <p>Documento generado para <strong>Proyecto Centauro</strong></p>
+    </footer>
+</div>
+
+</body>
+</html>

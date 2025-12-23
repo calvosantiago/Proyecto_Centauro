@@ -1,0 +1,7 @@
+Asesor: Hola, buenos días. Hablo con María?
+Cliente: Sí, dime.
+Asesor: Le llamo para ofrecerle nuestro nuevo plan de fibra.
+Cliente: Es muy caro.
+Asesor: Bueno, se lo dejo a mitad de precio si firma ya.
+Cliente: Ah, vale.
+Asesor: Perfecto, adiós.

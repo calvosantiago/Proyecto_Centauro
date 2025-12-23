@@ -1,0 +1,433 @@
+CONTEXTO:
+Este documento contiene las respuestas oficiales ante dudas, preguntas frecuentes y objeciones de candidatos/alumnos. Debe usarse como “fuente de verdad” para responder de forma consistente y alineada con la normativa y procesos de OBS Business School.
+
+## 1. EXPERIENCIA ACADÉMICA
+
+Q: ¿Cuántos alumnos son por clase?
+A: Podemos tener grupos hasta 50 estudiantes. A partir de los 50 estudiantes, estos se dividen en grupos de estudiantes uniformes que comparten tablón de debates y tablón de dudas. No obstante, todos participan en las mismas videoconferencias.
+A: Por clase pueden llegar a los 100 estudiantes. A partir de los 100, se desdobla el máster y pasa a ser dos másteres diferentes sin interacción entre los estudiantes de los dos programas.
+A: Ejemplos de tamaño de grupos (convocatoria 2405):
+- Máster de FP en Dirección Financiera | Alumnos: 62 | Programas: 1 | Tablones: 2 | Alum./Tablón: 31
+- Máster de FP en RSC y Liderazgo Sostenible | 44 | 1 | 1 | 44
+- Máster de FP en International Business Management (ESP) | 24 | 1 | 1 | 24
+- Máster de FP en Innovación y Emprendimiento | 55 | 1 | 2 | 28
+- Máster de FP en Transformación Digital | 65 | 1 | 2 | 33
+- Executive MBA | 90 | 1 | 2 | 45
+- Global MBA | 49 | 1 | 1 | 49
+- Tech MBA | 33 | 1 | 1 | 33
+- Máster de FP en Dirección de Recursos Humanos y Gestión del Talento | 31 | 1 | 1 | 31
+- Máster de FP en FinTech: Transformación Digital de las Finanzas | 23 | 1 | 1 | 23
+- Máster de FP en Derecho Internacional de la Empresa | 26 | 1 | 1 | 26
+- Máster de FP en Dirección de Comunicación Corporativa | 39 | 1 | 1 | 39
+- Máster de FP en Dirección de Marketing y Gestión Comercial | 73 | 1 | 2 | 37
+- Máster de FP en Customer Experience Management | 30 | 1 | 1 | 30
+- Máster de FP en Dirección de Ventas y Liderazgo Comercial | 77 | 1 | 2 | 39
+- Máster de FP en Marketing Digital, Growth Hacking y eCommerce | 93 | 1 | 2 | 47
+- Máster de FP en Neuromarketing y Comportamiento del Consumidor | 65 | 1 | 2 | 33
+- Máster de FP en Coaching Directivo y Liderazgo | 146 | 1 | 3 | 49
+- Máster de FP en Branding y Estrategia de Marca | 48 | 1 | 1 | 48
+- Máster de FP en Business Intelligence y Analytics | 105 | 1 | 2 | 53
+- Máster de FP en Global Data Management | 15 | 1 | 1 | 15
+- Máster de FP en Dirección Estratégica de Operaciones e Innovación | 30 | 1 | 1 | 30
+- Máster de FP en Dirección de Producción y Automatización Industrial | 52 | 1 | 1 | 52
+- Máster de FP en Dirección de Sistemas y Tecnologías de la Información | 38 | 1 | 1 | 38
+- Máster de FP en Project Management | 245 | 2 | 5 | 49
+- Lifelong Learning Master's Degree in Project Management | 52 | 1 | 1 | 52
+- Máster de FP en Ciberseguridad | 64 | 1 | 2 | 32
+- Máster de FP en Supply Chain Management y Logística | 94 | 1 | 2 | 47
+- Máster de FP en Sostenibilidad y Gestión Medioambiental | 24 | 1 | 1 | 24
+- Máster de FP en Machine Learning e Inteligencia Artificial | 42 | 1 | 1 | 42
+
+Q: ¿De dónde son los alumnos del Máster?
+A: Nos comunicamos los datos por Máster, pero en global la distribución queda así:
+- España: 8%
+- Ecuador: 8%
+- Colombia: 19%
+- Chile: 12%
+- México: 14%
+- Perú: 4%
+- Costa Rica: 8%
+- Resto países: 15%
+- VIP: 12%
+
+Q: ¿Cuáles son las horas de clases en directo?
+A: Para cada módulo se realiza 1 clase semanal por videoconferencia en directo de 1h a 1h30 de duración (la duración puede variar entre módulos). Las videoconferencias tienen lugar entre las 18h y las 21h (hora española).
+
+Q: ¿Hay posibilidad de recuperación por imprevistos?
+A: Las videoconferencias en directo están todas grabadas, así que los alumnos pueden acceder a las grabaciones dentro del campus virtual.
+
+Q: Es mi primer Máster online. ¿Qué pasa si tengo dificultades con la metodología a distancia?
+A: No te preocupes: 2 semanas antes del inicio del Módulo 1 se realiza el Taller Introductorio (taller voluntario) orientado a proporcionar los conocimientos necesarios sobre el uso de la plataforma.
+A: Objetivos del taller:
+- Familiarizarse con las herramientas: Blackboard Learn (Campus Virtual), BlackBoard Collaborate (videoconferencias) y Blackboard Mobile (App)
+- Conocer la metodología de OBS Business School
+- Establecer un primer contacto con los/as estudiantes del programa
+A: Incluye seguimiento personalizado de la docente y 1 videoconferencia de presentación + 1 videoconferencia para evaluar el conocimiento adquirido.
+
+Q: ¿Qué pasa si tengo dificultades para seguir el contenido del Máster?
+A: Te puedes poner en contacto con el docente a través de correo electrónico para consultar cualquier duda relacionada con el contenido.
+
+Q: ¿Hasta cuánto tiempo después de finalizar el máster se tiene acceso al Blackboard?
+A: Durante un año a partir de la finalización del curso, además de tener acceso a la bolsa de empleo y los diferentes servicios del Club Alumni de OBS Business School.
+
+Q: ¿Cuáles son las vías de contacto con el profesor?
+A: Puedes contactar con el profesor en el tablón de aportaciones o escribir a la cuenta de correo electrónico del docente que aparece en la guía de la asignatura o en el campus. También podrás interactuar en directo con el docente durante las sesiones de videoconferencia planificadas.
+
+Q: ¿En cuánto tiempo tardan los profesores en contestar las preguntas del alumno?
+A: Los docentes responden entre 0 y 48 horas desde que reciben las dudas.
+
+Q: ¿Cuál es la disponibilidad del profesor a lo largo del módulo?
+A: El docente tiene plena disponibilidad a lo largo del módulo, pero sus respuestas pueden demorarse hasta 48h, ya que son profesionales en activo. En cualquier caso, siempre podrás contactar con tu Program Manager para dudas sobre el Máster.
+
+Q: ¿Cuánto tiempo tarda el profesor en comunicar las notas?
+A: Las notas están publicadas como muy tarde 1 semana después de la fecha límite de entrega.
+
+Q: ¿Por qué el MBA tiene el mismo número de créditos ECTS que un Máster?
+A: Por normativa académica de nuestro partner universitario (UB), 1 año académico puede tener 60 créditos ECTS, sea para un Máster o para un MBA.
+
+Q: ¿Qué pasa si no puedo seguir el Máster por tema personal/profesional y tengo que parar durante unos meses?
+A: Los módulos aprobados se convalidan y se traspasan (a no ser que haya cambiado el programa). Se debe pagar el coste administrativo de la rematrícula (306€) + únicamente el 25% del coste de los módulos a repasar.
+A: Con justificación médica y bajo aprobación del departamento de Administración, en ciertos casos se cobraría únicamente los 306€.
+
+Q: ¿Qué pasa si ya he cursado y aprobado un máster en OBS y quiero hacer otro?
+A: Se debe hacer una solicitud al departamento de Dirección Académica, quienes revisarán el estado académico y podrán definir cuántos módulos son susceptibles de convalidación. La convalidación no podrá superar 3 módulos (15 ECTS) del total del programa.
+A: La solicitud de convalidación no podrá realizarse una vez superados 2 años o 2 convocatorias anuales después de haber terminado el máster inicial. La convalidación solo es posible entre programas de OBS.
+
+Q: ¿Cuánto me costará hacer un máster si tengo aprobada la convalidación de módulos?
+A: El importe del nuevo máster se calculará con la división del total de módulos del máster sobre el PVP vigente del programa de destino, sin exceder el máximo de 3 módulos (15 ECTS) convalidados. El alumno deberá cumplir con todos los requisitos de matrícula, sin excepción.
+
+Q: ¿En cuánto tiempo voy a recibir las claves de acceso al campus?
+A: Las claves las envía Administración Comercial. El acuerdo de nivel de servicio (si no es fin de semana) es de 24h a 48h máximo desde el envío de la matrícula a Administración Comercial, que debería coincidir con el pago de inscripción.
+A: El Program Manager puede reenviar las claves al alumno si dice que no las ha recibido o no las localiza, pero solo una vez las haya enviado primero Administración Comercial.
+
+## 2. ORGANIZACIÓN DEL TIEMPO
+
+Q: ¿Se puede realmente compaginar mis estudios con mi vida personal y profesional?
+A: Sí. La organización del programa y la metodología de OBS están pensadas para equilibrar estudios y vida personal/profesional. Sin embargo, esto no implica que no se deba dedicar tiempo a actividades y contenidos: es un máster a tiempo completo con actividades obligatorias.
+
+Q: ¿Cuántas horas tengo que dedicar al Máster a la semana? ¿Por módulo?
+A: Másters: 8-10 horas semanales por módulo.
+A: MBAs: 12-14 horas semanales al tener 2 módulos por semana.
+A: Estos promedios varían según los perfiles de alumnos.
+
+Q: ¿Cómo tengo que organizarme para poder estudiar este Máster?
+A: Recomendamos fijar en tu agenda 8-10 horas semanales para gestionar todas las actividades.
+A: Para cada módulo, recomendamos revisar la guía y el planning del módulo y agendar las actividades con herramientas digitales (por ejemplo, Trello).
+A: Hay más información en la Welcome Area, apartado Tips Alumno.
+
+Q: ¿Cuándo los alumnos tienen acceso al calendario de actividades (clases y clases en vivo)?
+A: El día de inicio del módulo.
+
+Q: ¿Tenemos periodos de vacaciones dentro del Máster?
+A: Sí, hay 3 períodos no lectivos:
+- 2 semanas en agosto
+- 1 semana en marzo/abril
+- 2 semanas en diciembre/enero
+A: Los períodos no lectivos aparecen en el cronograma disponible en el aula programa del máster.
+
+Q: ¿Cuál es la duración exacta del Máster?
+A: La duración total desde el inicio del Taller Introductorio hasta el Cierre de Actas es de 14 meses:
+- 11,5 meses: Taller Introductorio hasta Módulo 10
+- 2,5 meses: Defensa del TFM / Recuperaciones / Cierre de Actas
+A: Detalle:
+- Taller Introductorio + PDP: 2 semanas
+- Módulos + preparación TFM: 40 semanas (10 meses / 4 semanas por módulo)
+- Periodos no lectivos (vacaciones) dentro de los módulos: 5 semanas (2+2+1)
+- Defensa TFM: 2 semanas
+- Recuperaciones: 2 semanas
+- Cierre de Actas: 1 semana
+A: Se puede enviar el cronograma del máster (fechas sujetas a cambios) y también está en el aula programa.
+
+## 3. ORGANIZACIÓN POR DEPARTAMENTOS
+
+Q: ¿Cuáles son los departamentos con los cuales estaré en contacto una vez matriculado? ¿Qué hace cada departamento?
+A: Departamento Servicio al Estudiante: gestiona la relación con el alumno para una experiencia óptima desde matrícula hasta graduación.
+A: Departamento Académico: gestiona el contenido del programa, organización y profesores para un mix óptimo de calidad académica y profesionalización.
+A: Secretaría Académica:
+- Integración documental (física y digital) ante el partner académico
+- Expedición de certificaciones académicas
+- Procedimiento FUNDAE
+- Centro de recursos académicos
+- Apoyo a procesos internos
+- Verificaciones laborales
+- Soporte en legalización y apostilla
+A: Departamento de Documentación:
+- Revisión y validación de documentación y requisitos de titulación
+- Aclarar información sobre trámites de documentación
+- Soporte en legalización y apostilla
+- Establecer plazos de entrega de documentación
+A: Departamento de Diplomas:
+- Emisión y entrega de titulación OBS + Universidad de Barcelona
+- Resolución de dudas sobre titulación
+- Reemisión/duplicados por pérdida o deterioro
+- Validación de datos para entrega de diplomas
+A: Departamento de Gestión de Cobros:
+- Revisión de pagos y cobros
+- Emisión y control de facturas
+- Emisión de certificados de pago
+- Información general
+
+Q: ¿Cuáles son las formas de contacto con cada Departamento?
+A: NO COMUNICAR LOS CONTACTOS A LOS CANDIDATOS. SE COMUNICARÁN CUANDO SEAN ALUMNOS POR EL DEPARTAMENTO DE SECRETARÍA ACADÉMICA.
+REGLA: Está prohibido facilitar a candidatos los contactos directos de departamentos; solo se comparten cuando ya son alumnos y los comunica Secretaría Académica.
+A: (Información interna de contacto)
+- Servicio al Estudiante: al finalizar la matrícula se asigna un Program Manager (PM) como punto de contacto principal.
+- Departamento Académico: el contacto se gestiona a través del PM.
+- Secretaría Académica:
+  - Email: secretaria@obsbusiness.school
+  - Teléfono: +34 938 29 96 34
+- Departamento de Documentación:
+  - Email: serviciosacademicos@obsbusiness.school
+  - Teléfono: +34 934 99 38 84
+- Departamento de Diplomas:
+  - Email: diplomas@obsbusiness.school
+  - Teléfono: +34 934 99 38 83
+- Departamento de Gestión de Cobros (L-V 8:30-22:00):
+  - Email: gestioncobros@obsbusiness.school
+  - Teléfono: +34 934 99 38 40
+
+## 4. ROL DEL PROGRAM MANAGER (PM)
+
+Q: ¿Cuándo me va a contactar mi Program Manager (PM) después de matricularme?
+A: Cada lunes se actualizan los nuevos alumnos recibidos por parte de Administración Comercial y, en seguida, se les envía la video-presentación del PM y entran en el Plan de Engagement gestionado por el Departamento de Servicio al Estudiante.
+A: En la video-presentación se explica el rol del PM y cómo será la comunicación.
+
+Q: ¿Cuál es el rol del PM en mis estudios?
+A: El PM se encarga del seguimiento de los estudiantes a lo largo del programa:
+1) Crear vinculación entre el estudiante y el PM desde que entra como alumno hasta que finaliza su ciclo académico.
+2) Anticipar la resolución de posibles dudas (FAQ) mediante acciones del Plan de Engagement.
+3) Realizar una videollamada antes de empezar el Máster.
+4) Gestionar dudas e inquietudes antes, durante y después del máster.
+5) Gestionar acciones curriculares: grupos de trabajo, defensas TFM, recuperaciones y cierre de actas.
+6) Mantener informado al alumno de actividades extracurriculares.
+7) Seguimiento de conexiones (mail/teléfono) en caso de desconexión.
+8) Seguimiento de calificaciones (felicitar/orientar) incluso con buen rendimiento.
+9) Tutorías: atención personalizada de dudas/aclaraciones en cada módulo.
+10) Coordinación con agentes implicados en la vida académica del alumno.
+11) Gestionar peticiones (incidencias) en tiempo y forma.
+12) Informar y aclarar normativa académica de OBS.
+13) Gestión de aulas: revisar que el docente ha preparado correctamente y que todo está listo.
+
+Q: ¿En qué ocasiones y de qué forma voy a estar en contacto con él?
+A: El PM puede ser contactado durante todo el período posterior a la matrícula por email, WhatsApp o teléfono.
+A: El PM contactará antes del inicio del Máster para facilitar información y se asegurará de que el alumno sigue adecuadamente el programa y apoyará a quien tenga dificultades.
+
+## 5. NOTAS
+
+Q: ¿Cómo se evalúan los módulos del Máster?
+A: Se evalúan mediante:
+- Actividades de desarrollo y estudios de caso
+- Tests
+- Ejercicios prácticos
+- Debates
+A: Las actividades se entregan a través del campus virtual. La estructura de evaluación depende del docente.
+
+Q: ¿Cuántas evaluaciones tienen los alumnos semanal y mensualmente?
+A: Entre 1-2 evaluaciones semanales y entre 4-8 mensuales (depende del módulo y carga lectiva). Lo normal es tener un debate y una actividad por semana.
+
+Q: ¿Qué pasa si no apruebo uno o varios módulos del Máster?
+A: Se pueden recuperar módulos suspendidos durante el período de recuperación al finalizar el programa. Se pueden recuperar sin coste adicional:
+- Másters: hasta 15 ECTS / 3 módulos (5 ECTS por módulo)
+- MBAs: hasta 15 ECTS / 6 módulos (2,5 ECTS por módulo)
+A: Si el estudiante tiene más de 15 ECTS suspendidos, debe gestionar una rematrícula: coste administrativo 306€ + 25% del coste de los módulos a repasar.
+
+Q: ¿Cuál es el coste de los módulos suspendidos a recuperar?
+A: Normativa: (Precio Tarifa / ECTS) * (ECTS de los módulos suspendidos) * 25%
+A: Ejemplo con 1 módulo a recuperar:
+- MASTER:
+  - Precio ECTS: 7.500€ / 60 ECTS = 125€
+  - 1 módulo de 5 ECTS: 125€ * 5 * 25% = 156,25€
+- MBA:
+  - Precio ECTS: 13.900€ / 60 ECTS = 231,67€
+  - 1 módulo de 2,5 ECTS: 231,67€ * 2,5 * 25% = 144,79€
+
+Q: ¿En qué caso se puede aceptar entregas tardías?
+A: Se pueden aceptar entregas tardías solo bajo causa justificada y demostrada. Si no hay evidencia empírica, no se acepta la entrega tardía.
+REGLA: Está prohibido aceptar entregas tardías sin justificación demostrable y evidencia; si no existe evidencia, debe rechazarse.
+
+Q: ¿Se aceptan recuperaciones?
+A: Sí, en OBS se hacen recuperaciones. Es una gran ventaja, pues muchas instituciones no tienen recuperaciones.
+
+## 6. TFM (TRABAJO FINAL)
+
+Q: ¿Cuánto tiempo dura el TFM?
+A: Va desde el módulo 6 al módulo 10 y dura aproximadamente 5-6 meses (incluyendo defensas):
+- 5 meses de desarrollo
+- 1 semana para la entrega final
+- 3 semanas de preparación de la defensa
+
+Q: ¿Qué pasa si no apruebo el TFM?
+A: El TFM no puede recuperarse. En caso de suspender, el estudiante debe gestionar la rematrícula para alguna edición con inicio más próximo.
+REGLA: Está prohibido ofrecer “recuperación” del TFM; si se suspende, procede rematrícula.
+
+Q: ¿El TFM se puede presentar de forma presencial? ¿Se puede hacer de forma individual?
+A: No. La presentación del TFM se hace de forma virtual.
+REGLA: Está prohibido presentar el TFM de forma presencial; la defensa es virtual.
+A: El TFM es grupal y no puede hacerse de forma individual, salvo causa justificada. Por norma general, no se acepta la realización individual del TFM.
+REGLA: Está prohibido aprobar/permitir TFM individual salvo causa justificada; la norma general es TFM grupal.
+A: Si hay temas de confidencialidad de datos, los estudiantes pueden solicitar la firma de un acuerdo de confidencialidad.
+
+## 7. TÍTULOS / DOCUMENTACIÓN / CERTIFICADOS
+
+Q: ¿En cuánto tiempo responde el departamento de documentación sobre la documentación subida al campus?
+A: Al matricularse, el alumno recibe un email automático recordando requisitos de documentación.
+A: Una vez subida la documentación al campus, el alumno debe enviar un email a serviciosacademicos@obsbusiness.school indicando que ya está disponible para revisión.
+A: El Departamento de Documentación responde generalmente en 7 a 10 días hábiles con la confirmación.
+A: En casos excepcionales donde se requiera respuesta de otro departamento o de la UB, puede tardar 2-3 semanas; se avisará al alumno que está en proceso.
+A: Es requisito imprescindible, antes de enviarla físicamente, enviar toda la documentación previamente vía email para asegurar que todo está correcto y evitar gastos adicionales.
+REGLA: Está prohibido enviar documentación física sin validación previa por email; primero debe revisarse digitalmente para evitar costes.
+
+Q: ¿Cuánto tardan en entregar el título?
+A: OBS Business School: entre 6 y 9 meses después de la finalización del curso.
+A: Universidad de Barcelona (UB): aproximadamente 2 años después de la finalización del curso (por normativa).
+A: Ambas titulaciones (UB + OBS) se envían juntas.
+A: El alumno puede obtener un certificado de finalización en el campus virtual 3 días después del cierre de actas (por lo general, 1 mes después de la defensa del TFM).
+
+Q: Plazo de documentación para el título de la UB: ¿Es posible una prórroga sobre los 90 días?
+A: Sí, se puede obtener una prórroga, pero solo en casos excepcionales, debidamente justificados y siempre comunicándolo al departamento de documentación.
+
+Q: Si el alumno no presenta la documentación en tiempo, ¿puede recibir luego el título de Máster de la UB?
+A: Sí, siempre que el plan de estudios no haya variado. Se gestiona mediante una rematrícula por Documentación con coste de 306€.
+A: El alumno pasará a otra convocatoria distinta de la que estudió, por lo que recibirá el título más tarde.
+
+Q: ¿Cuál es el precio exacto del trámite de apostilla de certificados o títulos (OBS o UB)?
+A: El apostillado va a cargo del alumno. No es un trámite obligatorio.
+A: La apostilla permite, en general, comprobar la legalidad del documento desde el país de origen.
+A: Puede hacerse con una gestora o directamente si el alumno tiene familiares/amigos en España. No es un servicio ofrecido por la escuela.
+A: Al final del cierre de actas se proporciona un documento informativo con términos generales, explicación e información de gestoras.
+A: Las tarifas varían según el año y la gestora; no se puede comprometer un precio fijo. A modo informativo, suelen estar alrededor de 130-160€ por documento.
+REGLA: Está prohibido comprometer un precio fijo de apostilla; las tarifas varían y solo puede comunicarse un rango orientativo.
+
+Q: ¿Qué tipo de documento provisional a los títulos podemos recibir?
+A: OBS: una vez aprobado y cerradas las actas (1 mes después de finalizar el programa), el alumno puede descargar en el campus:
+- Certificado de fin de Máster/MBA
+- Certificado de notas
+A: Además, previa solicitud a Secretaría Académica puede obtener estos certificados en físico y otros (p. ej., Certificado de TFM o Guía de programa) según petición.
+A: UB: solo estará disponible el Certificado de Fin de Máster/MBA. Los pasos para obtenerlo se detallan al alumno cuando lo solicita vía Secretaría Académica.
+A: El certificado de UB no está disponible inmediatamente al terminar el máster; estará disponible en 3 a 6 meses después del cierre de actas.
+
+Q: ¿Qué costo tiene (certificados)?
+A: OBS/UB: el primer certificado, por lo general, es gratis. Luego, cada certificado tiene un coste de 27,27€.
+
+Q: ¿Cómo se solicita y cuánto tarda en llegar?
+A: OBS:
+- Digital: descarga en eSecretaría del campus (inmediato).
+- Físico: solicitar a Secretaría Académica por email; emisión y envío hasta 15 días hábiles.
+A: UB: emisión y envío hasta 1 mes.
+
+Q: ¿Se envía en físico al domicilio del alumno o solo por email?
+A: Se puede enviar de ambas maneras.
+
+Q: El certificado de horas para examen de PMI, ¿cuándo se entrega?
+A: Al finalizar el programa, bajo solicitud expresa del estudiante a su Program Manager.
+
+## 8. LEGITIMIDAD (CONFIANZA / VALIDACIÓN)
+
+Q: ¿Puedo hablar con un Alumni del máster?
+A: Por temas de RGPD no podemos dar los datos de los alumni. Puedes encontrar en la web de OBS testimoniales y videos de alumni de diferentes países y programas.
+A: (Además, en las plantillas del CRM existen testimoniales.)
+REGLA: Está prohibido facilitar datos personales o contacto directo de alumni a candidatos por RGPD.
+
+Q: ¿Puedo, antes de postular al máster, contactar directamente al presidente de la comunidad alumni?
+A: El presidente de la comunidad alumni se dedica a gestionar a los alumni y, al ser un trabajo voluntario, no lo podemos saturar.
+REGLA: No se debe derivar ni saturar al presidente de alumni con solicitudes de candidatos; su rol es para la comunidad alumni.
+
+Q: ¿Puedo hablar con un profesor del máster?
+A: A usar en casos muy excepcionales. Consultar la Dirección Académica para identificar el profesor adecuado y pasar el contacto al candidato.
+REGLA: Está prohibido ofrecer contacto con profesorado como práctica habitual; solo procede en casos muy excepcionales y con validación de Dirección Académica.
+
+Q: ¿Con quién puedo conectar de la Universidad para confirmar la relación?
+A: A usar en casos muy excepcionales. Consultar la Dirección Académica para solicitar permiso a la UB, informar de la situación y facilitar contacto.
+REGLA: Está prohibido facilitar contactos de la universidad sin autorización; solo en casos excepcionales y con permiso gestionado por Dirección Académica.
+
+## 9. GRADUACIÓN
+
+Q: ¿He de ir a España para la graduación? ¿Es obligatorio?
+A: En 2022, por situación de pandemia y restricciones, la graduación se adaptó al formato online. Existe un FAQ específico del Alumni Welcome y de la graduación 2022.
+A: En general, en futuras graduaciones se valorará la situación y se decidirá si el formato será online o presencial (Barcelona).
+A: La graduación no es obligatoria, pero es recomendable para celebrar la culminación como alumno.
+
+Q: ¿Se realizan actividades presenciales en Barcelona cercanas a la graduación?
+A: En 2022 no se realizó ningún evento presencial. En 2023 se valorará esta opción.
+A: Históricamente, cuando era presencial, el día después se hacía el Alumni Welcome; allí se realizaban actividades por Barcelona.
+
+Q: ¿Qué pasa durante la Graduación?
+A: En graduación online: evento de ~2 horas con un acto académico y ponencias de personalidades destacadas.
+A: En graduación presencial: también se realizan entregas de bandas.
+A: Links de graduaciones anteriores:
+- 2018: https://www.youtube.com/watch?v=AP0GdVVpZr0
+- 2019: https://www.youtube.com/watch?v=An6ba-C62Y8
+- 2020/2021: https://www.youtube.com/watch?v=AHOXbCOkYEM
+
+Q: ¿Cuántos alumnos vienen cada año a la Graduación?
+A: Depende del año y del formato (presencial o virtual).
+A: En los últimos años presenciales: 500-700 alumnos; contando familiares y docentes: 1500-2000 asistentes.
+A: En la última graduación online: asistieron 2700 alumnos (se juntaron dos graduaciones: 2020 y 2021). En total había 6200 graduables; se conectaron al streaming casi 11.000 personas contando familiares, etc.
+
+Q: ¿Se puede ofrecer carta de invitación a países que requieren visado para venir a la graduación?
+A: Sí. El alumno puede pedir una carta de invitación individualizada para trámites de visado al área de Comunicación (Marketing) por email: graduacion@obsbusiness.school
+
+## 10. SERVICIOS ADICIONALES
+
+Q: ¿Tenéis bolsa de empleo?
+A: En línea con apostar por la empleabilidad y el desarrollo profesional, se ha lanzado un portal de empleo para aportar valor y facilitar oportunidades de mejora laboral.
+
+Q: ¿Tenéis comunidad de alumni?
+A: Sí, hay comunidad de alumni en: España, Colombia, Perú, Ecuador, México, Chile y Argentina. Cada comunidad está gestionada por un presidente del país.
+A: La Comunidad de Antiguos Alumnos es una iniciativa conjunta de estudiantes, alumni, claustro y tejido empresarial y brinda servicio a más de 30.000 profesionales formados desde 2006.
+A: Los servicios del Club Alumni incluyen actualización de conocimientos, networking y desarrollo de carrera profesional a través de más de 40 actividades al año.
+
+Q: ¿Tenéis opción de prácticas dentro del Máster?
+A: Sí, los alumnos pueden hacer convenios de prácticas si lo desean. Dado el perfil del alumnado, no es un volumen alto el que lo necesita o solicita.
+
+Q: ¿Tenéis un informe de empleabilidad?
+A: Sí. Hay un Employment Report anual con datos de empleabilidad de los alumni. Se puede descargar el ER21 en formato digital en la web de OBS.
+
+## 11. PRECIOS Y COSTES
+
+Q: ¿El máster es bonificable (FUNDAE)?
+A: Sí, es bonificable para 600 horas de docencia. Los parámetros los establece FUNDAE y cada empresa debe revisarlos.
+
+Q: ¿Podéis emitir factura?
+A: Sí. Se pueden emitir facturas a nombre del alumno o de la empresa, pero solo una única factura.
+REGLA: Está prohibido emitir múltiples facturas; solo se permite una factura (a alumno o empresa).
+A: En el caso de FUNDAE, Secretaría Académica emite un anexo por cada año natural indicando horas e importe correspondiente.
+
+Q: ¿Puede pagar mi empresa mi Máster? ¿En totalidad? ¿Por parte?
+A: Sí. La empresa puede pagar el máster, ya sea el 100% o una parte.
+A: Para agilizar el trámite, si se sabe desde el inicio, al enviar la matrícula a Administración Comercial se deben indicar los datos fiscales.
+A: En FUNDAE, la normativa establece que debe ser por la totalidad del pago y la factura debe ir a nombre de quien realiza el pago:
+- Si paga la empresa: se requieren los datos de la empresa del alumno.
+- Si el trámite es por una gestora: los datos para la factura deben ser los de la gestora (quien realiza el pago).
+
+Q: ¿Las certificaciones están incluidas en el precio? ¿Cuánto cuestan?
+A: No, las certificaciones no están incluidas en el precio. El coste varía según la certificación. Ejemplos:
+- Máster en Project Management | Certificación: PMP | Coste público: $555 | Coste OBS: $405
+- Máster en Project Management | ACP | $495 | $435
+- Máster en Supply Chain Management & Logistics | CSCA | Coste público: NC | Coste OBS: $400
+- Máster en Supply Chain Management & Logistics | CSCM | NC | $800
+- Máster en Ciberseguridad | CISM | $760 | $575
+- Máster en Dirección de Sistemas | CISA | 760€ | (no indicado)
+- Máster en Business Intelligence | CAP | NC | $395
+- Máster en Business Intelligence | aCAP | NC | $200
+- Máster en Data Management e Innovación Tecnológica | CAP | NC | $395
+- Máster en Data Management e Innovación Tecnológica | aCAP | NC | $200
+- Máster en Dirección de Producción y Mejora de Procesos Industriales | Lean Green Belt Practitioner (manufacturing) | NC | 150-500€
+- Máster en Dirección de Producción y Mejora de Procesos Industriales | Six Sigma Green Belt | NC | 180€
+- Máster en Gestión Integral de la Calidad | Certificación Auditor Interno DNVGL | NC | 180€
+- Máster en Dirección de Recursos Humanos y Gestión del Talento | aPHR | $400 | (no indicado)
+- Máster en Dirección de Recursos Humanos y Gestión del Talento | PHRi | $495 | (no indicado)
+- Máster en Marketing Digital, Growth Hacking y eCommerce | Facebook Blueprint | $150 | (no indicado)
+- Máster en Marketing Digital, Growth Hacking y eCommerce | Google Ads | Gratis | (no indicado)
+
+Q: Aparte de las certificaciones, ¿qué costos hay adicionales al culminar el máster?
+A: No hay costes adicionales. Todo está incluido en el coste del Máster y se detalla en la Hoja de Matrícula:
+- Taller Introductorio / PDP / Módulos / TFM / Recuperaciones / Otras actividades
+
+Q: ¿Tenéis acuerdos con bancos para poder conseguir un préstamo?
+A: Sí. Para alumnos residentes en España (con nacionalidad española o no) existe un acuerdo de financiación con Banco Sabadell.
+A: No aplica a personas con nacionalidad de Venezuela.
+REGLA: Está prohibido ofrecer/gestionar esta financiación para personas con nacionalidad venezolana (no aplica).
+
+Q: ¿Cómo puedo ver mi cartera de pagos?
+A: Una vez matriculado y con claves de acceso al campus, en e-Secretaría hay un subapartado de Cartera donde se puede consultar el estado.
