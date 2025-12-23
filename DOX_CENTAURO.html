@@ -49,6 +49,7 @@
             border-radius: 4px;
             font-family: 'Consolas', 'Monaco', monospace;
             color: #e74c3c;
+            font-size: 0.95em;
         }
         pre {
             background-color: #2d3436;
@@ -57,11 +58,13 @@
             border-radius: 5px;
             overflow-x: auto;
             font-family: 'Consolas', 'Monaco', monospace;
+            margin-bottom: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            font-size: 0.95em;
         }
         th, td {
             padding: 12px;
@@ -74,6 +77,9 @@
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
+        }
+        .file-desc strong {
+            color: #2c3e50;
         }
         .note {
             background-color: #fff3cd;
@@ -109,7 +115,7 @@
 <div class="container">
     <header>
         <h1>🦄 Proyecto Centauro: Documentación Técnica</h1>
-        <p><strong>Fecha:</strong> 22 de Diciembre de 2025 | <strong>Versión:</strong> 1.1 (Con Privacidad) | <strong>Estado:</strong> <span class="status-mvp">Prototipo Funcional</span></p>
+        <p><strong>Fecha:</strong> 22 de Diciembre de 2025 | <strong>Versión:</strong> 1.2 (Detalle de Archivos) | <strong>Estado:</strong> <span class="status-mvp">Prototipo Funcional</span></p>
     </header>
 
     <section>
@@ -123,7 +129,7 @@
         
         <div class="mermaid">
             graph TD
-            A[Inputs: Documentos y Transcripciones] -->|Texto Plano| B(Ingestión Python)
+            A[Inputs: Documentos y Transcripciones] -->|Texto Plano / VTT| B(Ingestión Python)
             B --> C{ChromaDB <br/> Memoria Vectorial}
             
             subgraph "Fase 1: Memoria (R)"
@@ -160,16 +166,13 @@
         <ul>
             <li><strong>Emails:</strong> Detecta patrones de correo electrónico.</li>
             <li><strong>Teléfonos:</strong> Detecta formatos nacionales (+34) e internacionales.</li>
-            <li><strong>DNI/NIE:</strong> Detecta patrones de identificación española (8 dígitos + letra / X,Y,Z + 7 dígitos).</li>
+            <li><strong>DNI/NIE:</strong> Detecta patrones de identificación española.</li>
             <li><strong>IBAN:</strong> Detecta cuentas bancarias españolas.</li>
         </ul>
-        <p><em>Nota: El modelo de IA es capaz de evaluar si el asesor "confirmó el DNI" viendo el token <code>[REDACTED_DNI]</code>, manteniendo la funcionalidad de auditoría sin comprometer la privacidad.</em></p>
     </section>
 
     <section>
         <h2>4. Valor Estratégico: ¿Por qué un Agente Propio?</h2>
-        <p>Comparativa entre el desarrollo de Centauro (Python/API) frente al uso manual de herramientas web (ChatGPT/Gemini).</p>
-
         <table>
             <thead>
                 <tr>
@@ -181,60 +184,100 @@
             <tbody>
                 <tr>
                     <td><strong>Escalabilidad</strong></td>
-                    <td>Baja. Requiere copiar/pegar 1 a 1.</td>
-                    <td><strong>Industrial.</strong> Procesa miles de archivos sin intervención humana.</td>
+                    <td>Baja. Requiere intervención humana 1 a 1.</td>
+                    <td><strong>Industrial.</strong> Procesa miles de archivos en lote.</td>
                 </tr>
                 <tr>
                     <td><strong>Privacidad</strong></td>
-                    <td>Riesgo alto (se envían datos al chat).</td>
-                    <td><strong>Control Total.</strong> Sanitización local antes de salir a la nube.</td>
+                    <td>Riesgo alto (datos salen sin filtro).</td>
+                    <td><strong>Control Total.</strong> Sanitización local antes de la nube.</td>
                 </tr>
                 <tr>
                     <td><strong>Precisión (RAG)</strong></td>
-                    <td>Sufre alucinaciones con textos largos.</td>
-                    <td><strong>Quirúrgica.</strong> ChromaDB recupera solo la regla exacta necesaria.</td>
-                </tr>
-                <tr>
-                    <td><strong>Datos (Output)</strong></td>
-                    <td>Texto no estructurado.</td>
-                    <td><strong>Base de Datos (JSON).</strong> Permite analítica masiva (Power BI).</td>
+                    <td>Sufre alucinaciones en textos largos.</td>
+                    <td><strong>Quirúrgica.</strong> Recupera solo la regla exacta necesaria.</td>
                 </tr>
                 <tr>
                     <td><strong>Integración</strong></td>
                     <td>Aislado en el navegador.</td>
-                    <td><strong>Conectable.</strong> Se integra con Outlook, Teams y SharePoint.</td>
+                    <td><strong>Conectable.</strong> Genera bases de datos y analíticas.</td>
                 </tr>
             </tbody>
         </table>
     </section>
 
     <section>
-        <h2>5. Estructura de Carpetas</h2>
+        <h2>5. Estructura de Carpetas y Diccionario de Archivos</h2>
+        <p>El proyecto sigue una arquitectura modular donde cada archivo tiene una única responsabilidad.</p>
+        
         <pre>
 Proyecto_Centauro/
 │
 ├── inputs/
-│   ├── docs/          <-- MANUALES (Tu "Ley"). Archivos .txt limpios.
-│   └── transcripts/   <-- ENTREVISTAS. Transcripciones .txt para analizar.
+│   ├── docs/          <-- Base de Conocimiento (Manuales).
+│   └── transcripts/   <-- Cola de Trabajo (Entrevistas).
 │
-├── outputs/           <-- RESULTADOS. Archivos .json y logs de gastos.
+├── outputs/           <-- Resultados Generados.
 │
-├── centauro/          <-- CÓDIGO FUENTE
-│   ├── config.py      <-- Configuración.
-│   ├── privacy.py     <-- Módulo de Seguridad (Regex PII).
-│   ├── rag.py         <-- Motor de Memoria (ChromaDB).
-│   ├── analyze.py     <-- Lógica del Auditor (Prompts).
-│   ├── schema.py      <-- Contrato de Datos (JSON Schema).
-│   └── llm_client.py  <-- Conector OpenAI + Control de Gastos.
+├── centauro/          <-- MÓDULOS DE LÓGICA (Core)
+│   ├── config.py
+│   ├── privacy.py
+│   ├── rag.py
+│   ├── analyze.py
+│   ├── schema.py
+│   └── llm_client.py
 │
-├── .chroma_db/        <-- BASE DE DATOS LOCAL.
-├── main.py            <-- Ejecutable principal.
-└── .env               <-- Credenciales.
+├── main.py            <-- ORQUESTADOR
+└── .env               <-- SECRETOS
         </pre>
+
+        <h3>Diccionario de Componentes</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Archivo / Módulo</th>
+                    <th>Responsabilidad y Función</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="file-desc">
+                    <td><code>main.py</code></td>
+                    <td><strong>El Orquestador.</strong> Es el punto de entrada. Busca archivos nuevos, limpia formatos sucios (VTT) y coordina a los demás módulos.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>centauro/privacy.py</code></td>
+                    <td><strong>El Escudo de Seguridad.</strong> Contiene las RegEx (Expresiones Regulares) para detectar y ocultar DNI, teléfonos y emails antes de procesar nada.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>centauro/analyze.py</code></td>
+                    <td><strong>El Cerebro Analítico.</strong> Construye el Prompt maestro. Define las instrucciones para el LLM, inyecta el contexto recuperado y gestiona la lógica de inferencia de hablantes.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>centauro/rag.py</code></td>
+                    <td><strong>La Memoria (RAG).</strong> Se encarga de hablar con ChromaDB: trocea los manuales (chunking), los indexa y realiza las búsquedas semánticas.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>centauro/llm_client.py</code></td>
+                    <td><strong>El Conector y Contable.</strong> Gestiona la conexión con la API de OpenAI. Calcula y registra en un CSV el coste exacto (tokens) de cada ejecución.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>centauro/schema.py</code></td>
+                    <td><strong>El Contrato de Datos.</strong> Define la estructura obligatoria del JSON (clases Pydantic). Evita que la IA invente campos que no existen.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>centauro/config.py</code></td>
+                    <td><strong>Configuración Global.</strong> Centraliza rutas de carpetas, nombres de modelos y variables de entorno.</td>
+                </tr>
+                <tr class="file-desc">
+                    <td><code>outputs/control_gastos.csv</code></td>
+                    <td><strong>Log Financiero.</strong> Archivo autogenerado que registra la fecha, hora, archivo procesado y coste en dólares de cada operación.</td>
+                </tr>
+            </tbody>
+        </table>
     </section>
 
     <section>
-        <h2>6. Stack Tecnológico y Evolución</h2>
+        <h2>6. Stack Tecnológico</h2>
         <table>
             <thead>
                 <tr>
@@ -250,32 +293,17 @@ Proyecto_Centauro/
                     <td>Python 3.10+</td>
                 </tr>
                 <tr>
-                    <td><strong>LLM (Cerebro)</strong></td>
+                    <td><strong>LLM</strong></td>
                     <td>OpenAI GPT-4o-mini</td>
                     <td>Azure OpenAI Service (GPT-4o)</td>
                 </tr>
                 <tr>
-                    <td><strong>Memoria (RAG)</strong></td>
-                    <td><strong>ChromaDB (Local)</strong></td>
-                    <td><strong>Azure AI Search</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>Embeddings</strong></td>
-                    <td>OpenAI text-embedding-3-small</td>
-                    <td>Azure OpenAI Embeddings</td>
+                    <td><strong>RAG / Memoria</strong></td>
+                    <td>ChromaDB (Local)</td>
+                    <td>Azure AI Search</td>
                 </tr>
             </tbody>
         </table>
-    </section>
-
-    <section>
-        <h2>7. Próximos Pasos</h2>
-        <ul>
-            <li>✅ <strong>Fase A: Validación.</strong> Limpiar manuales reales, subir transcripción real y ajustar prompts.</li>
-            <li>✅ <strong>Fase A.2: Seguridad.</strong> Implementación y testeo del módulo de privacidad PII.</li>
-            <li>⬜ <strong>Fase B: Integración.</strong> Generar PDF legible desde el JSON y conectar envío por email.</li>
-            <li>⬜ <strong>Fase C: Escalabilidad.</strong> Migrar a Azure AI Search si el volumen supera las 50k entrevistas.</li>
-        </ul>
     </section>
 
     <footer>
