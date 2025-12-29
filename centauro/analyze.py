@@ -3,86 +3,99 @@ from .config import settings
 from .rag import buscar_contexto
 from .llm_client import consultar_gpt
 from .schema import ReporteCalidad
-from .privacy import redact_pii  # Importamos tu módulo de seguridad
+from .privacy import redact_pii
 
 def analizar_entrevista(nombre_archivo, texto_transcripcion):
     print(f"🔍 Buscando reglas para: {nombre_archivo}")
     
-    # --- 1. CAPA DE PRIVACIDAD (GDPR) ---
-    print("🛡️ Aplicando capa de privacidad...")
+    # 1. Privacidad y Debug
     resultado_privacidad = redact_pii(texto_transcripcion)
     texto_seguro = resultado_privacidad.text
     
-    # Log opcional de seguridad
-    if sum(resultado_privacidad.stats.values()) > 0:
-        print(f"   🔒 Datos sensibles ocultados: {resultado_privacidad.stats}")
+    # GUARDAR LO QUE LEE LA IA (CRÍTICO PARA QUE TÚ VERIFIQUES)
+    debug_path = settings.OUTPUTS_DIR / f"DEBUG_INPUT_{nombre_archivo}.txt"
+    with open(debug_path, "w", encoding="utf-8") as f:
+        f.write(texto_seguro)
     
-    # --- 2. RECUPERACIÓN DE CONTEXTO (RAG) ---
-    # Buscamos en ChromaDB las reglas relevantes
-    contexto_manual = buscar_contexto("Criterios de evaluación calidad saludo cierre objeciones")
-    
-    # --- 3. DEFINICIÓN DEL PROMPT ---
+    # 2. RAG
+    contexto_manual = buscar_contexto("Guía completa de criterios de evaluación y checklist de calidad")
+
+    # 3. Prompt Anti-Alucinación
+    base = nombre_archivo.rsplit(".", 1)[0]
+    if base.startswith("entrevista_"):
+        base = base[len("entrevista_"):]
+    nombre_limpio = base.replace("_", " ").strip()
+
     ejemplo_json = """
     {
-        "asesor": "Nombre o 'Desconocido'",
-        "resumen_ejecutivo": "Resumen breve",
-        "puntos_fuertes": [
-            {
-                "criterio": "Saludo", 
-                "cumple": true, 
-                "cita_evidencia": "Hola...", 
-                "referencia_manual": "manual.txt", 
-                "feedback": "Correcto"
-            }
-        ],
+        "asesor": "Paola Suarez",
+        "resumen_ejecutivo": "...",
+        "puntos_fuertes": [],
         "areas_mejora": [
             {
-                "criterio": "Cierre", 
+                "criterio": "Aviso Grabación", 
                 "cumple": false, 
-                "cita_evidencia": "Adios...", 
-                "referencia_manual": "manual.txt", 
-                "feedback": "Incorrecto"
+                "cita_evidencia": "NO ENCONTRADO", 
+                "referencia_manual": "manual_legal.txt", 
+                "feedback": "No se realizó el aviso legal.",
+                "razonamiento": "El texto no contiene ninguna mención a 'grabar', 'calidad' o 'registro'."
             }
         ],
-        "nota_final_0_10": 5
+        "nota_final_0_10": 4.0
     }
     """
 
-    # AÑADIMOS LA INSTRUCCIÓN DE INFERENCIA DE HABLANTES
     sistema = f"""
-    Eres CENTAURO, un auditor de calidad comercial.
+    Eres CENTAURO, un software de auditoría forense automatizada. NO eres un asistente creativo.
     
-    MANUAL DE CRITERIOS (LA LEY):
+    MANUAL DE CRITERIOS:
     {contexto_manual}
     
-    INSTRUCCIONES:
-    1. Evalúa basándote EXCLUSIVAMENTE en el manual.
-    2. Si el asesor hace algo no documentado, ignóralo.
-    3. DEBES devolver un JSON válido siguiendo EXACTAMENTE este ejemplo:
-    {ejemplo_json}
+    METADATOS:
+    - Archivo: "{nombre_archivo}"
+    - Asesor: "{nombre_limpio}"
+    
+    -----------------------------------------------------------------------
+    ⚠️ PROTOCOLO DE EVIDENCIA CERO (ZERO-TRUST) ⚠️
+    -----------------------------------------------------------------------
+    
+    1. REGLA DE ORO DEL COPY-PASTE:
+       - Solo puedes marcar un criterio como TRUE si puedes hacer COPY-PASTE de la frase exacta desde la transcripción.
+       - PROHIBIDO PARAFRASEAR.
+       - Si la frase exacta no está en el texto: ES FALSE.
+       - Si la IA "cree" que lo dijo pero no está escrito: ES FALSE.
 
-    IMPORTANTE SOBRE LA TRANSCRIPCIÓN:
-    La transcripción puede no indicar explícitamente quién habla en cada línea (o no tener nombres).
-    Tu tarea es INFERIR por el CONTEXTO del diálogo:
-    - Quién es el ASESOR (quien explica, vende, saluda en nombre de la empresa).
-    - Quién es el CLIENTE/CANDIDATO (quien pregunta, responde dudas personales).
+    2. REGLA ESPECÍFICA PARA "GRABACIÓN/CALIDAD":
+       - Busca estrictamente palabras como: "grab", "monitor", "calidad", "registro", "seguridad".
+       - Si NO encuentras ninguna de estas palabras clave en el contexto de un aviso legal, marca FALSE.
+       - ALERTA DE ALUCINACIÓN: NUNCA uses frases genéricas como "Hola buenos días" o "Gracias por tu tiempo" para justificar este criterio. Si haces eso, fallas tu programación.
+
+    3. CAMPO "CITA_EVIDENCIA":
+       - Debe contener EXCLUSIVAMENTE texto extraído de la transcripción.
+       - Si no encuentras la evidencia, escribe literalmente: "NO ENCONTRADO".
+
+    4. CAMPO "RAZONAMIENTO":
+       - Si es TRUE: Explica qué palabra clave validó el criterio.
+       - Si es FALSE: Di "No se encontraron palabras clave asociadas a este criterio".
+
+    5. INFERENCIA DE HABLANTES:
+       - Detecta al Asesor por el contexto (quien explica el producto).
+    
+    Estructura JSON obligatoria:
+    {ejemplo_json}
     """
     
-    # Usamos el texto seguro (sin DNI/Teléfonos)
     usuario = f"""
-    Analiza esta transcripción (datos personales ocultados con [REDACTED]):
+    AUDITA ESTE TEXTO REAL (Sé literal y estricto):
     {texto_seguro}
     """
     
-    print("🧠 Consultando a GPT-4o-mini...")
+    print("🧠 Consultando a GPT-4o-mini (Temperatura 0 - Modo Forense)...")
     
-    # --- CAMBIO AQUÍ: Pasamos el nombre del archivo para el Excel de gastos ---
     respuesta_json_str = consultar_gpt(sistema, usuario, referencia_log=nombre_archivo)
     
-    # --- 4. PROCESAMIENTO ---
     try:
         datos = json.loads(respuesta_json_str)
-        
         if "ReporteCalidad" in datos:
             datos = datos["ReporteCalidad"]
             
@@ -97,6 +110,4 @@ def analizar_entrevista(nombre_archivo, texto_transcripcion):
         
     except Exception as e:
         print(f"❌ Error procesando {nombre_archivo}: {e}")
-        # Imprimimos un trozo de la respuesta para depurar si falla el JSON
-        print(f"DEBUG - Respuesta de la IA: {respuesta_json_str[:200]}...") 
         return None

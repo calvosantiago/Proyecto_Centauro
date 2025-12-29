@@ -1,3 +1,12 @@
 Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion),Total Tokens,Coste Estimado (USD)
 2025-12-22,18:06:42,entrevista_juan.txt,1403,298,1701,0.000389
 2025-12-23,16:47:36,entrevista_Paola_Suarez.vtt,14511,459,14970,0.002452
+2025-12-29,11:48:35,entrevista_Paola_Suarez.vtt,14589,360,14949,0.002404
+2025-12-29,11:52:36,entrevista_Paola_Suarez.vtt,14589,357,14946,0.002403
+2025-12-29,12:03:11,entrevista_Paola_Suarez.vtt,14589,358,14947,0.002403
+2025-12-29,12:05:04,entrevista_Paola_Suarez.vtt,14592,393,14985,0.002425
+2025-12-29,12:09:21,entrevista_Paola_Suarez.vtt,14588,836,15424,0.002690
+2025-12-29,12:15:08,entrevista_Paola_Suarez.vtt,14679,567,15246,0.002542
+2025-12-29,12:24:52,entrevista_Paola_Suarez.vtt,14933,598,15531,0.002599
+2025-12-29,12:40:40,entrevista_Paola_Suarez.vtt,14933,584,15517,0.002590
+2025-12-29,12:46:08,entrevista_Paola_Suarez.vtt,14948,198,15146,0.002361

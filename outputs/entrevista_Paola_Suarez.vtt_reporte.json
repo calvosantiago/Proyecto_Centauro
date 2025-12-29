@@ -1,44 +1,16 @@
 {
-  "asesor": "Desconocido",
-  "resumen_ejecutivo": "El asesor realizó una llamada para presentar el programa de máster en marketing y gestión comercial, explicando la metodología, beneficios y costos, y gestionando la admisión del candidato.",
-  "puntos_fuertes": [
-    {
-      "criterio": "Saludo",
-      "cumple": true,
-      "cita_evidencia": "Buenos días XXX. Soy XXX, Asesor de Admisiones de OBS Business School.",
-      "referencia_manual": "manual.txt",
-      "feedback": "Correcto"
-    },
-    {
-      "criterio": "Informar sobre grabación",
-      "cumple": false,
-      "cita_evidencia": "No se menciona que la llamada está siendo grabada.",
-      "referencia_manual": "manual.txt",
-      "feedback": "Falta mencionar que la llamada está siendo grabada por calidad."
-    },
-    {
-      "criterio": "Cierre",
-      "cumple": true,
-      "cita_evidencia": "Te mando mi Whatsapp para que nos vayamos comunicando por allí y para que me mandes allí la foto de tu documento de identidad.",
-      "referencia_manual": "manual.txt",
-      "feedback": "Correcto, se asegura el compromiso del candidato."
-    }
-  ],
+  "asesor": "Paola Suarez",
+  "resumen_ejecutivo": "La conversación se centra en la trayectoria profesional de la candidata, su interés en un máster en marketing y gestión comercial, y los detalles sobre la admisión y financiamiento del programa en OBS Business School. Se discuten las oportunidades de aprendizaje, la metodología del curso y los beneficios de la comunidad alumni.",
+  "puntos_fuertes": [],
   "areas_mejora": [
     {
-      "criterio": "Informar sobre grabación",
+      "criterio": "Aviso Grabación",
       "cumple": false,
-      "cita_evidencia": "No se menciona que la llamada está siendo grabada.",
-      "referencia_manual": "manual.txt",
-      "feedback": "Es obligatorio informar que la llamada está siendo grabada por calidad."
-    },
-    {
-      "criterio": "Gestión de objeciones",
-      "cumple": false,
-      "cita_evidencia": "No se observa un manejo claro de objeciones sobre el precio.",
-      "referencia_manual": "manual.txt",
-      "feedback": "El asesor debe resaltar el valor del servicio antes de hablar de precios."
+      "cita_evidencia": "NO ENCONTRADO",
+      "referencia_manual": "manual_legal.txt",
+      "feedback": "No se realizó el aviso legal.",
+      "razonamiento": "No se encontraron palabras clave asociadas a este criterio."
     }
   ],
-  "nota_final_0_10": 6
+  "nota_final_0_10": 4.0
 }
