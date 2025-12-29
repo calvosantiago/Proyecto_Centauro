@@ -115,6 +115,12 @@ def analizar_entrevista(nombre_archivo, texto_transcripcion):
     # 1. Privacidad
     resultado_privacidad = redact_pii(texto_transcripcion)
     texto_seguro = resultado_privacidad.text
+
+    debug_dir = settings.OUTPUTS_DIR / "Input_Debug"
+    debug_dir.mkdir(parents=True, exist_ok=True)
+    debug_path = debug_dir / f"DEBUG_INPUT_{nombre_archivo}.txt"
+    with open(debug_path, "w", encoding="utf-8") as f:
+        f.write(texto_seguro)
     
     # 2. RAG
     contexto_manual = buscar_contexto("Argumentación producto metodología ranking partners networking cierre objeciones legal")
@@ -216,7 +222,9 @@ def analizar_entrevista(nombre_archivo, texto_transcripcion):
             nota_final_0_10=nota_real
         )
         
-        output_path = settings.OUTPUTS_DIR / f"{nombre_archivo}_reporte.json"
+        json_dir = settings.OUTPUTS_DIR / "Reportes_JSON"
+        json_dir.mkdir(parents=True, exist_ok=True)
+        output_path = json_dir / f"{nombre_archivo}_reporte.json"
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(reporte.model_dump_json(indent=2))
             

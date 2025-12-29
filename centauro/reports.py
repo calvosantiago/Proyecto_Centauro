@@ -222,6 +222,8 @@ def generar_pdf(reporte_json, output_filename):
             pdf.draw_card(item, es_punto_fuerte=False)
 
     # Guardar archivo
-    pdf_path = settings.OUTPUTS_DIR / output_filename
+    pdf_dir = settings.OUTPUTS_DIR / "Reportes_PDF"
+    pdf_dir.mkdir(parents=True, exist_ok=True)
+    pdf_path = pdf_dir / output_filename
     pdf.output(str(pdf_path))
     print(f"🎨 PDF Estilizado Generado: {pdf_path}")
