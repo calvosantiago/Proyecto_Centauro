@@ -1,41 +1,41 @@
 {
   "asesor": "Paola Suarez",
-  "resumen_ejecutivo": "La llamada se centró en conocer las necesidades y motivaciones de la candidata, Andrea, quien busca un máster en marketing y gestión comercial. Se discutieron sus experiencias laborales, la importancia de la formación y se presentó el programa de OBS Business School, destacando su valor y beneficios. Se abordaron aspectos económicos y se propusieron los siguientes pasos para la admisión.",
+  "resumen_ejecutivo": "La llamada se centró en la presentación del programa de máster, abordando las necesidades y objetivos del candidato, así como la estructura del curso y las opciones de financiamiento. Se discutieron los beneficios de la titulación y la importancia de la formación continua en el contexto actual del mercado laboral.",
   "puntos_fuertes": [
     {
       "criterio": "2. Sondeo (Necesidades)",
       "cumple": true,
-      "cita_evidencia": "¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta?",
-      "referencia_manual": "Preguntar, preguntar y preguntar.",
-      "feedback": "Se realizaron preguntas abiertas que permitieron conocer las necesidades de la candidata.",
-      "razonamiento": "Se indagó sobre las motivaciones y áreas de mejora de Andrea.",
+      "cita_evidencia": "¿Qué experiencia tienes?",
+      "referencia_manual": "2.1. Preguntar",
+      "feedback": "Se realizaron preguntas abiertas que permiten conocer mejor al candidato.",
+      "razonamiento": "Esto ayuda a entender las motivaciones y necesidades del candidato.",
       "importancia": "ALTA"
     },
     {
       "criterio": "3. Argumentación (Valor)",
       "cumple": true,
-      "cita_evidencia": "Este máster tiene esa potencia que te da esas herramientas, esas habilidades en el área de marketing.",
-      "referencia_manual": "Encajar programa con necesidades del alumno.",
-      "feedback": "Se mencionaron los beneficios del programa de manera clara.",
-      "razonamiento": "Se relacionó el programa con las necesidades de la candidata.",
+      "cita_evidencia": "Esto hace también que o b s lidere los principales ranking de formación.",
+      "referencia_manual": "Poner en perspectiva la ventaja de nuestros títulos.",
+      "feedback": "Se mencionó el valor diferencial de la institución.",
+      "razonamiento": "Esto refuerza la propuesta de valor del programa.",
       "importancia": "ALTA"
     },
     {
       "criterio": "4. Objeciones / Precio",
       "cumple": true,
-      "cita_evidencia": "El máster está valuado en €7500, pero este pago es... €5130.",
-      "referencia_manual": "Ante una objeción de precio, el asesor nunca debe bajar el precio inmediatamente.",
-      "feedback": "Se abordó el tema económico de manera clara y se ofrecieron opciones de financiamiento.",
-      "razonamiento": "Se presentó el valor del programa antes de discutir el precio.",
+      "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial.",
+      "referencia_manual": "4.6. Titulación",
+      "feedback": "Se abordó la parte económica y se discutieron opciones de financiamiento.",
+      "razonamiento": "Esto es crucial para que el candidato pueda tomar una decisión informada.",
       "importancia": "ALTA"
     },
     {
       "criterio": "5. Cierre (Siguientes Pasos)",
       "cumple": true,
-      "cita_evidencia": "Te voy a mandar mi Whatsapp para que nos vayamos comunicando.",
-      "referencia_manual": "Cerrar próximos pasos.",
-      "feedback": "Se propusieron los siguientes pasos para la admisión.",
-      "razonamiento": "Se estableció un plan claro para avanzar en el proceso.",
+      "cita_evidencia": "Te mando mi contacto también.",
+      "referencia_manual": "5. Cierre (Siguientes Pasos)",
+      "feedback": "Se propuso avanzar con el proceso de admisión.",
+      "razonamiento": "Esto es esencial para mantener el interés del candidato.",
       "importancia": "ALTA"
     }
   ],
@@ -44,8 +44,8 @@
       "criterio": "1. Inicio (Saludo)",
       "cumple": false,
       "cita_evidencia": "NO VALIDADO: Hola soy Paola",
-      "referencia_manual": "El asesor debe iniciar la llamada saludando con su nombre y el de la empresa.",
-      "feedback": "El saludo fue cordial y adecuado.",
+      "referencia_manual": "2.1. Preguntar",
+      "feedback": "Saludo cordial y profesional.",
       "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
       "importancia": "BAJA"
     },
@@ -53,8 +53,8 @@
       "criterio": "6. Legal (Grabación)",
       "cumple": false,
       "cita_evidencia": "NO VALIDADO: Esta llamada se graba.",
-      "referencia_manual": "Informar que la llamada está siendo grabada por calidad.",
-      "feedback": "Se cumplió con la normativa de informar sobre la grabación.",
+      "referencia_manual": "6. Legal (Grabación)",
+      "feedback": "Se mencionó la grabación de la llamada.",
       "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
       "importancia": "MEDIA"
     }

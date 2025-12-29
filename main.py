@@ -1,97 +1,76 @@
-import re
 import os
+import time
 from pathlib import Path
+
+# Importamos tus módulos
 from centauro.config import settings
-from centauro.rag import indexar_documentacion
 from centauro.analyze import analizar_entrevista
+from centauro.rag import indexar_documentacion
+# 1. IMPORTAMOS EL GENERADOR DE PDF <--- NUEVO
+from centauro.reports import generar_pdf 
 
-def limpiar_vtt(texto_vtt):
-    """
-    Limpieza agresiva para VTTs sin identificación de hablante.
-    Elimina UUIDs, tiempos y cabeceras, dejando solo el flujo de conversación.
-    """
-    lines = texto_vtt.splitlines()
-    clean_lines = []
-
-    # Patrón para detectar los UUIDs largos (ej: c4fdd677-2ee3...)
-    uuid_pattern = re.compile(r"^[a-fA-F0-9\-]{20,}.*$")
-
-    for line in lines:
-        line = line.strip()
-
-        # 1. Saltar líneas vacías o cabecera
-        if not line or line == "WEBVTT":
-            continue
-
-        # 2. Saltar Timestamps (00:00:00 --> ...)
-        if "-->" in line:
-            continue
-
-        # 3. Saltar los códigos UUID extraños
-        if uuid_pattern.match(line):
-            continue
-
-        # 4. Si sobrevive a los filtros, es TEXTO hablado
-        clean_lines.append(line)
-
-    # Unimos todo con saltos de línea
-    return "\n".join(clean_lines)
-
-def leer_transcripcion(ruta: Path):
-    """
-    Lee el archivo y aplica limpieza si es .vtt
-    """
+def cargar_transcripcion(ruta_archivo):
+    """Lee el archivo de texto o VTT."""
     try:
-        contenido = ruta.read_text(encoding="utf-8")
-        
-        # Si es un archivo VTT, lo limpiamos antes de devolverlo
-        if ruta.suffix.lower() == ".vtt":
-            print(f"   🧹 Detectado VTT: Limpiando metadatos y timestamps...")
-            return limpiar_vtt(contenido)
-            
-        # Si es TXT, lo devolvemos tal cual
-        return contenido
-        
+        with open(ruta_archivo, "r", encoding="utf-8") as f:
+            texto = f.read()
+            # Aquí podrías añadir una limpieza extra si es VTT
+            return texto
     except Exception as e:
-        print(f"❌ Error leyendo {ruta.name}: {e}")
-        return ""
+        print(f"❌ Error leyendo {ruta_archivo}: {e}")
+        return None
 
 def main():
-    settings.OUTPUTS_DIR.mkdir(exist_ok=True)
+    print("🦄 INICIANDO PROYECTO CENTAURO (v2.4 Final)...")
     
-    # 1. Indexar manuales
-    indexar_documentacion()
-    
-    # --- BLOQUE DE DEBUG (EL CHIVATO) ---
-    # Esto te dirá exactamente dónde está mirando Python
-    ruta_absoluta = settings.TRANSCRIPTS_DIR.resolve()
-    print(f"\n👀 DEPURACIÓN: Buscando entrevistas en:")
-    print(f"   📂 {ruta_absoluta}")
-    
-    if ruta_absoluta.exists():
-        print(f"   📄 Archivos encontrados en esa carpeta: {os.listdir(ruta_absoluta)}")
-    else:
-        print(f"   ❌ ¡ALERTA! La carpeta no existe.")
-    # ------------------------------------
+    # 1. Asegurar directorios
+    os.makedirs(settings.INPUTS_DIR / "docs", exist_ok=True)
+    os.makedirs(settings.INPUTS_DIR / "transcripts", exist_ok=True)
+    os.makedirs(settings.OUTPUTS_DIR, exist_ok=True)
 
-    # 2. Procesar entrevistas (Buscamos TXT y VTT)
-    archivos_txt = list(settings.TRANSCRIPTS_DIR.glob("*.txt"))
-    archivos_vtt = list(settings.TRANSCRIPTS_DIR.glob("*.vtt"))
-    entrevistas = archivos_txt + archivos_vtt
+    # 2. Indexar Manuales (RAG)
+    print("\n📚 Actualizando memoria RAG...")
+    indexar_documentacion()
+
+    # 3. Buscar entrevistas para procesar
+    archivos_transcripcion = list((settings.INPUTS_DIR / "transcripts").glob("*.txt")) + \
+                             list((settings.INPUTS_DIR / "transcripts").glob("*.vtt"))
     
-    if not entrevistas:
-        print("\n⚠️ No hay entrevistas válidas (.txt o .vtt) para procesar.")
+    if not archivos_transcripcion:
+        print("⚠️ No hay transcripciones en 'inputs/transcripts/'. Pon archivos .txt o .vtt ahí.")
         return
 
-    print(f"\n--- Procesando {len(entrevistas)} entrevistas ---")
-    for entrevista in entrevistas:
-        print(f"Analizando: {entrevista.name}...")
+    print(f"\n🚀 Se encontraron {len(archivos_transcripcion)} entrevistas. Procesando...")
+
+    # 4. Bucle de Procesamiento
+    for archivo in archivos_transcripcion:
+        print(f"\n--------------------------------------------------")
+        print(f"🎧 Analizando: {archivo.name}")
         
-        texto_limpio = leer_transcripcion(entrevista)
+        texto = cargar_transcripcion(archivo)
+        if not texto: continue
+
+        # A) EJECUTAR ANÁLISIS (Llama a analyze.py)
+        reporte = analizar_entrevista(archivo.name, texto)
         
-        if texto_limpio:
-            # Enviamos el texto limpio al auditor
-            analizar_entrevista(entrevista.name, texto_limpio)
+        # B) GENERAR PDF (Si el análisis fue exitoso)
+        if reporte:
+            print("   🎨 Generando Informe PDF Premium...")
+            
+            # Nombre del archivo de salida
+            nombre_pdf = f"Reporte_{archivo.stem}.pdf"
+            
+            # ⚠️ CONVERSIÓN CLAVE: Pasamos el objeto a Diccionario (.model_dump)
+            # para que el generador de PDF lo entienda.
+            datos_para_pdf = reporte.model_dump()
+            
+            # LLAMADA A LA FUNCIÓN DE PDF <--- AQUÍ OCURRE LA MAGIA
+            generar_pdf(datos_para_pdf, nombre_pdf)
+            
+        else:
+            print("   ❌ El análisis falló, no se generará PDF.")
+
+    print("\n✅ CICLO TERMINADO. Revisa la carpeta 'outputs/'.")
 
 if __name__ == "__main__":
     main()

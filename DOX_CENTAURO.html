@@ -77,6 +77,11 @@
             border-left: 5px solid #e17055;
             font-size: 0.9em;
         }
+        /* Resaltado básico de pseudocódigo */
+        .kw { color: #c678dd; }
+        .str { color: #98c379; }
+        .func { color: #61afef; }
+        .com { color: #5c6370; font-style: italic; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -151,6 +156,53 @@
         <h2>1. Resumen de Arquitectura</h2>
         <p>Centauro es un sistema de auditoría automática basado en <strong>RAG (Retrieval-Augmented Generation)</strong> y validación determinista. Su objetivo es transformar transcripciones de ventas no estructuradas en reportes de calidad puntuados matemáticamente.</p>
         <p>El flujo de datos sigue una estricta política de <strong>"Confianza Cero"</strong> en la IA generativa, utilizando una capa de código Python ("Sheriff") para validar cada afirmación contra el audio real.</p>
+
+        <h3>1.1. Flujo End-to-End (Visión Operativa)</h3>
+        <p>El sistema se ejecuta de forma batch y local. El punto de entrada es <code>main.py</code>, que carga manuales, limpia transcripciones y orquesta la auditoría completa.</p>
+        <div class="mermaid">
+            flowchart LR
+            A[inputs/docs/*.txt] -->|Indexación| B[ChromaDB Local]
+            C[inputs/transcripts/*.vtt o .txt] -->|Limpieza VTT| D[Transcripción Limpia]
+            D -->|Privacidad: redact_pii| E[Transcripción Sanitizada]
+            E -->|Prompt + RAG| F[OpenAI API]
+            F -->|JSON crudo| G[Reporte JSON]
+            G -->|Sheriff 4.1| H[Validación Evidencias]
+            H --> I[Nota Final + outputs/*.json]
+        </div>
+
+        <h3>1.2. Diagrama de Capas (Input → Core → Output)</h3>
+        <div class="mermaid">
+            graph TD
+            subgraph "Input & Memory Layer"
+            A1[Inputs: Docs & Audio] -->|Limpieza| P[privacy.py]
+            D1[Manuales TXT] -->|Chunking| RAG[rag.py]
+            RAG <--> DB[(ChromaDB Local)]
+            end
+
+            subgraph "Core Logic Layer"
+            P -->|Texto Sanitizado| BRAIN[analyze.py]
+            RAG -->|Contexto Top-K| BRAIN
+            BRAIN -->|Prompt Blind Extractor| LLM[llm_client.py]
+            LLM <-->|API Request| OPENAI[OpenAI GPT-4o-mini]
+            OPENAI -->|JSON Candidato| SHERIFF[👮 Sheriff 4.1 Validator]
+            end
+
+            subgraph "Output Layer"
+            SHERIFF -->|JSON Validado| CALC[Cálculo Nota Ponderada]
+            CALC --> OUT[outputs/*.json]
+            end
+            
+            style SHERIFF fill:#e74c3c,color:white,stroke-width:2px
+            style LLM fill:#3498db,color:white
+        </div>
+
+        <h3>1.3. Principios de Diseño</h3>
+        <ul>
+            <li><strong>Determinismo sobre creatividad:</strong> Temperatura 0 y JSON estricto.</li>
+            <li><strong>RAG acotado:</strong> La IA solo ve fragmentos recuperados, no el manual completo.</li>
+            <li><strong>Auditoría verificable:</strong> Cada conclusión debe tener evidencia textual y pasa por el Sheriff.</li>
+            <li><strong>Privacidad:</strong> Se aplica redacción de PII antes de enviar a la API.</li>
+        </ul>
     </section>
 
     <section>
@@ -164,6 +216,8 @@
             <li><strong>Temperatura:</strong> <code>0.0</code>. <br><em>Justificación:</em> Necesitamos determinismo. Ante el mismo input, la IA debe dar siempre el mismo output. No queremos "creatividad" en una auditoría.</li>
             <li><strong>Response Format:</strong> <code>{ "type": "json_object" }</code>. Forzamos a la IA a devolver exclusivamente JSON válido, evitando texto introductorio.</li>
             <li><strong>Control de Costes:</strong> El script calcula los tokens de entrada/salida y registra el gasto en <code>outputs/control_gastos.csv</code> automáticamente.</li>
+            <li><strong>Embeddings:</strong> Se usa <code>text-embedding-3-small</code> para vectorizar manuales y queries.</li>
+            <li><strong>Autenticación:</strong> La API key se carga desde <code>.env</code> con <code>python-dotenv</code> (ver <code>centauro/config.py</code>).</li>
         </ul>
 
         <h3>2.2. Ingeniería del Prompt (<code>analyze.py</code>)</h3>
@@ -175,11 +229,11 @@
             A[Rol: Auditor Estricto]
             B[Reglas Anti-Alucinación]
             C[JSON Schema Obligatorio]
-            D["<MANUAL> (Contexto RAG)"]
+            D["MANUAL (Contexto RAG)"]
             end
 
             subgraph "User Message (Datos)"
-            E["<AUDIO_REAL> (Transcripción Sanitizada)"]
+            E["AUDIO_REAL (Transcripción Sanitizada)"]
             end
 
             A --> API
@@ -193,6 +247,23 @@
             <strong>Estrategia "Blind Extractor":</strong><br>
             Le decimos a la IA: <em>"Tus fuentes son exclusivamente las etiquetas XML. El texto en <code>&lt;MANUAL&gt;</code> son las reglas, pero NO puedes copiar texto de ahí. El texto en <code>&lt;AUDIO_REAL&gt;</code> es tu única verdad. Si copias texto que no está en el audio, fallarás."</em>
         </div>
+
+        <h3>2.3. ¿Qué es RAG y cómo se usa aquí?</h3>
+        <p><strong>RAG (Retrieval-Augmented Generation)</strong> es una técnica que combina un buscador vectorial con un modelo generativo. En Centauro, el modelo NO recibe todo el manual: solo recibe los fragmentos más relevantes recuperados de ChromaDB.</p>
+        <ul>
+            <li><strong>Indexación:</strong> <code>rag.indexar_documentacion()</code> divide cada manual en chunks de 1000 caracteres.</li>
+            <li><strong>Vectorización:</strong> Cada chunk se convierte a embedding y se guarda en <code>.chroma_db/</code>.</li>
+            <li><strong>Consulta:</strong> Se hace una búsqueda semántica con un query fijo de "criterios" y se recuperan los top-k fragmentos.</li>
+            <li><strong>Uso en prompt:</strong> Los fragmentos recuperados se inyectan dentro de <code>&lt;MANUAL&gt;</code>.</li>
+        </ul>
+
+        <h3>2.4. ¿Qué hace ChromaDB en Centauro?</h3>
+        <p>ChromaDB es la base de datos vectorial local. Se usa como "memoria" del manual, permitiendo recuperar solo la parte relevante sin saturar el prompt.</p>
+        <ul>
+            <li><strong>Persistencia:</strong> Se guarda en <code>.chroma_db</code> para no recalcular embeddings en cada ejecución.</li>
+            <li><strong>Colección:</strong> <code>manual_conocimiento</code> contiene documentos y metadatos (fuente de cada fragmento).</li>
+            <li><strong>Seguridad de consulta:</strong> Si no hay manuales, se devuelve un string de fallback y la auditoría continúa.</li>
+        </ul>
     </section>
 
     <section>
@@ -254,6 +325,23 @@
             <li><strong>Búsqueda:</strong> Se verifica si esas palabras existen en la transcripción original.</li>
             <li><strong>Umbral:</strong> Si más del <strong>60%</strong> de las palabras clave están presentes, se acepta el criterio. Si no, se marca como <strong>ALUCINACIÓN</strong>.</li>
         </ol>
+
+        <h3>4.1. Reglas de "Confianza Cero"</h3>
+        <ul>
+            <li>Si la evidencia viene marcada como <code>NO ENCONTRADO</code>, pasa directo a <em>áreas de mejora</em>.</li>
+            <li>Si la evidencia es demasiado corta o vacía, se marca como error de IA.</li>
+            <li>Se recalcula la nota final en Python con pesos fijos, sin fiarse de la IA.</li>
+            <li>Se separan automáticamente <strong>puntos fuertes</strong> y <strong>áreas de mejora</strong> tras la validación.</li>
+        </ul>
+
+        <h3>4.2. Cálculo de Nota Ponderada</h3>
+        <p>La puntuación final no la calcula la IA. Se recalcula con la tabla de pesos en <code>analyze.py</code>:</p>
+        <ul>
+            <li><strong>CRITICO:</strong> 10 puntos</li>
+            <li><strong>ALTA:</strong> 5 puntos</li>
+            <li><strong>MEDIA:</strong> 3 puntos</li>
+            <li><strong>BAJA:</strong> 1 punto</li>
+        </ul>
     </section>
 
     <section>
@@ -261,6 +349,8 @@
         <pre>
 CENTAURO_PROJECT/
 │
+├── .chroma_db/             <-- [PERSISTENCIA] Base vectorial local (ChromaDB).
+├── .env                    <-- [CONFIG] API Key OpenAI (no versionar).
 ├── inputs/                  <-- [ENTRADA] Datos crudos
 │   ├── docs/                <-- Manuales (.txt). Se indexan en ChromaDB.
 │   └── transcripts/         <-- Audios (.vtt). Se procesan uno a uno.
@@ -268,17 +358,167 @@ CENTAURO_PROJECT/
 ├── outputs/                 <-- [SALIDA]
 │   ├── *.json               <-- Reporte técnico crudo.
 │   └── *.pdf                <-- Reporte visual final.
+│   └── control_gastos.csv   <-- Registro de costes por tokens.
 │
 ├── centauro/                <-- [CÓDIGO FUENTE]
 │   ├── analyze.py           <-- Prompt Engineering + Lógica Sheriff.
 │   ├── llm_client.py        <-- Conexión OpenAI (Temp=0).
 │   ├── rag.py               <-- Gestión de memoria vectorial.
 │   ├── privacy.py           <-- Sanitización de datos personales.
-│   ├── reports.py           <-- Generación de PDF.
-│   └── schema.py            <-- Estructura de datos Pydantic.
+│   ├── reports.py           <-- Generación de PDF (si se integra en esta versión).
+│   ├── schema.py            <-- Estructura de datos Pydantic.
+│   └── config.py            <-- Rutas, modelos, y parámetros RAG.
 │
 └── main.py                  <-- Script de ejecución principal.
+├── install.py               <-- Script de scaffolding/instalación rápida.
+├── requirements.txt         <-- Dependencias del proyecto.
+└── scripts/                 <-- Utilidades auxiliares (PowerShell, etc.).
         </pre>
+    </section>
+
+    <section>
+        <h2>6. Desglose por Archivo (Qué hace cada uno)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Archivo</th>
+                    <th>Responsabilidad</th>
+                    <th>Detalles Clave</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>main.py</code></td>
+                    <td>Orquestador del pipeline</td>
+                    <td>Limpia VTT, indexa manuales, ejecuta auditoría por archivo.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/analyze.py</code></td>
+                    <td>Prompt + Sheriff</td>
+                    <td>Construye el prompt, valida evidencias y calcula nota ponderada.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/llm_client.py</code></td>
+                    <td>Cliente OpenAI</td>
+                    <td>Embeddings, chat completions y registro de costes.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/rag.py</code></td>
+                    <td>RAG local</td>
+                    <td>Indexación en Chroma y recuperación semántica.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/privacy.py</code></td>
+                    <td>Privacidad</td>
+                    <td>Redacción de emails, teléfonos, DNI/NIE e IBAN.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/schema.py</code></td>
+                    <td>Modelo de datos</td>
+                    <td>Define estructura del reporte con Pydantic.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/config.py</code></td>
+                    <td>Configuración</td>
+                    <td>Rutas, modelos y parámetros de chunking/retrieval.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/reports.py</code></td>
+                    <td>Generación de reportes visuales</td>
+                    <td>Reservado para la conversión a PDF (si se habilita).</td>
+                </tr>
+                <tr>
+                    <td><code>install.py</code></td>
+                    <td>Bootstrap</td>
+                    <td>Crea estructura base y archivos de ejemplo.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>7. Procesos Internos y Lógica de Datos</h2>
+        <h3>7.1 Limpieza de transcripciones</h3>
+        <p>Las transcripciones en VTT se limpian de timestamps y UUIDs. Solo queda el texto conversacional para maximizar la precisión del análisis.</p>
+
+        <h3>7.2 Redacción de datos personales</h3>
+        <p>Antes de enviar información a la API, se sustituyen patrones sensibles por etiquetas <code>[REDACTED_*]</code> (email, teléfono, DNI/NIE, IBAN).</p>
+
+        <h3>7.3 Generación del reporte</h3>
+        <p>La IA devuelve un JSON con seis criterios. El Sheriff valida la evidencia y recalcula la nota final en Python. El resultado se guarda en <code>outputs/</code>.</p>
+
+        <h3>7.4 Control de costes</h3>
+        <p>Todos los consumos se registran en <code>outputs/control_gastos.csv</code>, incluyendo fecha, tokens y coste estimado.</p>
+    </section>
+
+    <section>
+        <h2>8. Distribución de Carpetas (Mapa de Trabajo)</h2>
+        <ul>
+            <li><strong>inputs/docs:</strong> Manuales de calidad (base RAG).</li>
+            <li><strong>inputs/transcripts:</strong> Transcripciones de audio a analizar.</li>
+            <li><strong>outputs:</strong> Reportes JSON y control de costes.</li>
+            <li><strong>centauro:</strong> Núcleo lógico de la auditoría.</li>
+            <li><strong>.chroma_db:</strong> Persistencia vectorial local.</li>
+            <li><strong>scripts:</strong> utilidades externas (ej. PowerShell).</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>9. Deep Dive: Conexión API (<code>llm_client.py</code>)</h2>
+        <p>Este módulo es el único punto de salida hacia Internet y controla el determinismo de los resultados.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parámetro</th>
+                    <th>Valor</th>
+                    <th>Razón Técnica</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>model</code></td>
+                    <td><code>gpt-4o-mini</code></td>
+                    <td>Balance coste/velocidad con latencia baja.</td>
+                </tr>
+                <tr>
+                    <td><code>temperature</code></td>
+                    <td><code>0.0</code></td>
+                    <td>Determinismo absoluto para auditoría.</td>
+                </tr>
+                <tr>
+                    <td><code>response_format</code></td>
+                    <td><code>{ "type": "json_object" }</code></td>
+                    <td>Salida estrictamente JSON.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>El consumo de tokens se registra automáticamente en <code>outputs/control_gastos.csv</code>.</p>
+    </section>
+
+    <section>
+        <h2>10. Deep Dive: Ingeniería de Prompt (<code>analyze.py</code>)</h2>
+        <p>La IA trabaja en modo "auditor", no como asistente. El prompt limita fuentes y fuerza evidencia literal.</p>
+        <pre><span class="str">"Eres un AUDITOR DE VENTAS CONSULTIVAS.\nTUS FUENTES:\n1. &lt;MANUAL&gt; {contexto_rag} &lt;/MANUAL&gt;\n2. &lt;AUDIO_REAL&gt; (Texto a analizar)\n\nREGLAS:\n- Prohibido inventar texto.\n- Prohibido copiar texto del MANUAL como evidencia.\n- Solo puedes extraer texto literal del AUDIO_REAL.\n\nSALIDA: JSON estricto con 6 fases."</span></pre>
+        <h3>10.1. Estrategia "Dirty Quote Preference"</h3>
+        <p>Se fuerza a la IA a citar incluso errores ("ehh", "esteee") para facilitar la validación tokenizada del Sheriff.</p>
+    </section>
+
+    <section>
+        <h2>11. Pseudocódigo del Sheriff (Validación)</h2>
+        <p>El Sheriff aplica una comparación tolerante a ruido de transcripción:</p>
+        <pre><span class="func">def</span> <span class="kw">validar_por_tokens</span>(evidencia_ia, texto_real):
+    <span class="com"># 1) Limpieza: minúsculas, eliminar moneda y puntuación</span>
+    tokens_ia = limpiar(evidencia_ia)
+    tokens_real = limpiar(texto_real)
+
+    <span class="com"># 2) Intersección de conjuntos</span>
+    aciertos = <span class="kw">len</span>(<span class="kw">set</span>(tokens_ia) &amp; <span class="kw">set</span>(tokens_real))
+    ratio = aciertos / <span class="kw">len</span>(tokens_ia)
+
+    <span class="com"># 3) Umbral de 60%</span>
+    <span class="kw">if</span> ratio &gt;= <span class="str">0.60</span>:
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">return</span> <span class="kw">False</span></pre>
     </section>
 
     <footer>
