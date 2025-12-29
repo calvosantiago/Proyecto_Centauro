@@ -1,16 +1,63 @@
 {
   "asesor": "Paola Suarez",
-  "resumen_ejecutivo": "La conversación se centra en la trayectoria profesional de la candidata, su interés en un máster en marketing y gestión comercial, y los detalles sobre la admisión y financiamiento del programa en OBS Business School. Se discuten las oportunidades de aprendizaje, la metodología del curso y los beneficios de la comunidad alumni.",
-  "puntos_fuertes": [],
-  "areas_mejora": [
+  "resumen_ejecutivo": "La llamada se centró en conocer las necesidades y motivaciones de la candidata, Andrea, quien busca un máster en marketing y gestión comercial. Se discutieron sus experiencias laborales, la importancia de la formación y se presentó el programa de OBS Business School, destacando su valor y beneficios. Se abordaron aspectos económicos y se propusieron los siguientes pasos para la admisión.",
+  "puntos_fuertes": [
     {
-      "criterio": "Aviso Grabación",
-      "cumple": false,
-      "cita_evidencia": "NO ENCONTRADO",
-      "referencia_manual": "manual_legal.txt",
-      "feedback": "No se realizó el aviso legal.",
-      "razonamiento": "No se encontraron palabras clave asociadas a este criterio."
+      "criterio": "2. Sondeo (Necesidades)",
+      "cumple": true,
+      "cita_evidencia": "¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta?",
+      "referencia_manual": "Preguntar, preguntar y preguntar.",
+      "feedback": "Se realizaron preguntas abiertas que permitieron conocer las necesidades de la candidata.",
+      "razonamiento": "Se indagó sobre las motivaciones y áreas de mejora de Andrea.",
+      "importancia": "ALTA"
+    },
+    {
+      "criterio": "3. Argumentación (Valor)",
+      "cumple": true,
+      "cita_evidencia": "Este máster tiene esa potencia que te da esas herramientas, esas habilidades en el área de marketing.",
+      "referencia_manual": "Encajar programa con necesidades del alumno.",
+      "feedback": "Se mencionaron los beneficios del programa de manera clara.",
+      "razonamiento": "Se relacionó el programa con las necesidades de la candidata.",
+      "importancia": "ALTA"
+    },
+    {
+      "criterio": "4. Objeciones / Precio",
+      "cumple": true,
+      "cita_evidencia": "El máster está valuado en €7500, pero este pago es... €5130.",
+      "referencia_manual": "Ante una objeción de precio, el asesor nunca debe bajar el precio inmediatamente.",
+      "feedback": "Se abordó el tema económico de manera clara y se ofrecieron opciones de financiamiento.",
+      "razonamiento": "Se presentó el valor del programa antes de discutir el precio.",
+      "importancia": "ALTA"
+    },
+    {
+      "criterio": "5. Cierre (Siguientes Pasos)",
+      "cumple": true,
+      "cita_evidencia": "Te voy a mandar mi Whatsapp para que nos vayamos comunicando.",
+      "referencia_manual": "Cerrar próximos pasos.",
+      "feedback": "Se propusieron los siguientes pasos para la admisión.",
+      "razonamiento": "Se estableció un plan claro para avanzar en el proceso.",
+      "importancia": "ALTA"
     }
   ],
-  "nota_final_0_10": 4.0
+  "areas_mejora": [
+    {
+      "criterio": "1. Inicio (Saludo)",
+      "cumple": false,
+      "cita_evidencia": "NO VALIDADO: Hola soy Paola",
+      "referencia_manual": "El asesor debe iniciar la llamada saludando con su nombre y el de la empresa.",
+      "feedback": "El saludo fue cordial y adecuado.",
+      "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
+      "importancia": "BAJA"
+    },
+    {
+      "criterio": "6. Legal (Grabación)",
+      "cumple": false,
+      "cita_evidencia": "NO VALIDADO: Esta llamada se graba.",
+      "referencia_manual": "Informar que la llamada está siendo grabada por calidad.",
+      "feedback": "Se cumplió con la normativa de informar sobre la grabación.",
+      "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
+      "importancia": "MEDIA"
+    }
+  ],
+  "nota_final_0_10": 8.33
 }
