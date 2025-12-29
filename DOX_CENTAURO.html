@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentación Técnica - Proyecto Centauro</title>
+    <title>Documentación Técnica - Proyecto Centauro (v2.1)</title>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
@@ -13,301 +13,516 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f9f9f9;
+            background-color: #f4f6f9;
             margin: 0;
             padding: 20px;
         }
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
             background: #fff;
-            padding: 40px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             border-radius: 8px;
         }
         h1 {
             color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            font-size: 2.2em;
         }
         h2 {
             color: #2980b9;
-            margin-top: 30px;
-            border-left: 5px solid #3498db;
-            padding-left: 10px;
+            margin-top: 50px;
+            border-left: 6px solid #3498db;
+            padding-left: 15px;
+            background-color: #f9fbfd;
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
         }
         h3 {
             color: #34495e;
+            margin-top: 30px;
+            font-weight: 700;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        h4 {
+            color: #7f8c8d;
             margin-top: 20px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
         }
         p, li {
             font-size: 16px;
+            color: #444;
         }
         code {
             background-color: #f0f0f0;
             padding: 2px 5px;
             border-radius: 4px;
             font-family: 'Consolas', 'Monaco', monospace;
-            color: #e74c3c;
-            font-size: 0.95em;
+            color: #c7254e;
+            font-size: 0.9em;
         }
         pre {
             background-color: #2d3436;
             color: #dfe6e9;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             overflow-x: auto;
             font-family: 'Consolas', 'Monaco', monospace;
             margin-bottom: 20px;
+            border-left: 5px solid #e17055;
+            font-size: 0.9em;
         }
+        /* Resaltado básico de pseudocódigo */
+        .kw { color: #c678dd; }
+        .str { color: #98c379; }
+        .func { color: #61afef; }
+        .com { color: #5c6370; font-style: italic; }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 0.95em;
+            margin: 25px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
             text-align: left;
         }
         th {
-            background-color: #3498db;
+            background-color: #34495e;
             color: white;
+            font-weight: 600;
         }
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
         }
-        .file-desc strong {
-            color: #2c3e50;
-        }
-        .note {
+        .beta-warning {
             background-color: #fff3cd;
-            border-left: 5px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
         }
-        .security-alert {
-            background-color: #e8f8f5;
-            border-left: 5px solid #2ecc71;
-            padding: 15px;
-            margin: 20px 0;
+        .mermaid {
+            margin: 30px auto;
+            text-align: center;
+            background-color: #fff;
         }
-        .status-mvp {
+        .badge {
             display: inline-block;
-            background-color: #27ae60;
-            color: white;
-            padding: 2px 8px;
+            padding: 3px 8px;
             border-radius: 12px;
             font-size: 0.8em;
-            vertical-align: middle;
+            color: white;
+            font-weight: bold;
         }
-        footer {
-            margin-top: 50px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #7f8c8d;
+        .bg-critico { background-color: #dc3545; }
+        .bg-alta { background-color: #fd7e14; }
+        .bg-media { background-color: #17a2b8; }
+        .bg-baja { background-color: #6c757d; }
+        
+        .prompt-box {
+            background-color: #e8f4f8;
+            border: 1px solid #b8daff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    
+    <div class="beta-warning">
+        🚧 FASE DE DESARROLLO: PRE-BETA (MVP LOCAL) 🚧<br>
+        <span style="font-weight: normal; font-size: 0.9em;">Este sistema opera actualmente en entorno local. No está integrado con Azure Cloud ni bases de datos productivas. Toda la persistencia es local (ChromaDB/JSON).</span>
+    </div>
+
     <header>
-        <h1>🦄 Proyecto Centauro: Documentación Técnica</h1>
-        <p><strong>Fecha:</strong> 22 de Diciembre de 2025 | <strong>Versión:</strong> 1.2 (Detalle de Archivos) | <strong>Estado:</strong> <span class="status-mvp">Prototipo Funcional</span></p>
+        <h1>🦄 Proyecto Centauro: Manual Técnico Integral</h1>
+        <p><strong>Versión:</strong> 2.1 (Deep Dive API & Prompt) | <strong>Última Actualización:</strong> Diciembre 2025</p>
     </header>
 
     <section>
-        <h2>1. Resumen Ejecutivo</h2>
-        <p>Centauro es un agente de Inteligencia Artificial diseñado para <strong>auditar transcripciones de ventas</strong> de forma automática, estricta y escalable. A diferencia de un chat genérico, Centauro utiliza una arquitectura <strong>RAG (Retrieval-Augmented Generation)</strong> para garantizar que cada evaluación se base <strong>exclusivamente</strong> en los manuales oficiales de la organización.</p>
-    </section>
+        <h2>1. Resumen de Arquitectura</h2>
+        <p>Centauro es un sistema de auditoría automática basado en <strong>RAG (Retrieval-Augmented Generation)</strong> y validación determinista. Su objetivo es transformar transcripciones de ventas no estructuradas en reportes de calidad puntuados matemáticamente.</p>
+        <p>El flujo de datos sigue una estricta política de <strong>"Confianza Cero"</strong> en la IA generativa, utilizando una capa de código Python ("Sheriff") para validar cada afirmación contra el audio real.</p>
 
-    <section>
-        <h2>2. Arquitectura del Sistema (RAG + Privacy)</h2>
-        <p>El flujo incluye una capa intermedia de seguridad que sanitiza los datos antes de salir de la infraestructura local.</p>
-        
+        <h3>1.1. Flujo End-to-End (Visión Operativa)</h3>
+        <p>El sistema se ejecuta de forma batch y local. El punto de entrada es <code>main.py</code>, que carga manuales, limpia transcripciones y orquesta la auditoría completa.</p>
+        <div class="mermaid">
+            flowchart LR
+            A[inputs/docs/*.txt] -->|Indexación| B[ChromaDB Local]
+            C[inputs/transcripts/*.vtt o .txt] -->|Limpieza VTT| D[Transcripción Limpia]
+            D -->|Privacidad: redact_pii| E[Transcripción Sanitizada]
+            E -->|Prompt + RAG| F[OpenAI API]
+            F -->|JSON crudo| G[Reporte JSON]
+            G -->|Sheriff 4.1| H[Validación Evidencias]
+            H --> I[Nota Final + outputs/*.json]
+        </div>
+
+        <h3>1.2. Diagrama de Capas (Input → Core → Output)</h3>
         <div class="mermaid">
             graph TD
-            A[Inputs: Documentos y Transcripciones] -->|Texto Plano / VTT| B(Ingestión Python)
-            B --> C{ChromaDB <br/> Memoria Vectorial}
-            
-            subgraph "Fase 1: Memoria (R)"
-            C -->|Búsqueda Semántica| D[Recuperación de Reglas]
+            subgraph "Input & Memory Layer"
+            A1[Inputs: Docs & Audio] -->|Limpieza| P[privacy.py]
+            D1[Manuales TXT] -->|Chunking| RAG[rag.py]
+            RAG <--> DB[(ChromaDB Local)]
             end
-            
-            subgraph "Fase 2: Privacidad y Aumento (A)"
-            E[Nueva Entrevista] --> P(Capa de Privacidad privacy.py)
-            P -->|Texto Sanitizado| F[Script Python]
-            D --> F
-            F -->|Prompt: Reglas + Texto Seguro + JSON Schema| G[Construcción del Contexto]
-            end
-            
-            subgraph "Fase 3: Generación (G)"
-            G --> H[OpenAI GPT-4o-mini]
-            H -->|Salida JSON Estricta| I[Reporte Final]
-            end
-            
-            style P fill:#2ecc71,stroke:#333,stroke-width:2px,color:white
-            style C fill:#f9f,stroke:#333,stroke-width:2px
-            style H fill:#bbf,stroke:#333,stroke-width:2px
-        </div>
-    </section>
 
-    <section>
-        <h2>3. Seguridad y Privacidad (Módulo GDPR)</h2>
-        <p>El sistema incorpora un módulo estricto de privacidad (<code>privacy.py</code>) que actúa como cortafuegos de datos personales. Este proceso ocurre <strong>localmente</strong> en el servidor antes de realizar cualquier llamada a la API de OpenAI.</p>
-        
-        <div class="security-alert">
-            <strong>🔐 Mecanismo de Redacción:</strong> Los datos sensibles se detectan mediante expresiones regulares (Regex) y se sustituyen por tokens anónimos (ej: <code>[REDACTED_PHONE]</code>). El LLM nunca ve los datos reales.
+            subgraph "Core Logic Layer"
+            P -->|Texto Sanitizado| BRAIN[analyze.py]
+            RAG -->|Contexto Top-K| BRAIN
+            BRAIN -->|Prompt Blind Extractor| LLM[llm_client.py]
+            LLM <-->|API Request| OPENAI[OpenAI GPT-4o-mini]
+            OPENAI -->|JSON Candidato| SHERIFF[👮 Sheriff 4.1 Validator]
+            end
+
+            subgraph "Output Layer"
+            SHERIFF -->|JSON Validado| CALC[Cálculo Nota Ponderada]
+            CALC --> OUT[outputs/*.json]
+            end
+            
+            style SHERIFF fill:#e74c3c,color:white,stroke-width:2px
+            style LLM fill:#3498db,color:white
         </div>
 
-        <h3>Datos Protegidos:</h3>
+        <h3>1.3. Principios de Diseño</h3>
         <ul>
-            <li><strong>Emails:</strong> Detecta patrones de correo electrónico.</li>
-            <li><strong>Teléfonos:</strong> Detecta formatos nacionales (+34) e internacionales.</li>
-            <li><strong>DNI/NIE:</strong> Detecta patrones de identificación española.</li>
-            <li><strong>IBAN:</strong> Detecta cuentas bancarias españolas.</li>
+            <li><strong>Determinismo sobre creatividad:</strong> Temperatura 0 y JSON estricto.</li>
+            <li><strong>RAG acotado:</strong> La IA solo ve fragmentos recuperados, no el manual completo.</li>
+            <li><strong>Auditoría verificable:</strong> Cada conclusión debe tener evidencia textual y pasa por el Sheriff.</li>
+            <li><strong>Privacidad:</strong> Se aplica redacción de PII antes de enviar a la API.</li>
         </ul>
     </section>
 
     <section>
-        <h2>4. Valor Estratégico: ¿Por qué un Agente Propio?</h2>
+        <h2>2. Anatomía del Prompt y Conexión API</h2>
+        <p>El núcleo de la inteligencia de Centauro reside en cómo se comunica con OpenAI. No es un chat simple; es una inyección de contexto estructurada.</p>
+
+        <h3>2.1. Conexión API (<code>llm_client.py</code>)</h3>
+        <p>Este módulo gestiona el "handshake" con OpenAI. Se ha configurado para eliminar la creatividad y maximizar la precisión analítica.</p>
+        <ul>
+            <li><strong>Modelo:</strong> <code>gpt-4o-mini</code> (Optimizado para costes y alta velocidad).</li>
+            <li><strong>Temperatura:</strong> <code>0.0</code>. <br><em>Justificación:</em> Necesitamos determinismo. Ante el mismo input, la IA debe dar siempre el mismo output. No queremos "creatividad" en una auditoría.</li>
+            <li><strong>Response Format:</strong> <code>{ "type": "json_object" }</code>. Forzamos a la IA a devolver exclusivamente JSON válido, evitando texto introductorio.</li>
+            <li><strong>Control de Costes:</strong> El script calcula los tokens de entrada/salida y registra el gasto en <code>outputs/control_gastos.csv</code> automáticamente.</li>
+            <li><strong>Embeddings:</strong> Se usa <code>text-embedding-3-small</code> para vectorizar manuales y queries.</li>
+            <li><strong>Autenticación:</strong> La API key se carga desde <code>.env</code> con <code>python-dotenv</code> (ver <code>centauro/config.py</code>).</li>
+        </ul>
+
+        <h3>2.2. Ingeniería del Prompt (<code>analyze.py</code>)</h3>
+        <p>Utilizamos una estrategia de <strong>"Contenedores XML"</strong> para separar las instrucciones de los datos, evitando alucinaciones por contaminación de contexto.</p>
+
+        <div class="mermaid">
+            graph TD
+            subgraph "System Message (Instrucciones)"
+            A[Rol: Auditor Estricto]
+            B[Reglas Anti-Alucinación]
+            C[JSON Schema Obligatorio]
+            D["MANUAL (Contexto RAG)"]
+            end
+
+            subgraph "User Message (Datos)"
+            E["AUDIO_REAL (Transcripción Sanitizada)"]
+            end
+
+            A --> API
+            B --> API
+            C --> API
+            D --> API
+            E --> API[OpenAI API Request]
+        </div>
+
+        <div class="prompt-box">
+            <strong>Estrategia "Blind Extractor":</strong><br>
+            Le decimos a la IA: <em>"Tus fuentes son exclusivamente las etiquetas XML. El texto en <code>&lt;MANUAL&gt;</code> son las reglas, pero NO puedes copiar texto de ahí. El texto en <code>&lt;AUDIO_REAL&gt;</code> es tu única verdad. Si copias texto que no está en el audio, fallarás."</em>
+        </div>
+
+        <h3>2.3. ¿Qué es RAG y cómo se usa aquí?</h3>
+        <p><strong>RAG (Retrieval-Augmented Generation)</strong> es una técnica que combina un buscador vectorial con un modelo generativo. En Centauro, el modelo NO recibe todo el manual: solo recibe los fragmentos más relevantes recuperados de ChromaDB.</p>
+        <ul>
+            <li><strong>Indexación:</strong> <code>rag.indexar_documentacion()</code> divide cada manual en chunks de 1000 caracteres.</li>
+            <li><strong>Vectorización:</strong> Cada chunk se convierte a embedding y se guarda en <code>.chroma_db/</code>.</li>
+            <li><strong>Consulta:</strong> Se hace una búsqueda semántica con un query fijo de "criterios" y se recuperan los top-k fragmentos.</li>
+            <li><strong>Uso en prompt:</strong> Los fragmentos recuperados se inyectan dentro de <code>&lt;MANUAL&gt;</code>.</li>
+        </ul>
+
+        <h3>2.4. ¿Qué hace ChromaDB en Centauro?</h3>
+        <p>ChromaDB es la base de datos vectorial local. Se usa como "memoria" del manual, permitiendo recuperar solo la parte relevante sin saturar el prompt.</p>
+        <ul>
+            <li><strong>Persistencia:</strong> Se guarda en <code>.chroma_db</code> para no recalcular embeddings en cada ejecución.</li>
+            <li><strong>Colección:</strong> <code>manual_conocimiento</code> contiene documentos y metadatos (fuente de cada fragmento).</li>
+            <li><strong>Seguridad de consulta:</strong> Si no hay manuales, se devuelve un string de fallback y la auditoría continúa.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Matriz de Evaluación (Las 6 Fases)</h2>
+        <p>Centauro no evalúa "en general". Divide la llamada en 6 bloques obligatorios. La IA debe rellenar cada bloque, y el código Python (Sheriff) valida la evidencia.</p>
+
         <table>
             <thead>
                 <tr>
-                    <th>Característica</th>
-                    <th>Chat Web (Manual)</th>
-                    <th>Agente Centauro (Automático)</th>
+                    <th>Fase</th>
+                    <th>Importancia</th>
+                    <th>Lógica de Evaluación (Qué busca el Prompt)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>Escalabilidad</strong></td>
-                    <td>Baja. Requiere intervención humana 1 a 1.</td>
-                    <td><strong>Industrial.</strong> Procesa miles de archivos en lote.</td>
+                    <td><strong>1. INICIO</strong></td>
+                    <td><span class="badge bg-baja">BAJA</span></td>
+                    <td>Busca saludos cordiales ("Hola", "Buenos días", "Soy Paola").<br><em>Tolerancia:</em> Si la grabación empieza cortada, no penaliza gravemente.</td>
                 </tr>
                 <tr>
-                    <td><strong>Privacidad</strong></td>
-                    <td>Riesgo alto (datos salen sin filtro).</td>
-                    <td><strong>Control Total.</strong> Sanitización local antes de la nube.</td>
+                    <td><strong>2. SONDEO</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td><strong>Preguntas Abiertas:</strong> Busca interrogantes sobre el perfil, situación laboral o motivación del alumno.<br><em>Criterio:</em> Con 1 o 2 preguntas relevantes es suficiente.</td>
                 </tr>
                 <tr>
-                    <td><strong>Precisión (RAG)</strong></td>
-                    <td>Sufre alucinaciones en textos largos.</td>
-                    <td><strong>Quirúrgica.</strong> Recupera solo la regla exacta necesaria.</td>
+                    <td><strong>3. ARGUMENTACIÓN</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td><strong>Lógica "O" (Inclusiva):</strong> No exige todo el manual. Valida si menciona <em>Ranking</em> <strong>O</strong> <em>Metodología</em> <strong>O</strong> <em>Online</em> <strong>O</strong> <em>Partners</em>.<br><em>Objetivo:</em> Verificar que aportó valor, independientemente del argumento usado.</td>
                 </tr>
                 <tr>
-                    <td><strong>Integración</strong></td>
-                    <td>Aislado en el navegador.</td>
-                    <td><strong>Conectable.</strong> Genera bases de datos y analíticas.</td>
+                    <td><strong>4. OBJECIONES / PRECIO</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td><strong>Bolsa de Conceptos Económicos:</strong> No busca una cifra fija. Busca palabras como "Inversión", "Euros", "Beca", "Descuento", o cifras variables.<br><em>Objetivo:</em> Detectar negociación o explicación de precios, sea cual sea el importe.</td>
+                </tr>
+                <tr>
+                    <td><strong>5. CIERRE</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td><strong>Siguientes Pasos:</strong> Busca compromiso. Palabras clave: "Comité", "Enviar DNI", "Documentación", "Tarjeta", "Pago".</td>
+                </tr>
+                <tr>
+                    <td><strong>6. LEGAL</strong></td>
+                    <td><span class="badge bg-media">MEDIA</span></td>
+                    <td><strong>Coincidencia Estricta:</strong> Busca raíces de palabras legales: "Grabar", "Calidad", "Monitorizada".<br><em>Sheriff:</em> Si no aparecen estas palabras exactas, marca como NO CUMPLE.</td>
                 </tr>
             </tbody>
         </table>
     </section>
 
     <section>
-        <h2>5. Estructura de Carpetas y Diccionario de Archivos</h2>
-        <p>El proyecto sigue una arquitectura modular donde cada archivo tiene una única responsabilidad.</p>
-        
+        <h2>4. Metodología de Validación (Sheriff 4.1)</h2>
+        <p>Una vez la IA genera el reporte JSON, entra en acción el script de validación determinista en Python.</p>
+
+        <h3>Algoritmo "Token Overlap"</h3>
+        <p>El Sheriff no compara frases exactas (que fallan por errores de transcripción como "ehh" o "esteee"). Compara <strong>Bolsas de Palabras</strong>:</p>
+        <ol>
+            <li><strong>Limpieza:</strong> Se eliminan stopwords (el, la, de), puntuación y símbolos de moneda (€, $).</li>
+            <li><strong>Comparación:</strong> Se extraen las palabras clave de la evidencia citada por la IA (ej: <code>['precio', '5000', 'euros']</code>).</li>
+            <li><strong>Búsqueda:</strong> Se verifica si esas palabras existen en la transcripción original.</li>
+            <li><strong>Umbral:</strong> Si más del <strong>60%</strong> de las palabras clave están presentes, se acepta el criterio. Si no, se marca como <strong>ALUCINACIÓN</strong>.</li>
+        </ol>
+
+        <h3>4.1. Reglas de "Confianza Cero"</h3>
+        <ul>
+            <li>Si la evidencia viene marcada como <code>NO ENCONTRADO</code>, pasa directo a <em>áreas de mejora</em>.</li>
+            <li>Si la evidencia es demasiado corta o vacía, se marca como error de IA.</li>
+            <li>Se recalcula la nota final en Python con pesos fijos, sin fiarse de la IA.</li>
+            <li>Se separan automáticamente <strong>puntos fuertes</strong> y <strong>áreas de mejora</strong> tras la validación.</li>
+        </ul>
+
+        <h3>4.2. Cálculo de Nota Ponderada</h3>
+        <p>La puntuación final no la calcula la IA. Se recalcula con la tabla de pesos en <code>analyze.py</code>:</p>
+        <ul>
+            <li><strong>CRITICO:</strong> 10 puntos</li>
+            <li><strong>ALTA:</strong> 5 puntos</li>
+            <li><strong>MEDIA:</strong> 3 puntos</li>
+            <li><strong>BAJA:</strong> 1 punto</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Estructura de Archivos del Proyecto</h2>
         <pre>
-Proyecto_Centauro/
+CENTAURO_PROJECT/
 │
-├── inputs/
-│   ├── docs/          <-- Base de Conocimiento (Manuales).
-│   └── transcripts/   <-- Cola de Trabajo (Entrevistas).
+├── .chroma_db/             <-- [PERSISTENCIA] Base vectorial local (ChromaDB).
+├── .env                    <-- [CONFIG] API Key OpenAI (no versionar).
+├── inputs/                  <-- [ENTRADA] Datos crudos
+│   ├── docs/                <-- Manuales (.txt). Se indexan en ChromaDB.
+│   └── transcripts/         <-- Audios (.vtt). Se procesan uno a uno.
 │
-├── outputs/           <-- Resultados Generados.
+├── outputs/                 <-- [SALIDA]
+│   ├── *.json               <-- Reporte técnico crudo.
+│   └── *.pdf                <-- Reporte visual final.
+│   └── control_gastos.csv   <-- Registro de costes por tokens.
 │
-├── centauro/          <-- MÓDULOS DE LÓGICA (Core)
-│   ├── config.py
-│   ├── privacy.py
-│   ├── rag.py
-│   ├── analyze.py
-│   ├── schema.py
-│   └── llm_client.py
+├── centauro/                <-- [CÓDIGO FUENTE]
+│   ├── analyze.py           <-- Prompt Engineering + Lógica Sheriff.
+│   ├── llm_client.py        <-- Conexión OpenAI (Temp=0).
+│   ├── rag.py               <-- Gestión de memoria vectorial.
+│   ├── privacy.py           <-- Sanitización de datos personales.
+│   ├── reports.py           <-- Generación de PDF (si se integra en esta versión).
+│   ├── schema.py            <-- Estructura de datos Pydantic.
+│   └── config.py            <-- Rutas, modelos, y parámetros RAG.
 │
-├── main.py            <-- ORQUESTADOR
-└── .env               <-- SECRETOS
+└── main.py                  <-- Script de ejecución principal.
+├── install.py               <-- Script de scaffolding/instalación rápida.
+├── requirements.txt         <-- Dependencias del proyecto.
+└── scripts/                 <-- Utilidades auxiliares (PowerShell, etc.).
         </pre>
+    </section>
 
-        <h3>Diccionario de Componentes</h3>
+    <section>
+        <h2>6. Desglose por Archivo (Qué hace cada uno)</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Archivo / Módulo</th>
-                    <th>Responsabilidad y Función</th>
+                    <th>Archivo</th>
+                    <th>Responsabilidad</th>
+                    <th>Detalles Clave</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="file-desc">
+                <tr>
                     <td><code>main.py</code></td>
-                    <td><strong>El Orquestador.</strong> Es el punto de entrada. Busca archivos nuevos, limpia formatos sucios (VTT) y coordina a los demás módulos.</td>
+                    <td>Orquestador del pipeline</td>
+                    <td>Limpia VTT, indexa manuales, ejecuta auditoría por archivo.</td>
                 </tr>
-                <tr class="file-desc">
-                    <td><code>centauro/privacy.py</code></td>
-                    <td><strong>El Escudo de Seguridad.</strong> Contiene las RegEx (Expresiones Regulares) para detectar y ocultar DNI, teléfonos y emails antes de procesar nada.</td>
-                </tr>
-                <tr class="file-desc">
+                <tr>
                     <td><code>centauro/analyze.py</code></td>
-                    <td><strong>El Cerebro Analítico.</strong> Construye el Prompt maestro. Define las instrucciones para el LLM, inyecta el contexto recuperado y gestiona la lógica de inferencia de hablantes.</td>
+                    <td>Prompt + Sheriff</td>
+                    <td>Construye el prompt, valida evidencias y calcula nota ponderada.</td>
                 </tr>
-                <tr class="file-desc">
-                    <td><code>centauro/rag.py</code></td>
-                    <td><strong>La Memoria (RAG).</strong> Se encarga de hablar con ChromaDB: trocea los manuales (chunking), los indexa y realiza las búsquedas semánticas.</td>
-                </tr>
-                <tr class="file-desc">
+                <tr>
                     <td><code>centauro/llm_client.py</code></td>
-                    <td><strong>El Conector y Contable.</strong> Gestiona la conexión con la API de OpenAI. Calcula y registra en un CSV el coste exacto (tokens) de cada ejecución.</td>
+                    <td>Cliente OpenAI</td>
+                    <td>Embeddings, chat completions y registro de costes.</td>
                 </tr>
-                <tr class="file-desc">
+                <tr>
+                    <td><code>centauro/rag.py</code></td>
+                    <td>RAG local</td>
+                    <td>Indexación en Chroma y recuperación semántica.</td>
+                </tr>
+                <tr>
+                    <td><code>centauro/privacy.py</code></td>
+                    <td>Privacidad</td>
+                    <td>Redacción de emails, teléfonos, DNI/NIE e IBAN.</td>
+                </tr>
+                <tr>
                     <td><code>centauro/schema.py</code></td>
-                    <td><strong>El Contrato de Datos.</strong> Define la estructura obligatoria del JSON (clases Pydantic). Evita que la IA invente campos que no existen.</td>
+                    <td>Modelo de datos</td>
+                    <td>Define estructura del reporte con Pydantic.</td>
                 </tr>
-                <tr class="file-desc">
+                <tr>
                     <td><code>centauro/config.py</code></td>
-                    <td><strong>Configuración Global.</strong> Centraliza rutas de carpetas, nombres de modelos y variables de entorno.</td>
+                    <td>Configuración</td>
+                    <td>Rutas, modelos y parámetros de chunking/retrieval.</td>
                 </tr>
-                <tr class="file-desc">
-                    <td><code>outputs/control_gastos.csv</code></td>
-                    <td><strong>Log Financiero.</strong> Archivo autogenerado que registra la fecha, hora, archivo procesado y coste en dólares de cada operación.</td>
+                <tr>
+                    <td><code>centauro/reports.py</code></td>
+                    <td>Generación de reportes visuales</td>
+                    <td>Reservado para la conversión a PDF (si se habilita).</td>
+                </tr>
+                <tr>
+                    <td><code>install.py</code></td>
+                    <td>Bootstrap</td>
+                    <td>Crea estructura base y archivos de ejemplo.</td>
                 </tr>
             </tbody>
         </table>
     </section>
 
     <section>
-        <h2>6. Stack Tecnológico</h2>
+        <h2>7. Procesos Internos y Lógica de Datos</h2>
+        <h3>7.1 Limpieza de transcripciones</h3>
+        <p>Las transcripciones en VTT se limpian de timestamps y UUIDs. Solo queda el texto conversacional para maximizar la precisión del análisis.</p>
+
+        <h3>7.2 Redacción de datos personales</h3>
+        <p>Antes de enviar información a la API, se sustituyen patrones sensibles por etiquetas <code>[REDACTED_*]</code> (email, teléfono, DNI/NIE, IBAN).</p>
+
+        <h3>7.3 Generación del reporte</h3>
+        <p>La IA devuelve un JSON con seis criterios. El Sheriff valida la evidencia y recalcula la nota final en Python. El resultado se guarda en <code>outputs/</code>.</p>
+
+        <h3>7.4 Control de costes</h3>
+        <p>Todos los consumos se registran en <code>outputs/control_gastos.csv</code>, incluyendo fecha, tokens y coste estimado.</p>
+    </section>
+
+    <section>
+        <h2>8. Distribución de Carpetas (Mapa de Trabajo)</h2>
+        <ul>
+            <li><strong>inputs/docs:</strong> Manuales de calidad (base RAG).</li>
+            <li><strong>inputs/transcripts:</strong> Transcripciones de audio a analizar.</li>
+            <li><strong>outputs:</strong> Reportes JSON y control de costes.</li>
+            <li><strong>centauro:</strong> Núcleo lógico de la auditoría.</li>
+            <li><strong>.chroma_db:</strong> Persistencia vectorial local.</li>
+            <li><strong>scripts:</strong> utilidades externas (ej. PowerShell).</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>9. Deep Dive: Conexión API (<code>llm_client.py</code>)</h2>
+        <p>Este módulo es el único punto de salida hacia Internet y controla el determinismo de los resultados.</p>
         <table>
             <thead>
                 <tr>
-                    <th>Componente</th>
-                    <th>Tecnología MVP (Actual)</th>
-                    <th>Futuro Enterprise (Azure)</th>
+                    <th>Parámetro</th>
+                    <th>Valor</th>
+                    <th>Razón Técnica</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>Lenguaje</strong></td>
-                    <td>Python 3.10+</td>
-                    <td>Python 3.10+</td>
+                    <td><code>model</code></td>
+                    <td><code>gpt-4o-mini</code></td>
+                    <td>Balance coste/velocidad con latencia baja.</td>
                 </tr>
                 <tr>
-                    <td><strong>LLM</strong></td>
-                    <td>OpenAI GPT-4o-mini</td>
-                    <td>Azure OpenAI Service (GPT-4o)</td>
+                    <td><code>temperature</code></td>
+                    <td><code>0.0</code></td>
+                    <td>Determinismo absoluto para auditoría.</td>
                 </tr>
                 <tr>
-                    <td><strong>RAG / Memoria</strong></td>
-                    <td>ChromaDB (Local)</td>
-                    <td>Azure AI Search</td>
+                    <td><code>response_format</code></td>
+                    <td><code>{ "type": "json_object" }</code></td>
+                    <td>Salida estrictamente JSON.</td>
                 </tr>
             </tbody>
         </table>
+        <p>El consumo de tokens se registra automáticamente en <code>outputs/control_gastos.csv</code>.</p>
+    </section>
+
+    <section>
+        <h2>10. Deep Dive: Ingeniería de Prompt (<code>analyze.py</code>)</h2>
+        <p>La IA trabaja en modo "auditor", no como asistente. El prompt limita fuentes y fuerza evidencia literal.</p>
+        <pre><span class="str">"Eres un AUDITOR DE VENTAS CONSULTIVAS.\nTUS FUENTES:\n1. &lt;MANUAL&gt; {contexto_rag} &lt;/MANUAL&gt;\n2. &lt;AUDIO_REAL&gt; (Texto a analizar)\n\nREGLAS:\n- Prohibido inventar texto.\n- Prohibido copiar texto del MANUAL como evidencia.\n- Solo puedes extraer texto literal del AUDIO_REAL.\n\nSALIDA: JSON estricto con 6 fases."</span></pre>
+        <h3>10.1. Estrategia "Dirty Quote Preference"</h3>
+        <p>Se fuerza a la IA a citar incluso errores ("ehh", "esteee") para facilitar la validación tokenizada del Sheriff.</p>
+    </section>
+
+    <section>
+        <h2>11. Pseudocódigo del Sheriff (Validación)</h2>
+        <p>El Sheriff aplica una comparación tolerante a ruido de transcripción:</p>
+        <pre><span class="func">def</span> <span class="kw">validar_por_tokens</span>(evidencia_ia, texto_real):
+    <span class="com"># 1) Limpieza: minúsculas, eliminar moneda y puntuación</span>
+    tokens_ia = limpiar(evidencia_ia)
+    tokens_real = limpiar(texto_real)
+
+    <span class="com"># 2) Intersección de conjuntos</span>
+    aciertos = <span class="kw">len</span>(<span class="kw">set</span>(tokens_ia) &amp; <span class="kw">set</span>(tokens_real))
+    ratio = aciertos / <span class="kw">len</span>(tokens_ia)
+
+    <span class="com"># 3) Umbral de 60%</span>
+    <span class="kw">if</span> ratio &gt;= <span class="str">0.60</span>:
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">return</span> <span class="kw">False</span></pre>
     </section>
 
     <footer>
-        <p>Documento generado para <strong>Proyecto Centauro</strong></p>
+        <p>Proyecto Centauro - Documentación Interna para Desarrollo</p>
     </footer>
 </div>
 

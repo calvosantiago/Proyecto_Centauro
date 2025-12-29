@@ -1,16 +1,63 @@
 {
   "asesor": "Paola Suarez",
-  "resumen_ejecutivo": "La conversación se centra en la trayectoria profesional de la candidata, su interés en un máster en marketing y gestión comercial, y los detalles sobre la admisión y financiamiento del programa en OBS Business School. Se discuten las oportunidades de aprendizaje, la metodología del curso y los beneficios de la comunidad alumni.",
-  "puntos_fuertes": [],
-  "areas_mejora": [
+  "resumen_ejecutivo": "La llamada se centró en la presentación del programa de máster, abordando las necesidades y objetivos del candidato, así como la estructura del curso y las opciones de financiamiento. Se discutieron los beneficios de la titulación y la importancia de la formación continua en el contexto actual del mercado laboral.",
+  "puntos_fuertes": [
     {
-      "criterio": "Aviso Grabación",
-      "cumple": false,
-      "cita_evidencia": "NO ENCONTRADO",
-      "referencia_manual": "manual_legal.txt",
-      "feedback": "No se realizó el aviso legal.",
-      "razonamiento": "No se encontraron palabras clave asociadas a este criterio."
+      "criterio": "2. Sondeo (Necesidades)",
+      "cumple": true,
+      "cita_evidencia": "¿Qué experiencia tienes?",
+      "referencia_manual": "2.1. Preguntar",
+      "feedback": "Se realizaron preguntas abiertas que permiten conocer mejor al candidato.",
+      "razonamiento": "Esto ayuda a entender las motivaciones y necesidades del candidato.",
+      "importancia": "ALTA"
+    },
+    {
+      "criterio": "3. Argumentación (Valor)",
+      "cumple": true,
+      "cita_evidencia": "Esto hace también que o b s lidere los principales ranking de formación.",
+      "referencia_manual": "Poner en perspectiva la ventaja de nuestros títulos.",
+      "feedback": "Se mencionó el valor diferencial de la institución.",
+      "razonamiento": "Esto refuerza la propuesta de valor del programa.",
+      "importancia": "ALTA"
+    },
+    {
+      "criterio": "4. Objeciones / Precio",
+      "cumple": true,
+      "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial.",
+      "referencia_manual": "4.6. Titulación",
+      "feedback": "Se abordó la parte económica y se discutieron opciones de financiamiento.",
+      "razonamiento": "Esto es crucial para que el candidato pueda tomar una decisión informada.",
+      "importancia": "ALTA"
+    },
+    {
+      "criterio": "5. Cierre (Siguientes Pasos)",
+      "cumple": true,
+      "cita_evidencia": "Te mando mi contacto también.",
+      "referencia_manual": "5. Cierre (Siguientes Pasos)",
+      "feedback": "Se propuso avanzar con el proceso de admisión.",
+      "razonamiento": "Esto es esencial para mantener el interés del candidato.",
+      "importancia": "ALTA"
     }
   ],
-  "nota_final_0_10": 4.0
+  "areas_mejora": [
+    {
+      "criterio": "1. Inicio (Saludo)",
+      "cumple": false,
+      "cita_evidencia": "NO VALIDADO: Hola soy Paola",
+      "referencia_manual": "2.1. Preguntar",
+      "feedback": "Saludo cordial y profesional.",
+      "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
+      "importancia": "BAJA"
+    },
+    {
+      "criterio": "6. Legal (Grabación)",
+      "cumple": false,
+      "cita_evidencia": "NO VALIDADO: Esta llamada se graba.",
+      "referencia_manual": "6. Legal (Grabación)",
+      "feedback": "Se mencionó la grabación de la llamada.",
+      "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
+      "importancia": "MEDIA"
+    }
+  ],
+  "nota_final_0_10": 8.33
 }
