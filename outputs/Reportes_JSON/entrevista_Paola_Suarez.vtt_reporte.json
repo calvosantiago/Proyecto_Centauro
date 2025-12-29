@@ -1,42 +1,42 @@
 {
   "asesor": "Paola Suarez",
-  "resumen_ejecutivo": "La llamada se centró en entender las necesidades del candidato, su experiencia laboral y su interés en el máster. Se discutieron aspectos del programa, incluyendo la metodología, el valor del título y las oportunidades de networking. Se abordaron también las opciones de financiamiento y se propuso avanzar con la matrícula.",
+  "resumen_ejecutivo": "La conversación se centró en la trayectoria profesional de la candidata, su interés en un máster de marketing y gestión comercial, y la posibilidad de matricularse en OBS Business School. Se discutieron detalles sobre el programa, la metodología, y se abordaron aspectos financieros y de admisión.",
   "puntos_fuertes": [
     {
       "criterio": "2. Sondeo (Necesidades)",
       "cumple": true,
-      "cita_evidencia": "¿Qué experiencia tienes?",
+      "cita_evidencia": "¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta?",
+      "importancia": "ALTA",
+      "razonamiento": "Las preguntas abiertas permiten explorar las motivaciones y necesidades del candidato.",
       "referencia_manual": "2.1. Preguntar",
-      "feedback": "Se realizaron preguntas abiertas que permitieron conocer mejor al candidato.",
-      "razonamiento": "Esto ayuda a entender las motivaciones y necesidades del candidato.",
-      "importancia": "ALTA"
+      "feedback": "Se realizaron preguntas abiertas para entender las necesidades de la candidata."
     },
     {
       "criterio": "3. Argumentación (Valor)",
       "cumple": true,
-      "cita_evidencia": "Esto hace también que o b s lidere los principales ranking de formación.",
-      "referencia_manual": "Poner en perspectiva la ventaja de nuestros títulos.",
-      "feedback": "Se mencionaron los rankings y la calidad del programa.",
-      "razonamiento": "Esto refuerza la propuesta de valor del programa.",
-      "importancia": "ALTA"
+      "cita_evidencia": "Este título tiene un carácter propio o profesionalizante.",
+      "importancia": "ALTA",
+      "razonamiento": "Argumentar el valor del título es crucial para reforzar la decisión del candidato.",
+      "referencia_manual": "4.6. Titulación",
+      "feedback": "Se mencionó el valor del título y su reconocimiento internacional."
     },
     {
-      "criterio": "4. Objeciones / Precio",
+      "criterio": "4. Objeciones / Economía",
       "cumple": true,
       "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial.",
-      "referencia_manual": "4.6. Titulación",
-      "feedback": "Se abordó la parte económica y se discutieron opciones de financiamiento.",
-      "razonamiento": "Es importante aclarar las dudas sobre el costo y las opciones de pago.",
-      "importancia": "ALTA"
+      "importancia": "ALTA",
+      "razonamiento": "Es importante discutir la inversión y las opciones de pago para facilitar la decisión del candidato.",
+      "referencia_manual": "4.5. Salidas profesionales + Employment Report",
+      "feedback": "Se abordó la parte económica y se discutieron opciones de financiamiento."
     },
     {
       "criterio": "5. Cierre (Siguientes Pasos)",
       "cumple": true,
-      "cita_evidencia": "Te mando mi contacto también.",
-      "referencia_manual": "5. Cierre (Siguientes Pasos)",
-      "feedback": "Se propuso avanzar con la matrícula y se ofreció apoyo.",
-      "razonamiento": "Esto es crucial para cerrar la venta y asegurar el compromiso del candidato.",
-      "importancia": "ALTA"
+      "cita_evidencia": "Te mando mi Whatsapp para que nos vayamos comunicando.",
+      "importancia": "ALTA",
+      "razonamiento": "Proponer los siguientes pasos es esencial para cerrar la conversación de manera efectiva.",
+      "referencia_manual": "2.2. Cierre Investigación",
+      "feedback": "Se propuso avanzar en el proceso de matrícula."
     }
   ],
   "areas_mejora": [
@@ -44,19 +44,19 @@
       "criterio": "1. Inicio (Saludo)",
       "cumple": false,
       "cita_evidencia": "NO VALIDADO: Hola soy Paola",
-      "referencia_manual": "2.1. Preguntar",
-      "feedback": "Saludo cordial y profesional.",
-      "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
-      "importancia": "BAJA"
+      "importancia": "BAJA",
+      "razonamiento": "Alucinación: La frase no existe en el audio (Coincidencia: 33%)",
+      "referencia_manual": "...",
+      "feedback": "Saludo cordial y profesional."
     },
     {
       "criterio": "6. Legal (Grabación)",
       "cumple": false,
       "cita_evidencia": "NO VALIDADO: Esta llamada se graba.",
-      "referencia_manual": "6. Legal (Grabación)",
-      "feedback": "Se mencionó la grabación de la llamada, cumpliendo con la normativa.",
-      "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
-      "importancia": "MEDIA"
+      "importancia": "MEDIA",
+      "razonamiento": "Alucinación: La frase no existe en el audio (Coincidencia: 33%)",
+      "referencia_manual": "Manual Legal",
+      "feedback": "Cumple con la normativa de grabación."
     }
   ],
   "nota_final_0_10": 8.33
