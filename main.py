@@ -21,7 +21,7 @@ def cargar_transcripcion(ruta_archivo):
         return None
 
 def main():
-    print("🦄 INICIANDO PROYECTO CENTAURO (v2.4 Final)...")
+    print(" INICIANDO PROYECTO CENTAURO ...")
     
     # 1. Asegurar directorios
     os.makedirs(settings.INPUTS_DIR / "docs", exist_ok=True)

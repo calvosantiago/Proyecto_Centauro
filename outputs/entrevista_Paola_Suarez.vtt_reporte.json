@@ -1,13 +1,13 @@
 {
   "asesor": "Paola Suarez",
-  "resumen_ejecutivo": "La llamada se centró en la presentación del programa de máster, abordando las necesidades y objetivos del candidato, así como la estructura del curso y las opciones de financiamiento. Se discutieron los beneficios de la titulación y la importancia de la formación continua en el contexto actual del mercado laboral.",
+  "resumen_ejecutivo": "La llamada se centró en entender las necesidades del candidato, su experiencia laboral y su interés en el máster. Se discutieron aspectos del programa, incluyendo la metodología, el valor del título y las oportunidades de networking. Se abordaron también las opciones de financiamiento y se propuso avanzar con la matrícula.",
   "puntos_fuertes": [
     {
       "criterio": "2. Sondeo (Necesidades)",
       "cumple": true,
       "cita_evidencia": "¿Qué experiencia tienes?",
       "referencia_manual": "2.1. Preguntar",
-      "feedback": "Se realizaron preguntas abiertas que permiten conocer mejor al candidato.",
+      "feedback": "Se realizaron preguntas abiertas que permitieron conocer mejor al candidato.",
       "razonamiento": "Esto ayuda a entender las motivaciones y necesidades del candidato.",
       "importancia": "ALTA"
     },
@@ -16,7 +16,7 @@
       "cumple": true,
       "cita_evidencia": "Esto hace también que o b s lidere los principales ranking de formación.",
       "referencia_manual": "Poner en perspectiva la ventaja de nuestros títulos.",
-      "feedback": "Se mencionó el valor diferencial de la institución.",
+      "feedback": "Se mencionaron los rankings y la calidad del programa.",
       "razonamiento": "Esto refuerza la propuesta de valor del programa.",
       "importancia": "ALTA"
     },
@@ -26,7 +26,7 @@
       "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial.",
       "referencia_manual": "4.6. Titulación",
       "feedback": "Se abordó la parte económica y se discutieron opciones de financiamiento.",
-      "razonamiento": "Esto es crucial para que el candidato pueda tomar una decisión informada.",
+      "razonamiento": "Es importante aclarar las dudas sobre el costo y las opciones de pago.",
       "importancia": "ALTA"
     },
     {
@@ -34,8 +34,8 @@
       "cumple": true,
       "cita_evidencia": "Te mando mi contacto también.",
       "referencia_manual": "5. Cierre (Siguientes Pasos)",
-      "feedback": "Se propuso avanzar con el proceso de admisión.",
-      "razonamiento": "Esto es esencial para mantener el interés del candidato.",
+      "feedback": "Se propuso avanzar con la matrícula y se ofreció apoyo.",
+      "razonamiento": "Esto es crucial para cerrar la venta y asegurar el compromiso del candidato.",
       "importancia": "ALTA"
     }
   ],
@@ -54,7 +54,7 @@
       "cumple": false,
       "cita_evidencia": "NO VALIDADO: Esta llamada se graba.",
       "referencia_manual": "6. Legal (Grabación)",
-      "feedback": "Se mencionó la grabación de la llamada.",
+      "feedback": "Se mencionó la grabación de la llamada, cumpliendo con la normativa.",
       "razonamiento": "La evidencia citada no coincide suficientemente con el audio.",
       "importancia": "MEDIA"
     }
