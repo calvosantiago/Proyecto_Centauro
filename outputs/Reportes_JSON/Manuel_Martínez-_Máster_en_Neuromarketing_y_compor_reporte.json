@@ -1,0 +1,79 @@
+{
+  "asesor": "Manuel Martínez",
+  "resumen_ejecutivo": "El asesor demostró una excelente capacidad para conectar con el candidato, mostrando empatía y adaptando la conversación a sus intereses en neuromarketing. A lo largo de la interacción, Manuel utilizó preguntas abiertas y validó las emociones del candidato, lo que facilitó una conversación fluida y productiva.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Sondeo Profundo",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "¿Cuáles son los factores que tienes en cuenta para tomar la decisión de en qué Escuela estudiar?",
+      "importancia": "ALTA",
+      "razonamiento": "Hizo preguntas abiertas que permitieron al candidato compartir su experiencia, aunque podría haber profundizado más en sus motivaciones y frenos.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Hizo preguntas abiertas que permitieron al candidato compartir su experiencia, aunque podría haber profundizado más en sus motivaciones y frenos."
+    },
+    {
+      "criterio": "Valor",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "El programa está considerado entre los 5 mejores en español de su categoría.",
+      "importancia": "ALTA",
+      "razonamiento": "Manuel presentó los beneficios del programa de manera adaptada a las necesidades del candidato, resaltando su relevancia en el contexto actual.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Manuel presentó los beneficios del programa de manera adaptada a las necesidades del candidato, resaltando su relevancia en el contexto actual."
+    },
+    {
+      "criterio": "Cierre",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "¿Te gustaría que te envíe la información para tramitar tu candidatura?",
+      "importancia": "ALTA",
+      "razonamiento": "Fue proactivo en solicitar el compromiso del candidato y manejó la información sobre precios y ayudas económicas con seguridad.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Fue proactivo en solicitar el compromiso del candidato y manejó la información sobre precios y ayudas económicas con seguridad."
+    },
+    {
+      "criterio": "Escucha Activa",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Entiendo perfectamente que te preocupe el tiempo...",
+      "importancia": "CRITICO",
+      "razonamiento": "Validó las emociones del cliente y permitió que compartiera su experiencia, lo que generó un ambiente de confianza.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Validó las emociones del cliente y permitió que compartiera su experiencia, lo que generó un ambiente de confianza."
+    },
+    {
+      "criterio": "Manejo de Objeciones",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "Si decides realizar el máster, podemos gestionar los créditos Fundae.",
+      "importancia": "CRITICO",
+      "razonamiento": "Respondió a las preocupaciones del candidato con información útil y mostró empatía hacia su situación.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Respondió a las preocupaciones del candidato con información útil y mostró empatía hacia su situación."
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Legal",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "No se mencionó la grabación de la conversación.",
+      "importancia": "BAJA",
+      "razonamiento": "No se cumplió con la normativa de informar sobre la grabación de la llamada, lo que es un aspecto crítico.",
+      "referencia_manual": "Metodología General",
+      "feedback": "No se cumplió con la normativa de informar sobre la grabación de la llamada, lo que es un aspecto crítico."
+    },
+    {
+      "criterio": "Tono y Confianza",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "NO ENCONTRADO EN AUDIO",
+      "importancia": "MEDIA",
+      "razonamiento": "Transmitió autoridad y seguridad a lo largo de la conversación, lo que generó confianza en el candidato. [PENALIZACIÓN: La evidencia citada no aparece en el audio.]",
+      "referencia_manual": "Metodología General",
+      "feedback": "Transmitió autoridad y seguridad a lo largo de la conversación, lo que generó confianza en el candidato."
+    }
+  ],
+  "nota_final_0_10": 7.93
+}

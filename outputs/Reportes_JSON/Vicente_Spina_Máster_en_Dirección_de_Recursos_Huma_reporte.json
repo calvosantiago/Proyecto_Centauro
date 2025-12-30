@@ -1,0 +1,79 @@
+{
+  "asesor": "Gabriel",
+  "resumen_ejecutivo": "El asesor demostró una buena capacidad para conectar con el candidato, haciendo preguntas relevantes y adaptando su enfoque a las necesidades del cliente. Sin embargo, hubo momentos en los que se perdió la oportunidad de profundizar en las motivaciones del candidato.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Sondeo Profundo",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "¿Por qué ahora y no antes?",
+      "importancia": "ALTA",
+      "razonamiento": "Hizo preguntas abiertas que permitieron al candidato compartir su contexto, pero no profundizó en los frenos emocionales que podrían estar afectando su decisión.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Hizo preguntas abiertas que permitieron al candidato compartir su contexto, pero no profundizó en los frenos emocionales que podrían estar afectando su decisión."
+    },
+    {
+      "criterio": "Valor",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "El programa ofrece herramientas prácticas y metodologías actuales.",
+      "importancia": "ALTA",
+      "razonamiento": "El asesor presentó beneficios adaptados a las necesidades del candidato, aunque podría haber enfatizado más el ROI específico para el candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "El asesor presentó beneficios adaptados a las necesidades del candidato, aunque podría haber enfatizado más el ROI específico para el candidato."
+    },
+    {
+      "criterio": "Cierre",
+      "cumple": true,
+      "puntuacion": 3,
+      "cita_evidencia": "¿Cómo lo tenía pensado afrontar esta inversión?",
+      "importancia": "ALTA",
+      "razonamiento": "El cierre fue un poco mecánico y no se sintió la urgencia o la proactividad necesaria para asegurar el compromiso del candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "El cierre fue un poco mecánico y no se sintió la urgencia o la proactividad necesaria para asegurar el compromiso del candidato."
+    },
+    {
+      "criterio": "Escucha Activa",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Entiendo que no quieres comprometerte sin tener claro tu tiempo.",
+      "importancia": "CRITICO",
+      "razonamiento": "El asesor validó las preocupaciones del candidato y mostró empatía hacia su situación.",
+      "referencia_manual": "Metodología General",
+      "feedback": "El asesor validó las preocupaciones del candidato y mostró empatía hacia su situación."
+    },
+    {
+      "criterio": "Manejo de Objeciones",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "Entiendo que estás en una etapa investigativa.",
+      "importancia": "CRITICO",
+      "razonamiento": "El asesor abordó las objeciones del candidato con empatía y ofreció alternativas, aunque podría haber sido más persuasivo.",
+      "referencia_manual": "Metodología General",
+      "feedback": "El asesor abordó las objeciones del candidato con empatía y ofreció alternativas, aunque podría haber sido más persuasivo."
+    },
+    {
+      "criterio": "Tono y Confianza",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "La comunicación fue clara y profesional.",
+      "importancia": "MEDIA",
+      "razonamiento": "El asesor transmitió seguridad en su conocimiento del programa, aunque en algunos momentos se sintió un poco inseguro al abordar el cierre.",
+      "referencia_manual": "Metodología General",
+      "feedback": "El asesor transmitió seguridad en su conocimiento del programa, aunque en algunos momentos se sintió un poco inseguro al abordar el cierre."
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Legal",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "No se mencionó la grabación de la llamada.",
+      "importancia": "BAJA",
+      "razonamiento": "El asesor no cumplió con este aspecto legal importante.",
+      "referencia_manual": "Metodología General",
+      "feedback": "El asesor no cumplió con este aspecto legal importante."
+    }
+  ],
+  "nota_final_0_10": 7.72
+}

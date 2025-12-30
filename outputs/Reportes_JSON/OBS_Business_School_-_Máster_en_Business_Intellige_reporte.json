@@ -1,0 +1,79 @@
+{
+  "asesor": "Esther",
+  "resumen_ejecutivo": "El asesor demostró una buena capacidad para estructurar la llamada y guiar al candidato a través de la información del programa, aunque en algunos momentos se centró más en la presentación que en las necesidades del cliente.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Sondeo Profundo",
+      "cumple": true,
+      "puntuacion": 3,
+      "cita_evidencia": "¿Hay alguna habilidad que quiera pulir o algún punto fuerte a desarrollar?",
+      "importancia": "ALTA",
+      "razonamiento": "Hizo preguntas relevantes, pero no profundizó en las motivaciones o frenos del candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Hizo preguntas relevantes, pero no profundizó en las motivaciones o frenos del candidato."
+    },
+    {
+      "criterio": "Valor",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "El máster está avalado por la Universidad de Barcelona...",
+      "importancia": "ALTA",
+      "razonamiento": "Presentó beneficios del programa, pero podría haber adaptado más la información a las necesidades específicas del candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Presentó beneficios del programa, pero podría haber adaptado más la información a las necesidades específicas del candidato."
+    },
+    {
+      "criterio": "Cierre",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "¿Le gustaría recibir las ayudas económicas?",
+      "importancia": "ALTA",
+      "razonamiento": "Fue proactiva al preguntar sobre el interés en las ayudas, pero podría haber sido más firme en el cierre.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Fue proactiva al preguntar sobre el interés en las ayudas, pero podría haber sido más firme en el cierre."
+    },
+    {
+      "criterio": "Escucha Activa",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "Entiendo que los docentes también son empresarios.",
+      "importancia": "CRITICO",
+      "razonamiento": "Validó las inquietudes del candidato, pero en ocasiones interrumpió antes de que el candidato pudiera expresar completamente sus pensamientos.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Validó las inquietudes del candidato, pero en ocasiones interrumpió antes de que el candidato pudiera expresar completamente sus pensamientos."
+    },
+    {
+      "criterio": "Manejo de Objeciones",
+      "cumple": true,
+      "puntuacion": 3,
+      "cita_evidencia": "¿Ha escuchado hablar usted de la plataforma Blackboard?",
+      "importancia": "CRITICO",
+      "razonamiento": "Respondió a las preguntas del candidato, pero no abordó objeciones de manera proactiva.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Respondió a las preguntas del candidato, pero no abordó objeciones de manera proactiva."
+    },
+    {
+      "criterio": "Tono y Confianza",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "Mire, déjeme un segundín que vengo por aquí.",
+      "importancia": "MEDIA",
+      "razonamiento": "Transmitió confianza en la información presentada, aunque en algunos momentos su tono fue un poco informal.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Transmitió confianza en la información presentada, aunque en algunos momentos su tono fue un poco informal."
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Legal",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "No se mencionó la grabación de la llamada.",
+      "importancia": "BAJA",
+      "razonamiento": "No se cumplió con la normativa de informar sobre la grabación.",
+      "referencia_manual": "Metodología General",
+      "feedback": "No se cumplió con la normativa de informar sobre la grabación."
+    }
+  ],
+  "nota_final_0_10": 6.9
+}

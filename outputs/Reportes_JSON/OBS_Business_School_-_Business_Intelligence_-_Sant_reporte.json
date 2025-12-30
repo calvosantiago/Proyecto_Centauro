@@ -1,0 +1,79 @@
+{
+  "asesor": "Santiago Vargas",
+  "resumen_ejecutivo": "El asesor demostró una buena capacidad para conectar con el candidato, haciendo preguntas relevantes y adaptando su discurso a las necesidades del cliente. Sin embargo, hubo momentos en los que se perdió el hilo de la conversación y no profundizó lo suficiente en las motivaciones del candidato.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Sondeo Profundo",
+      "cumple": true,
+      "puntuacion": 3,
+      "cita_evidencia": "¿Por qué te ha interesado después de estudiar ADE?",
+      "importancia": "ALTA",
+      "razonamiento": "Hizo preguntas abiertas, pero no profundizó en el dolor del cliente ni exploró más allá de la superficie.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Hizo preguntas abiertas, pero no profundizó en el dolor del cliente ni exploró más allá de la superficie."
+    },
+    {
+      "criterio": "Valor",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "La formación que tú adquieres en OBS es una formación que va a impactar directamente en tu vida a nivel laboral.",
+      "importancia": "ALTA",
+      "razonamiento": "Presentó beneficios claros y relevantes, aunque podría haber adaptado más a las necesidades específicas del candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Presentó beneficios claros y relevantes, aunque podría haber adaptado más a las necesidades específicas del candidato."
+    },
+    {
+      "criterio": "Cierre",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "¿Cómo te gustaría pagarlo, de una sola vez o fraccionado?",
+      "importancia": "ALTA",
+      "razonamiento": "Fue proactivo al pedir el compromiso y ofreció opciones de pago, pero podría haber reforzado más la urgencia de la decisión.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Fue proactivo al pedir el compromiso y ofreció opciones de pago, pero podría haber reforzado más la urgencia de la decisión."
+    },
+    {
+      "criterio": "Manejo de Objeciones",
+      "cumple": true,
+      "puntuacion": 3,
+      "cita_evidencia": "Si ellos necesitaran un plus de información, podemos volver a hacer una llamada corta.",
+      "importancia": "CRITICO",
+      "razonamiento": "Mostró empatía, pero no ofreció argumentos sólidos para rebatir posibles objeciones del candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Mostró empatía, pero no ofreció argumentos sólidos para rebatir posibles objeciones del candidato."
+    },
+    {
+      "criterio": "Tono y Confianza",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "Estamos en varios rankings, como una de las mejores escuelas.",
+      "importancia": "MEDIA",
+      "razonamiento": "Transmitió autoridad y seguridad, aunque en algunos momentos su tono se volvió un poco monótono.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Transmitió autoridad y seguridad, aunque en algunos momentos su tono se volvió un poco monótono."
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Legal",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "No se mencionó la grabación de la llamada.",
+      "importancia": "BAJA",
+      "razonamiento": "No cumplió con la normativa de informar sobre la grabación, lo cual es un aspecto crítico.",
+      "referencia_manual": "Metodología General",
+      "feedback": "No cumplió con la normativa de informar sobre la grabación, lo cual es un aspecto crítico."
+    },
+    {
+      "criterio": "Escucha Activa",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "NO ENCONTRADO EN AUDIO",
+      "importancia": "CRITICO",
+      "razonamiento": "Validó las emociones del cliente, pero en algunos momentos interrumpió y no permitió que el candidato se expresara completamente. [PENALIZACIÓN: La evidencia citada no aparece en el audio.]",
+      "referencia_manual": "Metodología General",
+      "feedback": "Validó las emociones del cliente, pero en algunos momentos interrumpió y no permitió que el candidato se expresara completamente."
+    }
+  ],
+  "nota_final_0_10": 5.66
+}

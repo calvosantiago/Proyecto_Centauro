@@ -1,0 +1,78 @@
+{
+  "asesor": "Iván",
+  "resumen_ejecutivo": "El asesor demostró una excelente capacidad para conectar con la candidata, haciendo preguntas relevantes y adaptando su mensaje a las necesidades específicas de Zoila. Mantuvo un tono seguro y persuasivo a lo largo de la conversación, lo que facilitó una interacción fluida y productiva.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Sondeo Profundo",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "¿Cuáles son los factores que tienes en cuenta para tomar la decisión de en qué Escuela estudiar?",
+      "importancia": "ALTA",
+      "razonamiento": "Hizo preguntas abiertas y profundas que permitieron entender las motivaciones y necesidades de la candidata.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Hizo preguntas abiertas y profundas que permitieron entender las motivaciones y necesidades de la candidata."
+    },
+    {
+      "criterio": "Valor",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros.",
+      "importancia": "ALTA",
+      "razonamiento": "Vinculó los beneficios del programa a las necesidades específicas de la candidata, destacando el aprendizaje colaborativo.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Vinculó los beneficios del programa a las necesidades específicas de la candidata, destacando el aprendizaje colaborativo."
+    },
+    {
+      "criterio": "Cierre",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "¿Entonces empiezo a preparar tu candidatura?",
+      "importancia": "ALTA",
+      "razonamiento": "Fue proactivo en solicitar el compromiso de la candidata y manejó el tema del precio con seguridad.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Fue proactivo en solicitar el compromiso de la candidata y manejó el tema del precio con seguridad."
+    },
+    {
+      "criterio": "Legal",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Esto lo comentamos recién por teléfono, pero sobre todo para la grabación.",
+      "importancia": "BAJA",
+      "razonamiento": "Mencionó la grabación de la llamada, cumpliendo con la normativa legal.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Mencionó la grabación de la llamada, cumpliendo con la normativa legal."
+    },
+    {
+      "criterio": "Escucha Activa",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Entiendo perfectamente que te preocupe el tiempo...",
+      "importancia": "CRITICO",
+      "razonamiento": "Validó las emociones de la candidata y mostró interés genuino en sus respuestas.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Validó las emociones de la candidata y mostró interés genuino en sus respuestas."
+    },
+    {
+      "criterio": "Manejo de Objeciones",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Si el día de hoy nosotros hacemos todo el proceso de matriculación y por algún equis motivo no se encuentras que esta otra opción es mejor.",
+      "importancia": "CRITICO",
+      "razonamiento": "Rebatió las objeciones de manera empática y ofreció soluciones, mostrando flexibilidad.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Rebatió las objeciones de manera empática y ofreció soluciones, mostrando flexibilidad."
+    },
+    {
+      "criterio": "Tono y Confianza",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Esto es algo muy importante, mira de aquí hasta abril.",
+      "importancia": "MEDIA",
+      "razonamiento": "Transmitió autoridad y seguridad en su discurso, lo que generó confianza en la candidata.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Transmitió autoridad y seguridad en su discurso, lo que generó confianza en la candidata."
+    }
+  ],
+  "areas_mejora": [],
+  "nota_final_0_10": 10.0
+}

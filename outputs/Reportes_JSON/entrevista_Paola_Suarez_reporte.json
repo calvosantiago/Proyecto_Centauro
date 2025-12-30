@@ -1,0 +1,79 @@
+{
+  "asesor": "Pau",
+  "resumen_ejecutivo": "El asesor demostró una excelente capacidad para conectar con el candidato, validando sus emociones y necesidades, y adaptando la conversación a sus intereses y preocupaciones. Utilizó un enfoque consultivo, haciendo preguntas relevantes y ofreciendo información valiosa sobre el programa.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Sondeo Profundo",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "¿Qué necesitas fortalecer en tu día a día?",
+      "importancia": "ALTA",
+      "razonamiento": "Hizo preguntas abiertas que permitieron al candidato expresar sus necesidades, aunque podría haber profundizado más en sus motivaciones personales.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Hizo preguntas abiertas que permitieron al candidato expresar sus necesidades, aunque podría haber profundizado más en sus motivaciones personales."
+    },
+    {
+      "criterio": "Valor",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Este máster tiene la potencia que te da esas herramientas, esas habilidades en el área de marketing, pero también tiene la parte comercial.",
+      "importancia": "ALTA",
+      "razonamiento": "Adaptó los beneficios del programa a las necesidades específicas del candidato, resaltando cómo el máster puede ayudarle en su carrera.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Adaptó los beneficios del programa a las necesidades específicas del candidato, resaltando cómo el máster puede ayudarle en su carrera."
+    },
+    {
+      "criterio": "Cierre",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Si decides matricularte, puedes aprovechar el descuento y asegurar tu lugar ahora.",
+      "importancia": "ALTA",
+      "razonamiento": "Fue proactivo en solicitar el compromiso del candidato y presentó opciones de financiamiento de manera clara y segura.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Fue proactivo en solicitar el compromiso del candidato y presentó opciones de financiamiento de manera clara y segura."
+    },
+    {
+      "criterio": "Escucha Activa",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Entiendo perfectamente que te preocupe el tiempo...",
+      "importancia": "CRITICO",
+      "razonamiento": "Validó las emociones del cliente y mostró empatía, lo que fortaleció la conexión.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Validó las emociones del cliente y mostró empatía, lo que fortaleció la conexión."
+    },
+    {
+      "criterio": "Manejo de Objeciones",
+      "cumple": true,
+      "puntuacion": 4,
+      "cita_evidencia": "Si decides cambiarte para octubre, no se te modifica cada año, los máster se revalorizan.",
+      "importancia": "CRITICO",
+      "razonamiento": "Rebatió las preocupaciones del candidato con información clara y relevante, aunque podría haber explorado más objeciones.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Rebatió las preocupaciones del candidato con información clara y relevante, aunque podría haber explorado más objeciones."
+    },
+    {
+      "criterio": "Tono y Confianza",
+      "cumple": true,
+      "puntuacion": 5,
+      "cita_evidencia": "Este máster tiene la potencia que te da esas herramientas.",
+      "importancia": "MEDIA",
+      "razonamiento": "Transmitió autoridad y seguridad en su discurso, lo que generó confianza en el candidato.",
+      "referencia_manual": "Metodología General",
+      "feedback": "Transmitió autoridad y seguridad en su discurso, lo que generó confianza en el candidato."
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Legal",
+      "cumple": false,
+      "puntuacion": 1,
+      "cita_evidencia": "NO ENCONTRADO EN AUDIO",
+      "importancia": "BAJA",
+      "razonamiento": "No se cumplió con la normativa de informar sobre la grabación, lo que es un aspecto importante. [PENALIZACIÓN: La evidencia citada no aparece en el audio.]",
+      "referencia_manual": "Metodología General",
+      "feedback": "No se cumplió con la normativa de informar sobre la grabación, lo que es un aspecto importante."
+    }
+  ],
+  "nota_final_0_10": 8.76
+}
