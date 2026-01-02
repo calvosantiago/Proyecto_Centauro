@@ -1,79 +1,139 @@
 {
-  "asesor": "Pau",
-  "resumen_ejecutivo": "El asesor demostró una excelente capacidad para conectar con el candidato, validando sus emociones y necesidades, y adaptando la conversación a sus intereses y preocupaciones. Utilizó un enfoque consultivo, haciendo preguntas relevantes y ofreciendo información valiosa sobre el programa.",
-  "puntos_fuertes": [
+  "asesor": "entrevista Paola Suarez",
+  "meta": {
+    "version_modelo": "Centauro_v3_Tridente",
+    "flags_tecnicos": {
+      "recording_started_late": false
+    }
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidata con experiencia en marketing y ventas, actualmente en Nestlé, interesada en un máster para fortalecer habilidades en marketing y gestión comercial.",
+    "fase_funnel": "Investigación",
+    "nivel_dificultad": "Medio",
+    "intencion_compra": "Desconocida"
+  },
+  "timeline_momentos_clave": [
     {
-      "criterio": "Sondeo Profundo",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "¿Qué necesitas fortalecer en tu día a día?",
-      "importancia": "ALTA",
-      "razonamiento": "Hizo preguntas abiertas que permitieron al candidato expresar sus necesidades, aunque podría haber profundizado más en sus motivaciones personales.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Hizo preguntas abiertas que permitieron al candidato expresar sus necesidades, aunque podría haber profundizado más en sus motivaciones personales."
+      "fase": "Investigación",
+      "evento": "Identificación de necesidades",
+      "cita_evidencia": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Valor",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "Este máster tiene la potencia que te da esas herramientas, esas habilidades en el área de marketing, pero también tiene la parte comercial.",
-      "importancia": "ALTA",
-      "razonamiento": "Adaptó los beneficios del programa a las necesidades específicas del candidato, resaltando cómo el máster puede ayudarle en su carrera.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Adaptó los beneficios del programa a las necesidades específicas del candidato, resaltando cómo el máster puede ayudarle en su carrera."
+      "fase": "Cierre",
+      "evento": "Compromiso de pago",
+      "cita_evidencia": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Cierre",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "Si decides matricularte, puedes aprovechar el descuento y asegurar tu lugar ahora.",
-      "importancia": "ALTA",
-      "razonamiento": "Fue proactivo en solicitar el compromiso del candidato y presentó opciones de financiamiento de manera clara y segura.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Fue proactivo en solicitar el compromiso del candidato y presentó opciones de financiamiento de manera clara y segura."
+      "fase": "Cierre",
+      "evento": "Discusión sobre el costo",
+      "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial, cómo tenía apoyo familiar",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Escucha Activa",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "Entiendo perfectamente que te preocupe el tiempo...",
-      "importancia": "CRITICO",
-      "razonamiento": "Validó las emociones del cliente y mostró empatía, lo que fortaleció la conexión.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Validó las emociones del cliente y mostró empatía, lo que fortaleció la conexión."
-    },
-    {
-      "criterio": "Manejo de Objeciones",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "Si decides cambiarte para octubre, no se te modifica cada año, los máster se revalorizan.",
-      "importancia": "CRITICO",
-      "razonamiento": "Rebatió las preocupaciones del candidato con información clara y relevante, aunque podría haber explorado más objeciones.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Rebatió las preocupaciones del candidato con información clara y relevante, aunque podría haber explorado más objeciones."
-    },
-    {
-      "criterio": "Tono y Confianza",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "Este máster tiene la potencia que te da esas herramientas.",
-      "importancia": "MEDIA",
-      "razonamiento": "Transmitió autoridad y seguridad en su discurso, lo que generó confianza en el candidato.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Transmitió autoridad y seguridad en su discurso, lo que generó confianza en el candidato."
+      "fase": "Cierre",
+      "evento": "Condiciones de matrícula",
+      "cita_evidencia": "Hay un 20 por 100 que es por fecha de matrícula porque él se matriculó en los primeros cupos",
+      "timestamp_aprox": null
     }
   ],
-  "areas_mejora": [
+  "evaluacion_por_bloques": [
     {
-      "criterio": "Legal",
-      "cumple": false,
-      "puntuacion": 1,
-      "cita_evidencia": "NO ENCONTRADO EN AUDIO",
-      "importancia": "BAJA",
-      "razonamiento": "No se cumplió con la normativa de informar sobre la grabación, lo que es un aspecto importante. [PENALIZACIÓN: La evidencia citada no aparece en el audio.]",
-      "referencia_manual": "Metodología General",
-      "feedback": "No se cumplió con la normativa de informar sobre la grabación, lo que es un aspecto importante."
+      "id_bloque": "apertura",
+      "titulo": "Detección de Necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Cita 1: 'Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing'"
+      ],
+      "razonamiento": "La candidata expresa claramente sus necesidades de formación, lo que indica una buena apertura para la conversación.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "necesidades",
+      "titulo": "Detección de Necesidades",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Cita 1: 'me gustaría aprender un poquito más y igual no, o sea para la parte comercial, toda esta parte de negociación'"
+      ],
+      "razonamiento": "Se identifican necesidades específicas en marketing y negociación, lo que permite al asesor enfocar la presentación del programa. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "presentacion",
+      "titulo": "Presentación de Beneficios",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Cita 1: 'este título que te emite la Universidad de Barcelona no dice que es online'"
+      ],
+      "razonamiento": "La presentación de beneficios es clara y se vincula directamente con las necesidades de la candidata, destacando la calidad del título.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "objeciones",
+      "titulo": "Gestión de Objeciones",
+      "puntuacion_1_5": 1,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias_validadas": [],
+      "razonamiento": "El asesor aborda las preocupaciones sobre el costo de manera proactiva, ofreciendo opciones de financiamiento y aclarando dudas. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "cierre",
+      "titulo": "Cierre de la Venta",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Cita 1: 'Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos'"
+      ],
+      "razonamiento": "El cierre es efectivo, con la candidata mostrando interés y disposición para avanzar en el proceso de matrícula.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "estilo",
+      "titulo": "Estilo de Comunicación",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Cita 1: 'me gustaría mucho también conocer las opciones que que existen'"
+      ],
+      "razonamiento": "El asesor mantiene un tono profesional y empático, facilitando una conversación fluida y abierta.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "legal",
+      "titulo": "Mención de Grabación",
+      "puntuacion_1_5": null,
+      "observabilidad": "N/A",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [],
+      "razonamiento": "No se menciona la grabación de la llamada.",
+      "recomendaciones_accionables": null
     }
   ],
-  "nota_final_0_10": 8.76
+  "scorecard_final": {
+    "promedio_calculado_1_5": 0.0,
+    "nota_final_0_10": 6.61,
+    "calificacion_cualitativa": "C (Aprobado)",
+    "semaforo": "GRIS"
+  },
+  "feedback_resumido": {
+    "fortalezas": [
+      "Identificación clara de necesidades",
+      "Presentación efectiva de beneficios",
+      "Manejo proactivo de objeciones"
+    ],
+    "areas_mejora": [
+      "Incluir mención de grabación al inicio de la llamada"
+    ]
+  }
 }

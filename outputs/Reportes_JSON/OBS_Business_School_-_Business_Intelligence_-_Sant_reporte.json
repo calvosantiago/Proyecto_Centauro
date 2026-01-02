@@ -1,79 +1,150 @@
 {
-  "asesor": "Santiago Vargas",
-  "resumen_ejecutivo": "El asesor demostró una buena capacidad para conectar con el candidato, haciendo preguntas relevantes y adaptando su discurso a las necesidades del cliente. Sin embargo, hubo momentos en los que se perdió el hilo de la conversación y no profundizó lo suficiente en las motivaciones del candidato.",
-  "puntos_fuertes": [
+  "asesor": "OBS Business School - Business Intelligence - Santiago Vargas-20251219 170017",
+  "meta": {
+    "version_modelo": "Centauro_v3_Tridente",
+    "flags_tecnicos": {
+      "recording_started_late": false
+    }
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidato interesado en un máster de Business Intelligence tras finalizar ADE y con experiencia en prácticas",
+    "fase_funnel": "Investigación",
+    "nivel_dificultad": "Medio",
+    "intencion_compra": "Desconocida"
+  },
+  "timeline_momentos_clave": [
     {
-      "criterio": "Sondeo Profundo",
-      "cumple": true,
-      "puntuacion": 3,
-      "cita_evidencia": "¿Por qué te ha interesado después de estudiar ADE?",
-      "importancia": "ALTA",
-      "razonamiento": "Hizo preguntas abiertas, pero no profundizó en el dolor del cliente ni exploró más allá de la superficie.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Hizo preguntas abiertas, pero no profundizó en el dolor del cliente ni exploró más allá de la superficie."
+      "fase": "Apertura",
+      "evento": "Presentación del asesor",
+      "cita_evidencia": "Soy Santiago Vargas, soy asesor de admisiones en OBS",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Valor",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "La formación que tú adquieres en OBS es una formación que va a impactar directamente en tu vida a nivel laboral.",
-      "importancia": "ALTA",
-      "razonamiento": "Presentó beneficios claros y relevantes, aunque podría haber adaptado más a las necesidades específicas del candidato.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Presentó beneficios claros y relevantes, aunque podría haber adaptado más a las necesidades específicas del candidato."
+      "fase": "Necesidades",
+      "evento": "Motivación del candidato",
+      "cita_evidencia": "A mí siempre me ha gustado este tipo de ramas de estudio",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Cierre",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "¿Cómo te gustaría pagarlo, de una sola vez o fraccionado?",
-      "importancia": "ALTA",
-      "razonamiento": "Fue proactivo al pedir el compromiso y ofreció opciones de pago, pero podría haber reforzado más la urgencia de la decisión.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Fue proactivo al pedir el compromiso y ofreció opciones de pago, pero podría haber reforzado más la urgencia de la decisión."
+      "fase": "Presentación",
+      "evento": "Descripción de la metodología",
+      "cita_evidencia": "La metodología que nosotros tenemos es todo lo contrario, huimos de eso",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Manejo de Objeciones",
-      "cumple": true,
-      "puntuacion": 3,
-      "cita_evidencia": "Si ellos necesitaran un plus de información, podemos volver a hacer una llamada corta.",
-      "importancia": "CRITICO",
-      "razonamiento": "Mostró empatía, pero no ofreció argumentos sólidos para rebatir posibles objeciones del candidato.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Mostró empatía, pero no ofreció argumentos sólidos para rebatir posibles objeciones del candidato."
+      "fase": "Objeciones",
+      "evento": "Preguntas sobre la inversión",
+      "cita_evidencia": "¿Cómo te gustaría? ¿Cómo podrías hacerlo apagarlo de una sola vez o fraccionado?",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Tono y Confianza",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "Estamos en varios rankings, como una de las mejores escuelas.",
-      "importancia": "MEDIA",
-      "razonamiento": "Transmitió autoridad y seguridad, aunque en algunos momentos su tono se volvió un poco monótono.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Transmitió autoridad y seguridad, aunque en algunos momentos su tono se volvió un poco monótono."
+      "fase": "Cierre",
+      "evento": "Compromiso de pago",
+      "cita_evidencia": "En el caso de que te den el ok es hacer el pago el propio martes",
+      "timestamp_aprox": null
     }
   ],
-  "areas_mejora": [
+  "evaluacion_por_bloques": [
     {
-      "criterio": "Legal",
-      "cumple": false,
-      "puntuacion": 1,
-      "cita_evidencia": "No se mencionó la grabación de la llamada.",
-      "importancia": "BAJA",
-      "razonamiento": "No cumplió con la normativa de informar sobre la grabación, lo cual es un aspecto crítico.",
-      "referencia_manual": "Metodología General",
-      "feedback": "No cumplió con la normativa de informar sobre la grabación, lo cual es un aspecto crítico."
+      "id_bloque": "apertura",
+      "titulo": "Detección de Apertura",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Soy Santiago Vargas, soy asesor de admisiones en OBS"
+      ],
+      "razonamiento": "La apertura es clara y directa, estableciendo el rol del asesor y agradeciendo al candidato.",
+      "recomendaciones_accionables": null
     },
     {
-      "criterio": "Escucha Activa",
-      "cumple": false,
-      "puntuacion": 1,
-      "cita_evidencia": "NO ENCONTRADO EN AUDIO",
-      "importancia": "CRITICO",
-      "razonamiento": "Validó las emociones del cliente, pero en algunos momentos interrumpió y no permitió que el candidato se expresara completamente. [PENALIZACIÓN: La evidencia citada no aparece en el audio.]",
-      "referencia_manual": "Metodología General",
-      "feedback": "Validó las emociones del cliente, pero en algunos momentos interrumpió y no permitió que el candidato se expresara completamente."
+      "id_bloque": "necesidades",
+      "titulo": "Detección de Necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "A mí siempre me ha gustado este tipo de ramas de estudio",
+        "Quería un poco mezclar esas dos áreas"
+      ],
+      "razonamiento": "Se realizan preguntas que permiten al candidato expresar sus motivaciones y necesidades, aunque podrían ser más profundas.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "presentacion",
+      "titulo": "Presentación de Beneficios",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "La metodología que nosotros tenemos es todo lo contrario, huimos de eso",
+        "La formación que tenemos es una formación de impacto."
+      ],
+      "razonamiento": "Se presenta la metodología de manera clara y se vinculan beneficios a la experiencia del candidato.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "objeciones",
+      "titulo": "Gestión de Objeciones",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "¿Cómo te gustaría? ¿Cómo podrías hacerlo apagarlo de una sola vez o fraccionado?"
+      ],
+      "razonamiento": "Se aborda la objeción de manera proactiva, ofreciendo opciones de pago y mostrando flexibilidad. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "cierre",
+      "titulo": "Cierre de la Venta",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "En el caso de que te den el ok es hacer el pago el propio martes"
+      ],
+      "razonamiento": "Se establece un compromiso claro y se menciona la urgencia de la decisión, lo que es efectivo para el cierre.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "estilo",
+      "titulo": "Estilo y Tono",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "A mí me encanta cuando hablo con personas así, tan jóvenes y con tantas ganas."
+      ],
+      "razonamiento": "El tono es amigable y motivador, lo que ayuda a crear una conexión con el candidato.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "legal",
+      "titulo": "Mención de Grabación",
+      "puntuacion_1_5": null,
+      "observabilidad": "NULA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [],
+      "razonamiento": "No se menciona la grabación de la llamada, lo cual es un aspecto importante a considerar.",
+      "recomendaciones_accionables": null
     }
   ],
-  "nota_final_0_10": 5.66
+  "scorecard_final": {
+    "promedio_calculado_1_5": 0.0,
+    "nota_final_0_10": 6.96,
+    "calificacion_cualitativa": "C (Aprobado)",
+    "semaforo": "GRIS"
+  },
+  "feedback_resumido": {
+    "fortalezas": [
+      "Conexión efectiva con el candidato",
+      "Presentación clara de beneficios",
+      "Gestión proactiva de objeciones"
+    ],
+    "areas_mejora": [
+      "Profundizar más en las necesidades del candidato",
+      "Incluir mención de grabación al inicio"
+    ]
+  }
 }

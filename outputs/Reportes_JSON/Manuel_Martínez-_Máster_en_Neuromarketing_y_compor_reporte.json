@@ -1,79 +1,150 @@
 {
-  "asesor": "Manuel Martínez",
-  "resumen_ejecutivo": "El asesor demostró una excelente capacidad para conectar con el candidato, mostrando empatía y adaptando la conversación a sus intereses en neuromarketing. A lo largo de la interacción, Manuel utilizó preguntas abiertas y validó las emociones del candidato, lo que facilitó una conversación fluida y productiva.",
-  "puntos_fuertes": [
+  "asesor": "Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES",
+  "meta": {
+    "version_modelo": "Centauro_v3_Tridente",
+    "flags_tecnicos": {
+      "recording_started_late": false
+    }
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidato con experiencia en neuromarketing y comportamiento del consumidor, propietario de una cadena de pastelerías sin gluten, busca formación para actualizar y complementar sus conocimientos.",
+    "fase_funnel": "Investigación",
+    "nivel_dificultad": "Medio",
+    "intencion_compra": "Desconocida"
+  },
+  "timeline_momentos_clave": [
     {
-      "criterio": "Sondeo Profundo",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "¿Cuáles son los factores que tienes en cuenta para tomar la decisión de en qué Escuela estudiar?",
-      "importancia": "ALTA",
-      "razonamiento": "Hizo preguntas abiertas que permitieron al candidato compartir su experiencia, aunque podría haber profundizado más en sus motivaciones y frenos.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Hizo preguntas abiertas que permitieron al candidato compartir su experiencia, aunque podría haber profundizado más en sus motivaciones y frenos."
+      "fase": "Apertura",
+      "evento": "Presentación del asesor y del programa",
+      "cita_evidencia": "Tardes y encantado de conocerte y ponerle cara a tu solicitud de información.",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Valor",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "El programa está considerado entre los 5 mejores en español de su categoría.",
-      "importancia": "ALTA",
-      "razonamiento": "Manuel presentó los beneficios del programa de manera adaptada a las necesidades del candidato, resaltando su relevancia en el contexto actual.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Manuel presentó los beneficios del programa de manera adaptada a las necesidades del candidato, resaltando su relevancia en el contexto actual."
+      "fase": "Necesidades",
+      "evento": "Identificación de motivaciones del candidato",
+      "cita_evidencia": "¿Cuéntame por qué quieres realizar este Máster de Formación Permanente ahora, es una iniciativa propia o te lo exige tu empresa?",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Cierre",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "¿Te gustaría que te envíe la información para tramitar tu candidatura?",
-      "importancia": "ALTA",
-      "razonamiento": "Fue proactivo en solicitar el compromiso del candidato y manejó la información sobre precios y ayudas económicas con seguridad.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Fue proactivo en solicitar el compromiso del candidato y manejó la información sobre precios y ayudas económicas con seguridad."
+      "fase": "Presentación",
+      "evento": "Descripción del programa y su relevancia",
+      "cita_evidencia": "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal, que es un ranking internacional e independiente.",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Escucha Activa",
-      "cumple": true,
-      "puntuacion": 5,
-      "cita_evidencia": "Entiendo perfectamente que te preocupe el tiempo...",
-      "importancia": "CRITICO",
-      "razonamiento": "Validó las emociones del cliente y permitió que compartiera su experiencia, lo que generó un ambiente de confianza.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Validó las emociones del cliente y permitió que compartiera su experiencia, lo que generó un ambiente de confianza."
+      "fase": "Objeciones",
+      "evento": "Discusión sobre el coste y financiación",
+      "cita_evidencia": "El programa tiene un valor sin ayudas y es único pago de por vida para todo lo que estábamos hablando de €7500.",
+      "timestamp_aprox": null
     },
     {
-      "criterio": "Manejo de Objeciones",
-      "cumple": true,
-      "puntuacion": 4,
-      "cita_evidencia": "Si decides realizar el máster, podemos gestionar los créditos Fundae.",
-      "importancia": "CRITICO",
-      "razonamiento": "Respondió a las preocupaciones del candidato con información útil y mostró empatía hacia su situación.",
-      "referencia_manual": "Metodología General",
-      "feedback": "Respondió a las preocupaciones del candidato con información útil y mostró empatía hacia su situación."
+      "fase": "Cierre",
+      "evento": "Compromiso del candidato para enviar documentación",
+      "cita_evidencia": "Te envío mi currículum, me envió el DNIY si fotografía.",
+      "timestamp_aprox": null
     }
   ],
-  "areas_mejora": [
+  "evaluacion_por_bloques": [
     {
-      "criterio": "Legal",
-      "cumple": false,
-      "puntuacion": 1,
-      "cita_evidencia": "No se mencionó la grabación de la conversación.",
-      "importancia": "BAJA",
-      "razonamiento": "No se cumplió con la normativa de informar sobre la grabación de la llamada, lo que es un aspecto crítico.",
-      "referencia_manual": "Metodología General",
-      "feedback": "No se cumplió con la normativa de informar sobre la grabación de la llamada, lo que es un aspecto crítico."
+      "id_bloque": "apertura",
+      "titulo": "Detección de Apertura",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Tardes y encantado de conocerte y ponerle cara a tu solicitud de información."
+      ],
+      "razonamiento": "La apertura es cálida y establece una conexión personal, lo que es fundamental para una buena relación con el candidato.",
+      "recomendaciones_accionables": null
     },
     {
-      "criterio": "Tono y Confianza",
-      "cumple": false,
-      "puntuacion": 1,
-      "cita_evidencia": "NO ENCONTRADO EN AUDIO",
-      "importancia": "MEDIA",
-      "razonamiento": "Transmitió autoridad y seguridad a lo largo de la conversación, lo que generó confianza en el candidato. [PENALIZACIÓN: La evidencia citada no aparece en el audio.]",
-      "referencia_manual": "Metodología General",
-      "feedback": "Transmitió autoridad y seguridad a lo largo de la conversación, lo que generó confianza en el candidato."
+      "id_bloque": "necesidades",
+      "titulo": "Detección de Necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "¿Cuéntame por qué quieres realizar este Máster de Formación Permanente ahora, es una iniciativa propia o te lo exige tu empresa?",
+        "¿Cuáles son los factores que tienes en cuenta para tomar la decisión de en qué Escuela estudiar?"
+      ],
+      "razonamiento": "Se realizan preguntas relevantes que permiten entender las motivaciones del candidato, aunque podrían profundizarse más en sus frenos y aspiraciones.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "presentacion",
+      "titulo": "Presentación del Programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal."
+      ],
+      "razonamiento": "La presentación del programa es clara y se vincula a la experiencia del candidato, aunque podría incluir más ejemplos de éxito de exalumnos.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "objeciones",
+      "titulo": "Manejo de Objeciones",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "El programa tiene un valor sin ayudas y es único pago de por vida para todo lo que estábamos hablando de €7500."
+      ],
+      "razonamiento": "Se aborda el tema del coste de manera transparente y se ofrecen opciones de financiación, aunque se podría mejorar la empatía al abordar las preocupaciones del candidato. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "cierre",
+      "titulo": "Cierre de la Conversación",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Te envío mi currículum, me envió el DNIY si fotografía."
+      ],
+      "razonamiento": "El cierre es efectivo, con el candidato mostrando interés y compromiso para avanzar en el proceso de admisión.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "estilo",
+      "titulo": "Estilo y Tono",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Yo soy también un fanático de la neurociencia.",
+        "Es un campo que me encanta, el de la neurociencia, el neuromarketing me encanta."
+      ],
+      "razonamiento": "El tono es profesional y empático, lo que genera confianza en el candidato y establece una buena relación.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "legal",
+      "titulo": "Mención de Grabación",
+      "puntuacion_1_5": null,
+      "observabilidad": "NULA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [],
+      "razonamiento": "No se menciona la grabación de la llamada, lo cual es un aspecto importante a considerar.",
+      "recomendaciones_accionables": null
     }
   ],
-  "nota_final_0_10": 7.93
+  "scorecard_final": {
+    "promedio_calculado_1_5": 0.0,
+    "nota_final_0_10": 8.04,
+    "calificacion_cualitativa": "B (Bueno)",
+    "semaforo": "GRIS"
+  },
+  "feedback_resumido": {
+    "fortalezas": [
+      "Apertura cálida y conexión personal.",
+      "Preguntas relevantes para detectar necesidades.",
+      "Presentación clara del programa."
+    ],
+    "areas_mejora": [
+      "Profundizar más en las motivaciones y frenos del candidato.",
+      "Mejorar la empatía al abordar objeciones sobre el coste."
+    ]
+  }
 }
