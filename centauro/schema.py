@@ -9,6 +9,36 @@ class EventoClave(BaseModel):
     cita_evidencia: str = Field(..., description="Texto literal transcrito")
     timestamp_aprox: Optional[str] = Field(None, description="Momento aprox (Inicio/Mitad/Fin) o Timecode")
 
+class EvidenciaSpan(BaseModel):
+    tipo: str = Field(..., description="principal|secundaria")
+    timestamp_inicio: Optional[float] = Field(None, description="Inicio en segundos si existe")
+    timestamp_fin: Optional[float] = Field(None, description="Fin en segundos si existe")
+    start_idx: Optional[int] = Field(None, description="Indice inicio en texto")
+    end_idx: Optional[int] = Field(None, description="Indice fin en texto")
+    texto: str = Field(..., description="Evidencia literal del transcript")
+
+class EventoExtraido(BaseModel):
+    tipo: str = Field(..., description="Apertura|Necesidades|Propuesta|Objecion|Cierre|Estilo|Legal")
+    evento: str = Field(..., description="Hecho observable resumido")
+    evidencia: str = Field(..., description="Texto literal transcrito")
+    timestamp_inicio: Optional[float] = Field(None, description="Inicio en segundos si existe")
+    timestamp_fin: Optional[float] = Field(None, description="Fin en segundos si existe")
+    start_idx: Optional[int] = Field(None, description="Indice inicio en texto")
+    end_idx: Optional[int] = Field(None, description="Indice fin en texto")
+    locutor_probable: str = Field("desconocido", description="agente|lead|desconocido")
+    confianza_evento: float = Field(0.5, description="0-1 confianza")
+
+class ObservabilityItem(BaseModel):
+    bloque: str = Field(..., description="Bloque evaluable")
+    estado: str = Field(..., description="ALTA|MEDIA|BAJA|NO_OBSERVABLE_OFF_RECORD")
+    motivo: Optional[str] = Field(None, description="Motivo si no observable")
+
+class ExtractorOutput(BaseModel):
+    meta: "MetaData" = Field(default_factory=lambda: MetaData(version_modelo="Centauro_Extractor_v1"))
+    resumen_contextual: "ResumenContextual" = Field(default_factory=lambda: ResumenContextual())
+    events: List[EventoExtraido] = []
+    observability: List[ObservabilityItem] = []
+
 # --- NIVEL 2: EVALUACIÓN (EVALUADOR) ---
 
 class BloqueEvaluacion(BaseModel):
@@ -20,7 +50,8 @@ class BloqueEvaluacion(BaseModel):
     # Estado: EVALUADO, OFF_RECORD, SIN_EVIDENCIA
     estado_evaluacion: str = "EVALUADO" 
     
-    evidencias_validadas: List[str] = Field(default_factory=list, description="Lista de citas que sustentan la nota")
+    evidencias: List[EvidenciaSpan] = Field(default_factory=list, description="Evidencias con spans/timestamps")
+    evidencias_validadas: List[str] = Field(default_factory=list, description="Citas validadas por auditoria")
     razonamiento: str = "Sin razonamiento."
     recomendaciones_accionables: Optional[str] = None
 
@@ -42,6 +73,11 @@ class FeedbackResumido(BaseModel):
     fortalezas: List[str] = []
     areas_mejora: List[str] = []
 
+class AuditoriaResultado(BaseModel):
+    contradicciones_detectadas: List[str] = []
+    evidencias_invalidas: List[str] = []
+    accion_sugerida: str = "mantener"
+
 class MetaData(BaseModel):
     version_modelo: str = "Centauro_v3_Tridente"
     flags_tecnicos: dict = {} # ej: {"recording_started_late": True}
@@ -62,3 +98,11 @@ class ReporteCalidad(BaseModel):
     # Nota Final
     scorecard_final: ScorecardFinal = Field(default_factory=ScorecardFinal)
     feedback_resumido: FeedbackResumido = Field(default_factory=FeedbackResumido)
+    # Transparencia
+    lista_no_observable: List[ObservabilityItem] = []
+    auditoria: AuditoriaResultado = Field(default_factory=AuditoriaResultado)
+
+    # Campos amigables para PDF
+    resumen_ejecutivo: str = "Sin resumen disponible."
+    puntos_fuertes: List[dict] = []
+    areas_mejora: List[dict] = []

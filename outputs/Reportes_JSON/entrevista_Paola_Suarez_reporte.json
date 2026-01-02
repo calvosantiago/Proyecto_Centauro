@@ -7,133 +7,210 @@
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "Candidata con experiencia en marketing y ventas, actualmente en Nestlé, interesada en un máster para fortalecer habilidades en marketing y gestión comercial.",
-    "fase_funnel": "Investigación",
-    "nivel_dificultad": "Medio",
-    "intencion_compra": "Desconocida"
+    "perfil_lead": "Profesional en marketing y ventas con experiencia en la industria de alimentos y farmacéutica.",
+    "fase_funnel": "consideracion",
+    "nivel_dificultad": "media",
+    "intencion_compra": "alta"
   },
   "timeline_momentos_clave": [
     {
-      "fase": "Investigación",
-      "evento": "Identificación de necesidades",
-      "cita_evidencia": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing",
-      "timestamp_aprox": null
+      "fase": "Apertura",
+      "evento": "Introducción y presentación de la trayectoria profesional.",
+      "cita_evidencia": "La lead describe su experiencia en Gerber y su contribución al desarrollo de productos.",
+      "timestamp_aprox": "0.0"
+    },
+    {
+      "fase": "Necesidades",
+      "evento": "Identificación de áreas de mejora y deseo de formación.",
+      "cita_evidencia": "La lead menciona la necesidad de fortalecer su conocimiento en marketing y negociación.",
+      "timestamp_aprox": "60.0"
+    },
+    {
+      "fase": "Propuesta",
+      "evento": "Presentación del programa de máster.",
+      "cita_evidencia": "El asesor describe los beneficios y la estructura del máster en marketing y gestión comercial.",
+      "timestamp_aprox": "120.0"
     },
     {
       "fase": "Cierre",
-      "evento": "Compromiso de pago",
-      "cita_evidencia": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito",
-      "timestamp_aprox": null
-    },
-    {
-      "fase": "Cierre",
-      "evento": "Discusión sobre el costo",
-      "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial, cómo tenía apoyo familiar",
-      "timestamp_aprox": null
-    },
-    {
-      "fase": "Cierre",
-      "evento": "Condiciones de matrícula",
-      "cita_evidencia": "Hay un 20 por 100 que es por fecha de matrícula porque él se matriculó en los primeros cupos",
-      "timestamp_aprox": null
+      "evento": "Discusión sobre la matrícula y financiamiento.",
+      "cita_evidencia": "Se menciona el costo del máster y las opciones de pago.",
+      "timestamp_aprox": "180.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
-      "titulo": "Detección de Necesidades",
+      "titulo": "Apertura de la conversación",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing'"
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 60.0,
+          "start_idx": 0,
+          "end_idx": 200,
+          "texto": "La lead describe su experiencia en Gerber y su contribución al desarrollo de productos."
+        }
       ],
-      "razonamiento": "La candidata expresa claramente sus necesidades de formación, lo que indica una buena apertura para la conversación.",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "La lead describe su experiencia en Gerber y su contribución al desarrollo de productos."
+      ],
+      "razonamiento": "La apertura fue efectiva, ya que la lead compartió información relevante sobre su trayectoria profesional, lo que establece un buen contexto para la conversación.",
+      "recomendaciones_accionables": "Continuar haciendo preguntas abiertas para profundizar en la experiencia del lead."
     },
     {
       "id_bloque": "necesidades",
-      "titulo": "Detección de Necesidades",
-      "puntuacion_1_5": 3,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'me gustaría aprender un poquito más y igual no, o sea para la parte comercial, toda esta parte de negociación'"
-      ],
-      "razonamiento": "Se identifican necesidades específicas en marketing y negociación, lo que permite al asesor enfocar la presentación del programa. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "presentacion",
-      "titulo": "Presentación de Beneficios",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'este título que te emite la Universidad de Barcelona no dice que es online'"
-      ],
-      "razonamiento": "La presentación de beneficios es clara y se vincula directamente con las necesidades de la candidata, destacando la calidad del título.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "objeciones",
-      "titulo": "Gestión de Objeciones",
+      "titulo": "Identificación de necesidades",
       "puntuacion_1_5": 1,
       "observabilidad": "ALTA",
       "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 60.0,
+          "timestamp_fin": 120.0,
+          "start_idx": 200,
+          "end_idx": 400,
+          "texto": "La lead menciona la necesidad de fortalecer su conocimiento en marketing y negociación."
+        }
+      ],
       "evidencias_validadas": [],
-      "razonamiento": "El asesor aborda las preocupaciones sobre el costo de manera proactiva, ofreciendo opciones de financiamiento y aclarando dudas. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": null
+      "razonamiento": "Se identificaron claramente las necesidades de formación de la lead, lo que permite al asesor enfocar la propuesta de manera más efectiva. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
+      "recomendaciones_accionables": "Profundizar en las áreas específicas de marketing y negociación que la lead desea mejorar."
+    },
+    {
+      "id_bloque": "presentacion",
+      "titulo": "Presentación del programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 120.0,
+          "timestamp_fin": 180.0,
+          "start_idx": 400,
+          "end_idx": 600,
+          "texto": "El asesor describe los beneficios y la estructura del máster en marketing y gestión comercial."
+        }
+      ],
+      "evidencias_validadas": [
+        "El asesor describe los beneficios y la estructura del máster en marketing y gestión comercial."
+      ],
+      "razonamiento": "La presentación del programa fue clara y alineada con las necesidades expresadas por la lead, lo que aumenta la probabilidad de conversión.",
+      "recomendaciones_accionables": "Incluir ejemplos de éxito de exalumnos para reforzar la propuesta."
     },
     {
       "id_bloque": "cierre",
-      "titulo": "Cierre de la Venta",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
+      "titulo": "Cierre de la conversación",
+      "puntuacion_1_5": 3,
+      "observabilidad": "MEDIA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos'"
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 180.0,
+          "timestamp_fin": 240.0,
+          "start_idx": 600,
+          "end_idx": 800,
+          "texto": "Se menciona el costo del máster y las opciones de pago."
+        }
       ],
-      "razonamiento": "El cierre es efectivo, con la candidata mostrando interés y disposición para avanzar en el proceso de matrícula.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "estilo",
-      "titulo": "Estilo de Comunicación",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
       "evidencias_validadas": [
-        "Cita 1: 'me gustaría mucho también conocer las opciones que que existen'"
+        "Se menciona el costo del máster y las opciones de pago."
       ],
-      "razonamiento": "El asesor mantiene un tono profesional y empático, facilitando una conversación fluida y abierta.",
-      "recomendaciones_accionables": null
+      "razonamiento": "Se abordaron aspectos importantes del cierre, pero faltó un refuerzo de los beneficios y un llamado a la acción más contundente.",
+      "recomendaciones_accionables": "Incluir un resumen de los beneficios y un sentido de urgencia para motivar la decisión."
     },
     {
       "id_bloque": "legal",
-      "titulo": "Mención de Grabación",
-      "puntuacion_1_5": null,
-      "observabilidad": "N/A",
-      "estado_evaluacion": "EVALUADO",
+      "titulo": "Aspectos legales",
+      "puntuacion_1_5": 1,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [],
       "evidencias_validadas": [],
-      "razonamiento": "No se menciona la grabación de la llamada.",
-      "recomendaciones_accionables": null
+      "razonamiento": "La lead mostró interés en un programa que ofrece doble titulación y respaldo académico, lo que es un aspecto legal importante. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
+      "recomendaciones_accionables": "Asegurarse de que la lead tenga toda la información sobre la titulación y su validez."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 6.61,
-    "calificacion_cualitativa": "C (Aprobado)",
+    "nota_final_0_10": 3.75,
+    "calificacion_cualitativa": "D (Deficiente)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Identificación clara de necesidades",
-      "Presentación efectiva de beneficios",
-      "Manejo proactivo de objeciones"
+      "Apertura efectiva y clara",
+      "Identificación precisa de necesidades",
+      "Presentación alineada con expectativas"
     ],
     "areas_mejora": [
-      "Incluir mención de grabación al inicio de la llamada"
+      "Refuerzo de beneficios en el cierre",
+      "Mayor profundidad en preguntas sobre necesidades",
+      "Incluir testimonios de exalumnos"
     ]
-  }
+  },
+  "lista_no_observable": [
+    {
+      "bloque": "Legal",
+      "estado": "ALTA",
+      "motivo": "La lead está interesada en un programa de máster que ofrece doble titulación y respaldo académico."
+    }
+  ],
+  "auditoria": {
+    "contradicciones_detectadas": [
+      "Bloque 'necesidades' con nota alta sin evidencia válida.",
+      "Bloque 'legal' con nota alta sin evidencia válida."
+    ],
+    "evidencias_invalidas": [
+      "La lead menciona la necesidad de fortalecer su conocimiento en marketing y negociación."
+    ],
+    "accion_sugerida": "revision_humana"
+  },
+  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intención de compra: alta. Nota final: 3.75/10.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Apertura efectiva y clara",
+      "importancia": "ALTA",
+      "feedback": "Apertura efectiva y clara",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Identificación precisa de necesidades",
+      "importancia": "ALTA",
+      "feedback": "Identificación precisa de necesidades",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Presentación alineada con expectativas",
+      "importancia": "ALTA",
+      "feedback": "Presentación alineada con expectativas",
+      "cita_evidencia": ""
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Refuerzo de beneficios en el cierre",
+      "importancia": "CRITICO",
+      "feedback": "Refuerzo de beneficios en el cierre",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Mayor profundidad en preguntas sobre necesidades",
+      "importancia": "CRITICO",
+      "feedback": "Mayor profundidad en preguntas sobre necesidades",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Incluir testimonios de exalumnos",
+      "importancia": "CRITICO",
+      "feedback": "Incluir testimonios de exalumnos",
+      "cita_evidencia": ""
+    }
+  ]
 }

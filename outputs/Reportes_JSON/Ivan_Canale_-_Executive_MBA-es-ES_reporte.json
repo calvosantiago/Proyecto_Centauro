@@ -7,145 +7,210 @@
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "Zoila, ingeniera en marketing, busca consolidarse y especializarse para postular a una gerencia en su empresa actual, Nirsa.",
-    "fase_funnel": "Investigación",
-    "nivel_dificultad": "Medio",
-    "intencion_compra": "Desconocida"
+    "perfil_lead": "Ingeniera en marketing, jefe nacional de Trade marketing en Nirsa, busca consolidarse y especializarse para postular a una gerencia.",
+    "fase_funnel": "descubrimiento",
+    "nivel_dificultad": "media",
+    "intencion_compra": "alta"
   },
   "timeline_momentos_clave": [
     {
-      "fase": "Investigación",
-      "evento": "Detección de necesidades",
-      "cita_evidencia": "¿Cuáles son las herramientas que necesitas para poder ser gerente de Trade marketing?",
-      "timestamp_aprox": null
+      "fase": "Apertura",
+      "evento": "Introducción y presentación del proceso de admisión.",
+      "cita_evidencia": "Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar.",
+      "timestamp_aprox": "0.0"
     },
     {
-      "fase": "Investigación",
-      "evento": "Identificación de objetivos",
-      "cita_evidencia": "Busco consolidarme en el cargo, poder especializarme, seguir creciendo a nivel profesional.",
-      "timestamp_aprox": null
+      "fase": "Necesidades",
+      "evento": "Identificación de objetivos y necesidades del lead.",
+      "cita_evidencia": "Me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional.",
+      "timestamp_aprox": "0.0"
     },
     {
-      "fase": "Presentación",
-      "evento": "Presentación de la escuela",
-      "cita_evidencia": "OBS es una escuela de alta dirección profesionalizante.",
-      "timestamp_aprox": null
-    },
-    {
-      "fase": "Cierre",
-      "evento": "Propuesta económica",
-      "cita_evidencia": "El costo oficial del programa son €13900.",
-      "timestamp_aprox": null
+      "fase": "Propuesta",
+      "evento": "Presentación de la metodología y beneficios del programa.",
+      "cita_evidencia": "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros.",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
-      "evento": "Compromiso de pago",
-      "cita_evidencia": "¿Cómo lo ves? ¿Dispones de este importe para el pago en tiempo y forma?",
-      "timestamp_aprox": null
+      "evento": "Cierre de la reunión y próximos pasos.",
+      "cita_evidencia": "Te voy a enviar dos correos con esto, yo ya voy finalizando a no ser que tú tengas alguna otra duda o pregunta.",
+      "timestamp_aprox": "0.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
-      "titulo": "Detección de Necesidades",
+      "titulo": "Apertura de la conversación",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Este espacio está dedicado específicamente para ti."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
+          "texto": "Introducción y presentación del proceso de admisión."
+        }
       ],
-      "razonamiento": "La apertura fue cordial y se estableció un ambiente propicio para la conversación, aunque podría haber sido más personalizada.",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "Introducción y presentación del proceso de admisión."
+      ],
+      "razonamiento": "El agente realizó una introducción clara y estableció el propósito de la conversación, lo que es fundamental en la apertura.",
+      "recomendaciones_accionables": "Mantener la claridad en la introducción y seguir haciendo preguntas para profundizar en las necesidades del lead."
     },
     {
       "id_bloque": "necesidades",
-      "titulo": "Detección de Necesidades",
-      "puntuacion_1_5": 5,
+      "titulo": "Identificación de necesidades del lead",
+      "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Busco consolidarme en el cargo, poder especializarme, seguir creciendo a nivel profesional.",
-        "¿Qué herramientas necesitas para poder ser gerente de Trade marketing?"
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
+          "texto": "Me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional."
+        }
       ],
-      "razonamiento": "Se realizaron preguntas profundas que permitieron identificar claramente las necesidades y objetivos de Zoila.",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "Me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional."
+      ],
+      "razonamiento": "Se identificaron claramente las necesidades y objetivos del lead, lo que es crucial para adaptar la propuesta. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
+      "recomendaciones_accionables": "Continuar explorando otras necesidades o preocupaciones que el lead pueda tener."
     },
     {
       "id_bloque": "presentacion",
-      "titulo": "Presentación de Beneficios",
+      "titulo": "Presentación de la propuesta",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "OBS es una escuela de alta dirección profesionalizante.",
-        "La metodología está registrada y patentada."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
+          "texto": "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros."
+        }
       ],
-      "razonamiento": "La presentación de la escuela fue clara y se vincularon beneficios relevantes, aunque podría haber más énfasis en cómo se alinean con las necesidades específicas de Zoila.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "objeciones",
-      "titulo": "Gestión de Objeciones",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
       "evidencias_validadas": [
-        "¿Qué tan viable sería que este apoyo se diera?",
-        "¿Hay algún valor adicional que se deba de contemplar?"
+        "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros."
       ],
-      "razonamiento": "Se manejaron las objeciones con empatía y se ofrecieron soluciones, aunque se podría haber profundizado más en las preocupaciones de Zoila.",
-      "recomendaciones_accionables": null
+      "razonamiento": "La propuesta fue presentada de manera efectiva, destacando los beneficios del programa y la interacción con otros estudiantes.",
+      "recomendaciones_accionables": "Incluir ejemplos específicos de éxito de exalumnos para reforzar la propuesta."
     },
     {
       "id_bloque": "cierre",
-      "titulo": "Compromiso de Pago",
+      "titulo": "Cierre de la reunión",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "¿Cómo lo ves? ¿Dispones de este importe para el pago en tiempo y forma?",
-        "Te puedo preguntar si ves viable el pago en cuotas."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
+          "texto": "Te voy a enviar dos correos con esto, yo ya voy finalizando a no ser que tú tengas alguna otra duda o pregunta."
+        }
       ],
-      "razonamiento": "Se buscó el compromiso de pago de manera proactiva, aunque se podría haber reforzado más la urgencia de la decisión.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "estilo",
-      "titulo": "Estilo de Comunicación",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
       "evidencias_validadas": [
-        "Esto es algo muy importante, mira de aquí hasta abril."
+        "Te voy a enviar dos correos con esto, yo ya voy finalizando a no ser que tú tengas alguna otra duda o pregunta."
       ],
-      "razonamiento": "El tono fue seguro y experto, generando confianza en el candidato.",
-      "recomendaciones_accionables": null
+      "razonamiento": "El cierre fue claro y se ofreció la oportunidad de hacer preguntas, lo que es positivo para asegurar el compromiso del lead.",
+      "recomendaciones_accionables": "Asegurarse de que el lead se sienta cómodo y tenga todas sus dudas resueltas antes de finalizar."
     },
     {
       "id_bloque": "legal",
-      "titulo": "Mención de Grabación",
-      "puntuacion_1_5": null,
-      "observabilidad": "N/A",
-      "estado_evaluacion": "EVALUADO",
+      "titulo": "Aspectos legales y validez del programa",
+      "puntuacion_1_5": 1,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [],
       "evidencias_validadas": [],
-      "razonamiento": "No se mencionó la grabación de la llamada.",
-      "recomendaciones_accionables": null
+      "razonamiento": "Se mencionó el interés del lead en la validez internacional del título, pero no se abordaron detalles específicos. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
+      "recomendaciones_accionables": "Incluir información sobre la validez del título y cómo puede beneficiar al lead en su carrera profesional."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 8.39,
-    "calificacion_cualitativa": "B (Bueno)",
+    "nota_final_0_10": 6.75,
+    "calificacion_cualitativa": "C (Aprobado)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Detección de necesidades clara y profunda.",
-      "Estilo de comunicación seguro y experto."
+      "Buena apertura de la conversación",
+      "Identificación clara de necesidades",
+      "Presentación efectiva de la propuesta"
     ],
     "areas_mejora": [
-      "Personalizar más la apertura.",
-      "Profundizar en las objeciones y preocupaciones del candidato."
+      "Incluir ejemplos de éxito en la presentación",
+      "Asegurar que todas las dudas sean resueltas en el cierre",
+      "Proporcionar más información sobre aspectos legales del programa"
     ]
-  }
+  },
+  "lista_no_observable": [
+    {
+      "bloque": "Legal",
+      "estado": "ALTA",
+      "motivo": "El lead busca un título que le permita crecer profesionalmente y tiene interés en la validez internacional del mismo."
+    }
+  ],
+  "auditoria": {
+    "contradicciones_detectadas": [
+      "Bloque 'necesidades' sin evidencia distribuida.",
+      "Bloque 'legal' con nota alta sin evidencia válida."
+    ],
+    "evidencias_invalidas": [],
+    "accion_sugerida": "revision_humana"
+  },
+  "resumen_ejecutivo": "Lead en fase descubrimiento. Nivel de dificultad: media. Intención de compra: alta. Nota final: 6.75/10.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Buena apertura de la conversación",
+      "importancia": "ALTA",
+      "feedback": "Buena apertura de la conversación",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Identificación clara de necesidades",
+      "importancia": "ALTA",
+      "feedback": "Identificación clara de necesidades",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Presentación efectiva de la propuesta",
+      "importancia": "ALTA",
+      "feedback": "Presentación efectiva de la propuesta",
+      "cita_evidencia": ""
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Incluir ejemplos de éxito en la presentación",
+      "importancia": "CRITICO",
+      "feedback": "Incluir ejemplos de éxito en la presentación",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Asegurar que todas las dudas sean resueltas en el cierre",
+      "importancia": "CRITICO",
+      "feedback": "Asegurar que todas las dudas sean resueltas en el cierre",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Proporcionar más información sobre aspectos legales del programa",
+      "importancia": "CRITICO",
+      "feedback": "Proporcionar más información sobre aspectos legales del programa",
+      "cita_evidencia": ""
+    }
+  ]
 }

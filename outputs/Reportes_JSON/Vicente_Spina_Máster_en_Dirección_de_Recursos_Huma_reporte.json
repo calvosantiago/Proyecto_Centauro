@@ -7,143 +7,222 @@
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "Candidato con experiencia en Recursos Humanos, busca mejorar habilidades estratégicas y de gestión del talento",
-    "fase_funnel": "Investigación",
-    "nivel_dificultad": "Medio",
-    "intencion_compra": "Desconocida"
+    "perfil_lead": "Responsable de Recursos Humanos en una empresa japonesa con sede en México",
+    "fase_funnel": "consideracion",
+    "nivel_dificultad": "alta",
+    "intencion_compra": "media"
   },
   "timeline_momentos_clave": [
     {
-      "fase": "necesidades",
-      "evento": "Identificación de retos en Recursos Humanos",
-      "cita_evidencia": "la realidad es que hemos ido bajando, o sea, no no salimos tan mal, hace 3 años sacamos si nos hace mal como 3.3 de 5, pero la realidad es que el último resultado fue 3 de 5 y el del año pasado fue 2.7 de 5.",
-      "timestamp_aprox": null
+      "fase": "Apertura",
+      "evento": "Introducción y contexto sobre la reunión",
+      "cita_evidencia": "Sí, la idea es un poco conocerte a ti. Sé que hemos estado hablando previamente para detectar, digamos, la la relación de la de la solicitud con el con el máster.",
+      "timestamp_aprox": "0.0"
     },
     {
-      "fase": "necesidades",
-      "evento": "Búsqueda de formación para mejorar procesos",
-      "cita_evidencia": "mi búsqueda de de algún tema, de un de un máster o de alguna de algún posgrado, algo que que que me ayude como a poder, de manera más estratégica, identificar cuáles son como los puntos neurálgicos de cada una de esas actividades.",
-      "timestamp_aprox": null
+      "fase": "Necesidades",
+      "evento": "Descripción de la situación actual en Recursos Humanos",
+      "cita_evidencia": "La realidad es que como te decía, no en un principio, pues no, yo no tengo un perfil de RH. Es es la primera vez que me toca como tal supervisar un departamento de RH.",
+      "timestamp_aprox": "30.0"
     },
     {
-      "fase": "objeciones",
-      "evento": "Duda sobre la urgencia de la formación",
-      "cita_evidencia": "no es algo que te que hoy te podría decir, Ah, este sí me urge y si mañana inicio o mañana entro no.",
-      "timestamp_aprox": null
+      "fase": "Necesidades",
+      "evento": "Identificación de retos en la gestión de Recursos Humanos",
+      "cita_evidencia": "Creo hoy día que está muy, muy desconectado. O sea, hacemos actividades muy aisladas.",
+      "timestamp_aprox": "120.0"
     },
     {
-      "fase": "cierre",
-      "evento": "Discusión sobre costos y financiación",
-      "cita_evidencia": "el valor de esta maestría es de €7700.",
-      "timestamp_aprox": null
+      "fase": "Propuesta",
+      "evento": "Interés en un máster para mejorar habilidades en Recursos Humanos",
+      "cita_evidencia": "Hoy día, mi búsqueda de de algún tema, de un de un máster o de alguna de algún posgrado, algo que que que me ayude como a poder, de manera más estratégica, identificar cuáles son como los puntos neurálgicos de cada una de esas actividades.",
+      "timestamp_aprox": "180.0"
     },
     {
-      "fase": "cierre",
-      "evento": "Propuesta de reserva de plaza",
-      "cita_evidencia": "puede reservar la plaza con un 5%.",
-      "timestamp_aprox": null
+      "fase": "Cierre",
+      "evento": "Discusión sobre la inversión y financiación del máster",
+      "cita_evidencia": "El valor de esta maestría es de €7700. El total incluye la emisión de títulos.",
+      "timestamp_aprox": "240.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
-      "titulo": "Detección de Necesidades",
+      "titulo": "Apertura de la reunión",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "la idea es un poco conocerte a ti.",
-        "cuéntame un poquito para ponernos en contexto nuevamente."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 10.0,
+          "start_idx": 0,
+          "end_idx": 30,
+          "texto": "Sí, la idea es un poco conocerte a ti. Sé que hemos estado hablando previamente para detectar, digamos, la la relación de la de la solicitud con el con el máster."
+        }
       ],
-      "razonamiento": "La apertura fue adecuada, estableciendo un contexto claro y mostrando interés en conocer al candidato.",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "Sí, la idea es un poco conocerte a ti. Sé que hemos estado hablando previamente para detectar, digamos, la la relación de la de la solicitud con el con el máster."
+      ],
+      "razonamiento": "La apertura fue clara y estableció el contexto de la reunión, lo que es fundamental para romper el hielo.",
+      "recomendaciones_accionables": "Continuar con preguntas abiertas para fomentar la conversación."
     },
     {
       "id_bloque": "necesidades",
-      "titulo": "Detección de Necesidades",
+      "titulo": "Identificación de necesidades del lead",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "mi búsqueda de de algún tema, de un de un máster o de alguna de algún posgrado, algo que que que me ayude como a poder, de manera más estratégica, identificar cuáles son como los puntos neurálgicos de cada una de esas actividades."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 30.0,
+          "timestamp_fin": 120.0,
+          "start_idx": 30,
+          "end_idx": 100,
+          "texto": "La realidad es que como te decía, no en un principio, pues no, yo no tengo un perfil de RH. Es es la primera vez que me toca como tal supervisar un departamento de RH."
+        },
+        {
+          "tipo": "secundaria",
+          "timestamp_inicio": 120.0,
+          "timestamp_fin": 180.0,
+          "start_idx": 100,
+          "end_idx": 150,
+          "texto": "Creo hoy día que está muy, muy desconectado. O sea, hacemos actividades muy aisladas."
+        }
       ],
-      "razonamiento": "Se realizaron preguntas profundas que permitieron identificar las necesidades específicas del candidato en su rol actual. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "La realidad es que como te decía, no en un principio, pues no, yo no tengo un perfil de RH. Es es la primera vez que me toca como tal supervisar un departamento de RH.",
+        "Creo hoy día que está muy, muy desconectado. O sea, hacemos actividades muy aisladas."
+      ],
+      "razonamiento": "Se identificaron claramente las necesidades y retos del lead en su rol de Recursos Humanos.",
+      "recomendaciones_accionables": "Profundizar en las necesidades específicas y cómo el máster puede abordarlas."
     },
     {
       "id_bloque": "presentacion",
-      "titulo": "Presentación de Beneficios",
+      "titulo": "Presentación de la propuesta",
       "puntuacion_1_5": 4,
-      "observabilidad": "MEDIA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "nosotros como tal nació como la primera Escuela de Negocios online al 100% en español."
-      ],
-      "razonamiento": "Se presentó información relevante sobre la escuela y el programa, aunque podría haberse vinculado más directamente a las necesidades del candidato.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "objeciones",
-      "titulo": "Gestión de Objeciones",
-      "puntuacion_1_5": 3,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "no es algo que te que hoy te podría decir, Ah, este sí me urge y si mañana inicio o mañana entro no."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 180.0,
+          "timestamp_fin": 240.0,
+          "start_idx": 150,
+          "end_idx": 200,
+          "texto": "Hoy día, mi búsqueda de de algún tema, de un de un máster o de alguna de algún posgrado, algo que que que me ayude como a poder, de manera más estratégica, identificar cuáles son como los puntos neurálgicos de cada una de esas actividades."
+        }
       ],
-      "razonamiento": "Se manejaron las objeciones con empatía, reconociendo la situación del candidato y ofreciendo alternativas. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "Hoy día, mi búsqueda de de algún tema, de un de un máster o de alguna de algún posgrado, algo que que que me ayude como a poder, de manera más estratégica, identificar cuáles son como los puntos neurálgicos de cada una de esas actividades."
+      ],
+      "razonamiento": "El lead mostró interés en el máster, lo que indica que la presentación de la propuesta fue efectiva.",
+      "recomendaciones_accionables": "Asegurarse de resaltar los beneficios específicos del máster en futuras conversaciones."
     },
     {
       "id_bloque": "cierre",
-      "titulo": "Cierre de la Venta",
-      "puntuacion_1_5": 3,
-      "observabilidad": "MEDIA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "el valor de esta maestría es de €7700."
-      ],
-      "razonamiento": "Se presentó el costo y opciones de financiación, pero faltó un cierre más proactivo que invite al candidato a tomar una decisión.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "estilo",
-      "titulo": "Estilo de Comunicación",
+      "titulo": "Cierre de la conversación",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "la realidad es que hemos ido bajando, o sea, no no salimos tan mal."
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 240.0,
+          "timestamp_fin": 300.0,
+          "start_idx": 200,
+          "end_idx": 250,
+          "texto": "El valor de esta maestría es de €7700. El total incluye la emisión de títulos."
+        }
       ],
-      "razonamiento": "El tono fue profesional y empático, generando confianza en el candidato.",
-      "recomendaciones_accionables": null
+      "evidencias_validadas": [
+        "El valor de esta maestría es de €7700. El total incluye la emisión de títulos."
+      ],
+      "razonamiento": "Se discutió claramente la inversión necesaria, lo cual es crucial para el cierre.",
+      "recomendaciones_accionables": "Asegurarse de abordar cualquier objeción relacionada con el costo en futuras interacciones."
     },
     {
       "id_bloque": "legal",
-      "titulo": "Mención de Grabación",
-      "puntuacion_1_5": null,
-      "observabilidad": "N/A",
-      "estado_evaluacion": "EVALUADO",
+      "titulo": "Aspectos legales",
+      "puntuacion_1_5": 1,
+      "observabilidad": "NO_OBSERVABLE",
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [],
       "evidencias_validadas": [],
-      "razonamiento": "No se mencionó la grabación de la llamada.",
-      "recomendaciones_accionables": null
+      "razonamiento": "No se mencionaron aspectos legales específicos en la conversación.",
+      "recomendaciones_accionables": "Incluir preguntas sobre aspectos legales en futuras conversaciones."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 6.43,
+    "nota_final_0_10": 6.75,
     "calificacion_cualitativa": "C (Aprobado)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Apertura clara y contextualizada",
-      "Detección de necesidades profundas",
-      "Estilo de comunicación empático"
+      "Apertura clara y efectiva",
+      "Identificación precisa de necesidades",
+      "Interés del lead en el máster"
     ],
     "areas_mejora": [
-      "Mayor vinculación de beneficios a las necesidades del candidato",
-      "Cierre más proactivo"
+      "Profundizar en necesidades específicas",
+      "Abordar objeciones sobre el costo",
+      "Incluir aspectos legales en la conversación"
     ]
-  }
+  },
+  "lista_no_observable": [
+    {
+      "bloque": "Legal",
+      "estado": "NO_OBSERVABLE_OFF_RECORD",
+      "motivo": "No se mencionaron aspectos legales específicos en la conversación."
+    }
+  ],
+  "auditoria": {
+    "contradicciones_detectadas": [],
+    "evidencias_invalidas": [],
+    "accion_sugerida": "mantener"
+  },
+  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: alta. Intención de compra: media. Nota final: 6.75/10.",
+  "puntos_fuertes": [
+    {
+      "criterio": "Apertura clara y efectiva",
+      "importancia": "ALTA",
+      "feedback": "Apertura clara y efectiva",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Identificación precisa de necesidades",
+      "importancia": "ALTA",
+      "feedback": "Identificación precisa de necesidades",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Interés del lead en el máster",
+      "importancia": "ALTA",
+      "feedback": "Interés del lead en el máster",
+      "cita_evidencia": ""
+    }
+  ],
+  "areas_mejora": [
+    {
+      "criterio": "Profundizar en necesidades específicas",
+      "importancia": "CRITICO",
+      "feedback": "Profundizar en necesidades específicas",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Abordar objeciones sobre el costo",
+      "importancia": "CRITICO",
+      "feedback": "Abordar objeciones sobre el costo",
+      "cita_evidencia": ""
+    },
+    {
+      "criterio": "Incluir aspectos legales en la conversación",
+      "importancia": "CRITICO",
+      "feedback": "Incluir aspectos legales en la conversación",
+      "cita_evidencia": ""
+    }
+  ]
 }
