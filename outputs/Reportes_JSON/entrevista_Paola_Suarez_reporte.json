@@ -3,11 +3,11 @@
   "meta": {
     "version_modelo": "Centauro_v3_Tridente",
     "flags_tecnicos": {
-      "recording_started_late": false
+      "recording_started_late": true
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "Profesional en marketing y ventas con experiencia en la industria de alimentos y farmacéutica.",
+    "perfil_lead": "Candidata con experiencia en marketing y ventas, actualmente en Nestlé.",
     "fase_funnel": "consideracion",
     "nivel_dificultad": "media",
     "intencion_compra": "alta"
@@ -15,201 +15,225 @@
   "timeline_momentos_clave": [
     {
       "fase": "Apertura",
-      "evento": "Introducción y presentación de la trayectoria profesional.",
-      "cita_evidencia": "La lead describe su experiencia en Gerber y su contribución al desarrollo de productos.",
+      "evento": "Introducción de la candidata y su trayectoria profesional.",
+      "cita_evidencia": "En gerber precisamente estoy bueno, estoy apoyando para toda la estrategia del 2024.",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Necesidades",
-      "evento": "Identificación de áreas de mejora y deseo de formación.",
-      "cita_evidencia": "La lead menciona la necesidad de fortalecer su conocimiento en marketing y negociación.",
-      "timestamp_aprox": "60.0"
+      "evento": "Identificación de áreas de mejora y necesidades de formación.",
+      "cita_evidencia": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing.",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Propuesta",
-      "evento": "Presentación del programa de máster.",
-      "cita_evidencia": "El asesor describe los beneficios y la estructura del máster en marketing y gestión comercial.",
-      "timestamp_aprox": "120.0"
+      "evento": "Presentación del máster y sus beneficios.",
+      "cita_evidencia": "El programa gira entorno, adaptación al mercado, gestión de equipos, una visión estratégica y sobre todo, investigación.",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
-      "evento": "Discusión sobre la matrícula y financiamiento.",
-      "cita_evidencia": "Se menciona el costo del máster y las opciones de pago.",
-      "timestamp_aprox": "180.0"
+      "evento": "Confirmación de interés en el máster y discusión sobre la matrícula.",
+      "cita_evidencia": "Entonces ya ahorita mismo me comunico con mi papá que es quien me estaría ayudando.",
+      "timestamp_aprox": "0.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
       "titulo": "Apertura de la conversación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "puntuacion_1_5": null,
+      "observabilidad": "NULA (OFF-RECORD)",
+      "confianza": 0.5,
+      "estado_evaluacion": "OFF_RECORD",
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 84,
+          "texto": "En gerber precisamente estoy bueno, estoy apoyando para toda la estrategia del 2024."
+        }
+      ],
+      "evidencias_validadas": [],
+      "razonamiento": "[SISTEMA] Grabación iniciada tardíamente. Se asume cumplimiento previo.",
+      "recomendaciones_accionables": "Asegurarse de iniciar la grabación desde el comienzo de la llamada para capturar toda la información relevante."
+    },
+    {
+      "id_bloque": "necesidades",
+      "titulo": "Identificación de necesidades del candidato",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
           "timestamp_inicio": 0.0,
-          "timestamp_fin": 60.0,
+          "timestamp_fin": 0.0,
           "start_idx": 0,
-          "end_idx": 200,
-          "texto": "La lead describe su experiencia en Gerber y su contribución al desarrollo de productos."
+          "end_idx": 0,
+          "texto": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing."
         }
       ],
       "evidencias_validadas": [
-        "La lead describe su experiencia en Gerber y su contribución al desarrollo de productos."
+        "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing."
       ],
-      "razonamiento": "La apertura fue efectiva, ya que la lead compartió información relevante sobre su trayectoria profesional, lo que establece un buen contexto para la conversación.",
-      "recomendaciones_accionables": "Continuar haciendo preguntas abiertas para profundizar en la experiencia del lead."
-    },
-    {
-      "id_bloque": "necesidades",
-      "titulo": "Identificación de necesidades",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
-      "evidencias": [
-        {
-          "tipo": "principal",
-          "timestamp_inicio": 60.0,
-          "timestamp_fin": 120.0,
-          "start_idx": 200,
-          "end_idx": 400,
-          "texto": "La lead menciona la necesidad de fortalecer su conocimiento en marketing y negociación."
-        }
-      ],
-      "evidencias_validadas": [],
-      "razonamiento": "Se identificaron claramente las necesidades de formación de la lead, lo que permite al asesor enfocar la propuesta de manera más efectiva. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": "Profundizar en las áreas específicas de marketing y negociación que la lead desea mejorar."
+      "razonamiento": "Se identificó una necesidad de formación en marketing, pero no se exploraron otras áreas de mejora o necesidades adicionales.",
+      "recomendaciones_accionables": "Realizar preguntas más profundas para identificar otras necesidades y motivaciones del candidato."
     },
     {
       "id_bloque": "presentacion",
       "titulo": "Presentación del programa",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.5,
+      "estado_evaluacion": "SIN_EVIDENCIA",
       "evidencias": [
         {
           "tipo": "principal",
-          "timestamp_inicio": 120.0,
-          "timestamp_fin": 180.0,
-          "start_idx": 400,
-          "end_idx": 600,
-          "texto": "El asesor describe los beneficios y la estructura del máster en marketing y gestión comercial."
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 33255,
+          "end_idx": 33375,
+          "texto": "El programa gira entorno, adaptación al mercado, gestión de equipos, una visión estratégica y sobre todo, investigación."
         }
       ],
       "evidencias_validadas": [
-        "El asesor describe los beneficios y la estructura del máster en marketing y gestión comercial."
+        "El programa gira entorno, adaptación al mercado, gestión de equipos, una visión estratégica y sobre todo, investigación."
       ],
-      "razonamiento": "La presentación del programa fue clara y alineada con las necesidades expresadas por la lead, lo que aumenta la probabilidad de conversión.",
-      "recomendaciones_accionables": "Incluir ejemplos de éxito de exalumnos para reforzar la propuesta."
+      "razonamiento": "No se cuenta con información suficiente sobre la presentación del programa, ya que la grabación comenzó tarde.",
+      "recomendaciones_accionables": "Asegurarse de incluir una presentación clara y completa del programa en futuras interacciones."
+    },
+    {
+      "id_bloque": "objeciones",
+      "titulo": "Manejo de objeciones",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.3,
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [],
+      "evidencias_validadas": [],
+      "razonamiento": "No se registraron objeciones durante la llamada, lo que sugiere que no se abordaron posibles preocupaciones del candidato.",
+      "recomendaciones_accionables": "Incluir preguntas que permitan al candidato expresar cualquier objeción o preocupación que pueda tener."
     },
     {
       "id_bloque": "cierre",
       "titulo": "Cierre de la conversación",
-      "puntuacion_1_5": 3,
-      "observabilidad": "MEDIA",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
-          "timestamp_inicio": 180.0,
-          "timestamp_fin": 240.0,
-          "start_idx": 600,
-          "end_idx": 800,
-          "texto": "Se menciona el costo del máster y las opciones de pago."
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
+          "texto": "Entonces ya ahorita mismo me comunico con mi papá que es quien me estaría ayudando."
         }
       ],
       "evidencias_validadas": [
-        "Se menciona el costo del máster y las opciones de pago."
+        "Entonces ya ahorita mismo me comunico con mi papá que es quien me estaría ayudando."
       ],
-      "razonamiento": "Se abordaron aspectos importantes del cierre, pero faltó un refuerzo de los beneficios y un llamado a la acción más contundente.",
-      "recomendaciones_accionables": "Incluir un resumen de los beneficios y un sentido de urgencia para motivar la decisión."
+      "razonamiento": "Se logró un cierre donde el candidato mostró interés en el programa, pero no se discutieron los próximos pasos de manera clara.",
+      "recomendaciones_accionables": "Asegurarse de detallar los próximos pasos y confirmar el compromiso del candidato en el cierre."
+    },
+    {
+      "id_bloque": "estilo",
+      "titulo": "Estilo de comunicación",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.3,
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [],
+      "evidencias_validadas": [],
+      "razonamiento": "No se puede evaluar el estilo de comunicación debido a la falta de información completa.",
+      "recomendaciones_accionables": "Prestar atención al estilo de comunicación en futuras interacciones para mejorar la conexión con el candidato."
     },
     {
       "id_bloque": "legal",
       "titulo": "Aspectos legales",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
+      "puntuacion_1_5": null,
+      "observabilidad": "NULA (OFF-RECORD)",
+      "confianza": 0.5,
+      "estado_evaluacion": "OFF_RECORD",
       "evidencias": [],
       "evidencias_validadas": [],
-      "razonamiento": "La lead mostró interés en un programa que ofrece doble titulación y respaldo académico, lo que es un aspecto legal importante. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": "Asegurarse de que la lead tenga toda la información sobre la titulación y su validez."
+      "razonamiento": "[SISTEMA] Grabación iniciada tardíamente. Se asume cumplimiento previo.",
+      "recomendaciones_accionables": "Asegurarse de cubrir todos los aspectos legales desde el inicio de la llamada."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 3.75,
+    "nota_final_0_10": 0.0,
     "calificacion_cualitativa": "D (Deficiente)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Apertura efectiva y clara",
-      "Identificación precisa de necesidades",
-      "Presentación alineada con expectativas"
+      "Identificación de una necesidad de formación en marketing.",
+      "Interés del candidato en el programa.",
+      "Cierre de la conversación con un compromiso inicial."
     ],
     "areas_mejora": [
-      "Refuerzo de beneficios en el cierre",
-      "Mayor profundidad en preguntas sobre necesidades",
-      "Incluir testimonios de exalumnos"
+      "Iniciar la grabación desde el comienzo de la llamada.",
+      "Explorar más a fondo las necesidades y objeciones del candidato.",
+      "Detallar los próximos pasos en el cierre."
     ]
   },
   "lista_no_observable": [
     {
       "bloque": "Legal",
-      "estado": "ALTA",
-      "motivo": "La lead está interesada en un programa de máster que ofrece doble titulación y respaldo académico."
+      "estado": "NO_OBSERVABLE_OFF_RECORD",
+      "motivo": "La llamada parece haber comenzado ya avanzada."
     }
   ],
   "auditoria": {
-    "contradicciones_detectadas": [
-      "Bloque 'necesidades' con nota alta sin evidencia válida.",
-      "Bloque 'legal' con nota alta sin evidencia válida."
-    ],
-    "evidencias_invalidas": [
-      "La lead menciona la necesidad de fortalecer su conocimiento en marketing y negociación."
-    ],
-    "accion_sugerida": "revision_humana"
+    "contradicciones_detectadas": [],
+    "evidencias_invalidas": [],
+    "accion_sugerida": "mantener"
   },
-  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intención de compra: alta. Nota final: 3.75/10.",
+  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intencion de compra: alta. Nota final: 0.0/10.",
   "puntos_fuertes": [
     {
-      "criterio": "Apertura efectiva y clara",
+      "criterio": "Identificación de una necesidad de formación en marketing.",
       "importancia": "ALTA",
-      "feedback": "Apertura efectiva y clara",
+      "feedback": "Identificación de una necesidad de formación en marketing.",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Identificación precisa de necesidades",
+      "criterio": "Interés del candidato en el programa.",
       "importancia": "ALTA",
-      "feedback": "Identificación precisa de necesidades",
+      "feedback": "Interés del candidato en el programa.",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Presentación alineada con expectativas",
+      "criterio": "Cierre de la conversación con un compromiso inicial.",
       "importancia": "ALTA",
-      "feedback": "Presentación alineada con expectativas",
+      "feedback": "Cierre de la conversación con un compromiso inicial.",
       "cita_evidencia": ""
     }
   ],
   "areas_mejora": [
     {
-      "criterio": "Refuerzo de beneficios en el cierre",
+      "criterio": "Iniciar la grabación desde el comienzo de la llamada.",
       "importancia": "CRITICO",
-      "feedback": "Refuerzo de beneficios en el cierre",
+      "feedback": "Iniciar la grabación desde el comienzo de la llamada.",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Mayor profundidad en preguntas sobre necesidades",
+      "criterio": "Explorar más a fondo las necesidades y objeciones del candidato.",
       "importancia": "CRITICO",
-      "feedback": "Mayor profundidad en preguntas sobre necesidades",
+      "feedback": "Explorar más a fondo las necesidades y objeciones del candidato.",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Incluir testimonios de exalumnos",
+      "criterio": "Detallar los próximos pasos en el cierre.",
       "importancia": "CRITICO",
-      "feedback": "Incluir testimonios de exalumnos",
+      "feedback": "Detallar los próximos pasos en el cierre.",
       "cita_evidencia": ""
     }
   ]

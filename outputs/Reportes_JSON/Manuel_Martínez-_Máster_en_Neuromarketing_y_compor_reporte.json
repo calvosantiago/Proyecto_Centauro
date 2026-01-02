@@ -7,209 +7,214 @@
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "Propietario de una cadena de pastelerías sin gluten con 13 años de experiencia en neuromarketing.",
-    "fase_funnel": "descubrimiento",
+    "perfil_lead": "Propietario de una cadena de pastelerías sin gluten con experiencia en neuromarketing",
+    "fase_funnel": "consideracion",
     "nivel_dificultad": "media",
     "intencion_compra": "alta"
   },
   "timeline_momentos_clave": [
     {
       "fase": "Apertura",
-      "evento": "Presentación del asesor y del programa de máster.",
-      "cita_evidencia": "Mi nombre es Manuel Martínez. Yo soy asesor académico en o b s Business School Partner.",
+      "evento": "Presentación del asesor académico y del programa",
+      "cita_evidencia": "Como sabes, mi nombre es Manuel Martínez. Yo soy asesor académico en o b s Business School Partner, académico de la Universidad de Barcelona y vamos a tener una breve sesión informativa sobre 1 de nuestros programas, que es nuestro máster en neuromarketing y comportamiento del consumidor.",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Necesidades",
-      "evento": "Discusión sobre la experiencia del lead en neuromarketing y su interés en el programa.",
-      "cita_evidencia": "Llevo 13 años implementando estrategias de neuromarketing.",
-      "timestamp_aprox": "10.0"
+      "evento": "Exploración de la experiencia del lead en neuromarketing",
+      "cita_evidencia": "Me comentabas que habías ganado un un premio hacía poquito sobre una estrategia nueva de comportamiento del consumidor que llevas 13 años implementando",
+      "timestamp_aprox": "0.0"
+    },
+    {
+      "fase": "Necesidades",
+      "evento": "Descripción de la cadena de pastelerías y su enfoque en neuromarketing",
+      "cita_evidencia": "Yo tengo una cadena de pastelerías sin gluten, 5 tiendas en Barcelona en estos momentos, el resto están todas repartidas por España.",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Propuesta",
-      "evento": "Presentación del máster en neuromarketing y comportamiento del consumidor.",
-      "cita_evidencia": "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal.",
-      "timestamp_aprox": "120.0"
+      "evento": "Presentación del programa de máster",
+      "cita_evidencia": "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal, que es un ranking internacional e independiente y que solo valora programas tanto grados universitarios como másteres entre los 5 mejores en español de su categoría.",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
-      "evento": "Confirmación del interés del lead en el programa y discusión sobre el proceso de admisión.",
-      "cita_evidencia": "Me interesa y quiero hacerlo.",
-      "timestamp_aprox": "240.0"
+      "evento": "Confirmación de interés del lead en el programa",
+      "cita_evidencia": "Sí, sí, total, en todos los aspectos, sí, en todos los aspectos me parece que lo es, es es una muy buena manera de cómo lo lo estáis enfocando.",
+      "timestamp_aprox": "0.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
-      "titulo": "Apertura de la conversación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Apertura de la llamada",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.5,
+      "estado_evaluacion": "SIN_EVIDENCIA",
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 78,
+          "end_idx": 367,
+          "texto": "Como sabes, mi nombre es Manuel Martínez. Yo soy asesor académico en o b s Business School Partner, académico de la Universidad de Barcelona y vamos a tener una breve sesión informativa sobre 1 de nuestros programas, que es nuestro máster en neuromarketing y comportamiento del consumidor."
+        }
+      ],
+      "evidencias_validadas": [
+        "Como sabes, mi nombre es Manuel Martínez. Yo soy asesor académico en o b s Business School Partner, académico de la Universidad de Barcelona y vamos a tener una breve sesión informativa sobre 1 de nuestros programas, que es nuestro máster en neuromarketing y comportamiento del consumidor."
+      ],
+      "razonamiento": "No se registró una apertura formal de la llamada, lo que dificulta la evaluación de esta sección.",
+      "recomendaciones_accionables": "Iniciar siempre con una presentación clara y formal para establecer un buen tono en la conversación."
+    },
+    {
+      "id_bloque": "necesidades",
+      "titulo": "Exploración de necesidades del lead",
+      "puntuacion_1_5": 2,
+      "observabilidad": "MEDIA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
           "timestamp_inicio": 0.0,
-          "timestamp_fin": 10.0,
-          "start_idx": 0,
-          "end_idx": 30,
-          "texto": "Mi nombre es Manuel Martínez. Yo soy asesor académico en o b s Business School Partner."
-        }
-      ],
-      "evidencias_validadas": [
-        "Mi nombre es Manuel Martínez. Yo soy asesor académico en o b s Business School Partner."
-      ],
-      "razonamiento": "El asesor se presenta de manera clara y profesional, estableciendo un buen inicio para la conversación.",
-      "recomendaciones_accionables": "Mantener un tono amigable y profesional en futuras aperturas."
-    },
-    {
-      "id_bloque": "necesidades",
-      "titulo": "Identificación de necesidades del lead",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
+          "timestamp_fin": 0.0,
+          "start_idx": 503,
+          "end_idx": 654,
+          "texto": "Me comentabas que habías ganado un un premio hacía poquito sobre una estrategia nueva de comportamiento del consumidor que llevas 13 años implementando"
+        },
         {
-          "tipo": "principal",
-          "timestamp_inicio": 10.0,
-          "timestamp_fin": 120.0,
-          "start_idx": 30,
-          "end_idx": 150,
-          "texto": "Llevo 13 años implementando estrategias de neuromarketing."
+          "tipo": "secundaria",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 1426,
+          "end_idx": 1558,
+          "texto": "Yo tengo una cadena de pastelerías sin gluten, 5 tiendas en Barcelona en estos momentos, el resto están todas repartidas por España."
         }
       ],
       "evidencias_validadas": [
-        "Llevo 13 años implementando estrategias de neuromarketing."
+        "Me comentabas que habías ganado un un premio hacía poquito sobre una estrategia nueva de comportamiento del consumidor que llevas 13 años implementando",
+        "Yo tengo una cadena de pastelerías sin gluten, 5 tiendas en Barcelona en estos momentos, el resto están todas repartidas por España."
       ],
-      "razonamiento": "El lead comparte su experiencia y motivación, lo que permite al asesor entender mejor sus necesidades. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": "Profundizar en las motivaciones del lead para personalizar la propuesta."
+      "razonamiento": "Se exploraron algunas necesidades del lead, pero se podría profundizar más en sus motivaciones y objetivos específicos.",
+      "recomendaciones_accionables": "Realizar más preguntas abiertas para entender mejor las necesidades y motivaciones del lead."
     },
     {
       "id_bloque": "presentacion",
       "titulo": "Presentación del programa",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "puntuacion_1_5": 3,
+      "observabilidad": "MEDIA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
-          "timestamp_inicio": 120.0,
-          "timestamp_fin": 240.0,
-          "start_idx": 150,
-          "end_idx": 300,
-          "texto": "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal."
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 10614,
+          "end_idx": 10888,
+          "texto": "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal, que es un ranking internacional e independiente y que solo valora programas tanto grados universitarios como másteres entre los 5 mejores en español de su categoría."
         }
       ],
       "evidencias_validadas": [
-        "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal."
+        "Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal, que es un ranking internacional e independiente y que solo valora programas tanto grados universitarios como másteres entre los 5 mejores en español de su categoría."
       ],
-      "razonamiento": "La presentación del programa es clara y se menciona su prestigio, lo que puede atraer al lead.",
-      "recomendaciones_accionables": "Incluir más detalles sobre los beneficios específicos del programa."
+      "razonamiento": "La presentación del programa fue clara y se destacó su prestigio, aunque se podría incluir más información sobre los beneficios específicos para el lead.",
+      "recomendaciones_accionables": "Incluir ejemplos concretos de cómo el programa puede beneficiar al lead en su carrera profesional."
     },
     {
       "id_bloque": "cierre",
       "titulo": "Cierre de la conversación",
-      "puntuacion_1_5": 5,
+      "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
-          "timestamp_inicio": 240.0,
-          "timestamp_fin": 300.0,
-          "start_idx": 300,
-          "end_idx": 360,
-          "texto": "Me interesa y quiero hacerlo."
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
+          "texto": "Sí, sí, total, en todos los aspectos, sí, en todos los aspectos me parece que lo es, es es una muy buena manera de cómo lo lo estáis enfocando."
         }
       ],
       "evidencias_validadas": [
-        "Me interesa y quiero hacerlo."
+        "Sí, sí, total, en todos los aspectos, sí, en todos los aspectos me parece que lo es, es es una muy buena manera de cómo lo lo estáis enfocando."
       ],
-      "razonamiento": "El lead expresa claramente su interés en el programa, lo que indica un cierre exitoso.",
-      "recomendaciones_accionables": "Confirmar los próximos pasos y asegurar el compromiso del lead."
-    },
-    {
-      "id_bloque": "legal",
-      "titulo": "Aspectos legales y financiación",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
-      "evidencias": [],
-      "evidencias_validadas": [],
-      "razonamiento": "Se menciona el interés del lead en utilizar créditos Fundae, pero no se profundiza en los detalles. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": "Aclarar el proceso de financiación y los requisitos legales asociados."
+      "razonamiento": "El lead mostró interés en el programa, lo que indica un cierre efectivo, aunque se podría trabajar en asegurar un compromiso más firme.",
+      "recomendaciones_accionables": "Confirmar los próximos pasos y asegurar que el lead se sienta apoyado en el proceso de admisión."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 7.5,
-    "calificacion_cualitativa": "B (Bueno)",
+    "nota_final_0_10": 4.44,
+    "calificacion_cualitativa": "D (Deficiente)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Presentación clara y profesional del asesor",
-      "Identificación efectiva de las necesidades del lead",
-      "Cierre exitoso con interés del lead"
+      "Presentación clara del programa",
+      "Interés del lead confirmado",
+      "Exploración inicial de necesidades"
     ],
     "areas_mejora": [
-      "Profundizar en los beneficios específicos del programa",
-      "Aclarar aspectos legales y de financiación",
-      "Mantener un tono amigable y profesional en futuras interacciones"
+      "Falta de apertura formal",
+      "Profundizar en necesidades del lead",
+      "Incluir más beneficios específicos del programa"
     ]
   },
   "lista_no_observable": [
     {
       "bloque": "Legal",
-      "estado": "ALTA",
-      "motivo": "El lead tiene interés en utilizar créditos Fundae para financiar el máster."
+      "estado": "NO_OBSERVABLE_OFF_RECORD",
+      "motivo": "No se registró apertura formal de la llamada."
     }
   ],
   "auditoria": {
-    "contradicciones_detectadas": [
-      "Bloque 'necesidades' sin evidencia distribuida.",
-      "Bloque 'legal' con nota alta sin evidencia válida."
-    ],
+    "contradicciones_detectadas": [],
     "evidencias_invalidas": [],
-    "accion_sugerida": "revision_humana"
+    "accion_sugerida": "mantener"
   },
-  "resumen_ejecutivo": "Lead en fase descubrimiento. Nivel de dificultad: media. Intención de compra: alta. Nota final: 7.5/10.",
+  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intencion de compra: alta. Nota final: 4.44/10.",
   "puntos_fuertes": [
     {
-      "criterio": "Presentación clara y profesional del asesor",
+      "criterio": "Presentación clara del programa",
       "importancia": "ALTA",
-      "feedback": "Presentación clara y profesional del asesor",
+      "feedback": "Presentación clara del programa",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Identificación efectiva de las necesidades del lead",
+      "criterio": "Interés del lead confirmado",
       "importancia": "ALTA",
-      "feedback": "Identificación efectiva de las necesidades del lead",
+      "feedback": "Interés del lead confirmado",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Cierre exitoso con interés del lead",
+      "criterio": "Exploración inicial de necesidades",
       "importancia": "ALTA",
-      "feedback": "Cierre exitoso con interés del lead",
+      "feedback": "Exploración inicial de necesidades",
       "cita_evidencia": ""
     }
   ],
   "areas_mejora": [
     {
-      "criterio": "Profundizar en los beneficios específicos del programa",
+      "criterio": "Falta de apertura formal",
       "importancia": "CRITICO",
-      "feedback": "Profundizar en los beneficios específicos del programa",
+      "feedback": "Falta de apertura formal",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Aclarar aspectos legales y de financiación",
+      "criterio": "Profundizar en necesidades del lead",
       "importancia": "CRITICO",
-      "feedback": "Aclarar aspectos legales y de financiación",
+      "feedback": "Profundizar en necesidades del lead",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Mantener un tono amigable y profesional en futuras interacciones",
+      "criterio": "Incluir más beneficios específicos del programa",
       "importancia": "CRITICO",
-      "feedback": "Mantener un tono amigable y profesional en futuras interacciones",
+      "feedback": "Incluir más beneficios específicos del programa",
       "cita_evidencia": ""
     }
   ]

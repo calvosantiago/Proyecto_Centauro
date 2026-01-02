@@ -3,11 +3,11 @@
   "meta": {
     "version_modelo": "Centauro_v3_Tridente",
     "flags_tecnicos": {
-      "recording_started_late": false
+      "recording_started_late": true
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "Candidato interesado en una maestría en Business Intelligence y Business Analytics, con formación previa en ADE y experiencia en prácticas.",
+    "perfil_lead": "Candidato interesado en una maestría en Business Intelligence y Business Analytics",
     "fase_funnel": "consideracion",
     "nivel_dificultad": "media",
     "intencion_compra": "alta"
@@ -15,201 +15,166 @@
   "timeline_momentos_clave": [
     {
       "fase": "Apertura",
-      "evento": "Presentación del asesor y repaso de la conversación anterior.",
-      "cita_evidencia": "Soy Santiago Vargas, soy asesor de admisiones en en o b S y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas.",
+      "evento": "Presentación del asesor de admisiones",
+      "cita_evidencia": "Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en en o b S",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Necesidades",
-      "evento": "Exploración de motivaciones del candidato para estudiar la maestría.",
-      "cita_evidencia": "¿Por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?",
-      "timestamp_aprox": "10.0"
+      "evento": "Exploración de motivaciones del candidato",
+      "cita_evidencia": "¿Y por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Propuesta",
-      "evento": "Presentación de la metodología y beneficios de la escuela.",
-      "cita_evidencia": "La metodología que nosotros tenemos es todo lo contrario, huimos de eso. Aquí la metodología es práctica, todo práctico.",
-      "timestamp_aprox": "30.0"
+      "evento": "Descripción de la metodología de enseñanza",
+      "cita_evidencia": "Aquí la metodología que nosotros tenemos es todo lo contrario, huimos de eso.",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
-      "evento": "Discusión sobre el proceso de admisión y requisitos.",
-      "cita_evidencia": "Necesitaría cierta documentación para crear esa carpetita vale, una es tu currículum, no sé si lo tienes un currículum activado.",
-      "timestamp_aprox": "60.0"
+      "evento": "Presentación de la inversión y ayudas económicas",
+      "cita_evidencia": "Yo estudié el bachillerato de Ciencias y siempre me han gustado los datos y trabajarlos y yo creo que tengo mucha proyección En este sentido y sobre todos en en la Carta de motivación pones que te gustaría, que te gustaría que te que te dieran las ayudas económicas que hay ahora.",
+      "timestamp_aprox": "0.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
-      "titulo": "Apertura de la conversación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Apertura de la llamada",
+      "puntuacion_1_5": null,
+      "observabilidad": "NULA (OFF-RECORD)",
+      "confianza": 0.5,
+      "estado_evaluacion": "OFF_RECORD",
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 25,
+          "end_idx": 104,
+          "texto": "Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en en o b S"
+        }
+      ],
+      "evidencias_validadas": [],
+      "razonamiento": "[SISTEMA] Grabación iniciada tardíamente. Se asume cumplimiento previo.",
+      "recomendaciones_accionables": "Asegurarse de registrar la apertura de la llamada para futuras evaluaciones."
+    },
+    {
+      "id_bloque": "necesidades",
+      "titulo": "Exploración de necesidades del candidato",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
           "timestamp_inicio": 0.0,
-          "timestamp_fin": 10.0,
+          "timestamp_fin": 0.0,
           "start_idx": 0,
-          "end_idx": 20,
-          "texto": "Soy Santiago Vargas, soy asesor de admisiones en en o b S y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas."
+          "end_idx": 0,
+          "texto": "¿Y por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?"
         }
       ],
       "evidencias_validadas": [
-        "Soy Santiago Vargas, soy asesor de admisiones en en o b S y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas."
+        "¿Y por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?"
       ],
-      "razonamiento": "El asesor se presenta adecuadamente y repasa la conversación anterior, lo que establece un buen inicio para la interacción.",
-      "recomendaciones_accionables": "Mantener esta estructura de apertura en futuras interacciones para crear un ambiente cómodo."
-    },
-    {
-      "id_bloque": "necesidades",
-      "titulo": "Exploración de necesidades del candidato",
-      "puntuacion_1_5": 3,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
-        {
-          "tipo": "principal",
-          "timestamp_inicio": 10.0,
-          "timestamp_fin": 30.0,
-          "start_idx": 20,
-          "end_idx": 40,
-          "texto": "¿Por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?"
-        }
-      ],
-      "evidencias_validadas": [
-        "¿Por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?"
-      ],
-      "razonamiento": "Se realizan preguntas pertinentes que permiten explorar las motivaciones del candidato, lo cual es crucial para entender sus necesidades. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": "Continuar haciendo preguntas abiertas para profundizar en las motivaciones del candidato."
-    },
-    {
-      "id_bloque": "presentacion",
-      "titulo": "Presentación de la propuesta",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
-        {
-          "tipo": "principal",
-          "timestamp_inicio": 30.0,
-          "timestamp_fin": 60.0,
-          "start_idx": 40,
-          "end_idx": 80,
-          "texto": "La metodología que nosotros tenemos es todo lo contrario, huimos de eso. Aquí la metodología es práctica, todo práctico."
-        }
-      ],
-      "evidencias_validadas": [
-        "La metodología que nosotros tenemos es todo lo contrario, huimos de eso. Aquí la metodología es práctica, todo práctico."
-      ],
-      "razonamiento": "El asesor presenta claramente la metodología y beneficios de la escuela, alineándose con las necesidades del candidato.",
-      "recomendaciones_accionables": "Incluir ejemplos específicos de cómo la metodología práctica ha beneficiado a otros estudiantes."
+      "razonamiento": "Se realizó una pregunta sobre las motivaciones del candidato, pero no se evidencian respuestas que profundicen en sus necesidades.",
+      "recomendaciones_accionables": "Realizar más preguntas abiertas para explorar en profundidad las motivaciones y necesidades del candidato."
     },
     {
       "id_bloque": "cierre",
-      "titulo": "Cierre de la conversación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Cierre de la investigación",
+      "puntuacion_1_5": 1,
+      "observabilidad": "BAJA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
-          "timestamp_inicio": 60.0,
-          "timestamp_fin": 90.0,
-          "start_idx": 80,
-          "end_idx": 120,
-          "texto": "Necesitaría cierta documentación para crear esa carpetita vale, una es tu currículum, no sé si lo tienes un currículum activado."
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 30759,
+          "end_idx": 31039,
+          "texto": "Yo estudié el bachillerato de Ciencias y siempre me han gustado los datos y trabajarlos y yo creo que tengo mucha proyección En este sentido y sobre todos en en la Carta de motivación pones que te gustaría, que te gustaría que te que te dieran las ayudas económicas que hay ahora."
         }
       ],
       "evidencias_validadas": [
-        "Necesitaría cierta documentación para crear esa carpetita vale, una es tu currículum, no sé si lo tienes un currículum activado."
+        "Yo estudié el bachillerato de Ciencias y siempre me han gustado los datos y trabajarlos y yo creo que tengo mucha proyección En este sentido y sobre todos en en la Carta de motivación pones que te gustaría, que te gustaría que te que te dieran las ayudas económicas que hay ahora."
       ],
-      "razonamiento": "Se discute el proceso de admisión y se solicitan documentos necesarios, lo que es un paso importante hacia el cierre.",
-      "recomendaciones_accionables": "Asegurarse de que el candidato entienda claramente los próximos pasos y la documentación requerida."
-    },
-    {
-      "id_bloque": "legal",
-      "titulo": "Aspectos legales y de admisión",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
-      "evidencias": [],
-      "evidencias_validadas": [],
-      "razonamiento": "El candidato está informado sobre el proceso de admisión y requisitos legales, lo que es fundamental para la transparencia. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": "Continuar proporcionando información clara sobre los requisitos legales y de admisión."
+      "razonamiento": "Se presentó información sobre la inversión y ayudas económicas, pero no se evidencian compromisos claros del candidato.",
+      "recomendaciones_accionables": "Asegurarse de obtener un compromiso claro del candidato sobre su interés y capacidad para realizar la inversión."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 6.0,
-    "calificacion_cualitativa": "C (Aprobado)",
+    "nota_final_0_10": 0.0,
+    "calificacion_cualitativa": "D (Deficiente)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Buena apertura y presentación del asesor",
-      "Exploración efectiva de necesidades del candidato",
-      "Presentación clara de la propuesta y metodología"
+      "Interés del candidato en el programa",
+      "Exploración inicial de motivaciones",
+      "Presentación de ayudas económicas"
     ],
     "areas_mejora": [
-      "Incluir ejemplos específicos en la presentación",
-      "Asegurar claridad en los próximos pasos del proceso de admisión",
-      "Profundizar más en las motivaciones del candidato"
+      "Registrar adecuadamente la apertura de la llamada",
+      "Profundizar en las necesidades del candidato",
+      "Obtener compromisos claros del candidato"
     ]
   },
   "lista_no_observable": [
     {
       "bloque": "Legal",
-      "estado": "ALTA",
-      "motivo": "El candidato está informado sobre el proceso de admisión y requisitos legales."
+      "estado": "NO_OBSERVABLE_OFF_RECORD",
+      "motivo": "No se registró la apertura de la llamada."
     }
   ],
   "auditoria": {
-    "contradicciones_detectadas": [
-      "Bloque 'necesidades' sin evidencia distribuida.",
-      "Bloque 'legal' con nota alta sin evidencia válida."
-    ],
+    "contradicciones_detectadas": [],
     "evidencias_invalidas": [],
-    "accion_sugerida": "revision_humana"
+    "accion_sugerida": "mantener"
   },
-  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intención de compra: alta. Nota final: 6.0/10.",
+  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intencion de compra: alta. Nota final: 0.0/10.",
   "puntos_fuertes": [
     {
-      "criterio": "Buena apertura y presentación del asesor",
+      "criterio": "Interés del candidato en el programa",
       "importancia": "ALTA",
-      "feedback": "Buena apertura y presentación del asesor",
+      "feedback": "Interés del candidato en el programa",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Exploración efectiva de necesidades del candidato",
+      "criterio": "Exploración inicial de motivaciones",
       "importancia": "ALTA",
-      "feedback": "Exploración efectiva de necesidades del candidato",
+      "feedback": "Exploración inicial de motivaciones",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Presentación clara de la propuesta y metodología",
+      "criterio": "Presentación de ayudas económicas",
       "importancia": "ALTA",
-      "feedback": "Presentación clara de la propuesta y metodología",
+      "feedback": "Presentación de ayudas económicas",
       "cita_evidencia": ""
     }
   ],
   "areas_mejora": [
     {
-      "criterio": "Incluir ejemplos específicos en la presentación",
+      "criterio": "Registrar adecuadamente la apertura de la llamada",
       "importancia": "CRITICO",
-      "feedback": "Incluir ejemplos específicos en la presentación",
+      "feedback": "Registrar adecuadamente la apertura de la llamada",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Asegurar claridad en los próximos pasos del proceso de admisión",
+      "criterio": "Profundizar en las necesidades del candidato",
       "importancia": "CRITICO",
-      "feedback": "Asegurar claridad en los próximos pasos del proceso de admisión",
+      "feedback": "Profundizar en las necesidades del candidato",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Profundizar más en las motivaciones del candidato",
+      "criterio": "Obtener compromisos claros del candidato",
       "importancia": "CRITICO",
-      "feedback": "Profundizar más en las motivaciones del candidato",
+      "feedback": "Obtener compromisos claros del candidato",
       "cita_evidencia": ""
     }
   ]

@@ -3,11 +3,11 @@
   "meta": {
     "version_modelo": "Centauro_v3_Tridente",
     "flags_tecnicos": {
-      "recording_started_late": false
+      "recording_started_late": true
     }
   },
   "resumen_contextual": {
-    "perfil_lead": "profesional con experiencia en analítica de datos y formación previa en educación a distancia",
+    "perfil_lead": "interesado en un máster en analítica de datos",
     "fase_funnel": "consideracion",
     "nivel_dificultad": "media",
     "intencion_compra": "alta"
@@ -15,216 +15,181 @@
   "timeline_momentos_clave": [
     {
       "fase": "Apertura",
-      "evento": "Introducción y explicación de la llamada",
-      "cita_evidencia": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada",
+      "evento": "Inicio de la presentación del programa",
+      "cita_evidencia": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada, si le parece y así con cualquier cosa.",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Necesidades",
       "evento": "Identificación de habilidades a desarrollar",
       "cita_evidencia": "¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar? Pues he pensado bastante en la analítica a través de base de datos.",
-      "timestamp_aprox": "30.0"
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Propuesta",
-      "evento": "Presentación de la metodología y características del máster",
-      "cita_evidencia": "La metodología que nosotros utilizamos es cien por cien online. Las clases no son pregrabadas, serían en directo.",
-      "timestamp_aprox": "60.0"
+      "evento": "Descripción de la metodología del programa",
+      "cita_evidencia": "La metodología que nosotros utilizamos es cien por cien online. Las clases no son pregrabadas, serían en directo, de acuerdo?",
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
       "evento": "Presentación de costos y opciones de pago",
       "cita_evidencia": "El precio del máster son €7700, entonces serían 8966 dólares.",
-      "timestamp_aprox": "120.0"
+      "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
       "evento": "Confirmación de interés en ayudas económicas",
-      "cita_evidencia": "En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación.",
-      "timestamp_aprox": "180.0"
+      "cita_evidencia": "Vale, en este caso con bueno las ayudas económicas se podría quedar, déjeme un segundín se podría quedar un importe total de 6150, 23 dólares del total del total.",
+      "timestamp_aprox": "0.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "id_bloque": "apertura",
-      "titulo": "Introducción y explicación de la llamada",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Apertura de la llamada",
+      "puntuacion_1_5": null,
+      "observabilidad": "NULA (OFF-RECORD)",
+      "confianza": 0.5,
+      "estado_evaluacion": "OFF_RECORD",
+      "evidencias": [
+        {
+          "tipo": "principal",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 158,
+          "texto": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada, si le parece y así con cualquier cosa."
+        }
+      ],
+      "evidencias_validadas": [],
+      "razonamiento": "[SISTEMA] Grabación iniciada tardíamente. Se asume cumplimiento previo.",
+      "recomendaciones_accionables": "Asegurarse de registrar la apertura de la llamada y el aviso al candidato sobre la grabación."
+    },
+    {
+      "id_bloque": "necesidades",
+      "titulo": "Identificación de necesidades del candidato",
+      "puntuacion_1_5": 2,
+      "observabilidad": "MEDIA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
           "timestamp_inicio": 0.0,
-          "timestamp_fin": 30.0,
-          "start_idx": 0,
-          "end_idx": 30,
-          "texto": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada"
-        }
-      ],
-      "evidencias_validadas": [
-        "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada"
-      ],
-      "razonamiento": "El agente realizó una introducción clara y estructurada de la llamada, lo que ayuda a establecer un buen ambiente para la conversación.",
-      "recomendaciones_accionables": "Mantener esta claridad en futuras interacciones y considerar incluir preguntas para romper el hielo."
-    },
-    {
-      "id_bloque": "necesidades",
-      "titulo": "Identificación de habilidades a desarrollar",
-      "puntuacion_1_5": 3,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
-        {
-          "tipo": "principal",
-          "timestamp_inicio": 30.0,
-          "timestamp_fin": 60.0,
-          "start_idx": 30,
-          "end_idx": 60,
+          "timestamp_fin": 0.0,
+          "start_idx": 1035,
+          "end_idx": 1183,
           "texto": "¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar? Pues he pensado bastante en la analítica a través de base de datos."
         }
       ],
       "evidencias_validadas": [
         "¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar? Pues he pensado bastante en la analítica a través de base de datos."
       ],
-      "razonamiento": "Se identificaron las necesidades del lead de manera efectiva, permitiendo al agente enfocar la conversación en áreas relevantes. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": "Profundizar más en las motivaciones del lead para personalizar la propuesta."
-    },
-    {
-      "id_bloque": "presentacion",
-      "titulo": "Presentación de la metodología y características del máster",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
-        {
-          "tipo": "principal",
-          "timestamp_inicio": 60.0,
-          "timestamp_fin": 120.0,
-          "start_idx": 60,
-          "end_idx": 120,
-          "texto": "La metodología que nosotros utilizamos es cien por cien online. Las clases no son pregrabadas, serían en directo."
-        }
-      ],
-      "evidencias_validadas": [
-        "La metodología que nosotros utilizamos es cien por cien online. Las clases no son pregrabadas, serían en directo."
-      ],
-      "razonamiento": "La presentación de la metodología fue clara y relevante para el lead, alineándose con sus necesidades identificadas.",
-      "recomendaciones_accionables": "Incluir ejemplos de éxito de alumnos anteriores para reforzar la propuesta."
+      "razonamiento": "Se identificó una necesidad específica del candidato relacionada con la analítica de datos, aunque se podría profundizar más en otras áreas.",
+      "recomendaciones_accionables": "Realizar más preguntas para explorar otras habilidades y necesidades del candidato."
     },
     {
       "id_bloque": "cierre",
-      "titulo": "Presentación de costos y opciones de pago",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Cierre de la llamada",
+      "puntuacion_1_5": 2,
+      "observabilidad": "MEDIA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
-          "tipo": "principal",
-          "timestamp_inicio": 120.0,
-          "timestamp_fin": 180.0,
-          "start_idx": 120,
-          "end_idx": 180,
+          "tipo": "secundaria",
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 0,
+          "end_idx": 0,
           "texto": "El precio del máster son €7700, entonces serían 8966 dólares."
         },
         {
           "tipo": "secundaria",
-          "timestamp_inicio": 180.0,
-          "timestamp_fin": 240.0,
-          "start_idx": 180,
-          "end_idx": 240,
-          "texto": "En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación."
+          "timestamp_inicio": 0.0,
+          "timestamp_fin": 0.0,
+          "start_idx": 17994,
+          "end_idx": 18156,
+          "texto": "Vale, en este caso con bueno las ayudas económicas se podría quedar, déjeme un segundín se podría quedar un importe total de 6150, 23 dólares del total del total."
         }
       ],
       "evidencias_validadas": [
         "El precio del máster son €7700, entonces serían 8966 dólares.",
-        "En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación."
+        "Vale, en este caso con bueno las ayudas económicas se podría quedar, déjeme un segundín se podría quedar un importe total de 6150, 23 dólares del total del total."
       ],
-      "razonamiento": "El cierre fue efectivo al presentar costos y opciones de pago, además de confirmar el interés del lead en ayudas económicas.",
-      "recomendaciones_accionables": "Asegurarse de que el lead comprenda todas las opciones de financiamiento disponibles."
-    },
-    {
-      "id_bloque": "legal",
-      "titulo": "Requisitos de admisión y documentación necesaria",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
-      "evidencias": [],
-      "evidencias_validadas": [],
-      "razonamiento": "Se mencionaron aspectos legales relevantes, aunque no se detallaron en la conversación. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": "Incluir una sección específica sobre requisitos legales en futuras interacciones."
+      "razonamiento": "Se presentaron los costos y opciones de pago, así como la posibilidad de ayudas económicas, pero se necesita más claridad en el cierre.",
+      "recomendaciones_accionables": "Asegurarse de que el candidato comprenda todas las opciones de pago y ayudas disponibles."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 6.0,
-    "calificacion_cualitativa": "C (Aprobado)",
+    "nota_final_0_10": 2.5,
+    "calificacion_cualitativa": "D (Deficiente)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Introducción clara y estructurada",
-      "Identificación efectiva de necesidades",
-      "Presentación clara de la metodología"
+      "Identificación de una necesidad específica del candidato",
+      "Presentación clara de costos",
+      "Mención de ayudas económicas"
     ],
     "areas_mejora": [
-      "Profundizar en motivaciones del lead",
-      "Incluir ejemplos de éxito",
-      "Asegurar comprensión de opciones de financiamiento"
+      "Registrar adecuadamente la apertura de la llamada",
+      "Profundizar en las necesidades del candidato",
+      "Aclarar opciones de pago y ayudas económicas"
     ]
   },
   "lista_no_observable": [
     {
       "bloque": "Legal",
-      "estado": "ALTA",
-      "motivo": "Se mencionan los requisitos de admisión y documentación necesaria."
+      "estado": "NO_OBSERVABLE_OFF_RECORD",
+      "motivo": "No se registró apertura o aviso de la llamada."
     }
   ],
   "auditoria": {
-    "contradicciones_detectadas": [
-      "Bloque 'necesidades' sin evidencia distribuida.",
-      "Bloque 'legal' con nota alta sin evidencia válida."
-    ],
+    "contradicciones_detectadas": [],
     "evidencias_invalidas": [],
-    "accion_sugerida": "revision_humana"
+    "accion_sugerida": "mantener"
   },
-  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intención de compra: alta. Nota final: 6.0/10.",
+  "resumen_ejecutivo": "Lead en fase consideracion. Nivel de dificultad: media. Intencion de compra: alta. Nota final: 2.5/10.",
   "puntos_fuertes": [
     {
-      "criterio": "Introducción clara y estructurada",
+      "criterio": "Identificación de una necesidad específica del candidato",
       "importancia": "ALTA",
-      "feedback": "Introducción clara y estructurada",
+      "feedback": "Identificación de una necesidad específica del candidato",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Identificación efectiva de necesidades",
+      "criterio": "Presentación clara de costos",
       "importancia": "ALTA",
-      "feedback": "Identificación efectiva de necesidades",
+      "feedback": "Presentación clara de costos",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Presentación clara de la metodología",
+      "criterio": "Mención de ayudas económicas",
       "importancia": "ALTA",
-      "feedback": "Presentación clara de la metodología",
+      "feedback": "Mención de ayudas económicas",
       "cita_evidencia": ""
     }
   ],
   "areas_mejora": [
     {
-      "criterio": "Profundizar en motivaciones del lead",
+      "criterio": "Registrar adecuadamente la apertura de la llamada",
       "importancia": "CRITICO",
-      "feedback": "Profundizar en motivaciones del lead",
+      "feedback": "Registrar adecuadamente la apertura de la llamada",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Incluir ejemplos de éxito",
+      "criterio": "Profundizar en las necesidades del candidato",
       "importancia": "CRITICO",
-      "feedback": "Incluir ejemplos de éxito",
+      "feedback": "Profundizar en las necesidades del candidato",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Asegurar comprensión de opciones de financiamiento",
+      "criterio": "Aclarar opciones de pago y ayudas económicas",
       "importancia": "CRITICO",
-      "feedback": "Asegurar comprensión de opciones de financiamiento",
+      "feedback": "Aclarar opciones de pago y ayudas económicas",
       "cita_evidencia": ""
     }
   ]

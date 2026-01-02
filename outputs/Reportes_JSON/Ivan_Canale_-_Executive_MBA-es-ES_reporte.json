@@ -3,7 +3,7 @@
   "meta": {
     "version_modelo": "Centauro_v3_Tridente",
     "flags_tecnicos": {
-      "recording_started_late": false
+      "recording_started_late": true
     }
   },
   "resumen_contextual": {
@@ -14,202 +14,155 @@
   },
   "timeline_momentos_clave": [
     {
-      "fase": "Apertura",
-      "evento": "Introducción y presentación del proceso de admisión.",
-      "cita_evidencia": "Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar.",
+      "fase": "Necesidades",
+      "evento": "Identificación de objetivos y necesidades de formación",
+      "cita_evidencia": "me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional.",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Necesidades",
-      "evento": "Identificación de objetivos y necesidades del lead.",
-      "cita_evidencia": "Me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional.",
+      "evento": "Búsqueda de actualización en tendencias de marketing",
+      "cita_evidencia": "lo que buscaba es una actualizarme en las nuevas tendencias, obviamente un poco ampliar mi nivel de conocimiento.",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Propuesta",
-      "evento": "Presentación de la metodología y beneficios del programa.",
-      "cita_evidencia": "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros.",
+      "evento": "Presentación de la metodología y beneficios del programa",
+      "cita_evidencia": "Bueno, básicamente es una presentación de tu perfil profesional solicitando una plaza al programa y por qué ser tú la persona a la cual se lo otorguen.",
       "timestamp_aprox": "0.0"
     },
     {
       "fase": "Cierre",
-      "evento": "Cierre de la reunión y próximos pasos.",
-      "cita_evidencia": "Te voy a enviar dos correos con esto, yo ya voy finalizando a no ser que tú tengas alguna otra duda o pregunta.",
+      "evento": "Confirmación de interés en el programa",
+      "cita_evidencia": "Esto es sin interés, la primera recién en abril, que es cuando empieza el programa y te queda en 14 cuotas de 633 dólares.",
       "timestamp_aprox": "0.0"
     }
   ],
   "evaluacion_por_bloques": [
     {
-      "id_bloque": "apertura",
-      "titulo": "Apertura de la conversación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
-        {
-          "tipo": "principal",
-          "timestamp_inicio": 0.0,
-          "timestamp_fin": 0.0,
-          "start_idx": 0,
-          "end_idx": 0,
-          "texto": "Introducción y presentación del proceso de admisión."
-        }
-      ],
-      "evidencias_validadas": [
-        "Introducción y presentación del proceso de admisión."
-      ],
-      "razonamiento": "El agente realizó una introducción clara y estableció el propósito de la conversación, lo que es fundamental en la apertura.",
-      "recomendaciones_accionables": "Mantener la claridad en la introducción y seguir haciendo preguntas para profundizar en las necesidades del lead."
-    },
-    {
       "id_bloque": "necesidades",
-      "titulo": "Identificación de necesidades del lead",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Identificación de necesidades del candidato",
+      "puntuacion_1_5": 2,
+      "observabilidad": "MEDIA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
           "timestamp_inicio": 0.0,
           "timestamp_fin": 0.0,
-          "start_idx": 0,
-          "end_idx": 0,
-          "texto": "Me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional."
-        }
-      ],
-      "evidencias_validadas": [
-        "Me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional."
-      ],
-      "razonamiento": "Se identificaron claramente las necesidades y objetivos del lead, lo que es crucial para adaptar la propuesta. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": "Continuar explorando otras necesidades o preocupaciones que el lead pueda tener."
-    },
-    {
-      "id_bloque": "presentacion",
-      "titulo": "Presentación de la propuesta",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias": [
+          "start_idx": 976,
+          "end_idx": 1085,
+          "texto": "me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional."
+        },
         {
-          "tipo": "principal",
+          "tipo": "secundaria",
           "timestamp_inicio": 0.0,
           "timestamp_fin": 0.0,
           "start_idx": 0,
           "end_idx": 0,
-          "texto": "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros."
+          "texto": "lo que buscaba es una actualizarme en las nuevas tendencias, obviamente un poco ampliar mi nivel de conocimiento."
         }
       ],
       "evidencias_validadas": [
-        "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros."
+        "me comentabas que buscas consolidarte el encargo, poder especializarte, seguir creciendo a nivel profesional.",
+        "lo que buscaba es una actualizarme en las nuevas tendencias, obviamente un poco ampliar mi nivel de conocimiento."
       ],
-      "razonamiento": "La propuesta fue presentada de manera efectiva, destacando los beneficios del programa y la interacción con otros estudiantes.",
-      "recomendaciones_accionables": "Incluir ejemplos específicos de éxito de exalumnos para reforzar la propuesta."
+      "razonamiento": "Se identificaron necesidades claras del candidato en cuanto a su deseo de consolidarse y especializarse en su carrera profesional, así como la búsqueda de actualización en tendencias de marketing. Sin embargo, la información es limitada y no se exploraron más necesidades o motivaciones.",
+      "recomendaciones_accionables": "Realizar preguntas más profundas sobre las motivaciones del candidato y explorar otras posibles necesidades que puedan influir en su decisión de compra."
     },
     {
       "id_bloque": "cierre",
-      "titulo": "Cierre de la reunión",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
+      "titulo": "Confirmación de interés en el programa",
+      "puntuacion_1_5": 2,
+      "observabilidad": "MEDIA",
+      "confianza": 0.5,
       "estado_evaluacion": "EVALUADO",
       "evidencias": [
         {
           "tipo": "principal",
           "timestamp_inicio": 0.0,
           "timestamp_fin": 0.0,
-          "start_idx": 0,
-          "end_idx": 0,
-          "texto": "Te voy a enviar dos correos con esto, yo ya voy finalizando a no ser que tú tengas alguna otra duda o pregunta."
+          "start_idx": 48244,
+          "end_idx": 48366,
+          "texto": "Esto es sin interés, la primera recién en abril, que es cuando empieza el programa y te queda en 14 cuotas de 633 dólares."
         }
       ],
       "evidencias_validadas": [
-        "Te voy a enviar dos correos con esto, yo ya voy finalizando a no ser que tú tengas alguna otra duda o pregunta."
+        "Esto es sin interés, la primera recién en abril, que es cuando empieza el programa y te queda en 14 cuotas de 633 dólares."
       ],
-      "razonamiento": "El cierre fue claro y se ofreció la oportunidad de hacer preguntas, lo que es positivo para asegurar el compromiso del lead.",
-      "recomendaciones_accionables": "Asegurarse de que el lead se sienta cómodo y tenga todas sus dudas resueltas antes de finalizar."
-    },
-    {
-      "id_bloque": "legal",
-      "titulo": "Aspectos legales y validez del programa",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
-      "evidencias": [],
-      "evidencias_validadas": [],
-      "razonamiento": "Se mencionó el interés del lead en la validez internacional del título, pero no se abordaron detalles específicos. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": "Incluir información sobre la validez del título y cómo puede beneficiar al lead en su carrera profesional."
+      "razonamiento": "El candidato mostró interés en el programa, pero también expresó que su participación dependería de la fecha de inicio y del costo. Esto indica que hay una necesidad de aclarar detalles sobre el financiamiento y el compromiso.",
+      "recomendaciones_accionables": "Asegurarse de abordar las preocupaciones sobre el costo y la financiación, y confirmar el interés del candidato en el programa de manera más efectiva."
     }
   ],
   "scorecard_final": {
     "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 6.75,
-    "calificacion_cualitativa": "C (Aprobado)",
+    "nota_final_0_10": 2.5,
+    "calificacion_cualitativa": "D (Deficiente)",
     "semaforo": "GRIS"
   },
   "feedback_resumido": {
     "fortalezas": [
-      "Buena apertura de la conversación",
-      "Identificación clara de necesidades",
-      "Presentación efectiva de la propuesta"
+      "Identificación de objetivos claros del candidato",
+      "Interés en la actualización profesional",
+      "Reconocimiento de la importancia de la formación continua"
     ],
     "areas_mejora": [
-      "Incluir ejemplos de éxito en la presentación",
-      "Asegurar que todas las dudas sean resueltas en el cierre",
-      "Proporcionar más información sobre aspectos legales del programa"
+      "Explorar más a fondo las motivaciones del candidato",
+      "Aclarar detalles sobre costos y financiamiento",
+      "Realizar más preguntas para entender objeciones o frenos"
     ]
   },
   "lista_no_observable": [
     {
       "bloque": "Legal",
-      "estado": "ALTA",
-      "motivo": "El lead busca un título que le permita crecer profesionalmente y tiene interés en la validez internacional del mismo."
+      "estado": "NO_OBSERVABLE_OFF_RECORD",
+      "motivo": "La llamada parece haber comenzado ya avanzada, sin saludo ni aviso."
     }
   ],
   "auditoria": {
-    "contradicciones_detectadas": [
-      "Bloque 'necesidades' sin evidencia distribuida.",
-      "Bloque 'legal' con nota alta sin evidencia válida."
-    ],
+    "contradicciones_detectadas": [],
     "evidencias_invalidas": [],
-    "accion_sugerida": "revision_humana"
+    "accion_sugerida": "mantener"
   },
-  "resumen_ejecutivo": "Lead en fase descubrimiento. Nivel de dificultad: media. Intención de compra: alta. Nota final: 6.75/10.",
+  "resumen_ejecutivo": "Lead en fase descubrimiento. Nivel de dificultad: media. Intencion de compra: alta. Nota final: 2.5/10.",
   "puntos_fuertes": [
     {
-      "criterio": "Buena apertura de la conversación",
+      "criterio": "Identificación de objetivos claros del candidato",
       "importancia": "ALTA",
-      "feedback": "Buena apertura de la conversación",
+      "feedback": "Identificación de objetivos claros del candidato",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Identificación clara de necesidades",
+      "criterio": "Interés en la actualización profesional",
       "importancia": "ALTA",
-      "feedback": "Identificación clara de necesidades",
+      "feedback": "Interés en la actualización profesional",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Presentación efectiva de la propuesta",
+      "criterio": "Reconocimiento de la importancia de la formación continua",
       "importancia": "ALTA",
-      "feedback": "Presentación efectiva de la propuesta",
+      "feedback": "Reconocimiento de la importancia de la formación continua",
       "cita_evidencia": ""
     }
   ],
   "areas_mejora": [
     {
-      "criterio": "Incluir ejemplos de éxito en la presentación",
+      "criterio": "Explorar más a fondo las motivaciones del candidato",
       "importancia": "CRITICO",
-      "feedback": "Incluir ejemplos de éxito en la presentación",
+      "feedback": "Explorar más a fondo las motivaciones del candidato",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Asegurar que todas las dudas sean resueltas en el cierre",
+      "criterio": "Aclarar detalles sobre costos y financiamiento",
       "importancia": "CRITICO",
-      "feedback": "Asegurar que todas las dudas sean resueltas en el cierre",
+      "feedback": "Aclarar detalles sobre costos y financiamiento",
       "cita_evidencia": ""
     },
     {
-      "criterio": "Proporcionar más información sobre aspectos legales del programa",
+      "criterio": "Realizar más preguntas para entender objeciones o frenos",
       "importancia": "CRITICO",
-      "feedback": "Proporcionar más información sobre aspectos legales del programa",
+      "feedback": "Realizar más preguntas para entender objeciones o frenos",
       "cita_evidencia": ""
     }
   ]

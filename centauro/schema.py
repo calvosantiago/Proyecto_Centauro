@@ -46,6 +46,7 @@ class BloqueEvaluacion(BaseModel):
     titulo: str
     puntuacion_1_5: Optional[int] = Field(None, description="Nota 1-5. Null si es Off-Record")
     observabilidad: str = Field("ALTA", description="ALTA, MEDIA, BAJA o NULA (Off-Record)")
+    confianza: float = Field(0.5, description="0-1 confianza del evaluador")
     
     # Estado: EVALUADO, OFF_RECORD, SIN_EVIDENCIA
     estado_evaluacion: str = "EVALUADO" 
