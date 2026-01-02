@@ -1,0 +1,161 @@
+{
+  "asesor": "OBS Business School - Business Intelligence - Santiago Vargas-20251219 170017",
+  "meta": {
+    "version_modelo": "Centauro_V11_HeadOfSales",
+    "flags_tecnicos": {}
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidato joven con formación en ADE y experiencia en prácticas, interesado en una maestría en Business Intelligence.",
+    "fase_funnel": "Exploración y cierre de admisión.",
+    "objetivo_del_lead": "Obtener una formación sólida en Business Intelligence para avanzar en su carrera profesional.",
+    "barreras_principales": [
+      "Falta de experiencia laboral relevante",
+      "Necesidad de apoyo financiero de los padres"
+    ],
+    "resultado_general": "Candidato interesado en continuar con el proceso de admisión."
+  },
+  "cobertura_revision": {
+    "tramo_1_inicio": "hallazgos",
+    "tramo_2_exploracion": "hallazgos",
+    "tramo_3_desarrollo": "hallazgos",
+    "tramo_4_objeciones": "hallazgos",
+    "tramo_5_cierre": "hallazgos",
+    "alerta_cobertura": "OK"
+  },
+  "momentos_clave": [
+    {
+      "tramo": "1",
+      "evento": "Presentación del asesor",
+      "cita": "Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en en o b S"
+    },
+    {
+      "tramo": "2",
+      "evento": "Exploración de motivaciones",
+      "cita": "¿por qué te ha interesado después de estudiar Adel?"
+    },
+    {
+      "tramo": "3",
+      "evento": "Presentación de la metodología",
+      "cita": "la metodología que nosotros tenemos es todo lo contrario, huimos de eso."
+    },
+    {
+      "tramo": "4",
+      "evento": "Manejo de objeciones sobre el pago",
+      "cita": "¿Cómo te gustaría? ¿Cómo podrías hacerlo apagarlo de una sola vez o fraccionado te iría más cómodo?"
+    },
+    {
+      "tramo": "5",
+      "evento": "Cierre y siguiente paso",
+      "cita": "Te voy a enviar toda esta información, Eh? Todo, todo, todo lo que lo que te acabo de decir."
+    }
+  ],
+  "evaluacion_por_bloques": [
+    {
+      "bloque": "Apertura",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en en o b S",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor se presenta de manera clara, pero no establece una conexión personal.",
+      "recomendacion_accionable": "Incluir una pregunta inicial que rompa el hielo y genere conexión.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Detección de necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿por qué te ha interesado después de estudiar Adel?",
+      "evidencias_extra": [
+        "a mí siempre me ha gustado. ¿Cómo decirlo este tipo de de ramas de estudio?",
+        "quería un poco mezclar esas dos áreas y por eso me estudié a estudiar ese tipo de máster.",
+        "¿Qué, qué, qué, qué conclusiones has sacado?"
+      ],
+      "razonamiento": "El asesor realiza preguntas relevantes y escucha las respuestas del candidato, aunque podría profundizar más.",
+      "recomendacion_accionable": "Hacer preguntas más específicas sobre las expectativas del candidato respecto al máster.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Presentación del programa",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "la metodología que nosotros tenemos es todo lo contrario, huimos de eso.",
+      "evidencias_extra": [
+        "tenéis que resolverlo.",
+        "tenéis una clase semanal de 1:30 H en directo suelen ser a las 18:00 h de la tarde.",
+        "tenéis las licencias para poder utilizarlas."
+      ],
+      "razonamiento": "El asesor presenta el programa de manera clara y conecta los beneficios con las necesidades del candidato.",
+      "recomendacion_accionable": "Incluir ejemplos de éxito de exalumnos para reforzar la presentación.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Manejo de objeciones",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿Cómo te gustaría? ¿Cómo podrías hacerlo apagarlo de una sola vez o fraccionado te iría más cómodo?",
+      "evidencias_extra": [
+        "¿En esos me espero, EPA, estás aquí de nuevo?",
+        "¿Cómo lo ves un poquito mejor?"
+      ],
+      "razonamiento": "El asesor maneja las objeciones de manera efectiva, pero podría validar más las preocupaciones del candidato.",
+      "recomendacion_accionable": "Incluir una validación de las preocupaciones del candidato antes de ofrecer soluciones.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Cierre y siguiente paso",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "Te voy a enviar toda esta información, Eh? Todo, todo, todo lo que lo que te acabo de decir.",
+      "evidencias_extra": [
+        "hablarlo con tus padres o con quien tengas que hablarlo.",
+        "en el caso de que ellos quisieran información de primera mano."
+      ],
+      "razonamiento": "El cierre es claro y se establecen los siguientes pasos de manera efectiva.",
+      "recomendacion_accionable": "Asegurarse de que el candidato se sienta cómodo con el proceso y ofrezca apoyo adicional si es necesario.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Estilo y comunicación",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿Cómo lo llevas? Alguna pregunta, no.",
+      "evidencias_extra": [
+        "¿Te parece interesante? Sí, estoy tomando esto.",
+        "¿Tienes alguna duda por ahora?"
+      ],
+      "razonamiento": "El asesor mantiene un tono profesional y empático, aunque en algunos momentos puede parecer un poco mecánico.",
+      "recomendacion_accionable": "Incluir más interacciones personales para mejorar la conexión con el candidato.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Legal (Compliance)",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿Cómo lo ves? ¿Dispones de este importe para el pago en tiempo y forma?",
+      "evidencias_extra": [],
+      "razonamiento": "Se aborda el tema legal de manera clara y se asegura que el candidato esté informado.",
+      "recomendacion_accionable": "Continuar con la claridad en la comunicación de los aspectos legales.",
+      "recepcion_cliente": null
+    }
+  ],
+  "puntuacion_global_1_5": 4.29,
+  "feedback_resumido": {
+    "fortalezas": [
+      "Buena presentación del programa",
+      "Manejo efectivo de objeciones",
+      "Cierre claro y estructurado"
+    ],
+    "areas_mejora": [
+      "Profundizar más en la detección de necesidades",
+      "Mejorar la conexión personal en la apertura",
+      "Validar más las preocupaciones del candidato"
+    ]
+  }
+}

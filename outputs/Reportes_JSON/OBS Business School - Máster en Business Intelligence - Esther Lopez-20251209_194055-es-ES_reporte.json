@@ -1,0 +1,158 @@
+{
+  "asesor": "OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209 194055-es-ES",
+  "meta": {
+    "version_modelo": "Centauro_V11_HeadOfSales",
+    "flags_tecnicos": {}
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidato interesado en un máster en analítica de datos, con experiencia previa en formación online.",
+    "fase_funnel": "Exploración y cierre financiero.",
+    "objetivo_del_lead": "Avanzar hacia la candidatura y obtener información sobre ayudas económicas.",
+    "barreras_principales": [
+      "Costo del máster",
+      "Disponibilidad de ayudas económicas"
+    ],
+    "resultado_general": "Candidato interesado en continuar el proceso de admisión."
+  },
+  "cobertura_revision": {
+    "tramo_1_inicio": "hallazgos",
+    "tramo_2_exploracion": "hallazgos",
+    "tramo_3_desarrollo": "hallazgos",
+    "tramo_4_objeciones": "hallazgos",
+    "tramo_5_cierre": "hallazgos",
+    "alerta_cobertura": "OK"
+  },
+  "momentos_clave": [
+    {
+      "tramo": "1",
+      "evento": "Inicio de la llamada",
+      "cita": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada..."
+    },
+    {
+      "tramo": "2",
+      "evento": "Detección de necesidades",
+      "cita": "¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar?"
+    },
+    {
+      "tramo": "3",
+      "evento": "Presentación del programa",
+      "cita": "La metodología que nosotros utilizamos es cien por cien online."
+    },
+    {
+      "tramo": "4",
+      "evento": "Manejo de objeciones",
+      "cita": "En este caso, las plazas de ayuda económica."
+    },
+    {
+      "tramo": "5",
+      "evento": "Cierre y siguiente paso",
+      "cita": "El día jueves me pongo en contacto con usted, le va bien para esta hora?"
+    }
+  ],
+  "evaluacion_por_bloques": [
+    {
+      "bloque": "Apertura",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada...",
+      "evidencias_extra": [],
+      "razonamiento": "El saludo es educado y se establece un marco para la llamada, aunque falta conexión personal.",
+      "recomendacion_accionable": "Incluir una pregunta personal para generar conexión.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Detección de necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar?",
+      "evidencias_extra": [
+        "¿Pudo mirar las herramientas con las que contaba el programa?",
+        "¿Ya lo he hecho, tengo un diplomado en una entidad que se llama Avent Business School?"
+      ],
+      "razonamiento": "Se realizan preguntas relevantes que permiten identificar las necesidades del candidato.",
+      "recomendacion_accionable": "Profundizar más en las motivaciones personales del candidato.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Presentación del programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "La metodología que nosotros utilizamos es cien por cien online.",
+      "evidencias_extra": [
+        "Las clases no son pregrabadas, serían en directo, de acuerdo?",
+        "Sobre todo es trabajar en un contexto colaborativo y participativo."
+      ],
+      "razonamiento": "Se presenta el programa de manera clara y se vincula a las necesidades del candidato.",
+      "recomendacion_accionable": "Incluir ejemplos de éxito de alumnos anteriores para reforzar la presentación.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Manejo de objeciones",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "En este caso, las plazas de ayuda económica.",
+      "evidencias_extra": [
+        "Las ayudas serían menos 2418 dólares y se quedaría una cuota final.",
+        "Si finalmente le interesara que usara el máster, hiciera la carta de motivación."
+      ],
+      "razonamiento": "Se abordan las objeciones relacionadas con el costo y se ofrecen soluciones.",
+      "recomendacion_accionable": "Asegurarse de que el candidato entienda claramente el proceso de solicitud de ayudas.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Cierre y siguiente paso",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "El día jueves me pongo en contacto con usted, le va bien para esta hora?",
+      "evidencias_extra": [
+        "Si me manda la información yo no analizo y después ya podemos conversar ya en forma.",
+        "Cuente con mi respuesta para el día de mañana."
+      ],
+      "razonamiento": "Se establece un compromiso claro y se fijan los siguientes pasos de manera efectiva.",
+      "recomendacion_accionable": "Mantener la comunicación abierta y proactiva hasta el siguiente contacto.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Estilo y comunicación",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿Usted me va parando y me va y le vamos resolviendo las dudas, vale?",
+      "evidencias_extra": [
+        "Mire, déjeme un segundín que vengo por aquí.",
+        "¿A usted cómo le quedaría más cómodo?"
+      ],
+      "razonamiento": "El asesor mantiene un tono profesional y accesible, aunque podría ser más dinámico.",
+      "recomendacion_accionable": "Incorporar más preguntas abiertas para fomentar la interacción.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Legal (Compliance)",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "En este caso, las plazas de ayuda económica.",
+      "evidencias_extra": [],
+      "razonamiento": "Se menciona el proceso de admisión y la documentación necesaria de manera clara.",
+      "recomendacion_accionable": "Asegurarse de que el candidato tenga toda la información necesaria para el proceso.",
+      "recepcion_cliente": null
+    }
+  ],
+  "puntuacion_global_1_5": 4.14,
+  "feedback_resumido": {
+    "fortalezas": [
+      "Buena detección de necesidades",
+      "Presentación clara del programa",
+      "Manejo efectivo de objeciones"
+    ],
+    "areas_mejora": [
+      "Generar más conexión personal en la apertura",
+      "Fomentar más interacción durante la llamada"
+    ]
+  }
+}

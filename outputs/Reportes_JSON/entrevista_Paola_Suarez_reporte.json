@@ -1,139 +1,126 @@
 {
   "asesor": "entrevista Paola Suarez",
   "meta": {
-    "version_modelo": "Centauro_v3_Tridente",
-    "flags_tecnicos": {
-      "recording_started_late": false
-    }
+    "version_modelo": "Centauro_V11_HeadOfSales",
+    "flags_tecnicos": {}
   },
   "resumen_contextual": {
-    "perfil_lead": "Candidata con experiencia en marketing y ventas, actualmente en Nestlé, interesada en un máster para fortalecer habilidades en marketing y gestión comercial.",
-    "fase_funnel": "Investigación",
-    "nivel_dificultad": "Medio",
-    "intencion_compra": "Desconocida"
+    "perfil_lead": "Candidata con experiencia en marketing y ventas en Nestlé, busca fortalecer sus habilidades en marketing y negociación.",
+    "fase_funnel": "Exploración",
+    "objetivo_del_lead": "Realizar un máster en marketing y gestión comercial para avanzar en su carrera profesional.",
+    "barreras_principales": [
+      "Accidente que le causó incapacidad y pérdida de tiempo en su carrera.",
+      "Necesidad de apoyo financiero para el máster."
+    ],
+    "resultado_general": "Candidata interesada en el programa, con disposición a avanzar en el proceso de admisión."
   },
-  "timeline_momentos_clave": [
+  "cobertura_revision": {
+    "tramo_1_inicio": "sin_hallazgos_en_tramo",
+    "tramo_2_exploracion": "hallazgos",
+    "tramo_3_desarrollo": "hallazgos",
+    "tramo_4_objeciones": "hallazgos",
+    "tramo_5_cierre": "hallazgos",
+    "alerta_cobertura": "cobertura_insuficiente"
+  },
+  "momentos_clave": [
     {
-      "fase": "Investigación",
-      "evento": "Identificación de necesidades",
-      "cita_evidencia": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing",
-      "timestamp_aprox": null
+      "tramo": "2",
+      "evento": "Detección de necesidades",
+      "cita": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing."
     },
     {
-      "fase": "Cierre",
-      "evento": "Compromiso de pago",
-      "cita_evidencia": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito",
-      "timestamp_aprox": null
+      "tramo": "3",
+      "evento": "Presentación del programa",
+      "cita": "Yo pienso también este máster tiene tiene esa potencia que te da esas herramientas, esas habilidades en el área de marketing."
     },
     {
-      "fase": "Cierre",
-      "evento": "Discusión sobre el costo",
-      "cita_evidencia": "El máster lo vas a hacer por tus propios medios, tienes apoyo empresarial, cómo tenía apoyo familiar",
-      "timestamp_aprox": null
+      "tramo": "4",
+      "evento": "Manejo de objeciones",
+      "cita": "¿Cómo ves? ¿No está, o sea está bien, está bien Paul, porque precisamente como platicábamos, o sea realmente son o sea son inversiones."
     },
     {
-      "fase": "Cierre",
-      "evento": "Condiciones de matrícula",
-      "cita_evidencia": "Hay un 20 por 100 que es por fecha de matrícula porque él se matriculó en los primeros cupos",
-      "timestamp_aprox": null
+      "tramo": "5",
+      "evento": "Cierre y siguiente paso",
+      "cita": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito."
     }
   ],
   "evaluacion_por_bloques": [
     {
-      "id_bloque": "apertura",
-      "titulo": "Detección de Necesidades",
+      "bloque": "Apertura",
+      "puntuacion_1_5": null,
+      "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
+      "confianza": 1.0,
+      "evidencia_principal": "NO_OBSERVABLE (Inicio tardío estándar)",
+      "evidencias_extra": [],
+      "razonamiento": "El saludo fue educado, pero no se estableció una conexión personal. [AUDITOR: Inicio tardío detectado.]",
+      "recomendacion_accionable": "Incluir preguntas que generen conexión personal desde el inicio.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Detección de necesidades",
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing'"
+      "confianza": 1.0,
+      "evidencia_principal": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing.",
+      "evidencias_extra": [
+        "Me gustaría aprender un poquito más y igual no, o sea para la parte comercial, toda esta parte de negociación y demás.",
+        "Cuando fui este pecaria analista realmente no negociaba cara a cara con cliente."
       ],
-      "razonamiento": "La candidata expresa claramente sus necesidades de formación, lo que indica una buena apertura para la conversación.",
-      "recomendaciones_accionables": null
+      "razonamiento": "El asesor realizó preguntas relevantes y escuchó las necesidades del candidato.",
+      "recomendacion_accionable": "Profundizar más en las motivaciones personales y profesionales del candidato.",
+      "recepcion_cliente": null
     },
     {
-      "id_bloque": "necesidades",
-      "titulo": "Detección de Necesidades",
-      "puntuacion_1_5": 3,
+      "bloque": "Presentación del programa",
+      "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'me gustaría aprender un poquito más y igual no, o sea para la parte comercial, toda esta parte de negociación'"
+      "confianza": 1.0,
+      "evidencia_principal": "Yo pienso también este máster tiene tiene esa potencia que te da esas herramientas, esas habilidades en el área de marketing.",
+      "evidencias_extra": [
+        "El título que te emite la Universidad de Barcelona no dice que es online.",
+        "Este título es legal para trabajar en México y en más de 150 países."
       ],
-      "razonamiento": "Se identifican necesidades específicas en marketing y negociación, lo que permite al asesor enfocar la presentación del programa. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
-      "recomendaciones_accionables": null
+      "razonamiento": "Se presentó el programa de manera clara y se vincularon las necesidades del candidato con el contenido del máster.",
+      "recomendacion_accionable": "Incluir ejemplos de éxito de alumni para reforzar la presentación.",
+      "recepcion_cliente": null
     },
     {
-      "id_bloque": "presentacion",
-      "titulo": "Presentación de Beneficios",
+      "bloque": "Manejo de objeciones",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "¿Cómo ves? ¿No está, o sea está bien, está bien Paul, porque precisamente como platicábamos, o sea realmente son o sea son inversiones.",
+      "evidencias_extra": [
+        "Si por ejemplo no estás seguro en iniciarlo ahora, de hecho eso te sirve a ti a modo de clave de que estos 15 días pruebes a ver cómo te sientes."
+      ],
+      "razonamiento": "El asesor validó las preocupaciones del candidato y ofreció soluciones claras.",
+      "recomendacion_accionable": "Aislar y revalorizar las objeciones de manera más estructurada.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Cierre y siguiente paso",
       "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'este título que te emite la Universidad de Barcelona no dice que es online'"
+      "confianza": 1.0,
+      "evidencia_principal": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito.",
+      "evidencias_extra": [
+        "Perfecto este primer abono lo pagarías con tu tarjeta o la de tu papá.",
+        "Te voy a mandar mi Whatsapp, que creo que no te he escrito por Whatsapp para que nos vayamos comunicando por allí."
       ],
-      "razonamiento": "La presentación de beneficios es clara y se vincula directamente con las necesidades de la candidata, destacando la calidad del título.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "objeciones",
-      "titulo": "Gestión de Objeciones",
-      "puntuacion_1_5": 1,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "SIN_EVIDENCIA",
-      "evidencias_validadas": [],
-      "razonamiento": "El asesor aborda las preocupaciones sobre el costo de manera proactiva, ofreciendo opciones de financiamiento y aclarando dudas. [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "cierre",
-      "titulo": "Cierre de la Venta",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos'"
-      ],
-      "razonamiento": "El cierre es efectivo, con la candidata mostrando interés y disposición para avanzar en el proceso de matrícula.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "estilo",
-      "titulo": "Estilo de Comunicación",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [
-        "Cita 1: 'me gustaría mucho también conocer las opciones que que existen'"
-      ],
-      "razonamiento": "El asesor mantiene un tono profesional y empático, facilitando una conversación fluida y abierta.",
-      "recomendaciones_accionables": null
-    },
-    {
-      "id_bloque": "legal",
-      "titulo": "Mención de Grabación",
-      "puntuacion_1_5": null,
-      "observabilidad": "N/A",
-      "estado_evaluacion": "EVALUADO",
-      "evidencias_validadas": [],
-      "razonamiento": "No se menciona la grabación de la llamada.",
-      "recomendaciones_accionables": null
+      "razonamiento": "El cierre fue efectivo, estableciendo un compromiso claro y próximo paso.",
+      "recomendacion_accionable": "Mantener la comunicación abierta y proactiva para asegurar el seguimiento.",
+      "recepcion_cliente": null
     }
   ],
-  "scorecard_final": {
-    "promedio_calculado_1_5": 0.0,
-    "nota_final_0_10": 6.61,
-    "calificacion_cualitativa": "C (Aprobado)",
-    "semaforo": "GRIS"
-  },
+  "puntuacion_global_1_5": 4.25,
   "feedback_resumido": {
     "fortalezas": [
-      "Identificación clara de necesidades",
-      "Presentación efectiva de beneficios",
-      "Manejo proactivo de objeciones"
+      "Buena detección de necesidades del candidato.",
+      "Presentación clara del programa y sus beneficios."
     ],
     "areas_mejora": [
-      "Incluir mención de grabación al inicio de la llamada"
+      "Mejorar la apertura para generar conexión personal.",
+      "Estructurar mejor el manejo de objeciones."
     ]
   }
 }
