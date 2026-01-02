@@ -1,0 +1,147 @@
+{
+  "asesor": "OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209 194055-es-ES",
+  "meta": {
+    "version_modelo": "Centauro_v3_Tridente",
+    "flags_tecnicos": {
+      "recording_started_late": false
+    }
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidato interesado en un máster de formación permanente, con experiencia previa en educación online y en búsqueda de mejorar habilidades específicas.",
+    "fase_funnel": "Investigación",
+    "nivel_dificultad": "Medio",
+    "intencion_compra": "Desconocida"
+  },
+  "timeline_momentos_clave": [
+    {
+      "fase": "Apertura",
+      "evento": "Presentación y estructura de la llamada",
+      "cita_evidencia": "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada...",
+      "timestamp_aprox": null
+    },
+    {
+      "fase": "Necesidades",
+      "evento": "Identificación de habilidades a desarrollar",
+      "cita_evidencia": "¿Hay alguna habilidad que quiera pulir o algún punto fuerte a desarrollar? Pues he pensado bastante en la analítica a través de base de datos.",
+      "timestamp_aprox": null
+    },
+    {
+      "fase": "Presentación",
+      "evento": "Descripción de la metodología y beneficios del programa",
+      "cita_evidencia": "La metodología que nosotros utilizamos es cien por cien online. Las clases no son pregrabadas, serían en directo...",
+      "timestamp_aprox": null
+    },
+    {
+      "fase": "Objeciones",
+      "evento": "Discusión sobre el costo del máster",
+      "cita_evidencia": "El precio del máster son €7700, entonces serían 8966 dólares.",
+      "timestamp_aprox": null
+    },
+    {
+      "fase": "Cierre",
+      "evento": "Propuesta de ayuda económica y seguimiento",
+      "cita_evidencia": "En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación.",
+      "timestamp_aprox": null
+    }
+  ],
+  "evaluacion_por_bloques": [
+    {
+      "id_bloque": "apertura",
+      "titulo": "Detección de Apertura",
+      "puntuacion_1_5": 3,
+      "observabilidad": "MEDIA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer..."
+      ],
+      "razonamiento": "La apertura es funcional, pero carece de un enfoque más cálido y personalizado que podría ayudar a establecer una mejor conexión.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "necesidades",
+      "titulo": "Detección de Necesidades",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "¿Hay alguna habilidad que quiera pulir o algún punto fuerte a desarrollar? Pues he pensado bastante en la analítica a través de base de datos."
+      ],
+      "razonamiento": "Se realizaron preguntas adecuadas que permitieron al candidato expresar sus necesidades específicas, aunque se podría profundizar más. [AUDITOR: Se reduce nota por falta de evidencia distribuida.]",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "presentacion",
+      "titulo": "Presentación del Programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "La metodología que nosotros utilizamos es cien por cien online. Las clases no son pregrabadas, serían en directo..."
+      ],
+      "razonamiento": "La presentación fue clara y detallada, vinculando beneficios del programa a las necesidades del candidato, aunque podría ser más interactiva.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "objeciones",
+      "titulo": "Manejo de Objeciones",
+      "puntuacion_1_5": 3,
+      "observabilidad": "MEDIA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "El precio del máster son €7700, entonces serían 8966 dólares."
+      ],
+      "razonamiento": "Se abordó el tema del precio, pero faltó una revalorización de la inversión y cómo se alinea con los objetivos del candidato.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "cierre",
+      "titulo": "Cierre de la Llamada",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación."
+      ],
+      "razonamiento": "El cierre fue proactivo y se ofreció un seguimiento claro, aunque se podría haber enfatizado más la urgencia de la decisión.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "estilo",
+      "titulo": "Estilo y Tono",
+      "puntuacion_1_5": 3,
+      "observabilidad": "MEDIA",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [
+        "¿Usted me va parando y me va y le vamos resolviendo las dudas, vale?"
+      ],
+      "razonamiento": "El tono fue amigable, pero en algunos momentos se sintió un poco mecánico y podría beneficiarse de un enfoque más empático.",
+      "recomendaciones_accionables": null
+    },
+    {
+      "id_bloque": "legal",
+      "titulo": "Mención de Grabación",
+      "puntuacion_1_5": null,
+      "observabilidad": "N/A",
+      "estado_evaluacion": "EVALUADO",
+      "evidencias_validadas": [],
+      "razonamiento": "No se mencionó la grabación de la llamada, lo cual es un aspecto importante a incluir.",
+      "recomendaciones_accionables": null
+    }
+  ],
+  "scorecard_final": {
+    "promedio_calculado_1_5": 0.0,
+    "nota_final_0_10": 5.89,
+    "calificacion_cualitativa": "C (Aprobado)",
+    "semaforo": "GRIS"
+  },
+  "feedback_resumido": {
+    "fortalezas": [
+      "Identificación clara de necesidades del candidato.",
+      "Presentación detallada del programa y beneficios."
+    ],
+    "areas_mejora": [
+      "Mejorar la conexión emocional en la apertura.",
+      "Reforzar la revalorización del costo del programa y la urgencia en el cierre."
+    ]
+  }
+}

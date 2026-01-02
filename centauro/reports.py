@@ -2,16 +2,23 @@ from fpdf import FPDF
 from .config import settings
 
 # --- PALETA DE COLORES (Estilo Corporativo Moderno) ---
-COLOR_PRIMARY = (44, 62, 80)      # Azul Oscuro (Midnight Blue)
-COLOR_ACCENT = (52, 152, 219)     # Azul Brillante (Peter River)
-COLOR_BG_LIGHT = (236, 240, 241)  # Gris muy claro (Clouds)
-COLOR_TEXT_MAIN = (44, 62, 80)
-COLOR_TEXT_MUTED = (127, 140, 141)
+COLOR_PRIMARY = (0, 0, 0)          # Negro
+COLOR_ACCENT = (255, 221, 0)       # Amarillo #FFDD00
+COLOR_BG_LIGHT = (245, 245, 245)   # Gris muy claro
+COLOR_TEXT_MAIN = (0, 0, 0)
+COLOR_TEXT_MUTED = (120, 120, 120)
 
 # Semáforo
-COLOR_SUCCESS = (39, 174, 96)     # Verde (Nephritis)
-COLOR_WARNING = (243, 156, 18)    # Naranja (Orange)
-COLOR_DANGER = (192, 57, 43)      # Rojo (Pomegranate)
+COLOR_SUCCESS = (60, 60, 60)       # Gris oscuro
+COLOR_WARNING = (255, 221, 0)      # Amarillo
+COLOR_DANGER = (0, 0, 0)           # Negro
+
+def to_latin1(text):
+    if text is None:
+        return ""
+    text = str(text)
+    text = text.replace("€", "EUR")
+    return text.encode("latin-1", "replace").decode("latin-1")
 
 class ModernReport(FPDF):
     def header(self):
@@ -50,7 +57,10 @@ class ModernReport(FPDF):
         else: bg = COLOR_ACCENT # MEDIA
         
         self.set_fill_color(*bg)
-        self.set_text_color(255, 255, 255)
+        if bg in (COLOR_WARNING, COLOR_ACCENT):
+            self.set_text_color(0, 0, 0)
+        else:
+            self.set_text_color(255, 255, 255)
         self.set_font('Helvetica', 'B', 7)
         
         # Ancho dinámico
@@ -102,7 +112,7 @@ class ModernReport(FPDF):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(*COLOR_TEXT_MAIN)
         feedback = item.get('feedback', '') or item.get('razonamiento', '')
-        self.multi_cell(0, 5, feedback)
+        self.multi_cell(0, 5, to_latin1(feedback))
         
         # 5. Caja de Evidencia (Si existe)
         evidencia = item.get('cita_evidencia', '')
@@ -115,14 +125,15 @@ class ModernReport(FPDF):
             self.set_font('Helvetica', 'I', 9)
             
             # Icono comillas (simulado con texto)
-            self.multi_cell(0, 5, f'"{evidencia}"', border=0, fill=True)
+            self.multi_cell(0, 5, to_latin1(f'"{evidencia}"'), border=0, fill=True)
         elif "NO VALIDADO" in evidencia:
              # Caso especial Sheriff: Mostrar alerta técnica
             self.ln(2)
             self.set_x(14)
             self.set_text_color(*COLOR_DANGER)
             self.set_font('Helvetica', 'B', 8)
-            self.cell(0, 5, f"[!] ALERTA TÉCNICA: {item.get('razonamiento')}", 0, 1)
+            razon = item.get('razonamiento', '')
+            self.cell(0, 5, to_latin1(f"[!] ALERTA TÉCNICA: {razon}"), 0, 1)
 
         # Espacio final entre tarjetas
         self.ln(4)
@@ -144,10 +155,8 @@ def generar_pdf(reporte_json, output_filename):
     # Caja de la Nota
     nota = reporte_json.get('nota_final_0_10', 0)
     
-    # Color de la nota
-    if nota >= 8: score_color = COLOR_SUCCESS
-    elif nota >= 5: score_color = COLOR_WARNING
-    else: score_color = COLOR_DANGER
+    # Color fijo corporativo para la nota
+    score_color = COLOR_WARNING
     
     # Dibujar Círculo/Cuadro para la nota
     pdf.set_fill_color(*score_color)
@@ -155,7 +164,7 @@ def generar_pdf(reporte_json, output_filename):
     
     # Texto de la nota (Centrado en el cuadro)
     pdf.set_xy(10, 42)
-    pdf.set_text_color(255, 255, 255)
+    pdf.set_text_color(0, 0, 0)
     pdf.set_font('Helvetica', 'B', 22)
     pdf.cell(30, 10, f"{nota}", 0, 1, 'C')
     pdf.set_font('Helvetica', '', 8)
@@ -166,12 +175,14 @@ def generar_pdf(reporte_json, output_filename):
     pdf.set_xy(45, 35)
     pdf.set_text_color(*COLOR_TEXT_MAIN)
     pdf.set_font('Helvetica', 'B', 14)
-    pdf.cell(0, 8, f"Asesor: {reporte_json.get('asesor', 'Desconocido')}", 0, 1)
+    asesor = reporte_json.get('asesor', 'Desconocido')
+    pdf.cell(0, 8, to_latin1(f"Asesor: {asesor}"), 0, 1)
     
     pdf.set_xy(45, 43)
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(*COLOR_TEXT_MUTED)
-    pdf.multi_cell(0, 5, reporte_json.get('resumen_ejecutivo', 'Sin resumen disponible.'))
+    resumen = reporte_json.get('resumen_ejecutivo', 'Sin resumen disponible.')
+    pdf.multi_cell(0, 5, to_latin1(resumen))
     
     pdf.ln(15) # Separación del dashboard
 
@@ -211,6 +222,8 @@ def generar_pdf(reporte_json, output_filename):
             pdf.draw_card(item, es_punto_fuerte=False)
 
     # Guardar archivo
-    pdf_path = settings.OUTPUTS_DIR / output_filename
+    pdf_dir = settings.OUTPUTS_DIR / "Reportes_PDF"
+    pdf_dir.mkdir(parents=True, exist_ok=True)
+    pdf_path = pdf_dir / output_filename
     pdf.output(str(pdf_path))
     print(f"🎨 PDF Estilizado Generado: {pdf_path}")

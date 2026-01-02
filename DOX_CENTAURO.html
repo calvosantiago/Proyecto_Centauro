@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentación Técnica - Proyecto Centauro (v2.1)</title>
+    <title>Documentación Técnica - Proyecto Centauro (v3.0 Coach)</title>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
@@ -136,6 +136,14 @@
             border-radius: 5px;
             margin: 10px 0;
         }
+        
+        /* NUEVO: Caja para la Rúbrica V3 */
+        .rubrica-box {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -149,25 +157,25 @@
 
     <header>
         <h1>🦄 Proyecto Centauro: Manual Técnico Integral</h1>
-        <p><strong>Versión:</strong> 2.1 (Deep Dive API & Prompt) | <strong>Última Actualización:</strong> Diciembre 2025</p>
+        <p><strong>Versión:</strong> 3.0 (Coach Qualitative Model) | <strong>Última Actualización:</strong> Diciembre 2025</p>
     </header>
 
     <section>
         <h2>1. Resumen de Arquitectura</h2>
-        <p>Centauro es un sistema de auditoría automática basado en <strong>RAG (Retrieval-Augmented Generation)</strong> y validación determinista. Su objetivo es transformar transcripciones de ventas no estructuradas en reportes de calidad puntuados matemáticamente.</p>
-        <p>El flujo de datos sigue una estricta política de <strong>"Confianza Cero"</strong> en la IA generativa, utilizando una capa de código Python ("Sheriff") para validar cada afirmación contra el audio real.</p>
+        <p>Centauro es un sistema de auditoría automática basado en <strong>RAG (Retrieval-Augmented Generation)</strong>. En su versión 3.0, ha evolucionado de un sistema de validación binaria (Checklist) a un <strong>Modelo de Evaluación Cualitativa por Competencias</strong>.</p>
+        <p>El objetivo es diferenciar al vendedor "Robot" (que cumple el guion sin alma) del vendedor "Experto" (que persuade y conecta), utilizando una escala de 1 a 5 y validación semántica.</p>
 
         <h3>1.1. Flujo End-to-End (Visión Operativa)</h3>
         <p>El sistema se ejecuta de forma batch y local. El punto de entrada es <code>main.py</code>, que carga manuales, limpia transcripciones y orquesta la auditoría completa.</p>
         <div class="mermaid">
             flowchart LR
             A[inputs/docs/*.txt] -->|Indexación| B[ChromaDB Local]
-            C[inputs/transcripts/*.vtt o .txt] -->|Limpieza VTT| D[Transcripción Limpia]
+            C[inputs/transcripts/*.vtt] -->|Limpieza VTT| D[Transcripción Limpia]
             D -->|Privacidad: redact_pii| E[Transcripción Sanitizada]
-            E -->|Prompt + RAG| F[OpenAI API]
-            F -->|JSON crudo| G[Reporte JSON]
-            G -->|Sheriff 4.1| H[Validación Evidencias]
-            H --> I[Nota Final + outputs/*.json]
+            E -->|Prompt Coach V3| F[OpenAI API]
+            F -->|JSON Rúbrica (1-5)| G[Reporte JSON]
+            G -->|Sheriff 4.3| H[Validación Semántica]
+            H --> I[Nota Ponderada + outputs/*.json]
         </div>
 
         <h3>1.2. Diagrama de Capas (Input → Core → Output)</h3>
@@ -182,13 +190,13 @@
             subgraph "Core Logic Layer"
             P -->|Texto Sanitizado| BRAIN[analyze.py]
             RAG -->|Contexto Top-K| BRAIN
-            BRAIN -->|Prompt Blind Extractor| LLM[llm_client.py]
+            BRAIN -->|Prompt 'Director Ventas'| LLM[llm_client.py]
             LLM <-->|API Request| OPENAI[OpenAI GPT-4o-mini]
-            OPENAI -->|JSON Candidato| SHERIFF[👮 Sheriff 4.1 Validator]
+            OPENAI -->|JSON Cualitativo| SHERIFF[👮 Sheriff 4.3 Validator]
             end
 
             subgraph "Output Layer"
-            SHERIFF -->|JSON Validado| CALC[Cálculo Nota Ponderada]
+            SHERIFF -->|JSON Validado| CALC[Cálculo Ponderado]
             CALC --> OUT[outputs/*.json]
             end
             
@@ -198,10 +206,10 @@
 
         <h3>1.3. Principios de Diseño</h3>
         <ul>
+            <li><strong>Calidad sobre Cumplimiento:</strong> Se premia la ejecución experta (soft skills) sobre la repetición robótica.</li>
             <li><strong>Determinismo sobre creatividad:</strong> Temperatura 0 y JSON estricto.</li>
             <li><strong>RAG acotado:</strong> La IA solo ve fragmentos recuperados, no el manual completo.</li>
             <li><strong>Auditoría verificable:</strong> Cada conclusión debe tener evidencia textual y pasa por el Sheriff.</li>
-            <li><strong>Privacidad:</strong> Se aplica redacción de PII antes de enviar a la API.</li>
         </ul>
     </section>
 
@@ -213,135 +221,147 @@
         <p>Este módulo gestiona el "handshake" con OpenAI. Se ha configurado para eliminar la creatividad y maximizar la precisión analítica.</p>
         <ul>
             <li><strong>Modelo:</strong> <code>gpt-4o-mini</code> (Optimizado para costes y alta velocidad).</li>
-            <li><strong>Temperatura:</strong> <code>0.0</code>. <br><em>Justificación:</em> Necesitamos determinismo. Ante el mismo input, la IA debe dar siempre el mismo output. No queremos "creatividad" en una auditoría.</li>
-            <li><strong>Response Format:</strong> <code>{ "type": "json_object" }</code>. Forzamos a la IA a devolver exclusivamente JSON válido, evitando texto introductorio.</li>
-            <li><strong>Control de Costes:</strong> El script calcula los tokens de entrada/salida y registra el gasto en <code>outputs/control_gastos.csv</code> automáticamente.</li>
-            <li><strong>Embeddings:</strong> Se usa <code>text-embedding-3-small</code> para vectorizar manuales y queries.</li>
-            <li><strong>Autenticación:</strong> La API key se carga desde <code>.env</code> con <code>python-dotenv</code> (ver <code>centauro/config.py</code>).</li>
+            <li><strong>Temperatura:</strong> <code>0.0</code>. <br><em>Justificación:</em> Necesitamos determinismo. Ante el mismo input, la IA debe dar siempre el mismo output.</li>
+            <li><strong>Response Format:</strong> <code>{ "type": "json_object" }</code>. Forzamos a la IA a devolver exclusivamente JSON válido.</li>
+            <li><strong>Control de Costes:</strong> El script registra el gasto en <code>outputs/control_gastos.csv</code>.</li>
         </ul>
 
-        <h3>2.2. Ingeniería del Prompt (<code>analyze.py</code>)</h3>
-        <p>Utilizamos una estrategia de <strong>"Contenedores XML"</strong> para separar las instrucciones de los datos, evitando alucinaciones por contaminación de contexto.</p>
-
-        <div class="mermaid">
-            graph TD
-            subgraph "System Message (Instrucciones)"
-            A[Rol: Auditor Estricto]
-            B[Reglas Anti-Alucinación]
-            C[JSON Schema Obligatorio]
-            D["MANUAL (Contexto RAG)"]
-            end
-
-            subgraph "User Message (Datos)"
-            E["AUDIO_REAL (Transcripción Sanitizada)"]
-            end
-
-            A --> API
-            B --> API
-            C --> API
-            D --> API
-            E --> API[OpenAI API Request]
-        </div>
+        <h3>2.2. Ingeniería del Prompt (Coach Mode)</h3>
+        <p>Ya no usamos un prompt de "Auditor" que busca Sí/No. Usamos un prompt de "Director de Ventas" que evalúa del 1 al 5.</p>
 
         <div class="prompt-box">
-            <strong>Estrategia "Blind Extractor":</strong><br>
-            Le decimos a la IA: <em>"Tus fuentes son exclusivamente las etiquetas XML. El texto en <code>&lt;MANUAL&gt;</code> son las reglas, pero NO puedes copiar texto de ahí. El texto en <code>&lt;AUDIO_REAL&gt;</code> es tu única verdad. Si copias texto que no está en el audio, fallarás."</em>
+            <strong>Estrategia "Coach V3":</strong><br>
+            Le decimos a la IA: <em>"Eres un experto en ventas consultivas. Tu trabajo NO es verificar un checklist. Tu trabajo es EVALUAR LA CALIDAD. Un novato que lee el guion saca un 3. Un experto que persuade saca un 5."</em>
         </div>
 
         <h3>2.3. ¿Qué es RAG y cómo se usa aquí?</h3>
         <p><strong>RAG (Retrieval-Augmented Generation)</strong> es una técnica que combina un buscador vectorial con un modelo generativo. En Centauro, el modelo NO recibe todo el manual: solo recibe los fragmentos más relevantes recuperados de ChromaDB.</p>
-        <ul>
-            <li><strong>Indexación:</strong> <code>rag.indexar_documentacion()</code> divide cada manual en chunks de 1000 caracteres.</li>
-            <li><strong>Vectorización:</strong> Cada chunk se convierte a embedding y se guarda en <code>.chroma_db/</code>.</li>
-            <li><strong>Consulta:</strong> Se hace una búsqueda semántica con un query fijo de "criterios" y se recuperan los top-k fragmentos.</li>
-            <li><strong>Uso en prompt:</strong> Los fragmentos recuperados se inyectan dentro de <code>&lt;MANUAL&gt;</code>.</li>
-        </ul>
+        <p>En palabras simples: primero se busca "lo m&aacute;s parecido" en los manuales, luego esa evidencia se adjunta al prompt para que el modelo responda con conocimiento real y no con suposiciones.</p>
 
-        <h3>2.4. ¿Qué hace ChromaDB en Centauro?</h3>
-        <p>ChromaDB es la base de datos vectorial local. Se usa como "memoria" del manual, permitiendo recuperar solo la parte relevante sin saturar el prompt.</p>
+        <h3>2.4. &iquest;Qu&eacute; es ChromaDB?</h3>
+        <p><strong>ChromaDB</strong> es una base de datos vectorial local. Guarda representaciones matem&aacute;ticas (embeddings) de los manuales para poder buscar por significado y no por palabras exactas. Aqu&iacute; se usa en modo <em>persistente</em>, por eso existe la carpeta <code>.chroma_db</code>.</p>
+        <p>Ventaja clave: si el manual cambia, se reindexa y el sistema "recuerda" el nuevo contenido sin necesidad de reentrenar ning&uacute;n modelo.</p>
+
+        <h3>2.5. &iquest;Qu&eacute; es un embedding y para qu&eacute; sirve?</h3>
+        <p>Un <strong>embedding</strong> es un vector num&eacute;rico que representa el significado de un texto. Textos con ideas parecidas quedan cerca en ese espacio vectorial.</p>
+        <p>Centauro usa <code>text-embedding-3-small</code> para convertir cada fragmento del manual en n&uacute;meros comparables. Luego ChromaDB busca los fragmentos m&aacute;s cercanos al texto de consulta.</p>
+
+        <h3>2.6. RAG paso a paso (como funciona en este proyecto)</h3>
+        <ol>
+            <li><strong>Indexacion:</strong> Los manuales en <code>inputs/docs</code> se dividen en fragmentos (chunks).</li>
+            <li><strong>Embeddings:</strong> Cada fragmento se convierte en un embedding y se guarda en ChromaDB.</li>
+            <li><strong>Consulta:</strong> Antes de evaluar, se genera una consulta del tipo <em>"Venta consultiva metodologia cierre empatia"</em>.</li>
+            <li><strong>Recuperacion:</strong> ChromaDB devuelve los <em>Top-K</em> fragmentos mas relevantes.</li>
+            <li><strong>Inyeccion de contexto:</strong> Esos fragmentos se insertan en el prompt dentro de <code>&lt;MANUAL&gt;</code>.</li>
+            <li><strong>Respuesta:</strong> El modelo responde usando ese contexto como referencia.</li>
+        </ol>
+
+        <h3>2.7. Parametros RAG configurados</h3>
         <ul>
-            <li><strong>Persistencia:</strong> Se guarda en <code>.chroma_db</code> para no recalcular embeddings en cada ejecución.</li>
-            <li><strong>Colección:</strong> <code>manual_conocimiento</code> contiene documentos y metadatos (fuente de cada fragmento).</li>
-            <li><strong>Seguridad de consulta:</strong> Si no hay manuales, se devuelve un string de fallback y la auditoría continúa.</li>
+            <li><strong>Tamano de chunk:</strong> 1000 caracteres.</li>
+            <li><strong>Solapamiento:</strong> 100 caracteres para no cortar ideas.</li>
+            <li><strong>Top-K:</strong> 6 fragmentos por consulta (ajustable).</li>
         </ul>
     </section>
 
     <section>
-        <h2>3. Matriz de Evaluación (Las 6 Fases)</h2>
-        <p>Centauro no evalúa "en general". Divide la llamada en 6 bloques obligatorios. La IA debe rellenar cada bloque, y el código Python (Sheriff) valida la evidencia.</p>
+        <h2>3. Matriz de Evaluación V3 (Modelo Cualitativo)</h2>
+        <p>Centauro V3 introduce una diferenciación crítica entre <strong>Hard Skills</strong> (técnica) y <strong>Soft Skills</strong> (habilidades humanas), puntuadas con una rúbrica.</p>
 
+        <div class="rubrica-box">
+            <h4>📏 La Rúbrica de Puntuación (1-5)</h4>
+            <ul>
+                <li><strong>1 (Deficiente):</strong> No lo hace o lo hace mal.</li>
+                <li><strong>3 (Cumplidor - Robot):</strong> Lo hace mecánicamente siguiendo el guion, pero sin empatía.</li>
+                <li><strong>5 (Excelente - Experto):</strong> Lo hace de forma natural, estratégica y persuasiva.</li>
+            </ul>
+        </div>
+
+        <h3>3.1. Competencias Técnicas (Hard Skills)</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Fase</th>
+                    <th>Competencia</th>
                     <th>Importancia</th>
-                    <th>Lógica de Evaluación (Qué busca el Prompt)</th>
+                    <th>Criterio de Excelencia (Nota 5)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>1. INICIO</strong></td>
+                    <td><strong>1. SONDEO</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td>Preguntas profundas que descubren el "dolor" real del cliente, no solo datos demográficos.</td>
+                </tr>
+                <tr>
+                    <td><strong>2. VALOR</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td>Adaptación de los beneficios (Ranking, Metodología) al perfil del alumno.</td>
+                </tr>
+                <tr>
+                    <td><strong>3. CIERRE</strong></td>
+                    <td><span class="badge bg-alta">ALTA</span></td>
+                    <td>Proactividad y seguridad al pedir el compromiso o el pago.</td>
+                </tr>
+                <tr>
+                    <td><strong>4. LEGAL</strong></td>
                     <td><span class="badge bg-baja">BAJA</span></td>
-                    <td>Busca saludos cordiales ("Hola", "Buenos días", "Soy Paola").<br><em>Tolerancia:</em> Si la grabación empieza cortada, no penaliza gravemente.</td>
+                    <td>Cumplimiento normativo estricto (Mencionar grabación).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>3.2. Habilidades Blandas (Soft Skills)</h3>
+        <p>Estas competencias tienen pesos <strong>CRÍTICOS</strong> porque diferencian al Top Performer.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Habilidad</th>
+                    <th>Importancia</th>
+                    <th>Criterio de Excelencia (Nota 5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. ESCUCHA ACTIVA</strong></td>
+                    <td><span class="badge bg-critico">CRÍTICO</span></td>
+                    <td>Validar emociones, dejar hablar y retomar palabras del cliente.</td>
                 </tr>
                 <tr>
-                    <td><strong>2. SONDEO</strong></td>
-                    <td><span class="badge bg-alta">ALTA</span></td>
-                    <td><strong>Preguntas Abiertas:</strong> Busca interrogantes sobre el perfil, situación laboral o motivación del alumno.<br><em>Criterio:</em> Con 1 o 2 preguntas relevantes es suficiente.</td>
+                    <td><strong>2. MANEJO OBJECIONES</strong></td>
+                    <td><span class="badge bg-critico">CRÍTICO</span></td>
+                    <td>Rebatir con inteligencia emocional y argumentos nuevos, no repetición.</td>
                 </tr>
                 <tr>
-                    <td><strong>3. ARGUMENTACIÓN</strong></td>
-                    <td><span class="badge bg-alta">ALTA</span></td>
-                    <td><strong>Lógica "O" (Inclusiva):</strong> No exige todo el manual. Valida si menciona <em>Ranking</em> <strong>O</strong> <em>Metodología</em> <strong>O</strong> <em>Online</em> <strong>O</strong> <em>Partners</em>.<br><em>Objetivo:</em> Verificar que aportó valor, independientemente del argumento usado.</td>
-                </tr>
-                <tr>
-                    <td><strong>4. OBJECIONES / PRECIO</strong></td>
-                    <td><span class="badge bg-alta">ALTA</span></td>
-                    <td><strong>Bolsa de Conceptos Económicos:</strong> No busca una cifra fija. Busca palabras como "Inversión", "Euros", "Beca", "Descuento", o cifras variables.<br><em>Objetivo:</em> Detectar negociación o explicación de precios, sea cual sea el importe.</td>
-                </tr>
-                <tr>
-                    <td><strong>5. CIERRE</strong></td>
-                    <td><span class="badge bg-alta">ALTA</span></td>
-                    <td><strong>Siguientes Pasos:</strong> Busca compromiso. Palabras clave: "Comité", "Enviar DNI", "Documentación", "Tarjeta", "Pago".</td>
-                </tr>
-                <tr>
-                    <td><strong>6. LEGAL</strong></td>
+                    <td><strong>3. TONO Y CONFIANZA</strong></td>
                     <td><span class="badge bg-media">MEDIA</span></td>
-                    <td><strong>Coincidencia Estricta:</strong> Busca raíces de palabras legales: "Grabar", "Calidad", "Monitorizada".<br><em>Sheriff:</em> Si no aparecen estas palabras exactas, marca como NO CUMPLE.</td>
+                    <td>Transmisión de autoridad, calma y profesionalidad.</td>
                 </tr>
             </tbody>
         </table>
     </section>
 
     <section>
-        <h2>4. Metodología de Validación (Sheriff 4.1)</h2>
-        <p>Una vez la IA genera el reporte JSON, entra en acción el script de validación determinista en Python.</p>
+        <h2>4. Metodología de Validación (Sheriff 4.3)</h2>
+        <p>El Sheriff ha evolucionado para validar puntuaciones y proteger contra alucinaciones semánticas (especialmente en legal).</p>
 
-        <h3>Algoritmo "Token Overlap"</h3>
-        <p>El Sheriff no compara frases exactas (que fallan por errores de transcripción como "ehh" o "esteee"). Compara <strong>Bolsas de Palabras</strong>:</p>
-        <ol>
-            <li><strong>Limpieza:</strong> Se eliminan stopwords (el, la, de), puntuación y símbolos de moneda (€, $).</li>
-            <li><strong>Comparación:</strong> Se extraen las palabras clave de la evidencia citada por la IA (ej: <code>['precio', '5000', 'euros']</code>).</li>
-            <li><strong>Búsqueda:</strong> Se verifica si esas palabras existen en la transcripción original.</li>
-            <li><strong>Umbral:</strong> Si más del <strong>60%</strong> de las palabras clave están presentes, se acepta el criterio. Si no, se marca como <strong>ALUCINACIÓN</strong>.</li>
-        </ol>
-
-        <h3>4.1. Reglas de "Confianza Cero"</h3>
+        <h3>4.1. Validación Existencial</h3>
+        <p>Verifica que la evidencia citada por la IA exista realmente en el audio.</p>
         <ul>
-            <li>Si la evidencia viene marcada como <code>NO ENCONTRADO</code>, pasa directo a <em>áreas de mejora</em>.</li>
-            <li>Si la evidencia es demasiado corta o vacía, se marca como error de IA.</li>
-            <li>Se recalcula la nota final en Python con pesos fijos, sin fiarse de la IA.</li>
-            <li>Se separan automáticamente <strong>puntos fuertes</strong> y <strong>áreas de mejora</strong> tras la validación.</li>
+            <li><strong>Si existe:</strong> Se respeta la nota de la IA.</li>
+            <li><strong>Si NO existe:</strong> Se penaliza automáticamente con <strong>Nota 1</strong> y se marca como [ALUCINACIÓN].</li>
         </ul>
 
-        <h3>4.2. Cálculo de Nota Ponderada</h3>
-        <p>La puntuación final no la calcula la IA. Se recalcula con la tabla de pesos en <code>analyze.py</code>:</p>
-        <ul>
-            <li><strong>CRITICO:</strong> 10 puntos</li>
-            <li><strong>ALTA:</strong> 5 puntos</li>
-            <li><strong>MEDIA:</strong> 3 puntos</li>
-            <li><strong>BAJA:</strong> 1 punto</li>
-        </ul>
+        <h3>4.2. Validación Semántica (Anti-Fake Legal)</h3>
+        <p>Para el criterio "LEGAL", el Sheriff no solo busca que la frase exista. Verifica que contenga palabras clave obligatorias: <em>"grabar", "monitorizar", "calidad", "aviso"</em>.</p>
+        <p><em>Ejemplo:</em> Si la IA cita "Este espacio es para ti" como aviso legal, el Sheriff lo rechaza (Nota 1) porque no contiene términos legales, aunque la frase sea real.</p>
+
+        <h3>4.3. Cálculo de Nota Ponderada</h3>
+        <p>La nota final se calcula normalizando la escala 1-5:</p>
+        <pre>Puntuación Normalizada = (Nota_IA / 5.0)
+Nota Final = ( Σ (Puntuación_Norm * Peso) / Σ Pesos_Totales ) * 10</pre>
+
+        <h3>4.4. Umbral de evidencia (sheriff ligero)</h3>
+        <p>La validacion existencial no busca coincidencia exacta. Se limpian tokens y se valida un <strong>ratio minimo de 0.60</strong> entre las palabras de la cita y la transcripcion. Esto tolera pequenas variaciones del ASR (errores de transcripcion).</p>
     </section>
 
     <section>
@@ -351,28 +371,25 @@ CENTAURO_PROJECT/
 │
 ├── .chroma_db/             <-- [PERSISTENCIA] Base vectorial local (ChromaDB).
 ├── .env                    <-- [CONFIG] API Key OpenAI (no versionar).
-├── inputs/                  <-- [ENTRADA] Datos crudos
-│   ├── docs/                <-- Manuales (.txt). Se indexan en ChromaDB.
-│   └── transcripts/         <-- Audios (.vtt). Se procesan uno a uno.
+├── inputs/                 <-- [ENTRADA] Datos crudos
+│   ├── docs/               <-- Manuales (.txt). Se indexan en ChromaDB.
+│   └── transcripts/        <-- Audios (.vtt). Se procesan uno a uno.
 │
-├── outputs/                 <-- [SALIDA]
-│   ├── *.json               <-- Reporte técnico crudo.
-│   └── *.pdf                <-- Reporte visual final.
-│   └── control_gastos.csv   <-- Registro de costes por tokens.
+├── outputs/                <-- [SALIDA]
+│   ├── Reportes_JSON/      <-- Reportes técnicos crudos.
+│   ├── Reportes_PDF/       <-- Reportes visuales finales.
+│   └── control_gastos.csv  <-- Registro de costes por tokens.
 │
-├── centauro/                <-- [CÓDIGO FUENTE]
-│   ├── analyze.py           <-- Prompt Engineering + Lógica Sheriff.
-│   ├── llm_client.py        <-- Conexión OpenAI (Temp=0).
-│   ├── rag.py               <-- Gestión de memoria vectorial.
-│   ├── privacy.py           <-- Sanitización de datos personales.
-│   ├── reports.py           <-- Generación de PDF (si se integra en esta versión).
-│   ├── schema.py            <-- Estructura de datos Pydantic.
-│   └── config.py            <-- Rutas, modelos, y parámetros RAG.
+├── centauro/               <-- [CÓDIGO FUENTE]
+│   ├── analyze.py          <-- Prompt Coach V3 + Sheriff 4.3.
+│   ├── llm_client.py       <-- Conexión OpenAI (Temp=0).
+│   ├── rag.py              <-- Gestión de memoria vectorial.
+│   ├── privacy.py          <-- Sanitización de datos personales.
+│   ├── reports.py          <-- Generación de PDF.
+│   ├── schema.py           <-- Modelo de datos (int 1-5).
+│   └── config.py           <-- Configuración global.
 │
-└── main.py                  <-- Script de ejecución principal.
-├── install.py               <-- Script de scaffolding/instalación rápida.
-├── requirements.txt         <-- Dependencias del proyecto.
-└── scripts/                 <-- Utilidades auxiliares (PowerShell, etc.).
+└── main.py                 <-- Script de ejecución principal.
         </pre>
     </section>
 
@@ -389,13 +406,13 @@ CENTAURO_PROJECT/
             <tbody>
                 <tr>
                     <td><code>main.py</code></td>
-                    <td>Orquestador del pipeline</td>
-                    <td>Limpia VTT, indexa manuales, ejecuta auditoría por archivo.</td>
+                    <td>Orquestador</td>
+                    <td>Limpia VTT, indexa manuales, ejecuta auditoría.</td>
                 </tr>
                 <tr>
                     <td><code>centauro/analyze.py</code></td>
-                    <td>Prompt + Sheriff</td>
-                    <td>Construye el prompt, valida evidencias y calcula nota ponderada.</td>
+                    <td>Brain + Sheriff</td>
+                    <td>Prompt "Director Ventas" y validación semántica.</td>
                 </tr>
                 <tr>
                     <td><code>centauro/llm_client.py</code></td>
@@ -415,22 +432,17 @@ CENTAURO_PROJECT/
                 <tr>
                     <td><code>centauro/schema.py</code></td>
                     <td>Modelo de datos</td>
-                    <td>Define estructura del reporte con Pydantic.</td>
+                    <td>Define el formato del reporte (Pydantic) y la escala 1-5.</td>
                 </tr>
                 <tr>
                     <td><code>centauro/config.py</code></td>
-                    <td>Configuración</td>
-                    <td>Rutas, modelos y parámetros de chunking/retrieval.</td>
+                    <td>Configuracion</td>
+                    <td>Rutas base, modelo LLM, modelo de embeddings y path de ChromaDB.</td>
                 </tr>
                 <tr>
                     <td><code>centauro/reports.py</code></td>
-                    <td>Generación de reportes visuales</td>
-                    <td>Reservado para la conversión a PDF (si se habilita).</td>
-                </tr>
-                <tr>
-                    <td><code>install.py</code></td>
-                    <td>Bootstrap</td>
-                    <td>Crea estructura base y archivos de ejemplo.</td>
+                    <td>Reportes visuales</td>
+                    <td>Convierte el JSON final en PDF con la presentacion ejecutiva.</td>
                 </tr>
             </tbody>
         </table>
@@ -439,86 +451,74 @@ CENTAURO_PROJECT/
     <section>
         <h2>7. Procesos Internos y Lógica de Datos</h2>
         <h3>7.1 Limpieza de transcripciones</h3>
-        <p>Las transcripciones en VTT se limpian de timestamps y UUIDs. Solo queda el texto conversacional para maximizar la precisión del análisis.</p>
+        <p>Las transcripciones en VTT se limpian de timestamps y UUIDs para evitar ruido en el análisis cualitativo.</p>
+        <p>Tambi&eacute;n se eliminan etiquetas de estilo (<code>&lt;v&gt;</code>, <code>&lt;b&gt;</code>) y se compacta el texto en una sola l&iacute;nea para reducir tokens y costo.</p>
 
         <h3>7.2 Redacción de datos personales</h3>
-        <p>Antes de enviar información a la API, se sustituyen patrones sensibles por etiquetas <code>[REDACTED_*]</code> (email, teléfono, DNI/NIE, IBAN).</p>
+        <p>Antes de enviar información a la API, se sustituyen patrones sensibles por etiquetas <code>[REDACTED_*]</code>.</p>
+        <p>Se detectan: email, tel&eacute;fono, DNI, NIE e IBAN. Esta capa reduce riesgos de privacidad y cumple buenas pr&aacute;cticas de datos.</p>
 
         <h3>7.3 Generación del reporte</h3>
-        <p>La IA devuelve un JSON con seis criterios. El Sheriff valida la evidencia y recalcula la nota final en Python. El resultado se guarda en <code>outputs/</code>.</p>
-
-        <h3>7.4 Control de costes</h3>
-        <p>Todos los consumos se registran en <code>outputs/control_gastos.csv</code>, incluyendo fecha, tokens y coste estimado.</p>
+        <p>La IA devuelve un JSON con puntuaciones 1-5. El Sheriff valida la evidencia, aplica penalizaciones si es necesario y calcula la nota final.</p>
+        <p>Luego se separan <strong>puntos fuertes</strong> (nota &gt;= 3) y <strong>&aacute;reas de mejora</strong> (nota &lt; 3) para el PDF ejecutivo.</p>
     </section>
 
     <section>
-        <h2>8. Distribución de Carpetas (Mapa de Trabajo)</h2>
+        <h2>8. Distribución de Carpetas</h2>
         <ul>
             <li><strong>inputs/docs:</strong> Manuales de calidad (base RAG).</li>
-            <li><strong>inputs/transcripts:</strong> Transcripciones de audio a analizar.</li>
-            <li><strong>outputs:</strong> Reportes JSON y control de costes.</li>
-            <li><strong>centauro:</strong> Núcleo lógico de la auditoría.</li>
-            <li><strong>.chroma_db:</strong> Persistencia vectorial local.</li>
-            <li><strong>scripts:</strong> utilidades externas (ej. PowerShell).</li>
+            <li><strong>inputs/transcripts:</strong> Transcripciones de audio.</li>
+            <li><strong>outputs:</strong> Reportes JSON, PDF y logs.</li>
+            <li><strong>centauro:</strong> Núcleo lógico.</li>
         </ul>
     </section>
 
     <section>
-        <h2>9. Deep Dive: Conexión API (<code>llm_client.py</code>)</h2>
-        <p>Este módulo es el único punto de salida hacia Internet y controla el determinismo de los resultados.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Parámetro</th>
-                    <th>Valor</th>
-                    <th>Razón Técnica</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>model</code></td>
-                    <td><code>gpt-4o-mini</code></td>
-                    <td>Balance coste/velocidad con latencia baja.</td>
-                </tr>
-                <tr>
-                    <td><code>temperature</code></td>
-                    <td><code>0.0</code></td>
-                    <td>Determinismo absoluto para auditoría.</td>
-                </tr>
-                <tr>
-                    <td><code>response_format</code></td>
-                    <td><code>{ "type": "json_object" }</code></td>
-                    <td>Salida estrictamente JSON.</td>
-                </tr>
-            </tbody>
-        </table>
-        <p>El consumo de tokens se registra automáticamente en <code>outputs/control_gastos.csv</code>.</p>
+        <h2>9. Deep Dive: Conexión API</h2>
+        <p>Mantiene la configuración de <code>temperature: 0.0</code> para garantizar que, aunque la evaluación sea cualitativa, sea consistente entre ejecuciones.</p>
+        <p>La salida se fuerza a JSON estricto (<code>response_format: json_object</code>) para evitar texto libre y simplificar la validacion.</p>
+        <p>El consumo de tokens se registra en <code>outputs/control_gastos.csv</code> con fecha, hora, tokens y costo estimado en USD.</p>
     </section>
 
     <section>
-        <h2>10. Deep Dive: Ingeniería de Prompt (<code>analyze.py</code>)</h2>
-        <p>La IA trabaja en modo "auditor", no como asistente. El prompt limita fuentes y fuerza evidencia literal.</p>
-        <pre><span class="str">"Eres un AUDITOR DE VENTAS CONSULTIVAS.\nTUS FUENTES:\n1. &lt;MANUAL&gt; {contexto_rag} &lt;/MANUAL&gt;\n2. &lt;AUDIO_REAL&gt; (Texto a analizar)\n\nREGLAS:\n- Prohibido inventar texto.\n- Prohibido copiar texto del MANUAL como evidencia.\n- Solo puedes extraer texto literal del AUDIO_REAL.\n\nSALIDA: JSON estricto con 6 fases."</span></pre>
-        <h3>10.1. Estrategia "Dirty Quote Preference"</h3>
-        <p>Se fuerza a la IA a citar incluso errores ("ehh", "esteee") para facilitar la validación tokenizada del Sheriff.</p>
+        <h2>10. Deep Dive: Ingeniería de Prompt (Coach)</h2>
+        <p>El prompt V3 fuerza a la IA a actuar como un evaluador humano exigente.</p>
+        <pre><span class="str">"Eres un DIRECTOR DE VENTAS DE ÉLITE.\nCONTEXTO: Estás evaluando a asesores académicos.\n\nCRITERIOS DE PUNTUACIÓN:\n1 = Deficiente.\n3 = Cumplidor (Robot).\n5 = Excelente (Experto).\n\nSALIDA OBLIGATORIA: JSON con 'puntuacion' (int) y 'razonamiento'."</span></pre>
+        <h3>10.1. Penalización Automática</h3>
+        <p>El sistema está diseñado para desconfiar. Si la IA otorga un 5 pero la evidencia es débil o inexistente, el código Python sobreescribe la nota a 1.</p>
+        <h3>10.2. Tipo de evaluacion usada</h3>
+        <p>La evaluacion es <strong>cualitativa por competencias</strong>. No se busca solo "cumplir el guion", sino la calidad real de la interaccion (empatia, persuasion, manejo de objeciones).</p>
+        <p>La escala 1-5 se interpreta como: 1=Deficiente, 3=Robot (cumple sin conectar), 5=Experto (natural y estrategico).</p>
     </section>
 
     <section>
-        <h2>11. Pseudocódigo del Sheriff (Validación)</h2>
-        <p>El Sheriff aplica una comparación tolerante a ruido de transcripción:</p>
-        <pre><span class="func">def</span> <span class="kw">validar_por_tokens</span>(evidencia_ia, texto_real):
-    <span class="com"># 1) Limpieza: minúsculas, eliminar moneda y puntuación</span>
-    tokens_ia = limpiar(evidencia_ia)
-    tokens_real = limpiar(texto_real)
+        <h2>11. Pseudocódigo del Sheriff 4.3</h2>
+        <pre><span class="func">def</span> <span class="kw">validar_y_puntuar</span>(item, audio):
+    <span class="com"># 1. Check Existencial</span>
+    <span class="kw">if not</span> existe_en_audio(item.evidencia):
+        item.puntuacion = <span class="str">1</span>
+        item.razonamiento += <span class="str">" [ALUCINACIÓN]"</span>
+        <span class="kw">return</span>
 
-    <span class="com"># 2) Intersección de conjuntos</span>
-    aciertos = <span class="kw">len</span>(<span class="kw">set</span>(tokens_ia) &amp; <span class="kw">set</span>(tokens_real))
-    ratio = aciertos / <span class="kw">len</span>(tokens_ia)
+    <span class="com"># 2. Check Semántico (Solo Legal)</span>
+    <span class="kw">if</span> item.criterio == <span class="str">"LEGAL"</span> <span class="kw">and not</span> tiene_palabras_clave(item.evidencia):
+        item.puntuacion = <span class="str">1</span>
+        item.razonamiento += <span class="str">" [NO ES AVISO LEGAL]"</span></pre>
+    </section>
 
-    <span class="com"># 3) Umbral de 60%</span>
-    <span class="kw">if</span> ratio &gt;= <span class="str">0.60</span>:
-        <span class="kw">return</span> <span class="kw">True</span>
-    <span class="kw">return</span> <span class="kw">False</span></pre>
+    <section>
+        <h2>12. Glosario Basico (para no tecnicos)</h2>
+        <ul>
+            <li><strong>LLM:</strong> Modelo de lenguaje grande. Aqui es GPT-4o-mini.</li>
+            <li><strong>Prompt:</strong> Instrucciones que se le envian al modelo.</li>
+            <li><strong>Token:</strong> Unidad de texto usada para medir costo.</li>
+            <li><strong>Embedding:</strong> Vector numerico que representa el significado de un texto.</li>
+            <li><strong>Vector DB:</strong> Base de datos que busca por similitud de significado.</li>
+            <li><strong>RAG:</strong> Metodo que combina busqueda (manuales) + generacion (LLM).</li>
+            <li><strong>Chunking:</strong> Dividir documentos largos en fragmentos pequenos.</li>
+            <li><strong>Top-K:</strong> Numero de fragmentos mas relevantes que se recuperan.</li>
+            <li><strong>Temperatura:</strong> Controla creatividad. 0 = mas determinista.</li>
+        </ul>
     </section>
 
     <footer>

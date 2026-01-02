@@ -1,229 +1,251 @@
 import json
 import re
+from pathlib import Path
 from .config import settings
 from .rag import buscar_contexto
 from .llm_client import consultar_gpt
-from .schema import ReporteCalidad, ItemEvaluacion
+from .schema import (
+    ReporteCalidad, MetaData, ResumenContextual, 
+    EventoClave, BloqueEvaluacion, ScorecardFinal, FeedbackResumido
+)
 from .privacy import redact_pii
 
-# --- SISTEMA DE PONDERACIÓN ---
-PESOS = {
-    "CRITICO": 10.0, 
-    "ALTA": 5.0,     
-    "MEDIA": 3.0,    
-    "BAJA": 1.0      
+try:
+    from rapidfuzz import fuzz
+except ImportError:
+    print("⚠️ FALTA RAPIDFUZZ. Ejecuta: pip install rapidfuzz")
+    fuzz = None
+
+# --- CONFIGURACIÓN DE PESOS OBS ---
+PESOS_BLOQUES = {
+    "apertura": 1.0,          # MEDIA
+    "necesidades": 3.0,       # CRITICO
+    "presentacion": 2.0,      # ALTA
+    "objeciones": 3.0,        # CRITICO
+    "cierre": 3.0,            # CRITICO
+    "estilo": 2.0,            # ALTA
+    "legal": 1.0              # BAJA
 }
 
-def limpiar_tokens(texto):
-    """
-    Limpieza inteligente para el Sheriff 4.1:
-    - Quita símbolos de moneda (€, $) y puntuación (., ,).
-    - Permite que '5.000' coincida con '5000'.
-    """
-    if not texto: return []
-    
-    # 1. Pasamos a minúsculas
-    texto = texto.lower()
-    
-    # 2. Reemplazamos símbolos de moneda y puntos de miles por nada
-    # Así "7.500€" se convierte en "7500"
-    texto = texto.replace("€", "").replace("$", "").replace(".", "").replace(",", "")
-    
-    # 3. Quitamos cualquier otro caracter raro
-    texto_limpio = re.sub(r'[^\w\s]', '', texto)
-    
-    tokens = texto_limpio.split()
-    
-    # 4. Filtramos palabras vacías (stopwords)
-    stopwords = {'de', 'el', 'la', 'que', 'en', 'y', 'a', 'los', 'un', 'una', 'es', 'por', 'del', 'con', 'las', 'al', 'lo', 'se'}
-    
-    return [t for t in tokens if t not in stopwords and len(t) > 1]
+def limpiar_texto_base(texto: str):
+    """Normalización para fuzzy matching."""
+    if not texto: return ""
+    return texto.lower().strip().replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u")
 
-def validar_por_tokens(reporte_json, texto_original):
-    """SHERIFF 4.1: Validación robusta para cifras y descuentos."""
-    
-    # Limpiamos el texto original igual que la evidencia (quitando puntos de miles, etc)
-    tokens_texto_original = set(limpiar_tokens(texto_original))
-    
-    # Recuperamos todos los items para procesar
-    todos_items = reporte_json.get("puntos_fuertes", []) + reporte_json.get("areas_mejora", [])
-    
-    # Reiniciamos listas
-    reporte_json["puntos_fuertes"] = []
-    reporte_json["areas_mejora"] = []
+def extraer_json_robusto(respuesta_raw: str) -> dict:
+    if not respuesta_raw: raise ValueError("Respuesta vacía")
+    limpio = respuesta_raw.replace("```json", "").replace("```", "").strip()
+    m = re.search(r"\{.*\}", limpio, flags=re.S)
+    if not m:
+        try: return json.loads(limpio)
+        except: raise ValueError("No JSON found")
+    return json.loads(m.group(0))
 
-    for item in todos_items:
-        evidencia = item.get("cita_evidencia", "")
-        cumple_original = item.get("cumple", False)
-        
-        # Si ya venía como fallo o no tiene evidencia, pasa directo a mejora
-        if not cumple_original or "NO ENCONTRADO" in evidencia:
-            item["cumple"] = False
-            reporte_json["areas_mejora"].append(item)
+def validar_y_auditar_sheriff(reporte: ReporteCalidad, texto_transcripcion: str):
+    """
+    ETAPA AUDITOR (SHERIFF V3):
+    1. Verifica existencia de evidencias (Timeline y Bloques).
+    2. Aplica reglas de negocio "Off-Record" (si recording_started_late).
+    3. Penaliza bloques sin evidencia real.
+    """
+    texto_lower = limpiar_texto_base(texto_transcripcion)
+    
+    # 1. VERIFICAR FLAG "RECORDING STARTED LATE"
+    # Si la IA detectó que empezó tarde, forzamos NULA observabilidad en Apertura y Legal
+    inicio_tardio = reporte.meta.flags_tecnicos.get("recording_started_late", False)
+    
+    # 2. AUDITAR BLOQUES
+    for bloque in reporte.evaluacion_por_bloques:
+        # A) Regla Off-Record Automática
+        es_bloque_afectado = bloque.id_bloque in ["apertura", "legal"]
+        if inicio_tardio and es_bloque_afectado:
+            bloque.puntuacion_1_5 = None # Anular nota
+            bloque.observabilidad = "NULA (OFF-RECORD)"
+            bloque.estado_evaluacion = "OFF_RECORD"
+            bloque.razonamiento = "[SISTEMA] Grabación iniciada tardíamente. Se asume cumplimiento previo."
             continue
 
-        tokens_evidencia = limpiar_tokens(evidencia)
-        
-        if not tokens_evidencia or len(evidencia) < 3:
-            item["cumple"] = False
-            item["feedback"] = "IA Error: Evidencia insuficiente."
-            reporte_json["areas_mejora"].append(item)
-            continue
-
-        # CONTAMOS ACIERTOS (Intersección de conjuntos)
-        aciertos = 0
-        for token in tokens_evidencia:
-            if token in tokens_texto_original:
-                aciertos += 1
-        
-        ratio_acierto = aciertos / len(tokens_evidencia)
-        
-        # Umbral flexible (60%): Permite que la IA se equivoque en alguna palabra, 
-        # pero exige que los números y conceptos clave estén.
-        if ratio_acierto >= 0.60:
-            item["cumple"] = True
-            reporte_json["puntos_fuertes"].append(item)
-        else:
-            print(f"   🚨 CITA RECHAZADA: '{evidencia}' (Coincidencia: {ratio_acierto:.2%})")
-            item["cumple"] = False
-            item["cita_evidencia"] = f"NO VALIDADO: {evidencia}"
-            item["razonamiento"] = "La evidencia citada no coincide suficientemente con el audio."
-            reporte_json["areas_mejora"].append(item)
-
-    return reporte_json
-
-def calcular_nota_ponderada(puntos_fuertes, areas_mejora):
-    puntos_totales = 0.0
-    puntos_posibles = 0.0
-    todos_items = puntos_fuertes + areas_mejora
-    if not todos_items: return 0.0
-
-    for item in todos_items:
-        importancia = getattr(item, 'importancia', 'MEDIA').upper()
-        cumple = getattr(item, 'cumple', False)
-        peso = PESOS.get(importancia, 1.0)
-        puntos_posibles += peso
-        if cumple: puntos_totales += peso
+        # B) Validación de Evidencias (Fuzzy)
+        evidencias_reales = []
+        for cita in bloque.evidencias_validadas:
+            if len(cita) < 5: continue
             
-    if puntos_posibles == 0: return 0.0
-    nota = (puntos_totales / puntos_posibles) * 10
-    return round(nota, 2)
+            clean_cita = limpiar_texto_base(cita)
+            # Umbral 65: Tolerancia a errores de transcripción humanos
+            if fuzz:
+                ratio = fuzz.token_set_ratio(clean_cita, texto_lower)
+                valido = ratio >= 65
+            else:
+                valido = clean_cita in texto_lower
+                
+            if valido:
+                evidencias_reales.append(cita)
+        
+        # C) Penalización por Alucinación
+        # Si la IA dio nota > 1 pero no hay evidencias reales -> Bajamos a 1
+        # Excepción: Bloques "Estilo" a veces son subjetivos, somos más laxos (permitimos 0 evidencias si razonamiento es sólido)
+        es_subjetivo = bloque.id_bloque == "estilo"
+        
+        if bloque.puntuacion_1_5 is not None and bloque.puntuacion_1_5 > 1:
+            if len(evidencias_reales) == 0 and not es_subjetivo:
+                print(f"   🚨 Sheriff: Alucinación en '{bloque.id_bloque}'. Nota bajada a 1.")
+                bloque.puntuacion_1_5 = 1
+                bloque.razonamiento += " [AUDITOR: Evidencia no encontrada en audio. Penalización aplicada.]"
+                bloque.estado_evaluacion = "SIN_EVIDENCIA"
+            
+            # Penalización Soft Skills (Necesidades/Objeciones) si hay poca evidencia
+            elif bloque.id_bloque in ["necesidades", "objeciones"] and len(evidencias_reales) < 2 and bloque.puntuacion_1_5 >= 4:
+                bloque.puntuacion_1_5 -= 1
+                bloque.razonamiento += " [AUDITOR: Se reduce nota por falta de evidencia distribuida.]"
+
+        # Actualizamos la lista con solo las validadas
+        bloque.evidencias_validadas = evidencias_reales
+
+    return reporte
+
+def calcular_scorecard_final(reporte: ReporteCalidad):
+    """Calcula la nota ponderada ignorando los bloques OFF_RECORD."""
+    total_puntos = 0.0
+    total_peso = 0.0
+    
+    for bloque in reporte.evaluacion_por_bloques:
+        # Ignorar Off-Record o Nulos
+        if bloque.puntuacion_1_5 is None: continue
+        
+        peso = PESOS_BLOQUES.get(bloque.id_bloque, 1.0)
+        
+        # Normalización OBS (1-5) -> (0-100%)
+        # 1=0, 2=0.25, 3=0.5, 4=0.75, 5=1.0
+        puntos_norm = (bloque.puntuacion_1_5 - 1) / 4.0
+        
+        total_puntos += (puntos_norm * 10) * peso
+        total_peso += 10 * peso
+        
+    if total_peso == 0:
+        nota_final = 0.0
+    else:
+        nota_final = round((total_puntos / total_peso) * 10, 2)
+        
+    # Asignar al reporte
+    reporte.scorecard_final.promedio_calculado_1_5 = 0 # (Opcional, calculable inverso)
+    reporte.scorecard_final.nota_final_0_10 = nota_final
+    
+    # Cualitativo
+    if nota_final >= 9: reporte.scorecard_final.calificacion_cualitativa = "A (Excelencia)"
+    elif nota_final >= 7.5: reporte.scorecard_final.calificacion_cualitativa = "B (Bueno)"
+    elif nota_final >= 5: reporte.scorecard_final.calificacion_cualitativa = "C (Aprobado)"
+    else: reporte.scorecard_final.calificacion_cualitativa = "D (Deficiente)"
+    
+    return reporte
 
 def analizar_entrevista(nombre_archivo, texto_transcripcion):
-    print(f"🔍 Buscando reglas para: {nombre_archivo}")
+    print(f"🔍 Analizando (Centauro V3 Tridente): {nombre_archivo}")
     
-    # 1. Privacidad
-    resultado_privacidad = redact_pii(texto_transcripcion)
-    texto_seguro = resultado_privacidad.text
+    res_priv = redact_pii(texto_transcripcion)
+    texto_seguro = res_priv.text
     
-    # 2. RAG
-    contexto_manual = buscar_contexto("Argumentación producto metodología ranking partners networking cierre objeciones legal")
+    # Debug
+    debug_dir = settings.OUTPUTS_DIR / "Input_Debug"
+    debug_dir.mkdir(parents=True, exist_ok=True)
+    nombre_safe = re.sub(r'[^\w\-_]', '_', Path(nombre_archivo).stem)[:50]
+    with open(debug_dir / f"DEBUG_{nombre_safe}.txt", "w", encoding="utf-8") as f:
+        f.write(texto_seguro)
 
-    # 3. Prompt
-    base = nombre_archivo.rsplit(".", 1)[0]
-    if base.startswith("entrevista_"):
-        base = base[len("entrevista_"):]
-    nombre_limpio = base.replace("_", " ").strip()
+    contexto_manual = buscar_contexto("Venta consultiva metodologia cierre empatia legal")
+    base_nombre = Path(nombre_archivo).stem.replace("_", " ")
 
-    ejemplo_json = """
+    # --- PROMPT ARQUITECTÓNICO V3 (Extractor -> Evaluador) ---
+    sistema = f"""
+ACTÚA COMO: Head of Sales Coaching de OBS Business School.
+OBJETIVO: Auditar una llamada de venta consultiva.
+TU ENFOQUE: Severidad media-alta. Buscas calidad real, no cumplimiento robótico.
+
+### FASE 1: EXTRACTOR DE HECHOS (La Verdad)
+Primero, analiza el texto y extrae los hechos objetivos.
+- **Detección de Inicio Tardío:** ¿La llamada empieza con saludos ("Hola", "Buenos días") o ya están hablando de temas profundos?
+  - Si empieza ya iniciada -> `recording_started_late: true`.
+- **Línea de Tiempo:** Identifica 3-6 momentos clave (Objeción de precio, Cierre, Pregunta de dolor). Cita textualmente.
+
+### FASE 2: EVALUADOR (El Juicio)
+Evalúa del 1 al 5 cada bloque usando SOLO los hechos extraídos.
+
+**RÚBRICA OBS (Estándar de Oro):**
+- **1 (Deficiente):** No lo hace o es contraproducente.
+- **3 (Cumplidor):** Correcto pero robótico/administrativo.
+- **5 (Excelente):** Estratégico, empático, personalizado y persuasivo.
+
+**BLOQUES A EVALUAR:**
+1. `apertura`: Presentación y conexión. (Si `started_late` -> Nota null).
+2. `necesidades`: Preguntas profundas vs superficiales.
+3. `presentacion`: Vinculación de beneficios vs lectura de temario.
+4. `objeciones`: Empatía y revalorización vs discusión.
+5. `cierre`: Proactividad y compromiso de pago.
+6. `estilo`: Seguridad y tono experto.
+7. `legal`: Mención de grabación. (Si `started_late` -> Nota null).
+
+**REGLAS DE SALIDA:**
+- Si no hay evidencia suficiente, sé honesto: baja confianza o nota baja.
+- En Soft Skills (Necesidades, Objeciones), aporta MÚLTIPLES evidencias en la lista.
+
+FUENTES: <MANUAL>{contexto_manual}</MANUAL>
+"""
+    
+    # JSON Schema implícito en la instrucción (reforzamos con ejemplo one-shot si fuera necesario, 
+    # pero usaremos response_format json_object y Pydantic se encarga luego).
+    # Para mayor robustez, inyectamos la estructura esperada:
+    
+    estructura_json = """
+    ESTRUCTURA JSON OBLIGATORIA:
     {
-        "asesor": "Paola Suarez",
-        "resumen_ejecutivo": "...",
-        "puntos_fuertes": [
-            { "criterio": "1. Inicio (Saludo)", "cumple": true, "cita_evidencia": "Hola soy Paola", "referencia_manual": "...", "feedback": "...", "razonamiento": "...", "importancia": "BAJA" },
-            { "criterio": "2. Sondeo (Necesidades)", "cumple": true, "cita_evidencia": "¿Qué experiencia tienes?", "referencia_manual": "...", "feedback": "...", "razonamiento": "...", "importancia": "ALTA" },
-            { "criterio": "3. Argumentación (Valor)", "cumple": true, "cita_evidencia": "Tenemos el Ranking X", "referencia_manual": "...", "feedback": "...", "razonamiento": "...", "importancia": "ALTA" },
-            { "criterio": "4. Objeciones / Precio", "cumple": true, "cita_evidencia": "La inversión se queda en 5200", "referencia_manual": "...", "feedback": "...", "razonamiento": "...", "importancia": "ALTA" },
-            { "criterio": "5. Cierre (Siguientes Pasos)", "cumple": true, "cita_evidencia": "Pasamos a comité", "referencia_manual": "...", "feedback": "...", "razonamiento": "...", "importancia": "ALTA" },
-            { "criterio": "6. Legal (Grabación)", "cumple": true, "cita_evidencia": "Esta llamada se graba", "referencia_manual": "...", "feedback": "...", "razonamiento": "...", "importancia": "MEDIA" }
-        ],
-        "areas_mejora": [],
-        "nota_final_0_10": 0 
+      "meta": { "flags_tecnicos": { "recording_started_late": boolean } },
+      "resumen_contextual": { "perfil_lead": "...", "fase_funnel": "..." },
+      "timeline_momentos_clave": [ { "fase": "...", "evento": "...", "cita_evidencia": "..." } ],
+      "evaluacion_por_bloques": [
+        { 
+          "id_bloque": "necesidades", "titulo": "Detección de Necesidades",
+          "puntuacion_1_5": 4, "observabilidad": "ALTA",
+          "evidencias_validadas": ["Cita 1...", "Cita 2..."],
+          "razonamiento": "..."
+        }
+      ],
+      "feedback_resumido": { "fortalezas": [], "areas_mejora": [] }
     }
     """
-
-    sistema = f"""
-    Eres un AUDITOR DE VENTAS CONSULTIVAS.
     
-    TUS FUENTES:
-    1. REGLAS: <MANUAL>{contexto_manual}</MANUAL>
-    2. DATOS: <AUDIO_REAL>El texto del usuario</AUDIO_REAL>
+    prompt_completo = sistema + "\n" + estructura_json
+    usuario = f"<TRANSCRIPCION>\n{texto_seguro}\n</TRANSCRIPCION>"
     
-    METADATOS: Asesor: "{nombre_limpio}"
-    
-    MANDATO OBLIGATORIO: EVALÚA ESTAS 6 FASES (NO TE SALTES NINGUNA).
-    
-    1. INICIO (Saludo) -> [Imp: BAJA]
-       - Busca: Cualquier saludo cordial ("Hola", "Buenos días").
-       
-    2. SONDEO (Necesidades) -> [Imp: ALTA]
-       - Busca: Preguntas abiertas sobre el alumno (perfil, objetivos, trabajo).
-       
-    3. ARGUMENTACIÓN (Valor) -> [Imp: ALTA]
-       - ¿Mencionó ALGÚN valor diferencial? (Ranking, Metodología, Claustro, Título, Online).
-       - No hace falta que diga todo. Con argumentar el valor es suficiente.
-       
-    4. OBJECIONES / ECONOMÍA -> [Imp: ALTA]
-       - ¡IMPORTANTE! NO BUSQUES UN PRECIO FIJO.
-       - Busca CUALQUIER conversación económica: Precios (5000, 7500, 12000...), palabras como "Euros", "Dólares", "Inversión", "Matrícula", "Beca", "Descuento", "Abono".
-       - Si habla de dinero o resuelve dudas -> TRUE.
-       
-    5. CIERRE (Siguientes Pasos) -> [Imp: ALTA]
-       - ¿Propuso avanzar? (Comité, Documentación, Validación perfil).
-       - ¿Propuso formas de pago? (Financiación, Contado).
-       - Cualquiera vale como Cierre.
-       
-    6. LEGAL (Grabación) -> [Imp: MEDIA]
-       - Busca palabras raíz: "Grabar", "Calidad", "Monitor".
-       - Si no está -> FALSE.
-
-    REGLA DE EVIDENCIA (EXTRACCIÓN):
-    - Extrae el fragmento del audio donde ocurre la acción.
-    - No corrijas errores del audio. Cópialo tal cual.
-
-    Estructura JSON obligatoria:
-    {ejemplo_json}
-    """
-    
-    usuario = f"""
-    <AUDIO_REAL>
-    {texto_seguro}
-    </AUDIO_REAL>
-    """
-    
-    print("🧠 Consultando a GPT-4o-mini...")
-    
-    respuesta_json_str = consultar_gpt(sistema, usuario, referencia_log=nombre_archivo)
+    print("🧠 Consultando a GPT-4o-mini (Tridente V3)...")
+    respuesta_raw = consultar_gpt(prompt_completo, usuario, referencia_log=nombre_archivo)
     
     try:
-        datos = json.loads(respuesta_json_str)
-        if "ReporteCalidad" in datos:
-            datos = datos["ReporteCalidad"]
-            
-        print(f"👮‍♂️ Validando evidencias (Sheriff 4.1 Flexible)...")
-        datos_validados = validar_por_tokens(datos, texto_seguro)
+        data = extraer_json_robusto(respuesta_raw)
         
-        puntos_fuertes = [ItemEvaluacion(**item) for item in datos_validados.get("puntos_fuertes", [])]
-        areas_mejora = [ItemEvaluacion(**item) for item in datos_validados.get("areas_mejora", [])]
+        # Conversión a Pydantic (Validación de estructura)
+        # Nota: Ajustamos el modelo si faltan campos opcionales
+        reporte = ReporteCalidad(**data)
+        reporte.asesor = base_nombre # Rellenamos nombre fichero
+
+        # --- ETAPA 3: AUDITOR (Sheriff) ---
+        print("👮‍♂️ Sheriff V3: Auditando evidencias y Off-Record...")
+        reporte = validar_y_auditar_sheriff(reporte, texto_seguro)
         
-        nota_real = calcular_nota_ponderada(puntos_fuertes, areas_mejora)
+        # Cálculo final
+        reporte = calcular_scorecard_final(reporte)
+
+        # Guardar
+        ruta_json = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{nombre_safe}_reporte.json"
+        ruta_json.parent.mkdir(exist_ok=True)
         
-        reporte = ReporteCalidad(
-            asesor=datos.get("asesor", "Desconocido"),
-            resumen_ejecutivo=datos.get("resumen_ejecutivo", ""),
-            puntos_fuertes=puntos_fuertes,
-            areas_mejora=areas_mejora,
-            nota_final_0_10=nota_real
-        )
-        
-        output_path = settings.OUTPUTS_DIR / f"{nombre_archivo}_reporte.json"
-        with open(output_path, "w", encoding="utf-8") as f:
+        with open(ruta_json, "w", encoding="utf-8") as f:
             f.write(reporte.model_dump_json(indent=2))
             
-        print(f"✅ Reporte generado: {output_path}")
-        print(f"⭐️ NOTA FINAL: {nota_real}/10")
-        return reporte
+        print(f"✅ Reporte Generado: {ruta_json.name}")
+        print(f"⭐️ NOTA FINAL: {reporte.scorecard_final.nota_final_0_10}/10")
         
+        return reporte
+
     except Exception as e:
         print(f"❌ Error procesando {nombre_archivo}: {e}")
+        # import traceback; traceback.print_exc()
         return None
