@@ -157,7 +157,7 @@
 
     <header>
         <h1>🦄 Proyecto Centauro: Manual Técnico Integral</h1>
-        <p><strong>Versión:</strong> 3.0 (Coach Qualitative Model) | <strong>Última Actualización:</strong> Diciembre 2025</p>
+        <p><strong>Versión:</strong> 4.0 (Pipeline Extractor/Evaluador/Auditor) | <strong>Última Actualización:</strong> Diciembre 2025</p>
     </header>
 
     <section>
@@ -172,9 +172,9 @@
             A[inputs/docs/*.txt] -->|Indexación| B[ChromaDB Local]
             C[inputs/transcripts/*.vtt] -->|Limpieza VTT| D[Transcripción Limpia]
             D -->|Privacidad: redact_pii| E[Transcripción Sanitizada]
-            E -->|Prompt Coach V3| F[OpenAI API]
+            E -->|Pipeline Extractor/Evaluador V4| F[OpenAI API]
             F -->|JSON Rúbrica (1-5)| G[Reporte JSON]
-            G -->|Sheriff 4.3| H[Validación Semántica]
+            G -->|Sheriff/Auditor V4| H[Validación Semántica]
             H --> I[Nota Ponderada + outputs/*.json]
         </div>
 
@@ -190,9 +190,9 @@
             subgraph "Core Logic Layer"
             P -->|Texto Sanitizado| BRAIN[analyze.py]
             RAG -->|Contexto Top-K| BRAIN
-            BRAIN -->|Prompt 'Director Ventas'| LLM[llm_client.py]
+            BRAIN -->|Pipeline V4| LLM[llm_client.py]
             LLM <-->|API Request| OPENAI[OpenAI GPT-4o-mini]
-            OPENAI -->|JSON Cualitativo| SHERIFF[👮 Sheriff 4.3 Validator]
+            OPENAI2 -->|JSON Evaluaci¢n| SHERIFF[👮 Sheriff/Auditor V4]
             end
 
             subgraph "Output Layer"
@@ -210,7 +210,15 @@
             <li><strong>Determinismo sobre creatividad:</strong> Temperatura 0 y JSON estricto.</li>
             <li><strong>RAG acotado:</strong> La IA solo ve fragmentos recuperados, no el manual completo.</li>
             <li><strong>Auditoría verificable:</strong> Cada conclusión debe tener evidencia textual y pasa por el Sheriff.</li>
+        
+        <h3>1.4. Pipeline V4 (Extractor -> Evaluador -> Auditor)</h3>
+        <p>La versi¢n actual separa responsabilidades en tres etapas para reducir alucinaciones y mejorar justicia:</p>
+        <ul>
+            <li><strong>Extractor:</strong> Solo hechos observables con evidencia literal (sin notas).</li>
+            <li><strong>Evaluador:</strong> Aplica la r&uacute;brica usando solo lo extra¡do.</li>
+            <li><strong>Auditor:</strong> Verifica evidencia (spans/fuzzy) y ajusta inconsistencias.</li>
         </ul>
+</ul>
     </section>
 
     <section>
@@ -226,27 +234,42 @@
             <li><strong>Control de Costes:</strong> El script registra el gasto en <code>outputs/control_gastos.csv</code>.</li>
         </ul>
 
-        <h3>2.2. Ingeniería del Prompt (Coach Mode)</h3>
-        <p>Ya no usamos un prompt de "Auditor" que busca Sí/No. Usamos un prompt de "Director de Ventas" que evalúa del 1 al 5.</p>
+        <h3>2.2. Ingenier&iacute;a del Prompt (Pipeline V4)</h3>
+        <p>El prompt ahora se divide en dos roles: Extractor (hechos) y Evaluador (r&uacute;brica).</p>
 
         <div class="prompt-box">
-            <strong>Estrategia "Coach V3":</strong><br>
-            Le decimos a la IA: <em>"Eres un experto en ventas consultivas. Tu trabajo NO es verificar un checklist. Tu trabajo es EVALUAR LA CALIDAD. Un novato que lee el guion saca un 3. Un experto que persuade saca un 5."</em>
+            <strong>Estrategia "Pipeline V4":</strong><br>
+            Le decimos a la IA: <em>"Primero extrae hechos observables con evidencia literal. Luego eval&uacute;a calidad usando solo esos hechos."</em>
         </div>
 
-        <h3>2.3. ¿Qué es RAG y cómo se usa aquí?</h3>
+        <h3>2.3. Prompt Extractor (hechos)</h3>
+        <p>El extractor tiene prohibido evaluar. Solo devuelve eventos observables con evidencia literal copiada de la transcripci&oacute;n.</p>
+        <ul>
+            <li>Salida estricta en JSON.</li>
+            <li>Anti prompt-injection: la transcripci&oacute;n es dato, no instrucci&oacute;n.</li>
+            <li>Marca <code>NO_OBSERVABLE_OFF_RECORD</code> si la llamada empieza ya avanzada.</li>
+        </ul>
+
+        <h3>2.4. Prompt Evaluador (r&uacute;brica)</h3>
+        <p>El evaluador solo puede usar el JSON del extractor. No puede inventar evidencia nueva.</p>
+        <ul>
+            <li>Notas 1-5 por bloque + observabilidad + confianza.</li>
+            <li>Soft skills con evidencia distribuida (1 principal + 3-6 adicionales).</li>
+            <li>Legal/Apertura en OFF-RECORD no afectan la nota final.</li>
+        </ul>
+        <h3>2.5. ¿Qué es RAG y cómo se usa aquí?</h3>
         <p><strong>RAG (Retrieval-Augmented Generation)</strong> es una técnica que combina un buscador vectorial con un modelo generativo. En Centauro, el modelo NO recibe todo el manual: solo recibe los fragmentos más relevantes recuperados de ChromaDB.</p>
         <p>En palabras simples: primero se busca "lo m&aacute;s parecido" en los manuales, luego esa evidencia se adjunta al prompt para que el modelo responda con conocimiento real y no con suposiciones.</p>
 
-        <h3>2.4. &iquest;Qu&eacute; es ChromaDB?</h3>
+        <h3>2.6. &iquest;Qu&eacute; es ChromaDB?</h3>
         <p><strong>ChromaDB</strong> es una base de datos vectorial local. Guarda representaciones matem&aacute;ticas (embeddings) de los manuales para poder buscar por significado y no por palabras exactas. Aqu&iacute; se usa en modo <em>persistente</em>, por eso existe la carpeta <code>.chroma_db</code>.</p>
         <p>Ventaja clave: si el manual cambia, se reindexa y el sistema "recuerda" el nuevo contenido sin necesidad de reentrenar ning&uacute;n modelo.</p>
 
-        <h3>2.5. &iquest;Qu&eacute; es un embedding y para qu&eacute; sirve?</h3>
+        <h3>2.7. &iquest;Qu&eacute; es un embedding y para qu&eacute; sirve?</h3>
         <p>Un <strong>embedding</strong> es un vector num&eacute;rico que representa el significado de un texto. Textos con ideas parecidas quedan cerca en ese espacio vectorial.</p>
         <p>Centauro usa <code>text-embedding-3-small</code> para convertir cada fragmento del manual en n&uacute;meros comparables. Luego ChromaDB busca los fragmentos m&aacute;s cercanos al texto de consulta.</p>
 
-        <h3>2.6. RAG paso a paso (como funciona en este proyecto)</h3>
+        <h3>2.8. RAG paso a paso (como funciona en este proyecto)</h3>
         <ol>
             <li><strong>Indexacion:</strong> Los manuales en <code>inputs/docs</code> se dividen en fragmentos (chunks).</li>
             <li><strong>Embeddings:</strong> Cada fragmento se convierte en un embedding y se guarda en ChromaDB.</li>
@@ -256,11 +279,11 @@
             <li><strong>Respuesta:</strong> El modelo responde usando ese contexto como referencia.</li>
         </ol>
 
-        <h3>2.7. Parametros RAG configurados</h3>
+        <h3>2.9. Parametros RAG configurados</h3>
         <ul>
             <li><strong>Tamano de chunk:</strong> 1000 caracteres.</li>
             <li><strong>Solapamiento:</strong> 100 caracteres para no cortar ideas.</li>
-            <li><strong>Top-K:</strong> 6 fragmentos por consulta (ajustable).</li>
+            <li><strong>Top-K:</strong> 20 fragmentos por consulta (ajustable).</li>
         </ul>
     </section>
 
@@ -341,8 +364,8 @@
     </section>
 
     <section>
-        <h2>4. Metodología de Validación (Sheriff 4.3)</h2>
-        <p>El Sheriff ha evolucionado para validar puntuaciones y proteger contra alucinaciones semánticas (especialmente en legal).</p>
+        <h2>4. Metodología de Validación (Sheriff/Auditor V4)</h2>
+        <p>El Auditor V4 valida evidencia, detecta contradicciones y ajusta notas sin castigar injustamente cuando hay hechos parciales.</p>
 
         <h3>4.1. Validación Existencial</h3>
         <p>Verifica que la evidencia citada por la IA exista realmente en el audio.</p>
@@ -355,13 +378,16 @@
         <p>Para el criterio "LEGAL", el Sheriff no solo busca que la frase exista. Verifica que contenga palabras clave obligatorias: <em>"grabar", "monitorizar", "calidad", "aviso"</em>.</p>
         <p><em>Ejemplo:</em> Si la IA cita "Este espacio es para ti" como aviso legal, el Sheriff lo rechaza (Nota 1) porque no contiene términos legales, aunque la frase sea real.</p>
 
-        <h3>4.3. Cálculo de Nota Ponderada</h3>
+        <h3>4.3. C lculo de Nota Ponderada</h3>
         <p>La nota final se calcula normalizando la escala 1-5:</p>
-        <pre>Puntuación Normalizada = (Nota_IA / 5.0)
-Nota Final = ( Σ (Puntuación_Norm * Peso) / Σ Pesos_Totales ) * 10</pre>
+        <pre>Puntuaci¢n Normalizada = (Nota_IA / 5.0)
+Nota Final = ( S (Puntuaci¢n_Norm * Peso) / S Pesos_Totales ) * 10</pre>
 
         <h3>4.4. Umbral de evidencia (sheriff ligero)</h3>
         <p>La validacion existencial no busca coincidencia exacta. Se limpian tokens y se valida un <strong>ratio minimo de 0.60</strong> entre las palabras de la cita y la transcripcion. Esto tolera pequenas variaciones del ASR (errores de transcripcion).</p>
+
+        <h3>4.5. Auditor flexible (no todo a 1)</h3>
+        <p>Si hay eventos del extractor pero falta evidencia literal perfecta, el auditor baja suavemente la nota y marca <em>BAJA_EVIDENCIA</em> en lugar de castigar con 1.</p>
     </section>
 
     <section>
@@ -381,12 +407,12 @@ CENTAURO_PROJECT/
 │   └── control_gastos.csv  <-- Registro de costes por tokens.
 │
 ├── centauro/               <-- [CÓDIGO FUENTE]
-│   ├── analyze.py          <-- Prompt Coach V3 + Sheriff 4.3.
+│   ├── analyze.py          <-- Pipeline V4: extractor + evaluador + auditor.
 │   ├── llm_client.py       <-- Conexión OpenAI (Temp=0).
 │   ├── rag.py              <-- Gestión de memoria vectorial.
 │   ├── privacy.py          <-- Sanitización de datos personales.
 │   ├── reports.py          <-- Generación de PDF.
-│   ├── schema.py           <-- Modelo de datos (int 1-5).
+│   ├── schema.py           <-- Modelos Pydantic del reporte y bloques.
 │   └── config.py           <-- Configuración global.
 │
 └── main.py                 <-- Script de ejecución principal.
@@ -411,8 +437,8 @@ CENTAURO_PROJECT/
                 </tr>
                 <tr>
                     <td><code>centauro/analyze.py</code></td>
-                    <td>Brain + Sheriff</td>
-                    <td>Prompt "Director Ventas" y validación semántica.</td>
+                    <td>Pipeline + Auditor</td>
+                    <td>Pipeline V4 (extractor/evaluador/auditor) y validaci&oacute;n de evidencia.</td>
                 </tr>
                 <tr>
                     <td><code>centauro/llm_client.py</code></td>
@@ -459,7 +485,7 @@ CENTAURO_PROJECT/
         <p>Se detectan: email, tel&eacute;fono, DNI, NIE e IBAN. Esta capa reduce riesgos de privacidad y cumple buenas pr&aacute;cticas de datos.</p>
 
         <h3>7.3 Generación del reporte</h3>
-        <p>La IA devuelve un JSON con puntuaciones 1-5. El Sheriff valida la evidencia, aplica penalizaciones si es necesario y calcula la nota final.</p>
+        <p>La IA devuelve un JSON con puntuaciones 1-5. El Auditor valida la evidencia, aplica ajustes graduales y calcula la nota final.</p>
         <p>Luego se separan <strong>puntos fuertes</strong> (nota &gt;= 3) y <strong>&aacute;reas de mejora</strong> (nota &lt; 3) para el PDF ejecutivo.</p>
     </section>
 
@@ -481,9 +507,10 @@ CENTAURO_PROJECT/
     </section>
 
     <section>
-        <h2>10. Deep Dive: Ingeniería de Prompt (Coach)</h2>
-        <p>El prompt V3 fuerza a la IA a actuar como un evaluador humano exigente.</p>
-        <pre><span class="str">"Eres un DIRECTOR DE VENTAS DE ÉLITE.\nCONTEXTO: Estás evaluando a asesores académicos.\n\nCRITERIOS DE PUNTUACIÓN:\n1 = Deficiente.\n3 = Cumplidor (Robot).\n5 = Excelente (Experto).\n\nSALIDA OBLIGATORIA: JSON con 'puntuacion' (int) y 'razonamiento'."</span></pre>
+        <h2>10. Deep Dive: Ingeniería de Prompt (Pipeline V4)</h2>
+        <p>El prompt V4 separa extractor (hechos) y evaluador (r&uacute;brica) para evitar alucinaciones.</p>
+        <pre><span class="str">"EXTRACTOR: devuelve eventos con evidencia literal. SIN NOTAS."
+"EVALUADOR: aplica r&uacute;brica solo con esos eventos."</span></pre>
         <h3>10.1. Penalización Automática</h3>
         <p>El sistema está diseñado para desconfiar. Si la IA otorga un 5 pero la evidencia es débil o inexistente, el código Python sobreescribe la nota a 1.</p>
         <h3>10.2. Tipo de evaluacion usada</h3>
@@ -492,18 +519,16 @@ CENTAURO_PROJECT/
     </section>
 
     <section>
-        <h2>11. Pseudocódigo del Sheriff 4.3</h2>
-        <pre><span class="func">def</span> <span class="kw">validar_y_puntuar</span>(item, audio):
-    <span class="com"># 1. Check Existencial</span>
-    <span class="kw">if not</span> existe_en_audio(item.evidencia):
-        item.puntuacion = <span class="str">1</span>
-        item.razonamiento += <span class="str">" [ALUCINACIÓN]"</span>
-        <span class="kw">return</span>
+        <h2>11. Pseudoc¢digo del Sheriff/Auditor V4</h2>
+        <pre><span class="func">def</span> <span class="kw">validar_y_auditar</span>(bloque, audio, eventos):
+    <span class="com"># 1. Evidencia (span o fuzzy)</span>
+    <span class="kw">if</span> evidencia_invalida(bloque):
+        <span class="kw">if</span> eventos: ajustar_suavemente(bloque)
+        <span class="kw">else</span>: penalizar(bloque)
 
-    <span class="com"># 2. Check Semántico (Solo Legal)</span>
-    <span class="kw">if</span> item.criterio == <span class="str">"LEGAL"</span> <span class="kw">and not</span> tiene_palabras_clave(item.evidencia):
-        item.puntuacion = <span class="str">1</span>
-        item.razonamiento += <span class="str">" [NO ES AVISO LEGAL]"</span></pre>
+    <span class="com"># 2. Legal: palabras clave obligatorias</span>
+    <span class="kw">if</span> bloque.id == <span class="str">"LEGAL"</span> <span class="kw">and not</span> tiene_palabras_clave(bloque):
+        penalizar(bloque)</pre>
     </section>
 
     <section>
@@ -518,9 +543,24 @@ CENTAURO_PROJECT/
             <li><strong>Chunking:</strong> Dividir documentos largos en fragmentos pequenos.</li>
             <li><strong>Top-K:</strong> Numero de fragmentos mas relevantes que se recuperan.</li>
             <li><strong>Temperatura:</strong> Controla creatividad. 0 = mas determinista.</li>
+            <li><strong>Observabilidad:</strong> Cuanto se puede evaluar un bloque con la evidencia disponible.</li>
+            <li><strong>Confianza:</strong> Nivel de certeza del evaluador en la nota asignada.</li>
+            <li><strong>OFF-RECORD:</strong> Bloque no evaluable porque ocurri¢ antes de la grabaci¢n.</li>
         </ul>
     </section>
 
+
+    <section>
+        <h2>13. Esquema de Salida V4 (Resumen)</h2>
+        <ul>
+            <li><strong>resumen_contextual:</strong> perfil lead, fase funnel, dificultad, intenci¢n de compra.</li>
+            <li><strong>timeline_momentos_clave:</strong> 3-8 eventos con evidencia literal.</li>
+            <li><strong>evaluacion_por_bloques:</strong> nota 1-5, observabilidad, confianza, evidencias (literal).</li>
+            <li><strong>lista_no_observable:</strong> bloques fuera de evaluaci¢n.</li>
+            <li><strong>auditoria:</strong> contradicciones y evidencias invalidas.</li>
+            <li><strong>scorecard_final:</strong> nota final 0-10 y calificaci&oacute;n cualitativa.</li>
+        </ul>
+    </section>
     <footer>
         <p>Proyecto Centauro - Documentación Interna para Desarrollo</p>
     </footer>

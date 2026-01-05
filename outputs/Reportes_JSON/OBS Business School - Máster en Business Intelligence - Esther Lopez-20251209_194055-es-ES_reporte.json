@@ -1,0 +1,159 @@
+{
+  "asesor": "OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209 194055-es-ES",
+  "meta": {
+    "version_modelo": "Centauro_V11_HeadOfSales",
+    "flags_tecnicos": {}
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Candidato interesado en un máster en analítica de datos, con experiencia previa en formación online.",
+    "fase_funnel": "Exploración y presentación del programa.",
+    "objetivo_del_lead": "Mejorar habilidades en analítica de datos y obtener una doble titulación.",
+    "barreras_principales": [
+      "Costo del máster",
+      "Necesidad de ayuda económica"
+    ],
+    "resultado_general": "Candidato interesado, pero necesita más información sobre ayudas económicas y costos."
+  },
+  "cobertura_revision": {
+    "tramo_1_inicio": "hallazgos",
+    "tramo_2_exploracion": "hallazgos",
+    "tramo_3_desarrollo": "hallazgos",
+    "tramo_4_objeciones": "hallazgos",
+    "tramo_5_cierre": "hallazgos",
+    "alerta_cobertura": "OK"
+  },
+  "momentos_clave": [
+    {
+      "tramo": "1",
+      "evento": "Inicio de la llamada y presentación del asesor",
+      "cita": "[ASESOR]: Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada, si le parece y así con cualquier cosa."
+    },
+    {
+      "tramo": "2",
+      "evento": "Detección de necesidades del lead",
+      "cita": "[ASESOR]: ¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar?"
+    },
+    {
+      "tramo": "3",
+      "evento": "Presentación de la metodología del programa",
+      "cita": "[ASESOR]: La metodología que nosotros utilizamos es cien por cien online."
+    },
+    {
+      "tramo": "4",
+      "evento": "Manejo de objeciones sobre el costo",
+      "cita": "[ASESOR]: En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación."
+    },
+    {
+      "tramo": "5",
+      "evento": "Cierre y establecimiento de siguiente paso",
+      "cita": "[ASESOR]: Entonces, mire, nosotros lo hacemos tanto de manera al contado que en este caso se le reduce."
+    }
+  ],
+  "evaluacion_por_bloques": [
+    {
+      "bloque": "Apertura",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada, si le parece y así con cualquier cosa.",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor realiza una apertura adecuada, pero carece de un saludo más cálido o conexión personal.",
+      "recomendacion_accionable": "Incluir un saludo más personalizado y una breve introducción sobre la importancia de la llamada.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Detección de necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: ¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar?",
+      "evidencias_extra": [
+        "[ASESOR]: ¿Pudo mirar las herramientas con las que contaba el programa?",
+        "[ASESOR]: ¿Ya lo he hecho, tengo un diplomado en una entidad que se llama Avent Business School, es completamente a distancia."
+      ],
+      "razonamiento": "El asesor realiza preguntas relevantes para entender las necesidades del lead, aunque podría profundizar más en las motivaciones personales.",
+      "recomendacion_accionable": "Incluir preguntas adicionales sobre las expectativas del lead respecto al máster.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Presentación del programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: La metodología que nosotros utilizamos es cien por cien online.",
+      "evidencias_extra": [
+        "[ASESOR]: Lo que hacemos es trabajar con una masterclass a la semana de unos 90 minutos que en horario del Salvador sería más o menos al mediodía.",
+        "[ASESOR]: A partir del sexto mes se haría el trabajo final de máster, que estará alineado con todas las necesidades reales del mercado laboral."
+      ],
+      "razonamiento": "El asesor presenta el programa de manera clara y estructurada, aunque podría vincular más los beneficios del programa a las necesidades del lead.",
+      "recomendacion_accionable": "Conectar más explícitamente los beneficios del programa con las motivaciones del lead.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Manejo de objeciones",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación.",
+      "evidencias_extra": [
+        "[ASESOR]: Las ayudas serían menos 2418 dólares y se quedaría una cuota final.",
+        "[ASESOR]: Si usted dentro de un par de años dice. Mire, es que necesito un workshop de liderazgo porque es que lo hice, pero como que se me ha perdido un poco, pues puede volver y gestionarlo de nuevo."
+      ],
+      "razonamiento": "El asesor maneja las objeciones de manera efectiva, ofreciendo soluciones y alternativas, aunque podría ser más proactivo en la validación de las preocupaciones del lead.",
+      "recomendacion_accionable": "Asegurarse de validar las preocupaciones del lead antes de ofrecer soluciones.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Cierre y siguiente paso",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Entonces, mire, nosotros lo hacemos tanto de manera al contado que en este caso se le reduce.",
+      "evidencias_extra": [
+        "[ASESOR]: Yo diría que sí, entonces si me manda la información yo no analizo y después podemos conversar ya en forma.",
+        "[ASESOR]: El día jueves me pongo en contacto con usted, le va bien para esta hora?"
+      ],
+      "razonamiento": "El asesor establece un cierre claro y propone un siguiente paso, aunque podría ser más asertivo en la confirmación del compromiso del lead.",
+      "recomendacion_accionable": "Incluir un resumen de lo acordado y confirmar el compromiso del lead de manera más directa.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Estilo y comunicación",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Mire, déjeme un segundín que vengo por aquí.",
+      "evidencias_extra": [
+        "[ASESOR]: A ver, a ver ahora cuando cuando vea usted la pantalla me lo me avisa y así.",
+        "[ASESOR]: Al final, podrá desarrollar un proyecto y su posterior implementación inmediata en la empresa o en el emprendimiento."
+      ],
+      "razonamiento": "El asesor mantiene un tono profesional y empático, aunque en algunos momentos puede parecer un poco informal.",
+      "recomendacion_accionable": "Mantener un tono profesional y directo en todo momento.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Legal (Compliance)",
+      "puntuacion_1_5": null,
+      "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
+      "confianza": 1.0,
+      "evidencia_principal": "NO_OBSERVABLE (OFF-RECORD)",
+      "evidencias_extra": [],
+      "razonamiento": "No se observó el cumplimiento de las normativas legales, pero no se penaliza ya que puede haber ocurrido off-record.",
+      "recomendacion_accionable": "Asegurarse de incluir el aviso legal en todas las llamadas.",
+      "recepcion_cliente": null
+    }
+  ],
+  "puntuacion_global_1_5": 3.83,
+  "feedback_resumido": {
+    "fortalezas": [
+      "Buena detección de necesidades",
+      "Presentación clara del programa",
+      "Manejo efectivo de objeciones"
+    ],
+    "areas_mejora": [
+      "Mejorar la conexión personal en la apertura",
+      "Vincular más los beneficios del programa a las necesidades del lead",
+      "Ser más asertivo en la confirmación del compromiso del lead"
+    ]
+  }
+}

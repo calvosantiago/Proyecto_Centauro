@@ -1,64 +1,62 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
-# --- NIVEL 1: HECHOS OBSERVABLES (EXTRACTOR) ---
+# --- SUB-MODELOS ---
 
-class EventoClave(BaseModel):
-    fase: str = Field(..., description="Fase de la llamada (ej: Sondeo, Cierre)")
-    evento: str = Field(..., description="Descripción del hecho (ej: 'Cliente menciona dolor por precio')")
-    cita_evidencia: str = Field(..., description="Texto literal transcrito")
-    timestamp_aprox: Optional[str] = Field(None, description="Momento aprox (Inicio/Mitad/Fin) o Timecode")
-
-# --- NIVEL 2: EVALUACIÓN (EVALUADOR) ---
+class RecepcionCliente(BaseModel):
+    estado: Literal["ALINEADO", "NEUTRO", "RESISTENTE", "NO_DISPONIBLE", "DESCONOCIDO"] = "DESCONOCIDO"
+    evidencia: str = ""
 
 class BloqueEvaluacion(BaseModel):
-    id_bloque: str
-    titulo: str
-    puntuacion_1_5: Optional[int] = Field(None, description="Nota 1-5. Null si es Off-Record")
-    observabilidad: str = Field("ALTA", description="ALTA, MEDIA, BAJA o NULA (Off-Record)")
+    bloque: str
+    puntuacion_1_5: Optional[int] = Field(None, description="Nota 1-5. Null si es no observable")
+    observabilidad: str = "ALTA" # ALTA|MEDIA|BAJA|NO_OBSERVABLE_OFF_RECORD
+    confianza: float = 0.0
+    evidencia_principal: str = ""
+    evidencias_extra: List[str] = []
+    razonamiento: str = ""
+    recomendacion_accionable: str = ""
     
-    # Estado: EVALUADO, OFF_RECORD, SIN_EVIDENCIA
-    estado_evaluacion: str = "EVALUADO" 
-    
-    evidencias_validadas: List[str] = Field(default_factory=list, description="Lista de citas que sustentan la nota")
-    razonamiento: str = "Sin razonamiento."
-    recomendaciones_accionables: Optional[str] = None
+    # Campo especial solo para el bloque de cierre (opcional en otros)
+    recepcion_cliente: Optional[RecepcionCliente] = None
 
-# --- NIVEL 3: REPORTE FINAL (AUDITOR) ---
-
-class ScorecardFinal(BaseModel):
-    promedio_calculado_1_5: float = 0.0
-    nota_final_0_10: float = 0.0
-    calificacion_cualitativa: str = "Pendiente" # A, B, C, D
-    semaforo: str = "GRIS" # VERDE, AMARILLO, ROJO
+class CoberturaRevision(BaseModel):
+    tramo_1_inicio: str = "sin_hallazgos_en_tramo"
+    tramo_2_exploracion: str = "sin_hallazgos_en_tramo"
+    tramo_3_desarrollo: str = "sin_hallazgos_en_tramo"
+    tramo_4_objeciones: str = "sin_hallazgos_en_tramo"
+    tramo_5_cierre: str = "sin_hallazgos_en_tramo"
+    alerta_cobertura: str = "OK" # OK | cobertura_insuficiente
 
 class ResumenContextual(BaseModel):
-    perfil_lead: str = "Desconocido"
-    fase_funnel: str = "Desconocida"
-    nivel_dificultad: str = "Medio"
-    intencion_compra: str = "Desconocida"
+    perfil_lead: str = "..."
+    fase_funnel: str = "..."
+    objetivo_del_lead: str = "..."
+    barreras_principales: List[str] = []
+    resultado_general: str = "..."
+
+class MomentoClave(BaseModel):
+    tramo: str
+    evento: str
+    cita: str
 
 class FeedbackResumido(BaseModel):
     fortalezas: List[str] = []
     areas_mejora: List[str] = []
 
 class MetaData(BaseModel):
-    version_modelo: str = "Centauro_v3_Tridente"
-    flags_tecnicos: dict = {} # ej: {"recording_started_late": True}
+    version_modelo: str = "Centauro_V11_HeadOfSales"
+    flags_tecnicos: dict = {}
 
-# --- OBJETO RAÍZ ---
+# --- MODELO RAÍZ (Match exacto con tu JSON) ---
 
 class ReporteCalidad(BaseModel):
-    asesor: str = "Desconocido"
-    meta: MetaData = Field(default_factory=MetaData)
-    resumen_contextual: ResumenContextual = Field(default_factory=ResumenContextual)
+    asesor: str = "Desconocido" # Se rellena en Python
+    meta: MetaData = Field(default_factory=MetaData) # Se rellena en Python
     
-    # Timeline de hechos (Lo que PASÓ)
-    timeline_momentos_clave: List[EventoClave] = []
-    
-    # Evaluación (Lo que OPINAMOS)
-    evaluacion_por_bloques: List[BloqueEvaluacion] = []
-    
-    # Nota Final
-    scorecard_final: ScorecardFinal = Field(default_factory=ScorecardFinal)
-    feedback_resumido: FeedbackResumido = Field(default_factory=FeedbackResumido)
+    resumen_contextual: ResumenContextual
+    cobertura_revision: CoberturaRevision
+    momentos_clave: List[MomentoClave] = []
+    evaluacion_por_bloques: List[BloqueEvaluacion]
+    puntuacion_global_1_5: float = 0.0
+    feedback_resumido: FeedbackResumido

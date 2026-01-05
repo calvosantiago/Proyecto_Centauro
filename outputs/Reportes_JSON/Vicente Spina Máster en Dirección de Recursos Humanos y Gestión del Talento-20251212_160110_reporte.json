@@ -1,0 +1,128 @@
+{
+  "asesor": "Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212 160110",
+  "meta": {
+    "version_modelo": "Centauro_V11_HeadOfSales",
+    "flags_tecnicos": {}
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Uriel, encargado de 3 departamentos en una empresa japonesa, supervisando Recursos Humanos por primera vez.",
+    "fase_funnel": "Investigación",
+    "objetivo_del_lead": "Buscar un máster que le ayude a mejorar su gestión en Recursos Humanos y desarrollo organizacional.",
+    "barreras_principales": [
+      "Falta de tiempo para estudiar debido a la carga laboral.",
+      "Necesidad de una decisión bien fundamentada sobre el máster."
+    ],
+    "resultado_general": "El lead está interesado pero no está listo para comprometerse en este momento."
+  },
+  "cobertura_revision": {
+    "tramo_1_inicio": "hallazgos",
+    "tramo_2_exploracion": "hallazgos",
+    "tramo_3_desarrollo": "hallazgos",
+    "tramo_4_objeciones": "hallazgos",
+    "tramo_5_cierre": "hallazgos",
+    "alerta_cobertura": "OK"
+  },
+  "momentos_clave": [
+    {
+      "tramo": "1",
+      "evento": "Inicio de la llamada",
+      "cita": "[ASESOR]: Sí, la idea es un poco conocerte a ti."
+    },
+    {
+      "tramo": "2",
+      "evento": "Exploración de necesidades",
+      "cita": "[ASESOR]: Entonces cuéntame un poquito para ponernos en contexto nuevamente."
+    },
+    {
+      "tramo": "3",
+      "evento": "Desarrollo de la conversación sobre el máster",
+      "cita": "[ASESOR]: ¿Ver el Máster en Dirección de Recursos Humanos y gestión del talento también podría ser que de pronto tenga que ver más con con tu tarea específica?"
+    },
+    {
+      "tramo": "4",
+      "evento": "Manejo de objeciones sobre la carga de trabajo",
+      "cita": "[LEAD]: O sea, y la realidad es que ese diplomado lo pasé haciendo los trabajos a las 1:02 h de la mañana."
+    },
+    {
+      "tramo": "5",
+      "evento": "Cierre y siguiente paso",
+      "cita": "[LEAD]: ¿Te parece? Sí, claro, que pase toda esta época un poco a ajetreada no también, y ya con eso, con eso pues vamos aterrizando las ideas."
+    }
+  ],
+  "evaluacion_por_bloques": [
+    {
+      "bloque": "Apertura",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Sí, la idea es un poco conocerte a ti.",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor inicia la llamada de manera educada y establece el propósito de la conversación.",
+      "recomendacion_accionable": "Incluir una pregunta más personal para crear conexión.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Detección de necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Entonces cuéntame un poquito para ponernos en contexto nuevamente.",
+      "evidencias_extra": [
+        "[LEAD]: La realidad es que como te decía, no en un principio, pues no, yo no tengo un perfil de RH.",
+        "[LEAD]: Entonces, con base en todas esas cosas, este. Es que al final viene como me decía de tengo que meterme más en el detalle."
+      ],
+      "razonamiento": "El asesor hace preguntas abiertas que permiten al lead expresar sus necesidades y preocupaciones.",
+      "recomendacion_accionable": "Profundizar más en las motivaciones del lead para estudiar el máster.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Presentación del programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Nosotros como tal nació como la primera Escuela de Negocios online al 100% en español.",
+      "evidencias_extra": [
+        "[ASESOR]: Y por último estamos nosotros, que somos planeta, formación en universidades.",
+        "[ASESOR]: La metodología Harvard estudio del caso."
+      ],
+      "razonamiento": "El asesor presenta información relevante sobre la escuela y el programa, alineando con las necesidades del lead.",
+      "recomendacion_accionable": "Incluir ejemplos específicos de cómo el programa puede resolver los problemas del lead.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Manejo de objeciones",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[LEAD]: O sea, y la realidad es que ese diplomado lo pasé haciendo los trabajos a las 1:02 h de la mañana.",
+      "evidencias_extra": [
+        "[LEAD]: No quiero hacer eso este, pero pero con toda esta explicación ya me dejas más claro el panorama."
+      ],
+      "razonamiento": "El asesor escucha las preocupaciones del lead, pero podría haber validado más sus sentimientos antes de continuar.",
+      "recomendacion_accionable": "Validar las preocupaciones del lead y ofrecer soluciones específicas.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Cierre y siguiente paso",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[LEAD]: ¿Te parece? Sí, claro, que pase toda esta época un poco a ajetreada no también.",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor propone un seguimiento, pero no establece un compromiso claro ni fechas específicas.",
+      "recomendacion_accionable": "Definir un siguiente paso concreto y establecer un compromiso de seguimiento.",
+      "recepcion_cliente": null
+    }
+  ],
+  "puntuacion_global_1_5": 3.4,
+  "feedback_resumido": {
+    "fortalezas": [
+      "El asesor establece un buen rapport y hace preguntas abiertas que permiten al lead expresar sus necesidades."
+    ],
+    "areas_mejora": [
+      "Profundizar en las motivaciones del lead.",
+      "Validar las objeciones de manera más efectiva.",
+      "Establecer compromisos claros en el cierre."
+    ]
+  }
+}

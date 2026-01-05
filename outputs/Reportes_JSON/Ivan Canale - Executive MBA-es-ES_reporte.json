@@ -1,0 +1,159 @@
+{
+  "asesor": "Ivan Canale - Executive MBA-es-ES",
+  "meta": {
+    "version_modelo": "Centauro_V11_HeadOfSales",
+    "flags_tecnicos": {}
+  },
+  "resumen_contextual": {
+    "perfil_lead": "Zoila, ingeniera en marketing, busca consolidarse en su puesto actual y postular a una gerencia. Tiene experiencia en empresas de consumo masivo y ventas.",
+    "fase_funnel": "Exploración",
+    "objetivo_del_lead": "Obtener una maestría para actualizarse en tendencias y mejorar su perfil profesional.",
+    "barreras_principales": [
+      "Costo del programa",
+      "Comparación con otras opciones de estudio"
+    ],
+    "resultado_general": "Interesada en el programa, pero necesita evaluar opciones de financiamiento."
+  },
+  "cobertura_revision": {
+    "tramo_1_inicio": "hallazgos",
+    "tramo_2_exploracion": "hallazgos",
+    "tramo_3_desarrollo": "hallazgos",
+    "tramo_4_objeciones": "hallazgos",
+    "tramo_5_cierre": "hallazgos",
+    "alerta_cobertura": "OK"
+  },
+  "momentos_clave": [
+    {
+      "tramo": "1",
+      "evento": "Inicio de la llamada y presentación del asesor",
+      "cita": "[ASESOR]: Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar."
+    },
+    {
+      "tramo": "2",
+      "evento": "Exploración de necesidades y objetivos de Zoila",
+      "cita": "[ASESOR]: ¿Zoila, cuéntame qué herramientas necesitas para poder ser gerente de marketing?"
+    },
+    {
+      "tramo": "3",
+      "evento": "Presentación de la metodología y beneficios del programa",
+      "cita": "[ASESOR]: La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros."
+    },
+    {
+      "tramo": "4",
+      "evento": "Manejo de objeciones sobre el costo del programa",
+      "cita": "[ASESOR]: Mira, el costo oficial del programa son €16000 son 13900, perdón, 15000 dólares."
+    },
+    {
+      "tramo": "5",
+      "evento": "Cierre y propuesta de siguiente paso",
+      "cita": "[ASESOR]: ¿Quieres saber más sobre una financiación tipo aplazado?"
+    }
+  ],
+  "evaluacion_por_bloques": [
+    {
+      "bloque": "Apertura",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar.",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor inicia la llamada con un enfoque claro en conocer al lead, pero falta un saludo más cálido y personal.",
+      "recomendacion_accionable": "Incluir un saludo más personalizado y una breve introducción sobre el programa.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Detección de necesidades",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: ¿Zoila, cuéntame qué herramientas necesitas para poder ser gerente de marketing?",
+      "evidencias_extra": [
+        "[ASESOR]: ¿Cómo te sientes a nivel planificación, a nivel estrategia, a nivel liderazgo tienes personas a cargo cuántas?",
+        "[ASESOR]: ¿Qué te ha impedido realizarlo hasta el momento?"
+      ],
+      "razonamiento": "El asesor realiza preguntas relevantes que permiten entender las necesidades y objetivos de Zoila, aunque podría profundizar más en sus motivaciones.",
+      "recomendacion_accionable": "Hacer preguntas más específicas sobre las expectativas de Zoila respecto al programa.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Presentación del programa",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros.",
+      "evidencias_extra": [
+        "[ASESOR]: Fíjate el nombre o b s significa online Business School, que quiero decir con esto que tenemos hemos nacido de esta manera.",
+        "[ASESOR]: Aquí buscamos literalmente lo opuesto, calidad y no cantidad."
+      ],
+      "razonamiento": "El asesor presenta el programa de manera clara y conecta los beneficios con las necesidades del lead, aunque podría ser más persuasivo.",
+      "recomendacion_accionable": "Incluir ejemplos concretos de cómo el programa ha beneficiado a otros alumnos.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Manejo de objeciones",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Mira, el costo oficial del programa son €16000 son 13900, perdón, 15000 dólares.",
+      "evidencias_extra": [
+        "[ASESOR]: Si somos admitidos ahí, claro, el escenario ya nos cambia drásticamente.",
+        "[ASESOR]: ¿Cuéntame cómo te quedaría a nivel matrícula y cómo te quedaría a nivel cuota?"
+      ],
+      "razonamiento": "El asesor aborda las objeciones sobre el costo de manera efectiva, ofreciendo alternativas y mostrando flexibilidad.",
+      "recomendacion_accionable": "Reforzar la propuesta de valor del programa en relación al costo.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Cierre y siguiente paso",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: ¿Quieres saber más sobre una financiación tipo aplazado?",
+      "evidencias_extra": [
+        "[ASESOR]: Si te hace falta hacerlo con más de una tarjeta sí que lo podemos hacer.",
+        "[ASESOR]: ¿Tú manejas tarjetas Visa, Master American Express o Diners?"
+      ],
+      "razonamiento": "El cierre es proactivo y busca asegurar el compromiso del lead, aunque podría ser más directo en la solicitud de documentación.",
+      "recomendacion_accionable": "Asegurarse de que el lead entienda claramente los próximos pasos y la documentación necesaria.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Estilo y comunicación",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Esto es algo muy importante, mira de aquí hasta abril. ¿No es que no vas a hacer nada?",
+      "evidencias_extra": [
+        "[ASESOR]: Fíjate ahora la cantidad de servicios extracurriculares que te va a brindar o b s.",
+        "[ASESOR]: ¿Cómo puedo aplicar todos estos conocimientos, metodologías, herramientas, actualizaciones, softwares dentro de mi puesto de trabajo?"
+      ],
+      "razonamiento": "El asesor mantiene un tono profesional y claro, aunque en algunos momentos puede parecer un poco monótono.",
+      "recomendacion_accionable": "Variar el tono y ritmo para mantener el interés del lead.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Legal (Compliance)",
+      "puntuacion_1_5": 5,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: ¿Tú manejas tarjetas Visa, Master American Express o Diners?",
+      "evidencias_extra": [],
+      "razonamiento": "Se cumple con la normativa de legalidad y se asegura que el lead esté informado sobre los aspectos legales.",
+      "recomendacion_accionable": "Continuar asegurando que se cumplan todos los requisitos legales en el proceso.",
+      "recepcion_cliente": null
+    }
+  ],
+  "puntuacion_global_1_5": 4.0,
+  "feedback_resumido": {
+    "fortalezas": [
+      "Buena detección de necesidades",
+      "Presentación clara del programa",
+      "Manejo efectivo de objeciones"
+    ],
+    "areas_mejora": [
+      "Mejorar la apertura con un saludo más cálido",
+      "Profundizar en las motivaciones del lead",
+      "Variar el tono y ritmo de la comunicación"
+    ]
+  }
+}

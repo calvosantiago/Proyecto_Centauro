@@ -4,14 +4,12 @@ import chromadb.utils.embedding_functions as embedding_functions
 from .config import settings
 
 # 1. Configurar la función de Embeddings (Nativa de Chroma + OpenAI)
-# Esto es más robusto que importarla de llm_client porque Chroma gestiona los batches.
 openai_ef = embedding_functions.OpenAIEmbeddingFunction(
     api_key=settings.OPENAI_API_KEY,
     model_name=settings.MODELO_EMBEDDING
 )
 
 # 2. Inicializar el Cliente de ChromaDB
-# CORRECCIÓN: Usamos CHROMA_PATH, no CHROMA_DIR
 chroma_client = chromadb.PersistentClient(path=str(settings.CHROMA_PATH))
 
 # 3. Obtener o crear la colección
@@ -26,7 +24,7 @@ def indexar_documentacion():
     """
     print("--- 📚 Iniciando Indexación RAG ---")
     
-    # CORRECCIÓN: Construimos la ruta usando INPUTS_DIR
+    # Restauramos TU ruta original: inputs/docs
     docs_dir = settings.INPUTS_DIR / "docs"
     
     # Crear carpeta si no existe
@@ -50,9 +48,7 @@ def indexar_documentacion():
                 
             if not texto: continue
             
-            # ESTRATEGIA DE CHUNKING:
-            # Dividimos el texto en bloques de 1000 caracteres con un solapamiento de 100
-            # para no cortar ideas a la mitad.
+            # TU ESTRATEGIA DE CHUNKING ORIGINAL:
             chunk_size = 1000
             overlap = 100
             chunks = []
@@ -66,8 +62,7 @@ def indexar_documentacion():
             ids = [f"{archivo.name}_{i}" for i in range(len(chunks))]
             metadatas = [{"fuente": archivo.name, "chunk_id": i} for i in range(len(chunks))]
             
-            # UPSERT: Insertar o Actualizar
-            # No necesitamos generar embeddings manualmente, 'openai_ef' lo hace aquí automáticamente.
+            # UPSERT
             collection.upsert(
                 ids=ids,
                 documents=chunks,
@@ -82,13 +77,14 @@ def indexar_documentacion():
 
     print(f"✅ Indexación completada. Total fragmentos en memoria: {collection.count()}")
 
-def buscar_contexto(query_texto, n_results=6):
+def buscar_contexto(query_texto, n_results=20):
     """
-    Busca los fragmentos más relevantes semánticamente para la query.
+    Busca los fragmentos más relevantes.
+    MODIFICACIÓN: n_results=20 para asegurar que gpt-4o-mini tenga todo el contexto.
     """
     total_docs = collection.count()
     if total_docs == 0:
-        return "ADVERTENCIA: No hay manuales indexados en el sistema. Analiza basándote en tu criterio general."
+        return ""
         
     # Seguridad: No pedir más resultados de los que existen
     k_seguro = min(n_results, total_docs)
@@ -98,11 +94,12 @@ def buscar_contexto(query_texto, n_results=6):
         n_results=k_seguro
     )
     
-    # Chroma devuelve una lista de listas (porque permite batched queries).
-    # Nosotros solo hicimos una query, así que tomamos el índice [0].
+    if not resultados['documents']:
+        return ""
+
     lista_documentos = resultados['documents'][0]
     
-    # Unimos los fragmentos con separadores claros para el Prompt
+    # Unimos los fragmentos
     contexto_unido = "\n\n--- FRAGMENTO DEL MANUAL ---\n".join(lista_documentos)
     
     return contexto_unido

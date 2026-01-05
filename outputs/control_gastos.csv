@@ -119,3 +119,91 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 2026-01-02,10:23:05,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017.vtt,11931,1096,13027,0.002447
 2026-01-02,10:23:30,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES.vtt,6891,1215,8106,0.001763
 2026-01-02,10:23:54,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110.vtt,13433,1223,14656,0.002749
+2026-01-02,13:41:19,entrevista_Paola_Suarez.vtt_extractor,13661,661,14322,0.002446
+2026-01-02,13:41:43,entrevista_Paola_Suarez.vtt_evaluador,3306,1193,4499,0.001212
+2026-01-02,13:41:53,Ivan Canale - Executive MBA-es-ES.vtt_extractor,15825,539,16364,0.002697
+2026-01-02,13:42:17,Ivan Canale - Executive MBA-es-ES.vtt_evaluador,3184,1067,4251,0.001118
+2026-01-02,13:42:30,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES.vtt_extractor,12485,525,13010,0.002188
+2026-01-02,13:42:58,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES.vtt_evaluador,3170,1193,4363,0.001191
+2026-01-02,13:43:14,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017.vtt_extractor,11580,680,12260,0.002145
+2026-01-02,13:43:43,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017.vtt_evaluador,3307,1262,4569,0.001253
+2026-01-02,13:43:56,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES.vtt_extractor,6540,679,7219,0.001388
+2026-01-02,13:44:22,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES.vtt_evaluador,3306,1251,4557,0.001246
+2026-01-02,13:44:35,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110.vtt_extractor,13082,527,13609,0.002278
+2026-01-02,13:44:58,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110.vtt_evaluador,3181,1161,4342,0.001174
+2026-01-02,14:33:02,entrevista_Paola_Suarez_full,13311,626,13937,0.002372
+2026-01-02,14:33:18,Ivan Canale - Executive MBA-es-ES_full,15475,692,16167,0.002736
+2026-01-02,14:33:30,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,12135,613,12748,0.002188
+2026-01-02,14:33:44,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,11230,758,11988,0.002139
+2026-01-02,14:33:58,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,6190,673,6863,0.001332
+2026-01-02,14:34:11,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,12732,565,13297,0.002249
+2026-01-02,14:35:09,entrevista_Paola_Suarez_full,18297,738,19035,0.003187
+2026-01-02,14:35:22,Ivan Canale - Executive MBA-es-ES_full,20461,673,21134,0.003473
+2026-01-02,14:35:37,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17121,756,17877,0.003022
+2026-01-02,14:35:50,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16216,789,17005,0.002906
+2026-01-02,14:36:05,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11176,754,11930,0.002129
+2026-01-02,14:36:17,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,17718,584,18302,0.003008
+2026-01-02,14:39:21,entrevista_Paola_Suarez_full,18760,1544,20304,0.003740
+2026-01-02,14:39:53,Ivan Canale - Executive MBA-es-ES_full,20924,1590,22514,0.004093
+2026-01-02,14:40:25,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17584,1642,19226,0.003623
+2026-01-02,14:40:53,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16679,1543,18222,0.003428
+2026-01-02,14:41:21,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11639,1532,13171,0.002665
+2026-01-02,14:41:55,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18181,1662,19843,0.003724
+2026-01-02,14:45:04,entrevista_Paola_Suarez_full,18760,1530,20290,0.003732
+2026-01-02,14:45:37,Ivan Canale - Executive MBA-es-ES_full,20924,1626,22550,0.004114
+2026-01-02,14:46:08,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17584,1657,19241,0.003632
+2026-01-02,14:46:47,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16679,1583,18262,0.003452
+2026-01-02,14:47:28,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11639,1571,13210,0.002688
+2026-01-02,14:48:06,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18181,1626,19807,0.003703
+2026-01-02,14:55:38,entrevista_Paola_Suarez_full,18808,1453,20261,0.003693
+2026-01-02,14:55:56,Ivan Canale - Executive MBA-es-ES_full,20972,1648,22620,0.004135
+2026-01-02,14:56:17,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17632,1651,19283,0.003635
+2026-01-02,14:56:39,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16727,1601,18328,0.003470
+2026-01-02,14:57:00,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11687,1682,13369,0.002762
+2026-01-02,14:57:25,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18229,1918,20147,0.003885
+2026-01-02,15:04:31,entrevista_Paola_Suarez_full,18808,1399,20207,0.003661
+2026-01-02,15:04:57,Ivan Canale - Executive MBA-es-ES_full,20972,1612,22584,0.004113
+2026-01-02,15:05:26,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17632,1613,19245,0.003613
+2026-01-02,15:05:57,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16727,1632,18359,0.003488
+2026-01-02,15:06:28,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11687,1643,13330,0.002739
+2026-01-02,15:06:55,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18229,1585,19814,0.003685
+2026-01-02,15:24:32,entrevista_Paola_Suarez_full,18816,1373,20189,0.003646
+2026-01-02,15:25:03,Ivan Canale - Executive MBA-es-ES_full,20980,1767,22747,0.004207
+2026-01-02,15:25:34,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17640,1603,19243,0.003608
+2026-01-02,15:26:05,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16735,1699,18434,0.003530
+2026-01-02,15:26:36,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11695,1590,13285,0.002708
+2026-01-02,15:27:13,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18237,1801,20038,0.003816
+2026-01-02,15:31:45,entrevista_Paola_Suarez_diarizacion,12027,11873,23900,0.008928
+2026-01-02,15:32:17,entrevista_Paola_Suarez_full,18797,1431,20228,0.003678
+2026-01-02,15:38:00,Ivan Canale - Executive MBA-es-ES_diarizacion,14191,14209,28400,0.010654
+2026-01-02,15:38:34,Ivan Canale - Executive MBA-es-ES_full,21095,1685,22780,0.004175
+2026-01-02,15:47:31,entrevista_Paola_Suarez_diar_1,12057,11892,23949,0.008944
+2026-01-02,15:48:10,entrevista_Paola_Suarez_full,18944,1867,20811,0.003962
+2026-01-02,15:53:18,Ivan Canale - Executive MBA-es-ES_diar_1,14229,14014,28243,0.010543
+2026-01-02,15:53:59,Ivan Canale - Executive MBA-es-ES_full,21068,1892,22960,0.004295
+2026-01-02,15:57:23,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_1,10907,10801,21708,0.008117
+2026-01-02,16:03:50,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17830,16384,34214,0.012505
+2026-01-05,09:44:55,entrevista_Paola_Suarez_diar_1,12192,11872,24064,0.008952
+2026-01-05,09:45:30,entrevista_Paola_Suarez_full,18926,1700,20626,0.003859
+2026-01-05,09:50:30,Ivan Canale - Executive MBA-es-ES_diar_1,14360,14033,28393,0.010574
+2026-01-05,09:51:06,Ivan Canale - Executive MBA-es-ES_full,21087,1780,22867,0.004231
+2026-01-05,09:54:47,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_1,11029,10812,21841,0.008142
+2026-01-05,09:55:26,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17866,1802,19668,0.003761
+2026-01-05,09:58:13,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_1,10122,9781,19903,0.007387
+2026-01-05,09:58:48,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16835,1534,18369,0.003446
+2026-01-05,10:00:19,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_1,5088,4746,9834,0.003611
+2026-01-05,10:01:04,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11800,1841,13641,0.002875
+2026-01-05,10:07:07,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_1,11631,11193,22824,0.008460
+2026-01-05,10:07:46,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18243,1726,19969,0.003772
+2026-01-05,10:38:10,entrevista_Paola_Suarez_diar_1,12192,11871,24063,0.008951
+2026-01-05,10:38:34,entrevista_Paola_Suarez_full,18925,1353,20278,0.003651
+2026-01-05,10:40:42,Ivan Canale - Executive MBA-es-ES_diar_1,14360,14018,28378,0.010565
+2026-01-05,10:41:16,Ivan Canale - Executive MBA-es-ES_full,21072,1859,22931,0.004276
+2026-01-05,10:45:02,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_1,11029,10693,21722,0.008070
+2026-01-05,10:45:43,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17747,1744,19491,0.003708
+2026-01-05,10:49:00,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_1,10122,9776,19898,0.007384
+2026-01-05,10:49:41,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16830,1866,18696,0.003644
+2026-01-05,10:51:23,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_1,5088,4746,9834,0.003611
+2026-01-05,10:52:07,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11800,1912,13712,0.002917
+2026-01-05,10:55:07,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_1,11631,11295,22926,0.008522
+2026-01-05,10:55:45,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18347,1428,19775,0.003609
