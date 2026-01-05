@@ -6,13 +6,13 @@
   },
   "resumen_contextual": {
     "perfil_lead": "Fernando, propietario de una cadena de pastelerías sin gluten con 5 tiendas en Barcelona y 30 en total en España, con experiencia en neuromarketing.",
-    "fase_funnel": "Exploración y cierre de admisión.",
-    "objetivo_del_lead": "Mejorar sus conocimientos en neuromarketing y comportamiento del consumidor para aplicar en su negocio.",
+    "fase_funnel": "Consideración",
+    "objetivo_del_lead": "Realizar un máster en neuromarketing y comportamiento del consumidor para mejorar su conocimiento y aplicación en su negocio.",
     "barreras_principales": [
       "No ha utilizado créditos Fundae",
-      "Necesita información sobre el proceso de admisión y financiación."
+      "Necesita información sobre el coste y financiación"
     ],
-    "resultado_general": "Interés en el programa y disposición para enviar la documentación necesaria."
+    "resultado_general": "Interés en el programa y disposición para enviar documentación para la admisión."
   },
   "cobertura_revision": {
     "tramo_1_inicio": "hallazgos",
@@ -26,27 +26,27 @@
     {
       "tramo": "1",
       "evento": "Presentación del asesor y del programa",
-      "cita": "Tardes y encantado de conocerte y ponerle cara a tu solicitud de información."
+      "cita": "[ASESOR]: Tardes y encantado de conocerte y ponerle cara a tu solicitud de información."
     },
     {
       "tramo": "2",
       "evento": "Exploración de necesidades del lead",
-      "cita": "¿Cuántos años llevas implementando estrategias de neuromarketing?"
+      "cita": "[ASESOR]: Corrígeme si recuerdo mal, pero tienes empresa propia."
     },
     {
       "tramo": "3",
       "evento": "Presentación del programa",
-      "cita": "Nuestro máster en neuromarketing y comportamiento del consumidor está considerado por el ranking dead universal."
+      "cita": "[ASESOR]: Yo creo que ahí es donde vamos a ver con el plan de estudios."
     },
     {
       "tramo": "4",
       "evento": "Manejo de objeciones sobre financiación",
-      "cita": "Los créditos fundáis, si no los has utilizado sabes que caducan al año."
+      "cita": "[ASESOR]: El máster, al al suceder entre 2025 y 2026, puedes utilizar créditos de 1 año y del otro."
     },
     {
       "tramo": "5",
       "evento": "Cierre y siguiente paso",
-      "cita": "Te voy a contar cómo es nuestra metodología de estudio."
+      "cita": "[ASESOR]: Perfecto, pues Fernando, viste el valor oficial del programa en nuestra página web, no, no, pues te lo voy a compartir."
     }
   ],
   "evaluacion_por_bloques": [
@@ -55,10 +55,10 @@
       "puntuacion_1_5": 3,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Tardes y encantado de conocerte y ponerle cara a tu solicitud de información.",
+      "evidencia_principal": "[ASESOR]: Tardes y encantado de conocerte y ponerle cara a tu solicitud de información.",
       "evidencias_extra": [],
-      "razonamiento": "El saludo es educado, pero falta conexión personal.",
-      "recomendacion_accionable": "Incluir preguntas más personales para establecer una mejor conexión.",
+      "razonamiento": "El saludo es educado y establece una conexión inicial, pero carece de un toque personal que podría mejorar la relación.",
+      "recomendacion_accionable": "Incluir preguntas más personales para crear una conexión más fuerte.",
       "recepcion_cliente": null
     },
     {
@@ -66,13 +66,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "¿Cuántos años llevas implementando estrategias de neuromarketing?",
+      "evidencia_principal": "[ASESOR]: Corrígeme si recuerdo mal, pero tienes empresa propia.",
       "evidencias_extra": [
-        "Me comentabas que habías ganado un premio hace poquito sobre una estrategia nueva de comportamiento del consumidor.",
-        "Siempre ha sido mi hobby, mi obsesión y me encanta la neurociencia."
+        "[ASESOR]: Me comentabas que habías ganado un un premio hacía poquito sobre una estrategia nueva de comportamiento del consumidor.",
+        "[ASESOR]: ¿Te iba a preguntar la medición de es que yo soy también un fanático de la neurociencia?"
       ],
-      "razonamiento": "El asesor realiza preguntas relevantes y escucha activamente, aunque podría profundizar más.",
-      "recomendacion_accionable": "Hacer preguntas más específicas sobre las expectativas del lead respecto al máster.",
+      "razonamiento": "El asesor realiza preguntas relevantes y muestra interés en las necesidades del lead, aunque podría profundizar más.",
+      "recomendacion_accionable": "Hacer más preguntas abiertas para explorar más a fondo las motivaciones y necesidades del lead.",
       "recepcion_cliente": null
     },
     {
@@ -80,12 +80,12 @@
       "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Nuestro máster en neuromarketing y comportamiento del consumidor está considerado por el ranking dead universal.",
+      "evidencia_principal": "[ASESOR]: Nuestro máster en neuromarketing y comportamiento consumidor está considerado por el ranking dead universal.",
       "evidencias_extra": [
-        "El programa da comienzo ahora a principios de octubre.",
-        "Se organiza en torno a 10 unidades temáticas."
+        "[ASESOR]: Hablamos de una duración de 12 meses.",
+        "[ASESOR]: Se encuentra dentro del marco europeo de la educación superior."
       ],
-      "razonamiento": "La presentación es clara, estructurada y se relaciona con las necesidades del lead.",
+      "razonamiento": "La presentación es clara, estructurada y se relaciona bien con las necesidades del lead, mostrando el valor del programa.",
       "recomendacion_accionable": "Continuar personalizando la presentación según las respuestas del lead.",
       "recepcion_cliente": null
     },
@@ -94,13 +94,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Los créditos fundáis, si no los has utilizado sabes que caducan al año.",
+      "evidencia_principal": "[ASESOR]: El máster, al al suceder entre 2025 y 2026, puedes utilizar créditos de 1 año y del otro.",
       "evidencias_extra": [
-        "Si tienes 30 empleados, puedes utilizar créditos de 1 año y del otro.",
-        "Te pediría una información que es nombre de la empresa CIF."
+        "[ASESOR]: Si lo quisieras hacer por fundad, porque teniendo 30 tiendas entiendo que tendrás un volumen mínimo 30 trabajadores.",
+        "[ASESOR]: Sí, nosotros tenemos un, tenemos un departamento que lo gestiona."
       ],
-      "razonamiento": "El asesor aborda las objeciones de manera efectiva, pero podría ofrecer más soluciones.",
-      "recomendacion_accionable": "Proporcionar ejemplos de cómo otros candidatos han utilizado créditos Fundae.",
+      "razonamiento": "El asesor maneja bien las objeciones y ofrece soluciones, aunque podría ser más proactivo en la validación de las preocupaciones del lead.",
+      "recomendacion_accionable": "Asegurarse de que el lead se sienta completamente cómodo con las opciones de financiación.",
       "recepcion_cliente": null
     },
     {
@@ -108,13 +108,13 @@
       "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Te voy a contar cómo es nuestra metodología de estudio.",
+      "evidencia_principal": "[ASESOR]: Perfecto, pues Fernando, viste el valor oficial del programa en nuestra página web, no, no, pues te lo voy a compartir.",
       "evidencias_extra": [
-        "Te enviaré el mail con lo que necesitamos para tramitarlo.",
-        "Quedamos así: te envío el mail detallando toda la información."
+        "[ASESOR]: Mándamelo cuanto antes.",
+        "[ASESOR]: Quedamos así, Fernando, oye, pues ha sido un placer y muy agradable la conversación de verdad."
       ],
-      "razonamiento": "El cierre es claro y se establecen los siguientes pasos de manera efectiva.",
-      "recomendacion_accionable": "Asegurarse de que el lead tenga toda la información necesaria para el envío de documentos.",
+      "razonamiento": "El cierre es efectivo, establece un compromiso claro y asegura el seguimiento, lo que es crucial para la conversión.",
+      "recomendacion_accionable": "Mantener la claridad en los siguientes pasos y asegurar que el lead tenga toda la información necesaria.",
       "recepcion_cliente": null
     },
     {
@@ -122,36 +122,37 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "La conversación es fluida y el tono es profesional.",
+      "evidencia_principal": "[ASESOR]: Yo creo que tenéis, tenéis temática muy interesante y bueno, oye, es, es es verla no?",
       "evidencias_extra": [
-        "El asesor muestra interés genuino en las necesidades del lead."
+        "[ASESOR]: Es un campo que me encanta, el de la neurociencia, el neuromarketing me encanta, me encanta."
       ],
-      "razonamiento": "El estilo es adecuado, pero podría ser más empático en algunos momentos.",
-      "recomendacion_accionable": "Incluir más elementos de empatía y conexión personal.",
+      "razonamiento": "El tono es profesional y muestra entusiasmo, aunque en algunos momentos puede parecer un poco informal.",
+      "recomendacion_accionable": "Mantener un equilibrio entre profesionalismo y cercanía.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Legal (Compliance)",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
+      "puntuacion_1_5": null,
+      "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
       "confianza": 1.0,
-      "evidencia_principal": "Te pediré 3 documentos muy sencillos tuyos.",
+      "evidencia_principal": "NO_OBSERVABLE (Inicio tardío)",
       "evidencias_extra": [],
-      "razonamiento": "Se sigue el protocolo de compliance de manera adecuada.",
-      "recomendacion_accionable": "Mantener siempre la claridad en la documentación requerida.",
+      "razonamiento": "No se observó ninguna falta de cumplimiento legal durante la llamada.",
+      "recomendacion_accionable": "Continuar asegurando que se cumplen todos los requisitos legales en futuras interacciones.",
       "recepcion_cliente": null
     }
   ],
-  "puntuacion_global_1_5": 4.29,
+  "puntuacion_global_1_5": 4.17,
   "feedback_resumido": {
     "fortalezas": [
+      "Buena detección de necesidades",
       "Presentación clara y estructurada del programa",
-      "Detección de necesidades efectiva",
-      "Manejo de objeciones adecuado"
+      "Cierre efectivo y proactivo"
     ],
     "areas_mejora": [
-      "Establecer una mejor conexión personal en la apertura",
-      "Incluir más empatía en la comunicación"
+      "Profundizar más en las motivaciones del lead",
+      "Mejorar el manejo de objeciones",
+      "Mantener un equilibrio entre profesionalismo y cercanía"
     ]
   }
 }

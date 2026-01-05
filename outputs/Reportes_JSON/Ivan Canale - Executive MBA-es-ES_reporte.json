@@ -5,14 +5,14 @@
     "flags_tecnicos": {}
   },
   "resumen_contextual": {
-    "perfil_lead": "Zoila, ingeniera en marketing, actualmente jefa nacional de Trade marketing en Nirsa, busca consolidarse y postular a una gerencia.",
+    "perfil_lead": "Zoila, ingeniera en marketing, actualmente jefa nacional de Trade marketing en Nirsa, busca consolidarse en su carrera y postular a una gerencia.",
     "fase_funnel": "Exploración",
-    "objetivo_del_lead": "Obtener una maestría para actualizarse en tendencias y mejorar su perfil profesional.",
+    "objetivo_del_lead": "Obtener una maestría para actualizarse en tendencias de marketing y mejorar su perfil profesional.",
     "barreras_principales": [
       "Costo del programa",
       "Comparación con otras opciones de estudio"
     ],
-    "resultado_general": "Interesada en el programa, pero necesita evaluar opciones de financiamiento."
+    "resultado_general": "Interesada en aplicar al programa con apoyo económico."
   },
   "cobertura_revision": {
     "tramo_1_inicio": "hallazgos",
@@ -25,28 +25,28 @@
   "momentos_clave": [
     {
       "tramo": "1",
-      "evento": "Presentación del asesor",
-      "cita": "Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar."
+      "evento": "Introducción y establecimiento de objetivos",
+      "cita": "[ASESOR]: Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar."
     },
     {
       "tramo": "2",
-      "evento": "Detección de necesidades",
-      "cita": "Cuéntame qué herramientas necesitas para poder ser gerente de Trade marketing."
+      "evento": "Exploración de necesidades y motivaciones",
+      "cita": "[ASESOR]: ¿Zoila, Cuéntame Qué qué herramientas necesitas para para poder ser gerente de entre marketing?"
     },
     {
       "tramo": "3",
-      "evento": "Presentación del programa",
-      "cita": "OBS significa online Business School, que quiero decir con esto que tenemos hemos nacido de esta manera."
+      "evento": "Presentación del programa y metodología",
+      "cita": "[ASESOR]: Fíjate el nombre o b s significa online Business School, que quiero decir con esto que tenemos hemos nacido de esta manera."
     },
     {
       "tramo": "4",
-      "evento": "Manejo de objeciones",
-      "cita": "Becas como tal. Nosotros no manejamos y cuando escuchas esto también, Zoila."
+      "evento": "Manejo de objeciones sobre el costo",
+      "cita": "[ASESOR]: Mira, el costo oficial del programa son €16000 son 13900, perdón, 15000 dólares."
     },
     {
       "tramo": "5",
       "evento": "Cierre y siguiente paso",
-      "cita": "¿Quieres aplicar a lo a lo que son los apoyos económicos?"
+      "cita": "[ASESOR]: ¿Quisieras aplicar a lo a lo que son los apoyos económicos?"
     }
   ],
   "evaluacion_por_bloques": [
@@ -55,10 +55,10 @@
       "puntuacion_1_5": 3,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Por último, Zoila, este espacio está dedicado específicamente para ti, cualquier duda pregunta que tú tengas.",
+      "evidencia_principal": "[ASESOR]: Para conocerte, entenderte, ver cuáles son tus objetivos, metas y lo fundamental, no saber si realmente te podemos ayudar.",
       "evidencias_extra": [],
-      "razonamiento": "El asesor establece un ambiente de confianza y apertura, pero falta un saludo más personal.",
-      "recomendacion_accionable": "Incluir un saludo más cálido y personal para mejorar la conexión inicial.",
+      "razonamiento": "El asesor establece un objetivo claro para la llamada, pero la conexión personal es limitada.",
+      "recomendacion_accionable": "Incluir preguntas más personales para crear una mejor conexión.",
       "recepcion_cliente": null
     },
     {
@@ -66,13 +66,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Cuéntame qué herramientas necesitas para poder ser gerente de Trade marketing.",
+      "evidencia_principal": "[ASESOR]: ¿Zoila, Cuéntame Qué qué herramientas necesitas para para poder ser gerente de entre marketing?",
       "evidencias_extra": [
-        "¿Cómo te sientes a nivel planificación, a nivel estrategia, a nivel liderazgo tienes personas a cargo cuántas?",
-        "Lo que buscaba es una actualizarme en las nuevas tendencias, obviamente un poco ampliar mi nivel de conocimiento."
+        "[ASESOR]: Entonces un poco. Lo que buscaba es una actualizarme en las nuevas tendencias, obviamente un poco ampliar mi nivel de conocimiento.",
+        "[ASESOR]: Considero que de pronto tengo conocimientos que son muy empíricos, pero de pronto puedo ya elevarlos de nivel en mis conversaciones."
       ],
-      "razonamiento": "El asesor realiza preguntas relevantes y escucha activamente las respuestas del lead, identificando sus necesidades.",
-      "recomendacion_accionable": "Profundizar más en las motivaciones personales del lead para personalizar la oferta.",
+      "razonamiento": "El asesor realiza preguntas relevantes que permiten identificar las necesidades del lead.",
+      "recomendacion_accionable": "Profundizar más en las motivaciones personales y profesionales del lead.",
       "recepcion_cliente": null
     },
     {
@@ -80,27 +80,27 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "OBS lo que te comentaba recién es una escuela de alta dirección profesionalizante.",
+      "evidencia_principal": "[ASESOR]: Fíjate el nombre o b s significa online Business School, que quiero decir con esto que tenemos hemos nacido de esta manera.",
       "evidencias_extra": [
-        "La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros.",
-        "Fíjate el nombre o b s significa online Business School."
+        "[ASESOR]: La idea es que no solamente aprendas del programa en sí de los profesores del director, sino también de todos tus compañeros.",
+        "[ASESOR]: Aquí en las aulas tenemos entre 20 y 25 diferentes nacionalidades."
       ],
       "razonamiento": "El asesor presenta el programa de manera clara y relaciona sus beneficios con las necesidades del lead.",
-      "recomendacion_accionable": "Incluir ejemplos concretos de éxito de alumni para reforzar la presentación.",
+      "recomendacion_accionable": "Incluir ejemplos específicos de cómo el programa ha beneficiado a otros alumnos.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Manejo de objeciones",
-      "puntuacion_1_5": 3,
+      "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Becas como tal. Nosotros no manejamos y cuando escuchas esto también, Zoila.",
+      "evidencia_principal": "[ASESOR]: Mira, el costo oficial del programa son €16000 son 13900, perdón, 15000 dólares.",
       "evidencias_extra": [
-        "¿Qué tan viable sería que este apoyo se diera o no como para yo también tener?",
-        "¿Qué tan viable sería que este apoyo se diera o no como para yo también tener?"
+        "[ASESOR]: Si somos admitidos ahí, claro, el escenario ya nos cambia drásticamente.",
+        "[ASESOR]: ¿Cómo lo ves con todas estas ayudas que te acabo de comentar? ¿Crees que es posible hacer esta inversión?"
       ],
-      "razonamiento": "El asesor aborda las objeciones del lead, pero podría ser más proactivo en ofrecer soluciones.",
-      "recomendacion_accionable": "Proporcionar información más detallada sobre las opciones de financiamiento y becas.",
+      "razonamiento": "El asesor aborda las objeciones de manera efectiva, ofreciendo soluciones y alternativas.",
+      "recomendacion_accionable": "Asegurarse de validar las preocupaciones del lead antes de ofrecer soluciones.",
       "recepcion_cliente": null
     },
     {
@@ -108,13 +108,12 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "¿Quieres aplicar a lo a lo que son los apoyos económicos?",
+      "evidencia_principal": "[ASESOR]: ¿Quisieras aplicar a lo a lo que son los apoyos económicos?",
       "evidencias_extra": [
-        "Te enviaré el mail con lo que necesitamos para tramitarlo.",
-        "Quedamos así: te envío el mail detallando toda la información."
+        "[ASESOR]: Si tú lo tuvieras 100% claro, yo le puedo preguntar al responsable de admisiones si nos daría espacio de de poder presentar tu tu candidatura."
       ],
-      "razonamiento": "El asesor cierra la conversación de manera clara y establece los siguientes pasos.",
-      "recomendacion_accionable": "Asegurarse de que el lead tenga toda la información necesaria para tomar una decisión.",
+      "razonamiento": "El asesor propone un siguiente paso claro y relevante, alineado con las necesidades del lead.",
+      "recomendacion_accionable": "Reforzar la urgencia y la importancia de actuar rápidamente para asegurar la plaza.",
       "recepcion_cliente": null
     },
     {
@@ -122,13 +121,12 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Esto es algo muy importante, mira de aquí hasta abril.",
+      "evidencia_principal": "[ASESOR]: Bueno, esto lo comentamos recién por teléfono, pero sobre todo para la grabación.",
       "evidencias_extra": [
-        "La idea es que no solamente aprendas del programa en sí de los profesores del director.",
-        "Fíjate el nombre o b s significa online Business School."
+        "[ASESOR]: Este espacio está dedicado específicamente para ti, cualquier duda pregunta que tú tengas, ninguna pregunta está de más ni mucho menos."
       ],
-      "razonamiento": "El asesor mantiene un tono profesional y claro, facilitando la comprensión del lead.",
-      "recomendacion_accionable": "Mantener el mismo nivel de claridad y profesionalismo en todas las interacciones.",
+      "razonamiento": "El asesor mantiene un tono profesional y empático, facilitando la comunicación.",
+      "recomendacion_accionable": "Continuar utilizando un lenguaje claro y accesible para el lead.",
       "recepcion_cliente": null
     },
     {
@@ -136,24 +134,23 @@
       "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Te comento, Zoila, que tienes un periodo de sentimiento de 14 días.",
+      "evidencia_principal": "[ASESOR]: Te enviaré el mail con lo que necesitamos para tramitarlo.",
       "evidencias_extra": [],
-      "razonamiento": "Se proporciona información clara sobre el proceso legal y de admisión.",
-      "recomendacion_accionable": "Continuar informando al lead sobre sus derechos y el proceso de admisión.",
+      "razonamiento": "El asesor menciona claramente los requisitos legales y de documentación necesarios.",
+      "recomendacion_accionable": "Asegurarse de que el lead comprenda todos los requisitos legales.",
       "recepcion_cliente": null
     }
   ],
-  "puntuacion_global_1_5": 3.86,
+  "puntuacion_global_1_5": 4.0,
   "feedback_resumido": {
     "fortalezas": [
       "Buena detección de necesidades",
       "Presentación clara del programa",
-      "Manejo adecuado de objeciones"
+      "Manejo efectivo de objeciones"
     ],
     "areas_mejora": [
       "Mejorar la conexión personal en la apertura",
-      "Ser más proactivo en el manejo de objeciones",
-      "Incluir ejemplos de éxito de alumni"
+      "Profundizar en las motivaciones del lead"
     ]
   }
 }

@@ -6,13 +6,13 @@
   },
   "resumen_contextual": {
     "perfil_lead": "Candidata con experiencia en marketing y ventas en Nestlé, busca fortalecer sus habilidades en marketing y negociación.",
-    "fase_funnel": "Exploración",
+    "fase_funnel": "Evaluación de admisión",
     "objetivo_del_lead": "Realizar un máster en marketing y gestión comercial para avanzar en su carrera profesional.",
     "barreras_principales": [
-      "Accidente que le causó incapacidad y pérdida de tiempo en su carrera.",
-      "Necesidad de apoyo financiero para el máster."
+      "Accidente que le causó incapacidad y pérdida de tiempo en su carrera",
+      "Necesidad de apoyo financiero para el máster"
     ],
-    "resultado_general": "Candidata interesada en el programa, con disposición a avanzar en el proceso de admisión."
+    "resultado_general": "Candidata interesada en el programa, con disposición para avanzar en el proceso de admisión."
   },
   "cobertura_revision": {
     "tramo_1_inicio": "sin_hallazgos_en_tramo",
@@ -20,39 +20,39 @@
     "tramo_3_desarrollo": "hallazgos",
     "tramo_4_objeciones": "hallazgos",
     "tramo_5_cierre": "hallazgos",
-    "alerta_cobertura": "cobertura_insuficiente"
+    "alerta_cobertura": "OK"
   },
   "momentos_clave": [
     {
       "tramo": "2",
       "evento": "Detección de necesidades",
-      "cita": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing."
+      "cita": "[ASESOR]: ¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta, que sería aquello que te hace falta?"
     },
     {
       "tramo": "3",
       "evento": "Presentación del programa",
-      "cita": "Yo pienso también este máster tiene tiene esa potencia que te da esas herramientas, esas habilidades en el área de marketing."
+      "cita": "[ASESOR]: O B S tiene un valor importantísimo y totalmente diferenciador."
     },
     {
       "tramo": "4",
       "evento": "Manejo de objeciones",
-      "cita": "¿Cómo ves? ¿No está, o sea está bien, está bien Paul, porque precisamente como platicábamos, o sea realmente son o sea son inversiones."
+      "cita": "[ASESOR]: Si por ejemplo no estás seguro en iniciarlo ahora, podemos coger y el expediente y pasarlo sin ningún coste para que lo inicies en octubre."
     },
     {
       "tramo": "5",
       "evento": "Cierre y siguiente paso",
-      "cita": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito."
+      "cita": "[ASESOR]: ¿Cómo lo ves con todas estas ayudas que te acabo de comentar? ¿Crees que es posible hacer esta inversión?"
     }
   ],
   "evaluacion_por_bloques": [
     {
       "bloque": "Apertura",
-      "puntuacion_1_5": null,
-      "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
+      "puntuacion_1_5": 3,
+      "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "NO_OBSERVABLE (Inicio tardío estándar)",
+      "evidencia_principal": "[ASESOR]: Buenos días XXX. Soy XXX, Asesor de Admisiones de OBS Business School.",
       "evidencias_extra": [],
-      "razonamiento": "El saludo fue educado, pero no se estableció una conexión personal. [AUDITOR: Inicio tardío detectado.]",
+      "razonamiento": "El saludo es educado y profesional, pero no establece una conexión personal.",
       "recomendacion_accionable": "Incluir preguntas que generen conexión personal desde el inicio.",
       "recepcion_cliente": null
     },
@@ -61,13 +61,12 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Yo creo que precisamente me haría falta como más esta parte de de conocimiento para la parte de marketing.",
+      "evidencia_principal": "[ASESOR]: ¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta, que sería aquello que te hace falta?",
       "evidencias_extra": [
-        "Me gustaría aprender un poquito más y igual no, o sea para la parte comercial, toda esta parte de negociación y demás.",
-        "Cuando fui este pecaria analista realmente no negociaba cara a cara con cliente."
+        "[ASESOR]: ¿Por qué ahora? ¿Viste que ahora es momento importante para formarte?"
       ],
-      "razonamiento": "El asesor realizó preguntas relevantes y escuchó las necesidades del candidato.",
-      "recomendacion_accionable": "Profundizar más en las motivaciones personales y profesionales del candidato.",
+      "razonamiento": "El asesor realiza preguntas relevantes que permiten identificar las necesidades del lead.",
+      "recomendacion_accionable": "Profundizar más en las motivaciones personales y profesionales del lead.",
       "recepcion_cliente": null
     },
     {
@@ -75,13 +74,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Yo pienso también este máster tiene tiene esa potencia que te da esas herramientas, esas habilidades en el área de marketing.",
+      "evidencia_principal": "[ASESOR]: O B S tiene un valor importantísimo y totalmente diferenciador.",
       "evidencias_extra": [
-        "El título que te emite la Universidad de Barcelona no dice que es online.",
-        "Este título es legal para trabajar en México y en más de 150 países."
+        "[ASESOR]: Somos la única Business School en El Mundo online que tiene como partner académico a esta Universidad.",
+        "[ASESOR]: Este título es legal para trabajar en México y en más de 150 países."
       ],
-      "razonamiento": "Se presentó el programa de manera clara y se vincularon las necesidades del candidato con el contenido del máster.",
-      "recomendacion_accionable": "Incluir ejemplos de éxito de alumni para reforzar la presentación.",
+      "razonamiento": "El asesor presenta el programa de manera clara y resalta sus beneficios, aunque podría personalizar más la presentación.",
+      "recomendacion_accionable": "Vincular más el programa a las necesidades específicas del lead.",
       "recepcion_cliente": null
     },
     {
@@ -89,38 +88,63 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "¿Cómo ves? ¿No está, o sea está bien, está bien Paul, porque precisamente como platicábamos, o sea realmente son o sea son inversiones.",
+      "evidencia_principal": "[ASESOR]: Si por ejemplo no estás seguro en iniciarlo ahora, podemos coger y el expediente y pasarlo sin ningún coste para que lo inicies en octubre.",
       "evidencias_extra": [
-        "Si por ejemplo no estás seguro en iniciarlo ahora, de hecho eso te sirve a ti a modo de clave de que estos 15 días pruebes a ver cómo te sientes."
+        "[ASESOR]: Hay un 20 por 100 que es por fecha de matrícula.",
+        "[ASESOR]: Si decides moverte a octubre, la cuota no empezaría en ahora porque ya empezaste el programa."
       ],
-      "razonamiento": "El asesor validó las preocupaciones del candidato y ofreció soluciones claras.",
-      "recomendacion_accionable": "Aislar y revalorizar las objeciones de manera más estructurada.",
+      "razonamiento": "El asesor maneja objeciones de manera efectiva, ofreciendo alternativas y asegurando al lead.",
+      "recomendacion_accionable": "Continuar validando las preocupaciones del lead y ofrecer soluciones claras.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Cierre y siguiente paso",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: ¿Cómo lo ves con todas estas ayudas que te acabo de comentar? ¿Crees que es posible hacer esta inversión?",
+      "evidencias_extra": [
+        "[ASESOR]: Te voy a mandar mi Whatsapp para que nos vayamos comunicando.",
+        "[ASESOR]: Si decides moverte a octubre no se te modifica cada año, los máster se revalorizan."
+      ],
+      "razonamiento": "El cierre es proactivo y busca asegurar el compromiso del lead, aunque podría ser más asertivo.",
+      "recomendacion_accionable": "Incluir un resumen de los acuerdos y próximos pasos más claros.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Estilo y comunicación",
+      "puntuacion_1_5": 4,
+      "observabilidad": "ALTA",
+      "confianza": 1.0,
+      "evidencia_principal": "[ASESOR]: Estoy convencido de que este Máster de Formación Permanente te va a ayudar mucho.",
+      "evidencias_extra": [],
+      "razonamiento": "El tono es profesional y empático, aunque en algunos momentos puede sonar un poco mecánico.",
+      "recomendacion_accionable": "Incorporar más elementos de empatía y conexión personal.",
+      "recepcion_cliente": null
+    },
+    {
+      "bloque": "Legal (Compliance)",
       "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "Sí, sí, sí, sí está padrísimo, o sea, desde que vi el el plan de estudios, yo dije, es prácticamente como bien platicábamos al inicio de la sesión lo que necesito.",
-      "evidencias_extra": [
-        "Perfecto este primer abono lo pagarías con tu tarjeta o la de tu papá.",
-        "Te voy a mandar mi Whatsapp, que creo que no te he escrito por Whatsapp para que nos vayamos comunicando por allí."
-      ],
-      "razonamiento": "El cierre fue efectivo, estableciendo un compromiso claro y próximo paso.",
-      "recomendacion_accionable": "Mantener la comunicación abierta y proactiva para asegurar el seguimiento.",
+      "evidencia_principal": "[ASESOR]: Hay un período de desistimiento, que si tú quieres rescindir el contrato se te devuelve todo lo que pagues de matrícula.",
+      "evidencias_extra": [],
+      "razonamiento": "Se aborda correctamente el tema legal, asegurando que el lead esté informado sobre sus derechos.",
+      "recomendacion_accionable": "Mantener siempre la claridad en los aspectos legales.",
       "recepcion_cliente": null
     }
   ],
-  "puntuacion_global_1_5": 4.25,
+  "puntuacion_global_1_5": 4.0,
   "feedback_resumido": {
     "fortalezas": [
-      "Buena detección de necesidades del candidato.",
-      "Presentación clara del programa y sus beneficios."
+      "Buena detección de necesidades",
+      "Presentación clara del programa",
+      "Manejo efectivo de objeciones"
     ],
     "areas_mejora": [
-      "Mejorar la apertura para generar conexión personal.",
-      "Estructurar mejor el manejo de objeciones."
+      "Conectar más personalmente en la apertura",
+      "Personalizar la presentación del programa",
+      "Ser más asertivo en el cierre"
     ]
   }
 }

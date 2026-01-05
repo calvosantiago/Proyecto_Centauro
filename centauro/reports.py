@@ -3,227 +3,228 @@ from .config import settings
 
 # --- PALETA DE COLORES (Estilo Corporativo Moderno) ---
 COLOR_PRIMARY = (0, 0, 0)          # Negro
-COLOR_ACCENT = (255, 221, 0)       # Amarillo #FFDD00
+COLOR_ACCENT = (255, 221, 0)       # Amarillo OBS #FFDD00
 COLOR_BG_LIGHT = (245, 245, 245)   # Gris muy claro
 COLOR_TEXT_MAIN = (0, 0, 0)
 COLOR_TEXT_MUTED = (120, 120, 120)
 
-# Semáforo
-COLOR_SUCCESS = (60, 60, 60)       # Gris oscuro
-COLOR_WARNING = (255, 221, 0)      # Amarillo
-COLOR_DANGER = (0, 0, 0)           # Negro
+# Semáforo de Notas (1-5)
+COLOR_BAD = (220, 53, 69)     # Rojo (Nota 1-2)
+COLOR_MID = (255, 193, 7)     # Amarillo (Nota 3)
+COLOR_GOOD = (40, 167, 69)    # Verde (Nota 4-5)
+COLOR_NEUTRAL = (108, 117, 125)# Gris (Off Record)
 
 def to_latin1(text):
-    if text is None:
-        return ""
+    if text is None: return ""
     text = str(text)
-    text = text.replace("€", "EUR")
+    text = text.replace("€", "EUR").replace("“", '"').replace("”", '"').replace("’", "'")
     return text.encode("latin-1", "replace").decode("latin-1")
 
 class ModernReport(FPDF):
     def header(self):
-        # Banda superior de color
+        # Banda superior
         self.set_fill_color(*COLOR_PRIMARY)
         self.rect(0, 0, 210, 25, 'F')
         
-        # Título del Reporte (Blanco)
+        # Título
         self.set_font('Helvetica', 'B', 16)
         self.set_text_color(255, 255, 255)
         self.set_xy(10, 8)
-        self.cell(0, 10, 'CENTAURO AUDIT | Reporte de Calidad', 0, 0, 'L')
+        self.cell(0, 10, 'CENTAURO AUDIT | Sales Coaching Report', 0, 0, 'L')
         
-        # Subtítulo (ej: Fecha o Versión)
+        # Subtítulo
         self.set_font('Helvetica', '', 10)
         self.set_xy(10, 16)
-        self.cell(0, 5, 'Análisis Automático Supervisado (Sheriff v4.1)', 0, 0, 'L')
-        
-        self.ln(20) # Espacio tras el header
+        self.cell(0, 5, 'Evaluación de Calidad Venta Consultiva (V15.1)', 0, 0, 'L')
+        self.ln(20)
 
     def footer(self):
         self.set_y(-15)
         self.set_font('Helvetica', 'I', 8)
         self.set_text_color(*COLOR_TEXT_MUTED)
-        self.cell(0, 10, f'Página {self.page_no()} | Generado por Proyecto Centauro', 0, 0, 'C')
+        self.cell(0, 10, f'Página {self.page_no()} | OBS Business School', 0, 0, 'C')
 
-    def draw_badge(self, texto, tipo="MEDIA", x=None, y=None):
-        """Dibuja una etiqueta tipo 'Badge' (Pill shape)."""
-        if x is None: x = self.get_x()
-        if y is None: y = self.get_y()
-        
-        # Colores del badge
-        if tipo == "CRITICO": bg = COLOR_DANGER
-        elif tipo == "ALTA": bg = COLOR_WARNING
-        elif tipo == "BAJA": bg = COLOR_TEXT_MUTED
-        else: bg = COLOR_ACCENT # MEDIA
-        
-        self.set_fill_color(*bg)
-        if bg in (COLOR_WARNING, COLOR_ACCENT):
-            self.set_text_color(0, 0, 0)
-        else:
-            self.set_text_color(255, 255, 255)
-        self.set_font('Helvetica', 'B', 7)
-        
-        # Ancho dinámico
+    def get_score_color(self, score):
+        if score is None: return COLOR_NEUTRAL
+        if score >= 4: return COLOR_GOOD
+        if score >= 3: return COLOR_MID
+        return COLOR_BAD
+
+    def draw_badge(self, texto, color_rgb):
+        """Dibuja una etiqueta de color."""
+        self.set_fill_color(*color_rgb)
+        self.set_text_color(255, 255, 255)
+        self.set_font('Helvetica', 'B', 8)
         width = self.get_string_width(texto) + 6
-        height = 5
-        
-        # Rectángulo redondeado (simulado)
-        self.rect(x, y, width, height, 'F')
-        
-        # Texto centrado
-        self.set_xy(x, y)
-        self.cell(width, height, texto, 0, 0, 'C')
-        
-        # Restaurar cursor
-        self.set_xy(x + width + 2, y)
-        return height
+        self.rect(self.get_x(), self.get_y(), width, 6, 'F')
+        self.cell(width, 6, texto, 0, 0, 'C')
+        self.ln(8)
 
-    def draw_card(self, item, es_punto_fuerte=True):
-        """Dibuja una tarjeta visual para cada criterio evaluado."""
+    def draw_block_card(self, bloque):
+        """Dibuja la tarjeta de evaluación de un bloque específico."""
         start_y = self.get_y()
         
-        # Protección de salto de página: Si queda poco espacio, salta
-        if start_y > 250:
+        # Salto de página inteligente
+        if start_y > 240:
             self.add_page()
             start_y = self.get_y()
 
-        # Configurar colores según estado
-        bar_color = COLOR_SUCCESS if es_punto_fuerte else COLOR_DANGER
+        # Datos del bloque
+        nombre = bloque.get('bloque', 'Bloque Desconocido')
+        nota = bloque.get('puntuacion_1_5')
+        razon = bloque.get('razonamiento', '')
+        evidencia = bloque.get('evidencia_principal', '')
+        accion = bloque.get('recomendacion_accionable', '')
         
-        # 1. Barra lateral de color (Status Indicator)
-        self.set_fill_color(*bar_color)
-        self.rect(10, start_y, 2, 25, 'F') # Altura mínima inicial
+        # Color según nota
+        score_color = self.get_score_color(nota)
+        texto_nota = f"{nota}/5" if nota is not None else "N/A"
         
-        # 2. Título del Criterio
-        self.set_xy(14, start_y)
-        self.set_font('Helvetica', 'B', 11)
+        # 1. Barra lateral de estado
+        self.set_fill_color(*score_color)
+        self.rect(10, start_y, 2, 35, 'F') # Altura mínima
+        
+        # 2. Título del Bloque y Nota
+        self.set_xy(15, start_y)
+        self.set_font('Helvetica', 'B', 12)
         self.set_text_color(*COLOR_PRIMARY)
-        self.cell(0, 6, item.get('criterio', 'Criterio Desconocido'), 0, 1)
+        self.cell(140, 8, to_latin1(nombre), 0, 0)
         
-        # 3. Badge de Importancia (justo al lado o debajo)
-        importancia = item.get('importancia', 'MEDIA').upper()
-        current_y = self.get_y()
-        self.set_xy(14, current_y)
-        self.draw_badge(importancia, importancia)
-        self.ln(6)
+        # Badge de Nota a la derecha
+        self.set_font('Helvetica', 'B', 14)
+        self.set_text_color(*score_color)
+        self.cell(0, 8, texto_nota, 0, 1, 'R')
         
-        # 4. Razonamiento / Feedback (Texto normal)
-        self.set_x(14)
+        # 3. Razonamiento (Feedback)
+        self.set_x(15)
         self.set_font('Helvetica', '', 10)
         self.set_text_color(*COLOR_TEXT_MAIN)
-        feedback = item.get('feedback', '') or item.get('razonamiento', '')
-        self.multi_cell(0, 5, to_latin1(feedback))
-        
-        # 5. Caja de Evidencia (Si existe)
-        evidencia = item.get('cita_evidencia', '')
-        if evidencia and "NO ENCONTRADO" not in evidencia and "NO VALIDADO" not in evidencia:
-            self.ln(2)
-            self.set_x(14)
-            # Fondo gris suave para la cita
-            self.set_fill_color(245, 245, 245)
-            self.set_text_color(80, 80, 80)
-            self.set_font('Helvetica', 'I', 9)
-            
-            # Icono comillas (simulado con texto)
-            self.multi_cell(0, 5, to_latin1(f'"{evidencia}"'), border=0, fill=True)
-        elif "NO VALIDADO" in evidencia:
-             # Caso especial Sheriff: Mostrar alerta técnica
-            self.ln(2)
-            self.set_x(14)
-            self.set_text_color(*COLOR_DANGER)
-            self.set_font('Helvetica', 'B', 8)
-            razon = item.get('razonamiento', '')
-            self.cell(0, 5, to_latin1(f"[!] ALERTA TÉCNICA: {razon}"), 0, 1)
+        self.multi_cell(0, 5, to_latin1(razon))
+        self.ln(2)
 
-        # Espacio final entre tarjetas
-        self.ln(4)
-        
-        # Dibujar línea separadora suave
-        line_y = self.get_y()
-        self.set_draw_color(230, 230, 230)
-        self.line(10, line_y, 200, line_y)
-        self.ln(4)
+        # 4. Evidencia (Cita) - Fondo gris
+        if evidencia and "NO_OBSERVABLE" not in evidencia:
+            self.set_x(15)
+            self.set_fill_color(240, 240, 240)
+            self.set_font('Helvetica', 'I', 9)
+            self.set_text_color(80, 80, 80)
+            self.multi_cell(0, 5, to_latin1(f'"{evidencia}"'), border=0, fill=True)
+            self.ln(2)
+
+        # 5. Recomendación (Acción) - Si la nota es baja
+        if accion and (nota is None or nota < 5):
+            self.set_x(15)
+            self.set_font('Helvetica', 'B', 9)
+            self.set_text_color(*COLOR_ACCENT) # Amarillo OBS para resaltar acción
+            # Ponemos fondo negro al texto amarillo para legibilidad o usamos color oscuro
+            self.set_text_color(100, 80, 0) # Ocre oscuro para leerse bien sobre blanco
+            self.multi_cell(0, 5, to_latin1(f"💡 COACHING: {accion}"))
+
+        self.ln(5)
+        # Línea separadora
+        self.set_draw_color(220, 220, 220)
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(5)
 
 def generar_pdf(reporte_json, output_filename):
+    # Convertir a dict si es un objeto Pydantic
+    if hasattr(reporte_json, 'model_dump'):
+        data = reporte_json.model_dump()
+    else:
+        data = reporte_json
+
     pdf = ModernReport()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # --- DASHBOARD SUPERIOR (Scorecard) ---
-    pdf.set_y(35)
+    # --- DASHBOARD SUPERIOR ---
+    pdf.set_y(30)
     
-    # Caja de la Nota
-    nota = reporte_json.get('nota_final_0_10', 0)
+    # 1. Nota Global (Círculo/Cuadro Grande)
+    nota_global = data.get('puntuacion_global_1_5', 0)
+    color_global = pdf.get_score_color(nota_global)
     
-    # Color fijo corporativo para la nota
-    score_color = COLOR_WARNING
+    pdf.set_fill_color(*color_global)
+    pdf.rect(10, 30, 40, 40, 'F')
     
-    # Dibujar Círculo/Cuadro para la nota
-    pdf.set_fill_color(*score_color)
-    pdf.rect(10, 35, 30, 30, 'F')
-    
-    # Texto de la nota (Centrado en el cuadro)
-    pdf.set_xy(10, 42)
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font('Helvetica', 'B', 22)
-    pdf.cell(30, 10, f"{nota}", 0, 1, 'C')
-    pdf.set_font('Helvetica', '', 8)
+    pdf.set_xy(10, 40)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font('Helvetica', 'B', 26)
+    pdf.cell(40, 10, f"{nota_global}", 0, 1, 'C')
+    pdf.set_font('Helvetica', '', 10)
     pdf.set_xy(10, 52)
-    pdf.cell(30, 5, "/ 10", 0, 0, 'C')
+    pdf.cell(40, 5, "/ 5.0", 0, 0, 'C')
     
-    # Datos del Asesor (A la derecha de la nota)
-    pdf.set_xy(45, 35)
-    pdf.set_text_color(*COLOR_TEXT_MAIN)
+    # 2. Datos Asesor y Contexto
+    pdf.set_xy(55, 30)
+    pdf.set_text_color(*COLOR_PRIMARY)
     pdf.set_font('Helvetica', 'B', 14)
-    asesor = reporte_json.get('asesor', 'Desconocido')
+    asesor = data.get('asesor', 'Asesor OBS')
     pdf.cell(0, 8, to_latin1(f"Asesor: {asesor}"), 0, 1)
     
-    pdf.set_xy(45, 43)
+    pdf.set_xy(55, 40)
     pdf.set_font('Helvetica', '', 10)
-    pdf.set_text_color(*COLOR_TEXT_MUTED)
-    resumen = reporte_json.get('resumen_ejecutivo', 'Sin resumen disponible.')
-    pdf.multi_cell(0, 5, to_latin1(resumen))
+    pdf.set_text_color(*COLOR_TEXT_MAIN)
     
-    pdf.ln(15) # Separación del dashboard
+    ctx = data.get('resumen_contextual', {})
+    resumen_texto = (
+        f"Perfil Lead: {ctx.get('perfil_lead', 'N/A')}\n"
+        f"Objetivo: {ctx.get('objetivo_del_lead', 'N/A')}\n"
+        f"Resultado: {ctx.get('resultado_general', 'N/A')}"
+    )
+    pdf.multi_cell(0, 5, to_latin1(resumen_texto))
+    
+    pdf.ln(15)
 
-    # --- SECCIÓN 1: PUNTOS FUERTES ---
-    if reporte_json.get('puntos_fuertes'):
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.set_text_color(*COLOR_SUCCESS)
-        pdf.cell(0, 10, "FORTALEZAS DETECTADAS", 0, 1)
-        # Línea verde debajo del título
-        y = pdf.get_y()
-        pdf.set_draw_color(*COLOR_SUCCESS)
-        pdf.set_line_width(0.5)
-        pdf.line(10, y, 200, y)
-        pdf.ln(5)
+    # --- SECCIÓN: EVALUACIÓN DETALLADA ---
+    pdf.set_font('Helvetica', 'B', 14)
+    pdf.set_text_color(*COLOR_PRIMARY)
+    pdf.cell(0, 10, "Desglose por Bloques (Técnica de Venta)", 0, 1)
+    pdf.ln(2)
+    
+    bloques = data.get('evaluacion_por_bloques', [])
+    for bloque in bloques:
+        pdf.draw_block_card(bloque)
         
-        for item in reporte_json['puntos_fuertes']:
-            pdf.draw_card(item, es_punto_fuerte=True)
-            
+    # --- SECCIÓN: FEEDBACK RESUMIDO ---
+    pdf.add_page()
+    pdf.set_font('Helvetica', 'B', 14)
+    pdf.set_text_color(*COLOR_PRIMARY)
+    pdf.cell(0, 10, "Feedback Ejecutivo & Coaching", 0, 1)
     pdf.ln(5)
-
-    # --- SECCIÓN 2: ÁREAS DE MEJORA ---
-    if reporte_json.get('areas_mejora'):
-        # Forzar nueva página si queda poco espacio
-        if pdf.get_y() > 200: pdf.add_page()
+    
+    fb = data.get('feedback_resumido', {})
+    
+    # Fortalezas
+    pdf.set_fill_color(230, 255, 230) # Verde claro fondo
+    pdf.rect(10, pdf.get_y(), 190, 8, 'F')
+    pdf.set_font('Helvetica', 'B', 12)
+    pdf.set_text_color(*COLOR_GOOD)
+    pdf.cell(0, 8, "  FORTALEZAS (Keep doing)", 0, 1)
+    pdf.ln(2)
+    pdf.set_font('Helvetica', '', 11)
+    pdf.set_text_color(*COLOR_TEXT_MAIN)
+    for f in fb.get('fortalezas', []):
+        pdf.cell(5) # Indent
+        pdf.cell(0, 6, to_latin1(f"• {f}"), 0, 1)
+    pdf.ln(5)
+    
+    # Áreas de Mejora
+    pdf.set_fill_color(255, 230, 230) # Rojo claro fondo
+    pdf.rect(10, pdf.get_y(), 190, 8, 'F')
+    pdf.set_font('Helvetica', 'B', 12)
+    pdf.set_text_color(*COLOR_BAD)
+    pdf.cell(0, 8, "  ÁREAS DE MEJORA (Action Plan)", 0, 1)
+    pdf.ln(2)
+    pdf.set_font('Helvetica', '', 11)
+    pdf.set_text_color(*COLOR_TEXT_MAIN)
+    for m in fb.get('areas_mejora', []):
+        pdf.cell(5)
+        pdf.cell(0, 6, to_latin1(f"• {m}"), 0, 1)
         
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.set_text_color(*COLOR_DANGER)
-        pdf.cell(0, 10, "ÁREAS DE MEJORA Y CUMPLIMIENTO", 0, 1)
-        # Línea roja debajo
-        y = pdf.get_y()
-        pdf.set_draw_color(*COLOR_DANGER)
-        pdf.set_line_width(0.5)
-        pdf.line(10, y, 200, y)
-        pdf.ln(5)
-        
-        for item in reporte_json['areas_mejora']:
-            pdf.draw_card(item, es_punto_fuerte=False)
-
-    # Guardar archivo
+    # Guardar
     pdf_dir = settings.OUTPUTS_DIR / "Reportes_PDF"
     pdf_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = pdf_dir / output_filename
     pdf.output(str(pdf_path))
-    print(f"🎨 PDF Estilizado Generado: {pdf_path}")
+    print(f"🎨 PDF Generado Exitosamente: {pdf_path}")

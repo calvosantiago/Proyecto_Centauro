@@ -2,14 +2,14 @@ import json
 import re
 import unicodedata
 from pathlib import Path
+
+# Imports propios
 from .config import settings
 from .rag import buscar_contexto
 from .llm_client import consultar_gpt
-from .schema import (
-    ReporteCalidad, MetaData, ResumenContextual, CoberturaRevision,
-    BloqueEvaluacion, RecepcionCliente, MomentoClave, FeedbackResumido
-)
+from .schema import ReporteCalidad
 from .privacy import redact_pii
+from .diarization import identificar_interlocutores  # <--- IMPORTAMOS LO NUEVO
 
 try:
     from rapidfuzz import fuzz
@@ -38,79 +38,23 @@ def extraer_json_robusto(respuesta_raw: str) -> dict:
     if not respuesta_raw: raise ValueError("Respuesta vacía")
     limpio = respuesta_raw.replace("```json", "").replace("```", "").strip()
     m = re.search(r"\{.*\}", limpio, flags=re.S)
-    if not m: 
-        try: return json.loads(limpio)
-        except: raise ValueError("No se encontró JSON válido")
-    return json.loads(m.group(0))
-
-# --- DIARIZACIÓN (Identificar Asesor vs Lead) ---
-
-def identificar_interlocutores(texto_crudo: str, nombre_asesor: str, log_id: str) -> str:
-    print(f"   🗣️ Identificando interlocutores (Asesor: {nombre_asesor})...")
     
-    # Chunking para evitar timeouts y alucinaciones en llamadas largas
-    tamano_chunk = 3000 
-    texto_total_diarizado = ""
-    lineas = texto_crudo.split('\n')
-    chunks = []
-    chunk_actual = []
-    len_actual = 0
+    json_str = m.group(0) if m else limpio
     
-    for linea in lineas:
-        chunk_actual.append(linea)
-        len_actual += len(linea)
-        if len_actual >= tamano_chunk:
-            chunks.append("\n".join(chunk_actual))
-            chunk_actual = []
-            len_actual = 0
-    if chunk_actual: chunks.append("\n".join(chunk_actual))
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        print(f"\n[ERROR CRÍTICO] La IA generó un JSON malformado (Error: {e}).")
+        print(f"[DEBUG] Inicio del JSON roto: {json_str[:100]}...")
+        # Intento desesperado: a veces el error es comillas dentro de strings
+        raise ValueError("JSON inválido generado por la IA.")
 
-    # Prompt Diarización (Pide JSON para evitar error 400 de OpenAI)
-    prompt_base = f"""
-ERES UN EDITOR DE GUIONES. 
-Tu tarea es separar el diálogo entre el ASESOR ({nombre_asesor}) y el LEAD (Cliente).
-
-INPUT: Fragmento de llamada de venta OBS.
-OUTPUT: JSON con campo "texto_diarizado".
-
-REGLAS:
-1. El ASESOR ({nombre_asesor}) es quien VENDE, explica el máster y hace las preguntas.
-2. El LEAD es quien COMPRA, expresa dudas o cuenta su vida.
-3. Añade `[ASESOR]:` o `[LEAD]:` al inicio de cada frase.
-4. NO RESUMAS. Texto literal palabra por palabra.
-
-EJEMPLO SALIDA JSON:
-{{
-  "texto_diarizado": "[ASESOR]: Hola, buenos días.\\n[LEAD]: Hola, quería información."
-}}
-OUTPUT MUST BE VALID JSON.
-"""
-
-    for i, chunk in enumerate(chunks):
-        try:
-            # Feedback de progreso
-            # print(f"      Procesando bloque {i+1}/{len(chunks)}...") 
-            resp_str = consultar_gpt(
-                prompt_base, 
-                f"FRAGMENTO {i+1}:\n{chunk}", 
-                referencia_log=f"{log_id}_diar_{i+1}"
-            )
-            data = extraer_json_robusto(resp_str)
-            texto_total_diarizado += data.get("texto_diarizado", chunk) + "\n"
-            
-        except Exception as e:
-            print(f"      ⚠️ Error en bloque {i+1}: {e}. Usando original.")
-            texto_total_diarizado += chunk + "\n"
-
-    return texto_total_diarizado
-
-# --- SHERIFF V15 (Validación sobre Diarizado) ---
+# --- SHERIFF V15 (Validación) ---
 
 def validar_y_auditar_sheriff(reporte: ReporteCalidad, texto_diarizado: str):
     texto_lower = limpiar_texto_base(texto_diarizado)
     
     for bloque in reporte.evaluacion_por_bloques:
-        # Off-Record check
         obs = bloque.observabilidad.upper()
         if "NO_OBSERVABLE" in obs or "OFF_RECORD" in obs:
             bloque.puntuacion_1_5 = None
@@ -123,8 +67,6 @@ def validar_y_auditar_sheriff(reporte: ReporteCalidad, texto_diarizado: str):
         
         for ev in evidencias_totales:
             if not ev or "no se observa" in ev.lower(): continue
-            
-            # El Sheriff busca la frase en el texto diarizado
             if _es_evidencia_valida(ev, texto_lower):
                 evidencias_validas.append(ev)
         
@@ -133,7 +75,7 @@ def validar_y_auditar_sheriff(reporte: ReporteCalidad, texto_diarizado: str):
             bloque.evidencias_extra = evidencias_validas[1:]
         else:
             if bloque.puntuacion_1_5 and bloque.puntuacion_1_5 > 1:
-                # Excepción inicio tardío
+                # Excepción inicio tardío (Apertura/Legal)
                 if bloque.bloque.lower() in ["apertura", "legal (compliance)"]:
                     bloque.puntuacion_1_5 = None
                     bloque.observabilidad = "NO_OBSERVABLE_OFF_RECORD"
@@ -162,7 +104,7 @@ def recalcular_nota_global(reporte: ReporteCalidad):
     reporte.puntuacion_global_1_5 = round(total / count, 2) if count > 0 else 0.0
     return reporte
 
-# --- ANÁLISIS (Prompt Completo Integrado) ---
+# --- ANÁLISIS LLM ---
 
 def ejecutar_analisis_completo(texto: str, manual: str, log_id: str) -> dict:
     prompt_sistema = """
@@ -351,7 +293,6 @@ OUTPUT MUST BE VALID JSON ONLY. NO envuelvas el JSON en ninguna clave raíz.
 {manual}
 </MANUAL_OBS>
 """
-    
     resp = consultar_gpt(prompt_sistema, usuario_msg, referencia_log=f"{log_id}_full")
     return extraer_json_robusto(resp)
 
@@ -359,33 +300,42 @@ OUTPUT MUST BE VALID JSON ONLY. NO envuelvas el JSON en ninguna clave raíz.
 
 def analizar_entrevista(nombre, texto):
     nombre_limpio = Path(nombre).stem.replace("_", " ")
-    print(f"[INFO] V15 Final (Prompt Completo + Diarización): {nombre_limpio}")
+    print(f"[INFO] Analizando (Modularizado): {nombre_limpio}")
     
+    # 1. Limpieza de Privacidad
     res_priv = redact_pii(texto)
     texto_seguro = res_priv.text
     
-    # 1. Diarización
-    texto_diarizado = identificar_interlocutores(texto_seguro, nombre_asesor=nombre_limpio, log_id=Path(nombre).stem)
+    # 2. DIARIZACIÓN (Importada de diarization.py)
+    # Aquí es donde ocurre la magia de separar interlocutores
+    texto_diarizado = identificar_interlocutores(
+        texto_crudo=texto_seguro, 
+        nombre_asesor=nombre_limpio, 
+        log_id=Path(nombre).stem
+    )
     
-    # Debug
+    # Debug Input
     debug_dir = settings.OUTPUTS_DIR / "Input_Debug"
     debug_dir.mkdir(parents=True, exist_ok=True)
     nombre_safe = re.sub(r'[^\w\-_]', '_', Path(nombre).stem)
     with open(debug_dir / f"DEBUG_{nombre_safe}.txt", "w", encoding="utf-8") as f:
         f.write(f"--- TEXTO DIARIZADO ---\n{texto_diarizado}")
     
-    # 2. Análisis
+    # 3. Contexto RAG
     contexto_manual = buscar_contexto("Venta consultiva metodologia cierre empatia legal")
+    
+    # 4. Ejecución del Análisis LLM
     data_raw = ejecutar_analisis_completo(texto_diarizado, contexto_manual, Path(nombre).stem)
     
     try:
         reporte = ReporteCalidad(**data_raw)
         reporte.asesor = nombre_limpio
         
-        print("[INFO] Sheriff V15: Auditando...")
+        print("[INFO] Sheriff: Validando evidencias y atribución...")
         reporte = validar_y_auditar_sheriff(reporte, texto_diarizado)
         reporte = recalcular_nota_global(reporte)
         
+        # Guardar JSON
         ruta = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{Path(nombre).stem}_reporte.json"
         ruta.parent.mkdir(exist_ok=True)
         with open(ruta, "w", encoding="utf-8") as f: 
@@ -395,5 +345,5 @@ def analizar_entrevista(nombre, texto):
         return reporte
 
     except Exception as e:
-        print(f"[ERROR] Fallo al procesar el JSON: {e}")
+        print(f"[ERROR] Fallo al procesar el JSON final: {e}")
         return None
