@@ -5,11 +5,11 @@
     "flags_tecnicos": {}
   },
   "resumen_contextual": {
-    "perfil_lead": "Uriel, encargado de 3 departamentos en una empresa japonesa, supervisa Recursos Humanos desde hace 2 años.",
+    "perfil_lead": "Uriel, encargado de 3 departamentos en una empresa japonesa, supervisando Recursos Humanos por primera vez.",
     "fase_funnel": "Investigación",
-    "objetivo_del_lead": "Buscar un máster que le ayude a mejorar su gestión en Recursos Humanos y desarrollar habilidades estratégicas.",
+    "objetivo_del_lead": "Buscar un máster que le ayude a mejorar su gestión en Recursos Humanos y desarrollo organizacional.",
     "barreras_principales": [
-      "Falta de tiempo para estudiar.",
+      "Falta de tiempo para estudiar debido a la carga laboral.",
       "Necesidad de una decisión bien fundamentada sobre el máster."
     ],
     "resultado_general": "El lead está interesado pero no está listo para comprometerse en este momento."
@@ -35,18 +35,18 @@
     },
     {
       "tramo": "3",
-      "evento": "Desarrollo de la conversación",
-      "cita": "[ASESOR]: ¿Cómo es el día a diario tuyo, personas que tienes a cargo, cómo has llegado a conocernos?"
+      "evento": "Desarrollo de la conversación sobre el máster",
+      "cita": "[ASESOR]: ¿Ver el Máster en Dirección de Recursos Humanos y gestión del talento también podría ser que de pronto tenga que ver más con con tu tarea específica?"
     },
     {
       "tramo": "4",
-      "evento": "Manejo de objeciones",
-      "cita": "[ASESOR]: ¿Es por estos números que por la tendencia a la baja, porque me dices que hace 2 años que estás tú a cargo del Departamento de Recursos Humanos, entonces por qué ahora y no antes?"
+      "evento": "Manejo de objeciones sobre la carga de trabajo",
+      "cita": "[LEAD]: O sea, y la realidad es que ese diplomado lo pasé haciendo los trabajos a las 1:02 h de la mañana."
     },
     {
       "tramo": "5",
       "evento": "Cierre y siguiente paso",
-      "cita": "[ASESOR]: ¿Cómo lo ves con todas estas ayudas que te acabo de comentar? ¿Crees que es posible hacer esta inversión?"
+      "cita": "[LEAD]: ¿Te parece? Sí, claro, que pase toda esta época un poco a ajetreada no también, y ya con eso, con eso pues vamos aterrizando las ideas."
     }
   ],
   "evaluacion_por_bloques": [
@@ -57,8 +57,8 @@
       "confianza": 1.0,
       "evidencia_principal": "[ASESOR]: Sí, la idea es un poco conocerte a ti.",
       "evidencias_extra": [],
-      "razonamiento": "El asesor inicia la llamada de manera adecuada, pero no establece una conexión personal fuerte.",
-      "recomendacion_accionable": "Incluir preguntas más personales para generar empatía.",
+      "razonamiento": "El asesor inicia la llamada de manera educada y establece el propósito de la conversación.",
+      "recomendacion_accionable": "Incluir una pregunta más personal para crear conexión.",
       "recepcion_cliente": null
     },
     {
@@ -68,11 +68,11 @@
       "confianza": 1.0,
       "evidencia_principal": "[ASESOR]: Entonces cuéntame un poquito para ponernos en contexto nuevamente.",
       "evidencias_extra": [
-        "[ASESOR]: ¿Cómo es el día a diario tuyo, personas que tienes a cargo, cómo has llegado a conocernos?",
-        "[ASESOR]: ¿Es por estos números que por la tendencia a la baja, porque me dices que hace 2 años que estás tú a cargo del Departamento de Recursos Humanos, entonces por qué ahora y no antes?"
+        "[LEAD]: La realidad es que como te decía, no en un principio, pues no, yo no tengo un perfil de RH.",
+        "[LEAD]: Entonces, con base en todas esas cosas, este. Es que al final viene como me decía de tengo que meterme más en el detalle."
       ],
-      "razonamiento": "El asesor realiza preguntas relevantes y escucha activamente, aunque podría profundizar más en las motivaciones del lead.",
-      "recomendacion_accionable": "Hacer preguntas más específicas sobre las necesidades y objetivos del lead.",
+      "razonamiento": "El asesor hace preguntas abiertas que permiten al lead expresar sus necesidades y preocupaciones.",
+      "recomendacion_accionable": "Profundizar más en las motivaciones del lead para estudiar el máster.",
       "recepcion_cliente": null
     },
     {
@@ -80,27 +80,26 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Bien, mira, te comento brevemente algunos datos. Nosotros como tal nació como la primera Escuela de Negocios online al 100% en español.",
+      "evidencia_principal": "[ASESOR]: Nosotros como tal nació como la primera Escuela de Negocios online al 100% en español.",
       "evidencias_extra": [
-        "[ASESOR]: Y por último estamos nosotros, que somos planeta, formación en universidades, el cual formamos parte de un holding de 2322 escuelas de negocio.",
-        "[ASESOR]: Entonces, por ejemplo, las aulas no pueden tener más de 50 alumnos."
+        "[ASESOR]: Y por último estamos nosotros, que somos planeta, formación en universidades.",
+        "[ASESOR]: La metodología Harvard estudio del caso."
       ],
-      "razonamiento": "El asesor presenta información relevante sobre la escuela y el programa, pero podría vincular más directamente el programa a las necesidades del lead.",
-      "recomendacion_accionable": "Conectar más los beneficios del programa con las necesidades específicas del lead.",
+      "razonamiento": "El asesor presenta información relevante sobre la escuela y el programa, alineando con las necesidades del lead.",
+      "recomendacion_accionable": "Incluir ejemplos específicos de cómo el programa puede resolver los problemas del lead.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Manejo de objeciones",
-      "puntuacion_1_5": 4,
+      "puntuacion_1_5": 3,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: ¿Es por estos números que por la tendencia a la baja, porque me dices que hace 2 años que estás tú a cargo del Departamento de Recursos Humanos, entonces por qué ahora y no antes?",
+      "evidencia_principal": "[LEAD]: O sea, y la realidad es que ese diplomado lo pasé haciendo los trabajos a las 1:02 h de la mañana.",
       "evidencias_extra": [
-        "[ASESOR]: ¿Cómo es el proceso de selección?",
-        "[ASESOR]: ¿Cómo te gustaría afrontar esta inversión?"
+        "[LEAD]: No quiero hacer eso este, pero pero con toda esta explicación ya me dejas más claro el panorama."
       ],
-      "razonamiento": "El asesor maneja las objeciones de manera efectiva, validando las preocupaciones del lead y guiándolo hacia la solución.",
-      "recomendacion_accionable": "Continuar validando las preocupaciones del lead y ofrecer soluciones concretas.",
+      "razonamiento": "El asesor escucha las preocupaciones del lead, pero podría haber validado más sus sentimientos antes de continuar.",
+      "recomendacion_accionable": "Validar las preocupaciones del lead y ofrecer soluciones específicas.",
       "recepcion_cliente": null
     },
     {
@@ -108,44 +107,22 @@
       "puntuacion_1_5": 3,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: ¿Cómo lo ves con todas estas ayudas que te acabo de comentar? ¿Crees que es posible hacer esta inversión?",
+      "evidencia_principal": "[LEAD]: ¿Te parece? Sí, claro, que pase toda esta época un poco a ajetreada no también.",
       "evidencias_extra": [],
-      "razonamiento": "El cierre es correcto, pero falta un resumen de lo acordado y un micro-compromiso claro.",
-      "recomendacion_accionable": "Incluir un resumen de la conversación y establecer un micro-compromiso para el siguiente paso.",
-      "recepcion_cliente": null
-    },
-    {
-      "bloque": "Estilo y comunicación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Sí, la idea es un poco conocerte a ti.",
-      "evidencias_extra": [],
-      "razonamiento": "El asesor mantiene un tono profesional y directo, aunque podría ser más empático.",
-      "recomendacion_accionable": "Incorporar más empatía en la comunicación.",
-      "recepcion_cliente": null
-    },
-    {
-      "bloque": "Legal (Compliance)",
-      "puntuacion_1_5": null,
-      "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
-      "confianza": 1.0,
-      "evidencia_principal": "NO_OBSERVABLE (Inicio tardío)",
-      "evidencias_extra": [],
-      "razonamiento": "No se observó el cumplimiento legal, pero no se penaliza ya que no es observable.",
-      "recomendacion_accionable": "Asegurarse de que se cubren todos los aspectos legales en futuras llamadas.",
+      "razonamiento": "El asesor propone un seguimiento, pero no establece un compromiso claro ni fechas específicas.",
+      "recomendacion_accionable": "Definir un siguiente paso concreto y establecer un compromiso de seguimiento.",
       "recepcion_cliente": null
     }
   ],
-  "puntuacion_global_1_5": 3.67,
+  "puntuacion_global_1_5": 3.4,
   "feedback_resumido": {
     "fortalezas": [
-      "Buena detección de necesidades.",
-      "Presentación clara del programa."
+      "El asesor establece un buen rapport y hace preguntas abiertas que permiten al lead expresar sus necesidades."
     ],
     "areas_mejora": [
-      "Mejorar la conexión personal en la apertura.",
-      "Incluir más empatía en la comunicación."
+      "Profundizar en las motivaciones del lead.",
+      "Validar las objeciones de manera más efectiva.",
+      "Establecer compromisos claros en el cierre."
     ]
   }
 }

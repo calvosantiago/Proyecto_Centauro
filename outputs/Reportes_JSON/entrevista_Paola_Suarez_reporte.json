@@ -26,17 +26,17 @@
     {
       "tramo": "2",
       "evento": "Detección de necesidades",
-      "cita": "[ASESOR]: ¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta, que sería aquello que te hace falta?"
+      "cita": "[ASESOR]: ¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta?"
     },
     {
       "tramo": "3",
       "evento": "Presentación del programa",
-      "cita": "[ASESOR]: O B S tiene un valor importantísimo y totalmente diferenciador."
+      "cita": "[ASESOR]: Este título tiene un carácter propio o profesionalizante."
     },
     {
       "tramo": "4",
       "evento": "Manejo de objeciones",
-      "cita": "[ASESOR]: Si por ejemplo no estás seguro en iniciarlo ahora, podemos coger y el expediente y pasarlo sin ningún coste para que lo inicies en octubre."
+      "cita": "[ASESOR]: Si por ejemplo no estás seguro en iniciarlo ahora, podemos coger y el expediente y pasarlo sin ningún coste."
     },
     {
       "tramo": "5",
@@ -47,13 +47,13 @@
   "evaluacion_por_bloques": [
     {
       "bloque": "Apertura",
-      "puntuacion_1_5": 3,
-      "observabilidad": "ALTA",
+      "puntuacion_1_5": null,
+      "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Buenos días XXX. Soy XXX, Asesor de Admisiones de OBS Business School.",
+      "evidencia_principal": "NO_OBSERVABLE (Inicio tardío)",
       "evidencias_extra": [],
-      "razonamiento": "El saludo es educado y profesional, pero no establece una conexión personal.",
-      "recomendacion_accionable": "Incluir preguntas que generen conexión personal desde el inicio.",
+      "razonamiento": "No se observó un saludo claro en la transcripción.",
+      "recomendacion_accionable": "Asegurarse de iniciar la llamada con un saludo claro y profesional.",
       "recepcion_cliente": null
     },
     {
@@ -61,12 +61,10 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: ¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta, que sería aquello que te hace falta?",
-      "evidencias_extra": [
-        "[ASESOR]: ¿Por qué ahora? ¿Viste que ahora es momento importante para formarte?"
-      ],
-      "razonamiento": "El asesor realiza preguntas relevantes que permiten identificar las necesidades del lead.",
-      "recomendacion_accionable": "Profundizar más en las motivaciones personales y profesionales del lead.",
+      "evidencia_principal": "[ASESOR]: ¿Qué necesitas fortalecer, qué ves que a lo mejor te hace falta?",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor realizó preguntas relevantes que permitieron identificar las necesidades del lead.",
+      "recomendacion_accionable": "Continuar profundizando en las motivaciones del lead para personalizar la oferta.",
       "recepcion_cliente": null
     },
     {
@@ -74,13 +72,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: O B S tiene un valor importantísimo y totalmente diferenciador.",
+      "evidencia_principal": "[ASESOR]: Este título tiene un carácter propio o profesionalizante.",
       "evidencias_extra": [
-        "[ASESOR]: Somos la única Business School en El Mundo online que tiene como partner académico a esta Universidad.",
-        "[ASESOR]: Este título es legal para trabajar en México y en más de 150 países."
+        "[ASESOR]: Al finalizar los estudios vas a recibir dos cartones, dos títulos de máster.",
+        "[ASESOR]: La Universidad de Barcelona está como la número 1 a nivel mundial en idioma español."
       ],
-      "razonamiento": "El asesor presenta el programa de manera clara y resalta sus beneficios, aunque podría personalizar más la presentación.",
-      "recomendacion_accionable": "Vincular más el programa a las necesidades específicas del lead.",
+      "razonamiento": "Se presentó el programa de manera clara y se resaltaron los beneficios de la titulación.",
+      "recomendacion_accionable": "Vincular más los beneficios del programa a las necesidades específicas del lead.",
       "recepcion_cliente": null
     },
     {
@@ -88,53 +86,29 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Si por ejemplo no estás seguro en iniciarlo ahora, podemos coger y el expediente y pasarlo sin ningún coste para que lo inicies en octubre.",
+      "evidencia_principal": "[ASESOR]: Si por ejemplo no estás seguro en iniciarlo ahora, podemos coger y el expediente y pasarlo sin ningún coste.",
       "evidencias_extra": [
-        "[ASESOR]: Hay un 20 por 100 que es por fecha de matrícula.",
-        "[ASESOR]: Si decides moverte a octubre, la cuota no empezaría en ahora porque ya empezaste el programa."
+        "[ASESOR]: Hay un período de desistimiento, que si tú quieres rescindir el contrato se te devuelve todo lo que pagues de matrícula."
       ],
-      "razonamiento": "El asesor maneja objeciones de manera efectiva, ofreciendo alternativas y asegurando al lead.",
-      "recomendacion_accionable": "Continuar validando las preocupaciones del lead y ofrecer soluciones claras.",
+      "razonamiento": "El asesor manejó las objeciones de manera efectiva, ofreciendo soluciones y alternativas.",
+      "recomendacion_accionable": "Seguir validando las preocupaciones del lead y ofrecer soluciones claras.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Cierre y siguiente paso",
-      "puntuacion_1_5": 4,
+      "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
       "confianza": 1.0,
       "evidencia_principal": "[ASESOR]: ¿Cómo lo ves con todas estas ayudas que te acabo de comentar? ¿Crees que es posible hacer esta inversión?",
       "evidencias_extra": [
-        "[ASESOR]: Te voy a mandar mi Whatsapp para que nos vayamos comunicando.",
-        "[ASESOR]: Si decides moverte a octubre no se te modifica cada año, los máster se revalorizan."
+        "[ASESOR]: Te voy a mandar mi Whatsapp, que creo que no te he escrito por Whatsapp para que nos vayamos comunicando por allí."
       ],
-      "razonamiento": "El cierre es proactivo y busca asegurar el compromiso del lead, aunque podría ser más asertivo.",
-      "recomendacion_accionable": "Incluir un resumen de los acuerdos y próximos pasos más claros.",
-      "recepcion_cliente": null
-    },
-    {
-      "bloque": "Estilo y comunicación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Estoy convencido de que este Máster de Formación Permanente te va a ayudar mucho.",
-      "evidencias_extra": [],
-      "razonamiento": "El tono es profesional y empático, aunque en algunos momentos puede sonar un poco mecánico.",
-      "recomendacion_accionable": "Incorporar más elementos de empatía y conexión personal.",
-      "recepcion_cliente": null
-    },
-    {
-      "bloque": "Legal (Compliance)",
-      "puntuacion_1_5": 5,
-      "observabilidad": "ALTA",
-      "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Hay un período de desistimiento, que si tú quieres rescindir el contrato se te devuelve todo lo que pagues de matrícula.",
-      "evidencias_extra": [],
-      "razonamiento": "Se aborda correctamente el tema legal, asegurando que el lead esté informado sobre sus derechos.",
-      "recomendacion_accionable": "Mantener siempre la claridad en los aspectos legales.",
+      "razonamiento": "El cierre fue efectivo, con un enfoque en el compromiso del lead y la facilitación del proceso.",
+      "recomendacion_accionable": "Mantener la comunicación abierta y proactiva para asegurar el compromiso del lead.",
       "recepcion_cliente": null
     }
   ],
-  "puntuacion_global_1_5": 4.0,
+  "puntuacion_global_1_5": 4.25,
   "feedback_resumido": {
     "fortalezas": [
       "Buena detección de necesidades",
@@ -142,9 +116,8 @@
       "Manejo efectivo de objeciones"
     ],
     "areas_mejora": [
-      "Conectar más personalmente en la apertura",
-      "Personalizar la presentación del programa",
-      "Ser más asertivo en el cierre"
+      "Iniciar la llamada con un saludo claro",
+      "Vincular más los beneficios del programa a las necesidades del lead"
     ]
   }
 }
