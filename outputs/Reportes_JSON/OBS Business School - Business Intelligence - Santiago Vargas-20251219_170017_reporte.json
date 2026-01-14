@@ -5,13 +5,14 @@
     "flags_tecnicos": {}
   },
   "resumen_contextual": {
-    "perfil_lead": "Candidato joven, con estudios en ADE y experiencia en prácticas, interesado en una maestría relacionada con datos.",
-    "fase_funnel": "Exploración",
-    "objetivo_del_lead": "Obtener una maestría en Business Intelligence para mejorar su perfil profesional.",
+    "perfil_lead": "Candidato joven con formación en ADE y experiencia en prácticas, interesado en una maestría en datos.",
+    "fase_funnel": "Exploración y cierre de admisión.",
+    "objetivo_del_lead": "Obtener una formación especializada en Business Intelligence y mejorar su perfil profesional.",
     "barreras_principales": [
-      "Falta de información sobre el programa y el proceso de admisión."
+      "Falta de experiencia previa en el sector de datos",
+      "Necesidad de apoyo financiero de los padres"
     ],
-    "resultado_general": "Candidato interesado, pero necesita más información y validación de sus padres."
+    "resultado_general": "Candidato interesado en avanzar con la admisión, pero necesita confirmar detalles con sus padres."
   },
   "cobertura_revision": {
     "tramo_1_inicio": "hallazgos",
@@ -24,23 +25,23 @@
   "momentos_clave": [
     {
       "tramo": "1",
-      "evento": "Presentación del asesor y repaso de la información previa",
-      "cita": "[ASESOR]: Esta ya vale, pues nada. Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en en o b S y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas."
+      "evento": "Introducción y repaso de la información previa",
+      "cita": "[ASESOR]: Esta ya vale, pues nada. Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en OBS y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas."
     },
     {
       "tramo": "2",
-      "evento": "Detección de necesidades y motivaciones del lead",
-      "cita": "[ASESOR]: ¿YY por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?"
+      "evento": "Detección de motivaciones del lead",
+      "cita": "[ASESOR]: ¿Y por qué te ha interesado después de estudiar ADE? ¿Por qué el tema de los datos, qué te ha motivado?"
     },
     {
       "tramo": "3",
-      "evento": "Presentación de la metodología y beneficios del programa",
-      "cita": "[ASESOR]: La metodología que nosotros tenemos es todo lo contrario, huimos de eso. Aquí la metodología es práctica, todo práctico, vale?"
+      "evento": "Presentación de la metodología de la escuela",
+      "cita": "[ASESOR]: Pues aquí la metodología que nosotros tenemos es todo lo contrario, huimos de eso."
     },
     {
       "tramo": "5",
-      "evento": "Cierre y propuesta de siguiente paso",
-      "cita": "[ASESOR]: Entonces, ¿cómo te gustaría? ¿Cómo podrías hacerlo apagarlo de una sola vez o fraccionado te iría más cómodo?"
+      "evento": "Cierre y discusión sobre el proceso de admisión",
+      "cita": "[ASESOR]: En el caso de que te acepten tu candidatura, tienes que hacer el 10%."
     }
   ],
   "evaluacion_por_bloques": [
@@ -49,10 +50,10 @@
       "puntuacion_1_5": 3,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Esta ya vale, pues nada. Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en en o b S y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas.",
+      "evidencia_principal": "[ASESOR]: Esta ya vale, pues nada. Me presento otra vez, soy Santiago Vargas, soy asesor de admisiones en OBS y a ver, déjame repasar un poquito lo que habíamos hablado previamente porque tomé algunas notas.",
       "evidencias_extra": [],
-      "razonamiento": "El asesor se presenta de manera clara y repasa la información previa, lo que establece un contexto adecuado para la llamada.",
-      "recomendacion_accionable": "Incluir un saludo más cálido y personal para mejorar la conexión inicial.",
+      "razonamiento": "El saludo es correcto, pero no establece una conexión personal fuerte.",
+      "recomendacion_accionable": "Incluir una pregunta más personal para generar conexión.",
       "recepcion_cliente": null
     },
     {
@@ -60,27 +61,27 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: ¿YY por qué te ha interesado después de estudiar Adel? ¿Por qué el tema de los datos, qué te ha motivado?",
+      "evidencia_principal": "[ASESOR]: ¿Y por qué te ha interesado después de estudiar ADE? ¿Por qué el tema de los datos, qué te ha motivado?",
       "evidencias_extra": [
-        "[ASESOR]: ¿Fuiste a de que salgo como más general y luego ya pensaste en en la maestría, ya me derivaré en algo más concreto, no?",
-        "[ASESOR]: ¿Bueno, en principio habías habías visto algo sobre en la web de Del máster, conoces, has profundizado un poco o simplemente cuando viste el anuncio lo rellenaste?"
+        "[ASESOR]: Bueno, en principio habías visto algo sobre en la web del máster, conoces, has profundizado un poco o simplemente cuando viste el anuncio lo rellenaste el formulario ya está.",
+        "[ASESOR]: ¿Es una Escuela de Negocios, eh? ¿Estamos, tenemos como partner académico, la Universidad de Barcelona, que sí es una Universidad Estatal que la conocerás, supongo, tú estudiaste en la Universidad de León, supongo que eres de León, no?"
       ],
-      "razonamiento": "El asesor realiza preguntas relevantes que permiten entender las motivaciones del lead, aunque podría profundizar más en sus necesidades específicas.",
-      "recomendacion_accionable": "Incluir más preguntas abiertas para explorar en profundidad las necesidades y expectativas del lead.",
+      "razonamiento": "El asesor realiza preguntas relevantes que permiten entender las motivaciones del lead.",
+      "recomendacion_accionable": "Profundizar más en las necesidades específicas del lead.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Presentación del programa",
-      "puntuacion_1_5": 4,
+      "puntuacion_1_5": 5,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: La metodología que nosotros tenemos es todo lo contrario, huimos de eso. Aquí la metodología es práctica, todo práctico, vale?",
+      "evidencia_principal": "[ASESOR]: Aquí la metodología es práctica, todo práctico, vale? Sí que es cierto que hay unas clases que luego hablaremos y hay un material teórico.",
       "evidencias_extra": [
-        "[ASESOR]: En o b s tenemos una cultura de de alumno y ex alumno, es decir, te cogemos de la mano el primer día y ya no te la soltamos nunca.",
-        "[ASESOR]: La formación que tenemos es una formación de impacto. Estos son números reales extraídos de de ex alumnos."
+        "[ASESOR]: El 78,4% de nuestros alumnos ocupan cargos directivos, ya sean cargos medios o en departamentos.",
+        "[ASESOR]: La Universidad de Barcelona aprueba nuestra formación y nuestra metodología y es partner académico nuestro."
       ],
-      "razonamiento": "El asesor presenta de manera clara y estructurada la metodología y beneficios del programa, aunque podría vincular más directamente los beneficios a las necesidades del lead.",
-      "recomendacion_accionable": "Personalizar más la presentación del programa en función de las motivaciones del lead.",
+      "razonamiento": "La presentación del programa es clara y se vincula bien con las necesidades del lead.",
+      "recomendacion_accionable": "Continuar personalizando la presentación según las respuestas del lead.",
       "recepcion_cliente": null
     },
     {
@@ -90,8 +91,8 @@
       "confianza": 0.0,
       "evidencia_principal": "EVIDENCIA_NO_ENCONTRADA",
       "evidencias_extra": [],
-      "razonamiento": "No se identificaron objeciones durante la llamada, lo que puede indicar que el lead no expresó preocupaciones o que el asesor no indagó lo suficiente.",
-      "recomendacion_accionable": "Incluir preguntas específicas para identificar posibles objeciones o preocupaciones del lead.",
+      "razonamiento": "No se identifican objeciones durante la llamada.",
+      "recomendacion_accionable": "Estar preparado para manejar objeciones en futuras llamadas.",
       "recepcion_cliente": null
     },
     {
@@ -99,12 +100,12 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Entonces, ¿cómo te gustaría? ¿Cómo podrías hacerlo apagarlo de una sola vez o fraccionado te iría más cómodo?",
+      "evidencia_principal": "[ASESOR]: En el caso de que te acepten tu candidatura, tienes que hacer el 10%.",
       "evidencias_extra": [
-        "[ASESOR]: Habría que hacer el pago de la de la de la matrícula, vamos a hablar de la parte económica, ahora no, que supongo que te interesa, no?"
+        "[ASESOR]: Si quieres seguir adelante, necesitaría estos documentos entre... Bueno, hoy a lo mejor es un poco tarde, pero el lunes y el martes porque estamos en la misma franja horaria."
       ],
-      "razonamiento": "El asesor propone un siguiente paso claro y ofrece opciones de pago, lo que es positivo para el cierre, aunque podría ser más proactivo en asegurar el compromiso del lead.",
-      "recomendacion_accionable": "Reforzar el cierre con un resumen de los beneficios y un llamado a la acción más directo.",
+      "razonamiento": "El cierre es claro y se establecen los siguientes pasos, aunque podría ser más firme.",
+      "recomendacion_accionable": "Reforzar la urgencia en la toma de decisiones.",
       "recepcion_cliente": null
     },
     {
@@ -112,13 +113,12 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: ¿Sí, vale, vale, no hay problema.",
+      "evidencia_principal": "[ASESOR]: Esto es importante porque no todas o casi ninguna de las escuelas de negocios, universidades ofrecen todo esto de lo que te estoy hablando.",
       "evidencias_extra": [
-        "[ASESOR]: ¿Cómo lo llevas? Alguna pregunta, no. ¿No, verdad?",
-        "[ASESOR]: ¿Tienes alguna pregunta para hasta Fíjate que todavía no hemos hablado de Master, Eh?"
+        "[ASESOR]: ¿Tienes alguna pregunta para hasta? Fíjate que todavía no hemos hablado de Master, eh? Solo de la escuela."
       ],
-      "razonamiento": "El asesor mantiene un tono profesional y directo, aunque en algunos momentos podría ser más empático y conectar mejor con el lead.",
-      "recomendacion_accionable": "Incorporar más empatía y conexión personal en la comunicación.",
+      "razonamiento": "El asesor mantiene un tono profesional y claro, aunque en algunos momentos puede parecer un poco monótono.",
+      "recomendacion_accionable": "Variar el tono y ritmo para mantener el interés del lead.",
       "recepcion_cliente": null
     },
     {
@@ -128,20 +128,22 @@
       "confianza": 0.0,
       "evidencia_principal": "EVIDENCIA_NO_ENCONTRADA",
       "evidencias_extra": [],
-      "razonamiento": "No se observó información sobre aspectos legales o de compliance durante la llamada.",
-      "recomendacion_accionable": "Asegurarse de incluir información sobre compliance en futuras llamadas.",
+      "razonamiento": "No se observan elementos de cumplimiento legal en la transcripción.",
+      "recomendacion_accionable": "Asegurarse de incluir el aviso legal en futuras llamadas.",
       "recepcion_cliente": null
     }
   ],
-  "puntuacion_global_1_5": 3.8,
+  "puntuacion_global_1_5": 4.0,
   "feedback_resumido": {
     "fortalezas": [
-      "Buena estructura en la presentación del programa",
-      "Detección de necesidades adecuada"
+      "Buena detección de necesidades",
+      "Presentación clara del programa",
+      "Cierre efectivo con próximos pasos"
     ],
     "areas_mejora": [
       "Mejorar la conexión personal en la apertura",
-      "Indagar más en objeciones y preocupaciones del lead"
+      "Preparar manejo de objeciones",
+      "Variar el estilo de comunicación"
     ]
   }
 }

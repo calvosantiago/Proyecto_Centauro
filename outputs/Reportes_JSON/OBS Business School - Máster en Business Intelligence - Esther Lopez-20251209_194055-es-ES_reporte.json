@@ -5,14 +5,14 @@
     "flags_tecnicos": {}
   },
   "resumen_contextual": {
-    "perfil_lead": "Candidato interesado en un máster en analítica de datos, con experiencia previa en formación online.",
-    "fase_funnel": "Exploración y presentación del programa.",
-    "objetivo_del_lead": "Mejorar habilidades en analítica de datos y obtener una doble titulación.",
+    "perfil_lead": "Interesado en un máster en analítica a través de bases de datos, con experiencia previa en formación online.",
+    "fase_funnel": "Exploración y cierre financiero.",
+    "objetivo_del_lead": "Mejorar habilidades en analítica y obtener una doble titulación.",
     "barreras_principales": [
       "Costo del máster",
       "Necesidad de ayuda económica"
     ],
-    "resultado_general": "Candidato interesado, pero necesita más información sobre ayudas económicas y costos."
+    "resultado_general": "El lead está interesado en el máster y en las ayudas económicas, con un seguimiento programado."
   },
   "cobertura_revision": {
     "tramo_1_inicio": "hallazgos",
@@ -41,12 +41,12 @@
     {
       "tramo": "4",
       "evento": "Manejo de objeciones sobre el costo",
-      "cita": "[ASESOR]: En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación."
+      "cita": "[ASESOR]: Le va mejor en en dólares, en euros. El en la primera moneda en dólares, mira el precio del máster son €7700, entonces serían 8966 dólares."
     },
     {
       "tramo": "5",
-      "evento": "Cierre y establecimiento de siguiente paso",
-      "cita": "[ASESOR]: Entonces, mire, nosotros lo hacemos tanto de manera al contado que en este caso se le reduce."
+      "evento": "Cierre y siguiente paso",
+      "cita": "[ASESOR]: En este caso, el jueves tenemos admisión, o sea, tenemos la reunión con la, con la, con este, con el Comité de Admisiones."
     }
   ],
   "evaluacion_por_bloques": [
@@ -57,8 +57,8 @@
       "confianza": 1.0,
       "evidencia_principal": "[ASESOR]: Vamos por aquí, que ahora yo también le voy a explicar un poquito cómo vamos a hacer, estructurar lo que es la llamada, si le parece y así con cualquier cosa.",
       "evidencias_extra": [],
-      "razonamiento": "El asesor realiza una apertura adecuada, pero carece de un saludo más cálido o conexión personal.",
-      "recomendacion_accionable": "Incluir un saludo más personalizado y una breve introducción sobre la importancia de la llamada.",
+      "razonamiento": "El asesor realiza una apertura estructurada, pero carece de conexión personal.",
+      "recomendacion_accionable": "Incluir un saludo más cálido y personal para establecer una mejor conexión.",
       "recepcion_cliente": null
     },
     {
@@ -69,10 +69,10 @@
       "evidencia_principal": "[ASESOR]: ¿Hay alguna habilidad que quiera pulir o algún algún punto fuerte a desarrollar?",
       "evidencias_extra": [
         "[ASESOR]: ¿Pudo mirar las herramientas con las que contaba el programa?",
-        "[ASESOR]: ¿Ya lo he hecho, tengo un diplomado en una entidad que se llama Avent Business School, es completamente a distancia."
+        "[ASESOR]: ¿Y había usted dado usted online anteriormente o es la primera vez?"
       ],
-      "razonamiento": "El asesor realiza preguntas relevantes para entender las necesidades del lead, aunque podría profundizar más en las motivaciones personales.",
-      "recomendacion_accionable": "Incluir preguntas adicionales sobre las expectativas del lead respecto al máster.",
+      "razonamiento": "El asesor realiza preguntas relevantes para entender las necesidades del lead, aunque podría profundizar más.",
+      "recomendacion_accionable": "Incluir más preguntas abiertas para explorar motivaciones y objetivos del lead.",
       "recepcion_cliente": null
     },
     {
@@ -85,8 +85,8 @@
         "[ASESOR]: Lo que hacemos es trabajar con una masterclass a la semana de unos 90 minutos que en horario del Salvador sería más o menos al mediodía.",
         "[ASESOR]: A partir del sexto mes se haría el trabajo final de máster, que estará alineado con todas las necesidades reales del mercado laboral."
       ],
-      "razonamiento": "El asesor presenta el programa de manera clara y estructurada, aunque podría vincular más los beneficios del programa a las necesidades del lead.",
-      "recomendacion_accionable": "Conectar más explícitamente los beneficios del programa con las motivaciones del lead.",
+      "razonamiento": "El asesor presenta el programa de manera clara y estructurada, pero podría vincular más los beneficios a las necesidades del lead.",
+      "recomendacion_accionable": "Personalizar más la presentación del programa en función de las necesidades específicas del lead.",
       "recepcion_cliente": null
     },
     {
@@ -94,13 +94,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación.",
+      "evidencia_principal": "[ASESOR]: Le va mejor en en dólares, en euros. El en la primera moneda en dólares, mira el precio del máster son €7700, entonces serían 8966 dólares.",
       "evidencias_extra": [
-        "[ASESOR]: Las ayudas serían menos 2418 dólares y se quedaría una cuota final.",
-        "[ASESOR]: Si usted dentro de un par de años dice. Mire, es que necesito un workshop de liderazgo porque es que lo hice, pero como que se me ha perdido un poco, pues puede volver y gestionarlo de nuevo."
+        "[ASESOR]: En este caso, si finalmente le interesara que usara el máster, hiciera la carta de motivación.",
+        "[ASESOR]: En este caso, las ayudas serían correcto, serían las ayudas serían menos 2418 dólares."
       ],
-      "razonamiento": "El asesor maneja las objeciones de manera efectiva, ofreciendo soluciones y alternativas, aunque podría ser más proactivo en la validación de las preocupaciones del lead.",
-      "recomendacion_accionable": "Asegurarse de validar las preocupaciones del lead antes de ofrecer soluciones.",
+      "razonamiento": "El asesor maneja las objeciones de manera efectiva, proporcionando información clara sobre costos y ayudas.",
+      "recomendacion_accionable": "Asegurarse de validar las preocupaciones del lead antes de presentar soluciones.",
       "recepcion_cliente": null
     },
     {
@@ -108,13 +108,13 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Entonces, mire, nosotros lo hacemos tanto de manera al contado que en este caso se le reduce.",
+      "evidencia_principal": "[ASESOR]: En este caso, el jueves tenemos admisión, o sea, tenemos la reunión con la, con la, con este, con el Comité de Admisiones.",
       "evidencias_extra": [
-        "[ASESOR]: Yo diría que sí, entonces si me manda la información yo no analizo y después podemos conversar ya en forma.",
-        "[ASESOR]: El día jueves me pongo en contacto con usted, le va bien para esta hora?"
+        "[ASESOR]: Yo ahora todo esto le pasaré un Excel al correo electrónico, vale para que lo tenga todo bien estructurado.",
+        "[ASESOR]: ¿No sé si tendría un espacio para que podamos resolver las dudas que se le hayan ocasionado de 5 o 10 minutos de mañana?"
       ],
-      "razonamiento": "El asesor establece un cierre claro y propone un siguiente paso, aunque podría ser más asertivo en la confirmación del compromiso del lead.",
-      "recomendacion_accionable": "Incluir un resumen de lo acordado y confirmar el compromiso del lead de manera más directa.",
+      "razonamiento": "El asesor establece un siguiente paso claro y busca un compromiso del lead, aunque podría ser más proactivo en el cierre.",
+      "recomendacion_accionable": "Incluir un resumen de los puntos tratados y reforzar la urgencia de la decisión.",
       "recepcion_cliente": null
     },
     {
@@ -122,38 +122,35 @@
       "puntuacion_1_5": 4,
       "observabilidad": "ALTA",
       "confianza": 1.0,
-      "evidencia_principal": "[ASESOR]: Mire, déjeme un segundín que vengo por aquí.",
-      "evidencias_extra": [
-        "[ASESOR]: A ver, a ver ahora cuando cuando vea usted la pantalla me lo me avisa y así.",
-        "[ASESOR]: Al final, podrá desarrollar un proyecto y su posterior implementación inmediata en la empresa o en el emprendimiento."
-      ],
-      "razonamiento": "El asesor mantiene un tono profesional y empático, aunque en algunos momentos puede parecer un poco informal.",
-      "recomendacion_accionable": "Mantener un tono profesional y directo en todo momento.",
+      "evidencia_principal": "[ASESOR]: Claro, por supuesto, bueno. ¿Gracias por su tiempo, por su amabilidad, por su gentileza y por, sobre todo, su tiempo, que es lo más valioso, no?",
+      "evidencias_extra": [],
+      "razonamiento": "El asesor mantiene un tono profesional y amable, aunque en algunos momentos puede parecer un poco mecánico.",
+      "recomendacion_accionable": "Trabajar en la naturalidad del discurso para que suene más conversacional.",
       "recepcion_cliente": null
     },
     {
       "bloque": "Legal (Compliance)",
       "puntuacion_1_5": null,
       "observabilidad": "NO_OBSERVABLE_OFF_RECORD",
-      "confianza": 1.0,
+      "confianza": 0.0,
       "evidencia_principal": "NO_OBSERVABLE (OFF-RECORD)",
       "evidencias_extra": [],
-      "razonamiento": "No se observó el cumplimiento de las normativas legales, pero no se penaliza ya que puede haber ocurrido off-record.",
-      "recomendacion_accionable": "Asegurarse de incluir el aviso legal en todas las llamadas.",
+      "razonamiento": "No se observó el cumplimiento legal en la transcripción.",
+      "recomendacion_accionable": "Asegurarse de incluir el aviso legal en futuras llamadas.",
       "recepcion_cliente": null
     }
   ],
   "puntuacion_global_1_5": 3.83,
   "feedback_resumido": {
     "fortalezas": [
-      "Buena detección de necesidades",
-      "Presentación clara del programa",
-      "Manejo efectivo de objeciones"
+      "Estructura clara en la presentación del programa",
+      "Manejo efectivo de objeciones",
+      "Estilo comunicativo profesional"
     ],
     "areas_mejora": [
-      "Mejorar la conexión personal en la apertura",
-      "Vincular más los beneficios del programa a las necesidades del lead",
-      "Ser más asertivo en la confirmación del compromiso del lead"
+      "Conexión personal en la apertura",
+      "Profundizar en la detección de necesidades",
+      "Personalizar más la presentación del programa"
     ]
   }
 }
