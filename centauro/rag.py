@@ -50,7 +50,7 @@ def indexar_documentacion():
             
             # TU ESTRATEGIA DE CHUNKING ORIGINAL:
             chunk_size = 1000
-            overlap = 100
+            overlap = 250
             chunks = []
             
             for i in range(0, len(texto), chunk_size - overlap):

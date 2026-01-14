@@ -207,3 +207,142 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 2026-01-05,10:52:07,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11800,1912,13712,0.002917
 2026-01-05,10:55:07,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_1,11631,11295,22926,0.008522
 2026-01-05,10:55:45,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18347,1428,19775,0.003609
+2026-01-13,18:30:45,entrevista_Paola_Suarez_diar_1,784,492,1276,0.000413
+2026-01-13,18:30:56,entrevista_Paola_Suarez_diar_2,777,480,1257,0.000405
+2026-01-13,18:31:10,entrevista_Paola_Suarez_diar_3,821,529,1350,0.000441
+2026-01-13,18:31:23,entrevista_Paola_Suarez_diar_4,801,446,1247,0.000388
+2026-01-13,18:31:35,entrevista_Paola_Suarez_diar_5,841,518,1359,0.000437
+2026-01-13,18:31:46,entrevista_Paola_Suarez_diar_6,801,527,1328,0.000436
+2026-01-13,18:31:56,entrevista_Paola_Suarez_diar_7,752,453,1205,0.000385
+2026-01-13,18:32:09,entrevista_Paola_Suarez_diar_8,831,544,1375,0.000451
+2026-01-13,18:32:20,entrevista_Paola_Suarez_diar_9,741,454,1195,0.000384
+2026-01-13,18:32:31,entrevista_Paola_Suarez_diar_10,742,450,1192,0.000381
+2026-01-13,18:32:44,entrevista_Paola_Suarez_diar_11,782,488,1270,0.000410
+2026-01-13,18:32:55,entrevista_Paola_Suarez_diar_12,772,510,1282,0.000422
+2026-01-13,18:33:07,entrevista_Paola_Suarez_diar_13,781,497,1278,0.000415
+2026-01-13,18:33:17,entrevista_Paola_Suarez_diar_14,808,515,1323,0.000430
+2026-01-13,18:33:28,entrevista_Paola_Suarez_diar_15,786,502,1288,0.000419
+2026-01-13,18:33:41,entrevista_Paola_Suarez_diar_16,816,488,1304,0.000415
+2026-01-13,18:33:53,entrevista_Paola_Suarez_diar_17,762,505,1267,0.000417
+2026-01-13,18:34:04,entrevista_Paola_Suarez_diar_18,802,542,1344,0.000445
+2026-01-13,18:34:17,entrevista_Paola_Suarez_diar_19,805,522,1327,0.000434
+2026-01-13,18:34:30,entrevista_Paola_Suarez_diar_20,801,528,1329,0.000437
+2026-01-13,18:34:44,entrevista_Paola_Suarez_diar_21,819,534,1353,0.000443
+2026-01-13,18:34:58,entrevista_Paola_Suarez_diar_22,877,633,1510,0.000511
+2026-01-13,18:35:12,entrevista_Paola_Suarez_diar_23,834,556,1390,0.000459
+2026-01-13,18:35:24,entrevista_Paola_Suarez_diar_24,809,536,1345,0.000443
+2026-01-13,18:35:26,entrevista_Paola_Suarez_diar_25,347,60,407,0.000088
+2026-01-13,18:36:09,entrevista_Paola_Suarez_full,19051,1838,20889,0.003960
+2026-01-13,18:36:19,Ivan Canale - Executive MBA-es-ES_diar_1,764,469,1233,0.000396
+2026-01-13,18:36:28,Ivan Canale - Executive MBA-es-ES_diar_2,751,420,1171,0.000365
+2026-01-13,18:36:38,Ivan Canale - Executive MBA-es-ES_diar_3,755,380,1135,0.000341
+2026-01-13,18:36:48,Ivan Canale - Executive MBA-es-ES_diar_4,761,470,1231,0.000396
+2026-01-13,18:37:00,Ivan Canale - Executive MBA-es-ES_diar_5,841,541,1382,0.000451
+2026-01-13,18:37:09,Ivan Canale - Executive MBA-es-ES_diar_6,748,439,1187,0.000376
+2026-01-13,18:37:19,Ivan Canale - Executive MBA-es-ES_diar_7,817,518,1335,0.000433
+2026-01-13,18:37:28,Ivan Canale - Executive MBA-es-ES_diar_8,747,451,1198,0.000383
+2026-01-13,18:37:40,Ivan Canale - Executive MBA-es-ES_diar_9,790,492,1282,0.000414
+2026-01-13,18:37:53,Ivan Canale - Executive MBA-es-ES_diar_10,879,586,1465,0.000483
+2026-01-13,18:38:03,Ivan Canale - Executive MBA-es-ES_diar_11,741,450,1191,0.000381
+2026-01-13,18:38:13,Ivan Canale - Executive MBA-es-ES_diar_12,764,484,1248,0.000405
+2026-01-13,18:38:25,Ivan Canale - Executive MBA-es-ES_diar_13,750,451,1201,0.000383
+2026-01-13,18:38:36,Ivan Canale - Executive MBA-es-ES_diar_14,777,471,1248,0.000399
+2026-01-13,18:38:45,Ivan Canale - Executive MBA-es-ES_diar_15,726,419,1145,0.000360
+2026-01-13,18:38:55,Ivan Canale - Executive MBA-es-ES_diar_16,748,436,1184,0.000374
+2026-01-13,18:39:06,Ivan Canale - Executive MBA-es-ES_diar_17,806,504,1310,0.000423
+2026-01-13,18:39:18,Ivan Canale - Executive MBA-es-ES_diar_18,783,482,1265,0.000407
+2026-01-13,18:39:30,Ivan Canale - Executive MBA-es-ES_diar_19,799,492,1291,0.000415
+2026-01-13,18:39:40,Ivan Canale - Executive MBA-es-ES_diar_20,802,496,1298,0.000418
+2026-01-13,18:39:50,Ivan Canale - Executive MBA-es-ES_diar_21,789,443,1232,0.000384
+2026-01-13,18:40:05,Ivan Canale - Executive MBA-es-ES_diar_22,804,528,1332,0.000437
+2026-01-13,18:40:18,Ivan Canale - Executive MBA-es-ES_diar_23,805,516,1321,0.000430
+2026-01-13,18:40:30,Ivan Canale - Executive MBA-es-ES_diar_24,819,454,1273,0.000395
+2026-01-13,18:40:43,Ivan Canale - Executive MBA-es-ES_diar_25,838,534,1372,0.000446
+2026-01-13,18:40:56,Ivan Canale - Executive MBA-es-ES_diar_26,777,485,1262,0.000408
+2026-01-13,18:41:04,Ivan Canale - Executive MBA-es-ES_diar_27,800,510,1310,0.000426
+2026-01-13,18:41:15,Ivan Canale - Executive MBA-es-ES_diar_28,795,468,1263,0.000400
+2026-01-13,18:41:26,Ivan Canale - Executive MBA-es-ES_diar_29,791,511,1302,0.000425
+2026-01-13,18:41:32,Ivan Canale - Executive MBA-es-ES_diar_30,548,254,802,0.000235
+2026-01-13,18:42:14,Ivan Canale - Executive MBA-es-ES_full,20898,1877,22775,0.004261
+2026-01-13,18:42:22,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_1,774,462,1236,0.000393
+2026-01-13,18:42:31,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_2,789,525,1314,0.000433
+2026-01-13,18:42:40,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_3,849,546,1395,0.000455
+2026-01-13,18:42:52,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_4,844,570,1414,0.000469
+2026-01-13,18:43:01,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_5,787,487,1274,0.000410
+2026-01-13,18:43:12,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_6,764,459,1223,0.000390
+2026-01-13,18:43:23,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_7,754,449,1203,0.000382
+2026-01-13,18:43:32,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_8,740,435,1175,0.000372
+2026-01-13,18:43:41,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_9,730,418,1148,0.000360
+2026-01-13,18:43:51,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_10,799,504,1303,0.000422
+2026-01-13,18:44:00,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_11,802,496,1298,0.000418
+2026-01-13,18:44:09,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_12,764,455,1219,0.000388
+2026-01-13,18:44:18,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_13,760,459,1219,0.000389
+2026-01-13,18:44:30,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_14,781,475,1256,0.000402
+2026-01-13,18:44:40,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_15,750,443,1193,0.000378
+2026-01-13,18:44:49,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_16,788,480,1268,0.000406
+2026-01-13,18:44:57,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_17,764,456,1220,0.000388
+2026-01-13,18:45:08,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_18,814,513,1327,0.000430
+2026-01-13,18:45:20,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_19,775,478,1253,0.000403
+2026-01-13,18:45:33,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_20,873,591,1464,0.000486
+2026-01-13,18:45:45,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_21,847,542,1389,0.000452
+2026-01-13,18:45:55,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_22,863,604,1467,0.000492
+2026-01-13,18:46:02,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_diar_23,600,338,938,0.000293
+2026-01-13,18:46:37,Manuel Martínez- Máster en Neuromarketing y comportamiento del consumidor-es-ES_full,17984,1615,19599,0.003667
+2026-01-13,18:46:51,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_1,865,572,1437,0.000473
+2026-01-13,18:47:02,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_2,820,480,1300,0.000411
+2026-01-13,18:47:07,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_3,827,298,1125,0.000303
+2026-01-13,18:47:17,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_4,868,555,1423,0.000463
+2026-01-13,18:47:26,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_5,814,507,1321,0.000426
+2026-01-13,18:47:38,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_6,810,508,1318,0.000426
+2026-01-13,18:47:49,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_7,803,489,1292,0.000414
+2026-01-13,18:47:59,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_8,822,476,1298,0.000409
+2026-01-13,18:48:12,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_9,818,515,1333,0.000432
+2026-01-13,18:48:22,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_10,821,517,1338,0.000433
+2026-01-13,18:48:31,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_11,875,523,1398,0.000445
+2026-01-13,18:48:40,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_12,802,474,1276,0.000405
+2026-01-13,18:48:51,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_13,780,418,1198,0.000368
+2026-01-13,18:48:59,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_14,782,463,1245,0.000395
+2026-01-13,18:49:07,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_15,803,442,1245,0.000386
+2026-01-13,18:49:17,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_16,841,540,1381,0.000450
+2026-01-13,18:49:28,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_17,877,566,1443,0.000471
+2026-01-13,18:49:37,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_18,840,505,1345,0.000429
+2026-01-13,18:49:47,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_19,842,472,1314,0.000410
+2026-01-13,18:49:49,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_diar_20,394,100,494,0.000119
+2026-01-13,18:50:29,OBS Business School - Business Intelligence - Santiago Vargas-20251219_170017_full,16255,1740,17995,0.003482
+2026-01-13,18:50:39,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_1,786,491,1277,0.000412
+2026-01-13,18:50:51,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_2,813,522,1335,0.000435
+2026-01-13,18:51:00,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_3,759,454,1213,0.000386
+2026-01-13,18:51:10,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_4,790,503,1293,0.000420
+2026-01-13,18:51:19,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_5,765,455,1220,0.000388
+2026-01-13,18:51:29,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_6,793,521,1314,0.000432
+2026-01-13,18:51:38,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_7,793,468,1261,0.000400
+2026-01-13,18:51:49,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_8,830,546,1376,0.000452
+2026-01-13,18:52:02,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_9,830,556,1386,0.000458
+2026-01-13,18:52:13,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_10,789,497,1286,0.000417
+2026-01-13,18:52:14,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_diar_11,350,50,400,0.000082
+2026-01-13,18:52:51,OBS Business School - Máster en Business Intelligence - Esther Lopez-20251209_194055-es-ES_full,11963,1859,13822,0.002910
+2026-01-13,18:53:00,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_1,790,484,1274,0.000409
+2026-01-13,18:53:09,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_2,788,464,1252,0.000397
+2026-01-13,18:53:19,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_3,797,440,1237,0.000384
+2026-01-13,18:53:29,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_4,792,495,1287,0.000416
+2026-01-13,18:53:38,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_5,815,490,1305,0.000416
+2026-01-13,18:53:50,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_6,866,581,1447,0.000478
+2026-01-13,18:54:01,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_7,850,548,1398,0.000456
+2026-01-13,18:54:15,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_8,799,481,1280,0.000408
+2026-01-13,18:54:25,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_9,805,505,1310,0.000424
+2026-01-13,18:54:35,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_10,783,472,1255,0.000401
+2026-01-13,18:54:45,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_11,806,507,1313,0.000425
+2026-01-13,18:54:55,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_12,806,482,1288,0.000410
+2026-01-13,18:55:06,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_13,810,508,1318,0.000426
+2026-01-13,18:55:17,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_14,783,483,1266,0.000407
+2026-01-13,18:55:29,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_15,831,593,1424,0.000480
+2026-01-13,18:55:41,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_16,823,484,1307,0.000414
+2026-01-13,18:55:51,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_17,775,464,1239,0.000395
+2026-01-13,18:56:01,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_18,779,467,1246,0.000397
+2026-01-13,18:56:11,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_19,787,478,1265,0.000405
+2026-01-13,18:56:19,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_20,806,485,1291,0.000412
+2026-01-13,18:56:30,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_21,855,551,1406,0.000459
+2026-01-13,18:56:39,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_22,869,492,1361,0.000426
+2026-01-13,18:56:49,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_23,804,484,1288,0.000411
+2026-01-13,18:56:52,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_24,408,112,520,0.000128
+2026-01-13,18:57:24,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18342,1672,20014,0.003755
