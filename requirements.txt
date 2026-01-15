@@ -1,7 +1,7 @@
-openai
+docx
+rapidfuzz
+dotenv
 chromadb
+openai
 pydantic
-python-docx
-pypdf
-python-dotenv
-tiktoken
+fpdf
