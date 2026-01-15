@@ -346,3 +346,427 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 2026-01-13,18:56:49,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_23,804,484,1288,0.000411
 2026-01-13,18:56:52,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_diar_24,408,112,520,0.000128
 2026-01-13,18:57:24,Vicente Spina Máster en Dirección de Recursos Humanos y Gestión del Talento-20251212_160110_full,18342,1672,20014,0.003755
+2026-01-15,10:30:59,entrevista_Paola_Suarez_diar_1,784,492,1276,0.000413
+2026-01-15,10:31:10,entrevista_Paola_Suarez_diar_2,777,478,1255,0.000403
+2026-01-15,10:31:20,entrevista_Paola_Suarez_diar_3,821,529,1350,0.000441
+2026-01-15,10:31:29,entrevista_Paola_Suarez_diar_4,801,532,1333,0.000439
+2026-01-15,10:31:38,entrevista_Paola_Suarez_diar_5,841,519,1360,0.000438
+2026-01-15,10:33:14,entrevista_Paola_Suarez_diar_1,784,492,1276,0.000413
+2026-01-15,10:33:25,entrevista_Paola_Suarez_diar_2,777,480,1257,0.000405
+2026-01-15,10:33:35,entrevista_Paola_Suarez_diar_3,821,547,1368,0.000451
+2026-01-15,10:33:43,entrevista_Paola_Suarez_diar_4,801,517,1318,0.000430
+2026-01-15,10:33:52,entrevista_Paola_Suarez_diar_5,841,523,1364,0.000440
+2026-01-15,10:34:00,entrevista_Paola_Suarez_diar_6,801,530,1331,0.000438
+2026-01-15,10:34:10,entrevista_Paola_Suarez_diar_7,752,453,1205,0.000385
+2026-01-15,10:34:20,entrevista_Paola_Suarez_diar_8,831,545,1376,0.000452
+2026-01-15,10:34:27,entrevista_Paola_Suarez_diar_9,741,453,1194,0.000383
+2026-01-15,10:34:35,entrevista_Paola_Suarez_diar_10,742,450,1192,0.000381
+2026-01-15,10:34:43,entrevista_Paola_Suarez_diar_11,782,488,1270,0.000410
+2026-01-15,10:34:51,entrevista_Paola_Suarez_diar_12,772,505,1277,0.000419
+2026-01-15,10:35:01,entrevista_Paola_Suarez_diar_13,781,497,1278,0.000415
+2026-01-15,10:35:10,entrevista_Paola_Suarez_diar_14,808,510,1318,0.000427
+2026-01-15,10:35:18,entrevista_Paola_Suarez_diar_15,786,502,1288,0.000419
+2026-01-15,12:29:14,entrevista_Paola_Suarez_diar_1,784,492,1276,0.000413
+2026-01-15,12:29:31,entrevista_Paola_Suarez_diar_2,777,480,1257,0.000405
+2026-01-15,12:33:02,Denis Maldonado - OBS Business School - Executive MBA_diar_1,794,354,1148,0.000331
+2026-01-15,12:33:14,Denis Maldonado - OBS Business School - Executive MBA_diar_2,862,503,1365,0.000431
+2026-01-15,12:33:25,Denis Maldonado - OBS Business School - Executive MBA_diar_3,852,504,1356,0.000430
+2026-01-15,12:33:34,Denis Maldonado - OBS Business School - Executive MBA_diar_4,841,476,1317,0.000412
+2026-01-15,12:33:43,Denis Maldonado - OBS Business School - Executive MBA_diar_5,863,516,1379,0.000439
+2026-01-15,12:33:53,Denis Maldonado - OBS Business School - Executive MBA_diar_6,888,506,1394,0.000437
+2026-01-15,12:34:03,Denis Maldonado - OBS Business School - Executive MBA_diar_7,824,490,1314,0.000418
+2026-01-15,12:34:10,Denis Maldonado - OBS Business School - Executive MBA_diar_8,781,454,1235,0.000390
+2026-01-15,12:34:20,Denis Maldonado - OBS Business School - Executive MBA_diar_9,828,376,1204,0.000350
+2026-01-15,12:34:29,Denis Maldonado - OBS Business School - Executive MBA_diar_10,861,515,1376,0.000438
+2026-01-15,12:34:38,Denis Maldonado - OBS Business School - Executive MBA_diar_11,869,481,1350,0.000419
+2026-01-15,12:34:46,Denis Maldonado - OBS Business School - Executive MBA_diar_12,809,432,1241,0.000381
+2026-01-15,12:34:56,Denis Maldonado - OBS Business School - Executive MBA_diar_13,811,483,1294,0.000411
+2026-01-15,12:35:02,Denis Maldonado - OBS Business School - Executive MBA_diar_14,809,353,1162,0.000333
+2026-01-15,12:35:09,Denis Maldonado - OBS Business School - Executive MBA_diar_15,750,388,1138,0.000345
+2026-01-15,12:35:18,Denis Maldonado - OBS Business School - Executive MBA_diar_16,860,515,1375,0.000438
+2026-01-15,12:35:24,Denis Maldonado - OBS Business School - Executive MBA_diar_17,800,384,1184,0.000350
+2026-01-15,12:35:32,Denis Maldonado - OBS Business School - Executive MBA_diar_18,859,421,1280,0.000381
+2026-01-15,12:35:41,Denis Maldonado - OBS Business School - Executive MBA_diar_19,845,489,1334,0.000420
+2026-01-15,12:35:49,Denis Maldonado - OBS Business School - Executive MBA_diar_20,867,470,1337,0.000412
+2026-01-15,12:35:57,Denis Maldonado - OBS Business School - Executive MBA_diar_21,896,462,1358,0.000412
+2026-01-15,12:36:06,Denis Maldonado - OBS Business School - Executive MBA_diar_22,882,505,1387,0.000435
+2026-01-15,12:36:15,Denis Maldonado - OBS Business School - Executive MBA_diar_23,859,476,1335,0.000414
+2026-01-15,12:36:18,Denis Maldonado - OBS Business School - Executive MBA_diar_24,496,167,663,0.000175
+2026-01-15,12:37:01,Denis Maldonado - OBS Business School - Executive MBA_full,17180,1896,19076,0.003715
+2026-01-15,13:00:40,Alejandro Paz - OBS Business School - Executive MBA_diar_1,787,472,1259,0.000401
+2026-01-15,13:00:55,Alejandro Paz - OBS Business School - Executive MBA_diar_2,876,554,1430,0.000464
+2026-01-15,13:01:07,Alejandro Paz - OBS Business School - Executive MBA_diar_3,825,505,1330,0.000427
+2026-01-15,13:01:18,Alejandro Paz - OBS Business School - Executive MBA_diar_4,821,499,1320,0.000423
+2026-01-15,13:01:29,Alejandro Paz - OBS Business School - Executive MBA_diar_5,805,483,1288,0.000411
+2026-01-15,13:01:39,Alejandro Paz - OBS Business School - Executive MBA_diar_6,772,472,1244,0.000399
+2026-01-15,13:01:52,Alejandro Paz - OBS Business School - Executive MBA_diar_7,859,533,1392,0.000449
+2026-01-15,13:02:01,Alejandro Paz - OBS Business School - Executive MBA_diar_8,774,453,1227,0.000388
+2026-01-15,13:02:14,Alejandro Paz - OBS Business School - Executive MBA_diar_9,810,479,1289,0.000409
+2026-01-15,13:02:23,Alejandro Paz - OBS Business School - Executive MBA_diar_10,797,467,1264,0.000400
+2026-01-15,13:02:34,Alejandro Paz - OBS Business School - Executive MBA_diar_11,840,525,1365,0.000441
+2026-01-15,13:02:45,Alejandro Paz - OBS Business School - Executive MBA_diar_12,958,633,1591,0.000523
+2026-01-15,13:02:57,Alejandro Paz - OBS Business School - Executive MBA_diar_13,871,542,1413,0.000456
+2026-01-15,13:03:12,Alejandro Paz - OBS Business School - Executive MBA_diar_14,1000,675,1675,0.000555
+2026-01-15,13:03:28,Alejandro Paz - OBS Business School - Executive MBA_diar_15,825,507,1332,0.000428
+2026-01-15,13:03:38,Alejandro Paz - OBS Business School - Executive MBA_diar_16,834,515,1349,0.000434
+2026-01-15,13:03:49,Alejandro Paz - OBS Business School - Executive MBA_diar_17,852,486,1338,0.000419
+2026-01-15,13:04:02,Alejandro Paz - OBS Business School - Executive MBA_diar_18,839,506,1345,0.000429
+2026-01-15,13:04:14,Alejandro Paz - OBS Business School - Executive MBA_diar_19,830,485,1315,0.000415
+2026-01-15,13:04:28,Alejandro Paz - OBS Business School - Executive MBA_diar_20,870,541,1411,0.000455
+2026-01-15,13:04:40,Alejandro Paz - OBS Business School - Executive MBA_diar_21,793,452,1245,0.000390
+2026-01-15,13:04:48,Alejandro Paz - OBS Business School - Executive MBA_diar_22,577,245,822,0.000234
+2026-01-15,13:05:36,Alejandro Paz - OBS Business School - Executive MBA_full,17507,1735,19242,0.003667
+2026-01-15,13:44:09,Alejandro Paz - OBS Business School - Executive MBA_diar_1,787,472,1259,0.000401
+2026-01-15,13:44:19,Alejandro Paz - OBS Business School - Executive MBA_diar_2,876,554,1430,0.000464
+2026-01-15,13:44:28,Alejandro Paz - OBS Business School - Executive MBA_diar_3,825,504,1329,0.000426
+2026-01-15,13:44:38,Alejandro Paz - OBS Business School - Executive MBA_diar_4,821,499,1320,0.000423
+2026-01-15,13:44:47,Alejandro Paz - OBS Business School - Executive MBA_diar_5,805,483,1288,0.000411
+2026-01-15,13:44:55,Alejandro Paz - OBS Business School - Executive MBA_diar_6,772,451,1223,0.000386
+2026-01-15,13:45:04,Alejandro Paz - OBS Business School - Executive MBA_diar_7,859,520,1379,0.000441
+2026-01-15,13:45:13,Alejandro Paz - OBS Business School - Executive MBA_diar_8,774,453,1227,0.000388
+2026-01-15,13:45:22,Alejandro Paz - OBS Business School - Executive MBA_diar_9,810,443,1253,0.000387
+2026-01-15,13:45:31,Alejandro Paz - OBS Business School - Executive MBA_diar_10,797,467,1264,0.000400
+2026-01-15,13:45:44,Alejandro Paz - OBS Business School - Executive MBA_diar_11,840,525,1365,0.000441
+2026-01-15,13:45:55,Alejandro Paz - OBS Business School - Executive MBA_diar_12,958,634,1592,0.000524
+2026-01-15,13:46:03,Alejandro Paz - OBS Business School - Executive MBA_diar_13,871,542,1413,0.000456
+2026-01-15,13:46:17,Alejandro Paz - OBS Business School - Executive MBA_diar_14,1000,675,1675,0.000555
+2026-01-15,13:46:27,Alejandro Paz - OBS Business School - Executive MBA_diar_15,825,508,1333,0.000429
+2026-01-15,13:46:38,Alejandro Paz - OBS Business School - Executive MBA_diar_16,834,515,1349,0.000434
+2026-01-15,13:46:47,Alejandro Paz - OBS Business School - Executive MBA_diar_17,852,484,1336,0.000418
+2026-01-15,13:46:56,Alejandro Paz - OBS Business School - Executive MBA_diar_18,839,506,1345,0.000429
+2026-01-15,13:47:05,Alejandro Paz - OBS Business School - Executive MBA_diar_19,830,485,1315,0.000415
+2026-01-15,13:47:15,Alejandro Paz - OBS Business School - Executive MBA_diar_20,870,541,1411,0.000455
+2026-01-15,13:47:22,Alejandro Paz - OBS Business School - Executive MBA_diar_21,793,452,1245,0.000390
+2026-01-15,13:47:26,Alejandro Paz - OBS Business School - Executive MBA_diar_22,577,245,822,0.000234
+2026-01-15,13:48:02,Alejandro Paz - OBS Business School - Executive MBA_full,17442,1822,19264,0.003709
+2026-01-15,13:48:11,Interview - Cindy Navarro_diar_1,805,472,1277,0.000404
+2026-01-15,13:48:18,Interview - Cindy Navarro_diar_2,763,441,1204,0.000379
+2026-01-15,13:48:26,Interview - Cindy Navarro_diar_3,784,419,1203,0.000369
+2026-01-15,13:48:38,Interview - Cindy Navarro_diar_4,755,451,1206,0.000384
+2026-01-15,13:48:47,Interview - Cindy Navarro_diar_5,787,463,1250,0.000396
+2026-01-15,13:48:59,Interview - Cindy Navarro_diar_6,961,608,1569,0.000509
+2026-01-15,13:49:13,Interview - Cindy Navarro_diar_7,1130,792,1922,0.000645
+2026-01-15,13:49:22,Interview - Cindy Navarro_diar_8,770,452,1222,0.000387
+2026-01-15,13:49:33,Interview - Cindy Navarro_diar_9,888,549,1437,0.000463
+2026-01-15,13:49:37,Interview - Cindy Navarro_diar_10,574,241,815,0.000231
+2026-01-15,13:50:03,Interview - Cindy Navarro_full,11598,1360,12958,0.002556
+2026-01-15,13:50:13,Interview - Cristian Radu _diar_1,809,462,1271,0.000399
+2026-01-15,13:50:22,Interview - Cristian Radu _diar_2,837,498,1335,0.000424
+2026-01-15,13:50:33,Interview - Cristian Radu _diar_3,845,462,1307,0.000404
+2026-01-15,13:50:43,Interview - Cristian Radu _diar_4,845,452,1297,0.000398
+2026-01-15,13:50:51,Interview - Cristian Radu _diar_5,824,404,1228,0.000366
+2026-01-15,13:51:00,Interview - Cristian Radu _diar_6,839,476,1315,0.000411
+2026-01-15,13:51:10,Interview - Cristian Radu _diar_7,876,484,1360,0.000422
+2026-01-15,13:51:20,Interview - Cristian Radu _diar_8,838,466,1304,0.000405
+2026-01-15,13:51:27,Interview - Cristian Radu _diar_9,856,380,1236,0.000356
+2026-01-15,13:51:36,Interview - Cristian Radu _diar_10,896,531,1427,0.000453
+2026-01-15,13:51:47,Interview - Cristian Radu _diar_11,838,484,1322,0.000416
+2026-01-15,13:51:56,Interview - Cristian Radu _diar_12,867,496,1363,0.000428
+2026-01-15,13:52:05,Interview - Cristian Radu _diar_13,835,471,1306,0.000408
+2026-01-15,13:52:15,Interview - Cristian Radu _diar_14,858,495,1353,0.000426
+2026-01-15,13:52:23,Interview - Cristian Radu _diar_15,862,507,1369,0.000433
+2026-01-15,13:52:31,Interview - Cristian Radu _diar_16,832,490,1322,0.000419
+2026-01-15,13:52:36,Interview - Cristian Radu _diar_17,498,162,660,0.000172
+2026-01-15,13:53:08,Interview - Cristian Radu _full,14163,1791,15954,0.003199
+2026-01-15,13:53:17,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_1,830,488,1318,0.000417
+2026-01-15,13:53:26,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_2,884,532,1416,0.000452
+2026-01-15,13:53:36,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_3,848,499,1347,0.000427
+2026-01-15,13:53:47,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_4,902,570,1472,0.000477
+2026-01-15,13:53:56,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_5,835,502,1337,0.000426
+2026-01-15,13:54:07,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_6,823,487,1310,0.000416
+2026-01-15,13:54:17,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_7,852,518,1370,0.000439
+2026-01-15,13:54:26,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_8,862,514,1376,0.000438
+2026-01-15,13:54:36,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_9,900,563,1463,0.000473
+2026-01-15,13:54:45,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_10,854,521,1375,0.000441
+2026-01-15,13:55:00,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_11,1038,696,1734,0.000573
+2026-01-15,13:55:10,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_12,861,532,1393,0.000448
+2026-01-15,13:55:20,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_13,972,605,1577,0.000509
+2026-01-15,13:55:30,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_14,939,592,1531,0.000496
+2026-01-15,13:55:40,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_15,778,442,1220,0.000382
+2026-01-15,13:55:48,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_16,823,477,1300,0.000410
+2026-01-15,13:55:59,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_17,854,500,1354,0.000428
+2026-01-15,13:56:10,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_18,901,547,1448,0.000463
+2026-01-15,13:56:19,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_19,867,526,1393,0.000446
+2026-01-15,13:56:29,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_20,882,536,1418,0.000454
+2026-01-15,13:56:37,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_21,922,479,1401,0.000426
+2026-01-15,13:56:48,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_22,835,493,1328,0.000421
+2026-01-15,13:57:00,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_23,893,549,1442,0.000463
+2026-01-15,13:57:09,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_24,888,545,1433,0.000460
+2026-01-15,13:57:23,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_25,955,598,1553,0.000502
+2026-01-15,13:57:34,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_26,923,582,1505,0.000488
+2026-01-15,13:57:45,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_27,866,521,1387,0.000442
+2026-01-15,13:57:59,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_28,878,522,1400,0.000445
+2026-01-15,13:58:04,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_diar_29,585,231,816,0.000226
+2026-01-15,13:58:45,Javier Vaquerizo Máster de Formación Permanente en Business Intelligence y Analytics  - Abril 2026_full,21513,1957,23470,0.004401
+2026-01-15,13:58:56,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_1,831,502,1333,0.000426
+2026-01-15,13:59:05,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_2,814,487,1301,0.000414
+2026-01-15,13:59:14,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_3,896,564,1460,0.000473
+2026-01-15,13:59:22,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_4,817,443,1260,0.000388
+2026-01-15,13:59:33,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_5,818,496,1314,0.000420
+2026-01-15,13:59:46,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_6,898,541,1439,0.000459
+2026-01-15,13:59:56,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_7,849,509,1358,0.000433
+2026-01-15,14:00:08,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_8,811,466,1277,0.000401
+2026-01-15,14:00:22,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_9,857,528,1385,0.000445
+2026-01-15,14:00:38,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_10,875,542,1417,0.000456
+2026-01-15,14:00:55,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_11,848,507,1355,0.000431
+2026-01-15,14:01:10,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_12,882,582,1464,0.000481
+2026-01-15,14:01:21,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_13,820,481,1301,0.000412
+2026-01-15,14:01:40,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_14,940,663,1603,0.000539
+2026-01-15,14:01:50,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _diar_15,667,322,989,0.000293
+2026-01-15,14:02:34,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA -Paula García _full,14210,1465,15675,0.003010
+2026-01-15,14:07:10,Interview - Cindy Navarro_diar_1,916,611,1527,0.000504
+2026-01-15,14:07:25,Interview - Cindy Navarro_diar_2,801,494,1295,0.000417
+2026-01-15,14:07:36,Interview - Cindy Navarro_diar_3,820,503,1323,0.000425
+2026-01-15,14:07:48,Interview - Cindy Navarro_diar_4,789,488,1277,0.000411
+2026-01-15,14:08:02,Interview - Cindy Navarro_diar_5,833,519,1352,0.000436
+2026-01-15,14:08:14,Interview - Cindy Navarro_diar_6,840,535,1375,0.000447
+2026-01-15,14:08:30,Interview - Cindy Navarro_diar_7,897,583,1480,0.000484
+2026-01-15,14:08:48,Interview - Cindy Navarro_diar_8,941,620,1561,0.000513
+2026-01-15,14:09:09,Interview - Cindy Navarro_diar_9,1047,745,1792,0.000604
+2026-01-15,14:09:18,Interview - Cindy Navarro_diar_10,702,371,1073,0.000328
+2026-01-15,14:09:57,Interview - Cindy Navarro_full,11773,1732,13505,0.002805
+2026-01-15,14:10:08,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_1,800,458,1258,0.000395
+2026-01-15,14:10:21,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_2,841,504,1345,0.000429
+2026-01-15,14:10:33,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_3,885,536,1421,0.000454
+2026-01-15,14:10:50,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_4,900,553,1453,0.000467
+2026-01-15,14:11:01,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_5,799,457,1256,0.000394
+2026-01-15,14:11:12,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_6,848,485,1333,0.000418
+2026-01-15,14:11:24,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_7,970,583,1553,0.000495
+2026-01-15,14:11:35,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_8,844,504,1348,0.000429
+2026-01-15,14:11:45,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_9,823,470,1293,0.000405
+2026-01-15,14:11:57,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_10,889,543,1432,0.000459
+2026-01-15,14:12:09,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_11,885,531,1416,0.000451
+2026-01-15,14:12:19,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_12,802,448,1250,0.000389
+2026-01-15,14:12:31,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_13,836,489,1325,0.000419
+2026-01-15,14:12:39,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_14,771,409,1180,0.000361
+2026-01-15,14:13:07,OBS Business School - Andrea Aicinburu - Dirección Financiera_full,13161,1356,14517,0.002788
+2026-01-15,14:13:18,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_1,829,513,1342,0.000432
+2026-01-15,14:13:28,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_2,868,548,1416,0.000459
+2026-01-15,14:13:37,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_3,818,485,1303,0.000414
+2026-01-15,14:13:48,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_4,875,553,1428,0.000463
+2026-01-15,14:14:06,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_5,958,643,1601,0.000530
+2026-01-15,14:14:17,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_6,857,492,1349,0.000424
+2026-01-15,14:14:27,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_7,840,527,1367,0.000442
+2026-01-15,14:14:39,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_8,875,570,1445,0.000473
+2026-01-15,14:14:50,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_9,854,516,1370,0.000438
+2026-01-15,14:15:05,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_10,882,602,1484,0.000494
+2026-01-15,14:15:19,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_11,826,509,1335,0.000429
+2026-01-15,14:15:29,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_12,893,605,1498,0.000497
+2026-01-15,14:15:31,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_13,395,78,473,0.000106
+2026-01-15,14:16:01,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_full,12826,1531,14357,0.002842
+2026-01-15,14:16:11,Ruben Di Colloredo- Máster en Dirección Financiera_diar_1,872,437,1309,0.000393
+2026-01-15,14:16:21,Ruben Di Colloredo- Máster en Dirección Financiera_diar_2,879,498,1377,0.000431
+2026-01-15,14:16:31,Ruben Di Colloredo- Máster en Dirección Financiera_diar_3,857,466,1323,0.000408
+2026-01-15,14:16:41,Ruben Di Colloredo- Máster en Dirección Financiera_diar_4,881,499,1380,0.000432
+2026-01-15,14:16:51,Ruben Di Colloredo- Máster en Dirección Financiera_diar_5,862,491,1353,0.000424
+2026-01-15,14:17:00,Ruben Di Colloredo- Máster en Dirección Financiera_diar_6,899,528,1427,0.000452
+2026-01-15,14:17:09,Ruben Di Colloredo- Máster en Dirección Financiera_diar_7,868,497,1365,0.000428
+2026-01-15,14:17:20,Ruben Di Colloredo- Máster en Dirección Financiera_diar_8,901,539,1440,0.000459
+2026-01-15,14:17:30,Ruben Di Colloredo- Máster en Dirección Financiera_diar_9,942,551,1493,0.000472
+2026-01-15,14:17:40,Ruben Di Colloredo- Máster en Dirección Financiera_diar_10,953,545,1498,0.000470
+2026-01-15,14:17:51,Ruben Di Colloredo- Máster en Dirección Financiera_diar_11,823,485,1308,0.000414
+2026-01-15,14:18:01,Ruben Di Colloredo- Máster en Dirección Financiera_diar_12,831,469,1300,0.000406
+2026-01-15,14:18:11,Ruben Di Colloredo- Máster en Dirección Financiera_diar_13,946,574,1520,0.000486
+2026-01-15,14:18:21,Ruben Di Colloredo- Máster en Dirección Financiera_diar_14,875,492,1367,0.000426
+2026-01-15,14:18:31,Ruben Di Colloredo- Máster en Dirección Financiera_diar_15,931,573,1504,0.000483
+2026-01-15,14:18:44,Ruben Di Colloredo- Máster en Dirección Financiera_diar_16,889,530,1419,0.000451
+2026-01-15,14:18:53,Ruben Di Colloredo- Máster en Dirección Financiera_diar_17,812,465,1277,0.000401
+2026-01-15,14:19:00,Ruben Di Colloredo- Máster en Dirección Financiera_diar_18,821,444,1265,0.000390
+2026-01-15,14:19:09,Ruben Di Colloredo- Máster en Dirección Financiera_diar_19,872,503,1375,0.000433
+2026-01-15,14:19:21,Ruben Di Colloredo- Máster en Dirección Financiera_diar_20,1046,662,1708,0.000554
+2026-01-15,14:19:31,Ruben Di Colloredo- Máster en Dirección Financiera_diar_21,888,514,1402,0.000442
+2026-01-15,14:19:41,Ruben Di Colloredo- Máster en Dirección Financiera_diar_22,816,443,1259,0.000388
+2026-01-15,14:19:49,Ruben Di Colloredo- Máster en Dirección Financiera_diar_23,826,466,1292,0.000403
+2026-01-15,14:19:59,Ruben Di Colloredo- Máster en Dirección Financiera_diar_24,839,482,1321,0.000415
+2026-01-15,14:20:12,Ruben Di Colloredo- Máster en Dirección Financiera_diar_25,875,526,1401,0.000447
+2026-01-15,14:20:22,Ruben Di Colloredo- Máster en Dirección Financiera_diar_26,883,512,1395,0.000440
+2026-01-15,14:20:31,Ruben Di Colloredo- Máster en Dirección Financiera_diar_27,849,477,1326,0.000414
+2026-01-15,14:20:43,Ruben Di Colloredo- Máster en Dirección Financiera_diar_28,1009,583,1592,0.000501
+2026-01-15,14:20:54,Ruben Di Colloredo- Máster en Dirección Financiera_diar_29,855,482,1337,0.000417
+2026-01-15,14:20:55,Ruben Di Colloredo- Máster en Dirección Financiera_diar_30,362,29,391,0.000072
+2026-01-15,14:21:27,Ruben Di Colloredo- Máster en Dirección Financiera_full,20673,1590,22263,0.004055
+2026-01-15,14:21:35,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_1,816,454,1270,0.000395
+2026-01-15,14:21:45,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_2,876,512,1388,0.000439
+2026-01-15,14:21:55,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_3,840,471,1311,0.000409
+2026-01-15,14:22:06,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_4,807,442,1249,0.000386
+2026-01-15,14:22:20,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_5,934,581,1515,0.000489
+2026-01-15,14:22:32,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_6,751,408,1159,0.000357
+2026-01-15,14:22:43,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_7,786,434,1220,0.000378
+2026-01-15,14:22:55,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_8,926,570,1496,0.000481
+2026-01-15,14:23:04,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_9,871,514,1385,0.000439
+2026-01-15,14:23:17,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_10,863,520,1383,0.000441
+2026-01-15,14:23:24,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_11,799,364,1163,0.000338
+2026-01-15,14:23:34,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_12,833,468,1301,0.000406
+2026-01-15,14:23:44,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_13,847,496,1343,0.000425
+2026-01-15,14:23:54,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_14,785,434,1219,0.000378
+2026-01-15,14:24:06,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_15,795,449,1244,0.000389
+2026-01-15,14:24:16,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_16,808,451,1259,0.000392
+2026-01-15,14:24:25,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_17,870,508,1378,0.000435
+2026-01-15,14:24:34,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_18,834,428,1262,0.000382
+2026-01-15,14:24:43,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_19,853,497,1350,0.000426
+2026-01-15,14:24:51,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_20,825,471,1296,0.000406
+2026-01-15,14:25:02,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_21,904,539,1443,0.000459
+2026-01-15,14:25:09,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_22,663,304,967,0.000282
+2026-01-15,14:25:41,Sesión sobre Máster en Dirección Financiera _Ania Collado_full,16377,1643,18020,0.003442
+2026-01-15,15:26:16,Interview - Cindy Navarro_diar_1,916,609,1525,0.000503
+2026-01-15,15:26:27,Interview - Cindy Navarro_diar_2,801,494,1295,0.000417
+2026-01-15,15:26:40,Interview - Cindy Navarro_diar_3,820,512,1332,0.000430
+2026-01-15,15:26:56,Interview - Cindy Navarro_diar_4,789,487,1276,0.000411
+2026-01-15,15:27:10,Interview - Cindy Navarro_diar_5,833,519,1352,0.000436
+2026-01-15,15:27:23,Interview - Cindy Navarro_diar_6,840,535,1375,0.000447
+2026-01-15,15:27:38,Interview - Cindy Navarro_diar_7,897,619,1516,0.000506
+2026-01-15,15:27:51,Interview - Cindy Navarro_diar_8,941,620,1561,0.000513
+2026-01-15,15:28:09,Interview - Cindy Navarro_diar_9,1047,745,1792,0.000604
+2026-01-15,15:28:17,Interview - Cindy Navarro_diar_10,702,371,1073,0.000328
+2026-01-15,15:28:59,Interview - Cindy Navarro_full,11938,1682,13620,0.002800
+2026-01-15,15:29:09,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_1,800,459,1259,0.000395
+2026-01-15,15:29:18,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_2,841,504,1345,0.000429
+2026-01-15,15:29:30,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_3,885,526,1411,0.000448
+2026-01-15,15:29:45,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_4,900,553,1453,0.000467
+2026-01-15,15:29:57,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_5,799,457,1256,0.000394
+2026-01-15,15:30:08,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_6,848,485,1333,0.000418
+2026-01-15,15:30:24,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_7,970,583,1553,0.000495
+2026-01-15,15:30:36,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_8,844,504,1348,0.000429
+2026-01-15,15:30:48,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_9,823,470,1293,0.000405
+2026-01-15,15:31:04,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_10,889,543,1432,0.000459
+2026-01-15,15:31:19,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_11,885,531,1416,0.000451
+2026-01-15,15:31:34,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_12,802,448,1250,0.000389
+2026-01-15,15:31:48,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_13,836,489,1325,0.000419
+2026-01-15,15:32:02,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_14,771,409,1180,0.000361
+2026-01-15,15:32:38,OBS Business School - Andrea Aicinburu - Dirección Financiera_full,13277,1494,14771,0.002888
+2026-01-15,15:32:56,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_1,829,513,1342,0.000432
+2026-01-15,15:33:10,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_2,868,548,1416,0.000459
+2026-01-15,15:33:24,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_3,818,485,1303,0.000414
+2026-01-15,15:33:37,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_4,875,553,1428,0.000463
+2026-01-15,15:33:54,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_5,958,643,1601,0.000530
+2026-01-15,15:34:07,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_6,857,522,1379,0.000442
+2026-01-15,15:34:19,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_7,840,527,1367,0.000442
+2026-01-15,15:34:33,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_8,875,584,1459,0.000482
+2026-01-15,15:34:45,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_9,854,516,1370,0.000438
+2026-01-15,15:34:58,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_10,882,602,1484,0.000494
+2026-01-15,15:35:09,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_11,826,509,1335,0.000429
+2026-01-15,15:35:27,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_12,893,605,1498,0.000497
+2026-01-15,15:35:29,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_13,395,78,473,0.000106
+2026-01-15,15:36:06,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_full,12994,1623,14617,0.002923
+2026-01-15,15:36:17,Ruben Di Colloredo- Máster en Dirección Financiera_diar_1,872,437,1309,0.000393
+2026-01-15,15:36:28,Ruben Di Colloredo- Máster en Dirección Financiera_diar_2,879,498,1377,0.000431
+2026-01-15,15:36:39,Ruben Di Colloredo- Máster en Dirección Financiera_diar_3,857,466,1323,0.000408
+2026-01-15,15:36:52,Ruben Di Colloredo- Máster en Dirección Financiera_diar_4,881,499,1380,0.000432
+2026-01-15,15:37:04,Ruben Di Colloredo- Máster en Dirección Financiera_diar_5,862,491,1353,0.000424
+2026-01-15,15:37:18,Ruben Di Colloredo- Máster en Dirección Financiera_diar_6,899,528,1427,0.000452
+2026-01-15,15:37:30,Ruben Di Colloredo- Máster en Dirección Financiera_diar_7,868,497,1365,0.000428
+2026-01-15,15:37:42,Ruben Di Colloredo- Máster en Dirección Financiera_diar_8,901,539,1440,0.000459
+2026-01-15,15:37:54,Ruben Di Colloredo- Máster en Dirección Financiera_diar_9,942,551,1493,0.000472
+2026-01-15,15:38:10,Ruben Di Colloredo- Máster en Dirección Financiera_diar_10,953,582,1535,0.000492
+2026-01-15,15:38:22,Ruben Di Colloredo- Máster en Dirección Financiera_diar_11,823,485,1308,0.000414
+2026-01-15,15:38:33,Ruben Di Colloredo- Máster en Dirección Financiera_diar_12,831,469,1300,0.000406
+2026-01-15,15:38:46,Ruben Di Colloredo- Máster en Dirección Financiera_diar_13,946,573,1519,0.000486
+2026-01-15,15:39:00,Ruben Di Colloredo- Máster en Dirección Financiera_diar_14,875,494,1369,0.000428
+2026-01-15,15:39:15,Ruben Di Colloredo- Máster en Dirección Financiera_diar_15,931,573,1504,0.000483
+2026-01-15,15:39:34,Ruben Di Colloredo- Máster en Dirección Financiera_diar_16,889,530,1419,0.000451
+2026-01-15,15:39:44,Ruben Di Colloredo- Máster en Dirección Financiera_diar_17,812,465,1277,0.000401
+2026-01-15,15:39:54,Ruben Di Colloredo- Máster en Dirección Financiera_diar_18,821,444,1265,0.000390
+2026-01-15,15:40:06,Ruben Di Colloredo- Máster en Dirección Financiera_diar_19,872,503,1375,0.000433
+2026-01-15,15:40:23,Ruben Di Colloredo- Máster en Dirección Financiera_diar_20,1046,662,1708,0.000554
+2026-01-15,15:40:36,Ruben Di Colloredo- Máster en Dirección Financiera_diar_21,888,473,1361,0.000417
+2026-01-15,15:40:49,Ruben Di Colloredo- Máster en Dirección Financiera_diar_22,816,443,1259,0.000388
+2026-01-15,15:41:02,Ruben Di Colloredo- Máster en Dirección Financiera_diar_23,826,466,1292,0.000403
+2026-01-15,15:41:16,Ruben Di Colloredo- Máster en Dirección Financiera_diar_24,839,482,1321,0.000415
+2026-01-15,15:41:29,Ruben Di Colloredo- Máster en Dirección Financiera_diar_25,875,526,1401,0.000447
+2026-01-15,15:41:42,Ruben Di Colloredo- Máster en Dirección Financiera_diar_26,883,506,1389,0.000436
+2026-01-15,15:41:52,Ruben Di Colloredo- Máster en Dirección Financiera_diar_27,849,465,1314,0.000406
+2026-01-15,15:42:05,Ruben Di Colloredo- Máster en Dirección Financiera_diar_28,1009,583,1592,0.000501
+2026-01-15,15:42:18,Ruben Di Colloredo- Máster en Dirección Financiera_diar_29,855,482,1337,0.000417
+2026-01-15,15:42:19,Ruben Di Colloredo- Máster en Dirección Financiera_diar_30,362,29,391,0.000072
+2026-01-15,15:42:56,Ruben Di Colloredo- Máster en Dirección Financiera_full,20775,1626,22401,0.004092
+2026-01-15,15:43:09,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_1,816,454,1270,0.000395
+2026-01-15,15:43:23,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_2,876,512,1388,0.000439
+2026-01-15,15:43:35,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_3,840,475,1315,0.000411
+2026-01-15,15:43:47,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_4,807,442,1249,0.000386
+2026-01-15,15:44:00,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_5,934,581,1515,0.000489
+2026-01-15,15:44:13,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_6,751,408,1159,0.000357
+2026-01-15,15:44:26,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_7,786,435,1221,0.000379
+2026-01-15,15:44:41,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_8,926,570,1496,0.000481
+2026-01-15,15:44:55,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_9,871,514,1385,0.000439
+2026-01-15,15:45:09,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_10,863,520,1383,0.000441
+2026-01-15,15:45:18,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_11,799,364,1163,0.000338
+2026-01-15,15:45:29,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_12,833,468,1301,0.000406
+2026-01-15,15:45:42,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_13,847,496,1343,0.000425
+2026-01-15,15:45:52,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_14,785,434,1219,0.000378
+2026-01-15,15:46:03,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_15,795,462,1257,0.000396
+2026-01-15,15:46:13,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_16,808,451,1259,0.000392
+2026-01-15,15:46:26,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_17,870,507,1377,0.000435
+2026-01-15,15:46:38,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_18,834,428,1262,0.000382
+2026-01-15,15:46:49,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_19,853,497,1350,0.000426
+2026-01-15,15:47:02,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_20,825,471,1296,0.000406
+2026-01-15,15:47:18,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_21,904,539,1443,0.000459
+2026-01-15,15:47:26,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_22,663,304,967,0.000282
+2026-01-15,15:48:03,Sesión sobre Máster en Dirección Financiera _Ania Collado_full,16518,1760,18278,0.003534
+2026-01-15,16:17:21,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_1,800,447,1247,0.000388
+2026-01-15,16:17:33,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_2,841,504,1345,0.000429
+2026-01-15,16:17:46,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_3,885,526,1411,0.000448
+2026-01-15,16:18:00,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_4,900,553,1453,0.000467
+2026-01-15,16:18:11,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_5,799,457,1256,0.000394
+2026-01-15,16:18:22,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_6,848,485,1333,0.000418
+2026-01-15,16:18:35,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_7,970,583,1553,0.000495
+2026-01-15,16:18:45,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_8,844,496,1340,0.000424
+2026-01-15,16:18:56,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_9,823,470,1293,0.000405
+2026-01-15,16:19:08,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_10,889,543,1432,0.000459
+2026-01-15,16:19:19,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_11,885,531,1416,0.000451
+2026-01-15,16:19:30,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_12,802,448,1250,0.000389
+2026-01-15,16:19:42,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_13,836,489,1325,0.000419
+2026-01-15,16:19:51,OBS Business School - Andrea Aicinburu - Dirección Financiera_diar_14,771,409,1180,0.000361
+2026-01-15,16:20:31,OBS Business School - Andrea Aicinburu - Dirección Financiera_full,13619,1382,15001,0.002872
+2026-01-15,16:20:43,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_1,829,513,1342,0.000432
+2026-01-15,16:20:56,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_2,868,548,1416,0.000459
+2026-01-15,16:21:09,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_3,818,485,1303,0.000414
+2026-01-15,16:21:26,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_4,875,553,1428,0.000463
+2026-01-15,16:21:44,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_5,958,643,1601,0.000530
+2026-01-15,16:21:55,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_6,857,522,1379,0.000442
+2026-01-15,16:22:06,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_7,840,527,1367,0.000442
+2026-01-15,16:22:23,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_8,875,584,1459,0.000482
+2026-01-15,16:22:34,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_9,854,516,1370,0.000438
+2026-01-15,16:22:48,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_10,882,602,1484,0.000494
+2026-01-15,16:23:05,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_11,826,509,1335,0.000429
+2026-01-15,16:23:18,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_12,893,621,1514,0.000507
+2026-01-15,16:23:21,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_diar_13,395,78,473,0.000106
+2026-01-15,16:24:01,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_full,13371,1818,15189,0.003096
+2026-01-15,16:24:16,Ruben Di Colloredo- Máster en Dirección Financiera_diar_1,872,437,1309,0.000393
+2026-01-15,16:24:28,Ruben Di Colloredo- Máster en Dirección Financiera_diar_2,879,498,1377,0.000431
+2026-01-15,16:24:40,Ruben Di Colloredo- Máster en Dirección Financiera_diar_3,857,466,1323,0.000408
+2026-01-15,16:24:50,Ruben Di Colloredo- Máster en Dirección Financiera_diar_4,881,499,1380,0.000432
+2026-01-15,16:25:00,Ruben Di Colloredo- Máster en Dirección Financiera_diar_5,862,491,1353,0.000424
+2026-01-15,16:25:11,Ruben Di Colloredo- Máster en Dirección Financiera_diar_6,899,528,1427,0.000452
+2026-01-15,16:25:26,Ruben Di Colloredo- Máster en Dirección Financiera_diar_7,868,497,1365,0.000428
+2026-01-15,16:25:42,Ruben Di Colloredo- Máster en Dirección Financiera_diar_8,901,539,1440,0.000459
+2026-01-15,16:25:56,Ruben Di Colloredo- Máster en Dirección Financiera_diar_9,942,551,1493,0.000472
+2026-01-15,16:26:09,Ruben Di Colloredo- Máster en Dirección Financiera_diar_10,953,582,1535,0.000492
+2026-01-15,16:26:19,Ruben Di Colloredo- Máster en Dirección Financiera_diar_11,823,483,1306,0.000413
+2026-01-15,16:26:32,Ruben Di Colloredo- Máster en Dirección Financiera_diar_12,831,469,1300,0.000406
+2026-01-15,16:26:45,Ruben Di Colloredo- Máster en Dirección Financiera_diar_13,946,573,1519,0.000486
+2026-01-15,16:26:55,Ruben Di Colloredo- Máster en Dirección Financiera_diar_14,875,494,1369,0.000428
+2026-01-15,16:27:08,Ruben Di Colloredo- Máster en Dirección Financiera_diar_15,931,573,1504,0.000483
+2026-01-15,16:27:21,Ruben Di Colloredo- Máster en Dirección Financiera_diar_16,889,530,1419,0.000451
+2026-01-15,16:27:35,Ruben Di Colloredo- Máster en Dirección Financiera_diar_17,812,465,1277,0.000401
+2026-01-15,16:27:46,Ruben Di Colloredo- Máster en Dirección Financiera_diar_18,821,444,1265,0.000390
+2026-01-15,16:27:56,Ruben Di Colloredo- Máster en Dirección Financiera_diar_19,872,501,1373,0.000431
+2026-01-15,16:28:11,Ruben Di Colloredo- Máster en Dirección Financiera_diar_20,1046,662,1708,0.000554
+2026-01-15,16:28:22,Ruben Di Colloredo- Máster en Dirección Financiera_diar_21,888,471,1359,0.000416
+2026-01-15,16:28:32,Ruben Di Colloredo- Máster en Dirección Financiera_diar_22,816,443,1259,0.000388
+2026-01-15,16:28:45,Ruben Di Colloredo- Máster en Dirección Financiera_diar_23,826,466,1292,0.000403
+2026-01-15,16:28:59,Ruben Di Colloredo- Máster en Dirección Financiera_diar_24,839,482,1321,0.000415
+2026-01-15,16:29:12,Ruben Di Colloredo- Máster en Dirección Financiera_diar_25,875,526,1401,0.000447
+2026-01-15,16:29:23,Ruben Di Colloredo- Máster en Dirección Financiera_diar_26,883,512,1395,0.000440
+2026-01-15,16:29:36,Ruben Di Colloredo- Máster en Dirección Financiera_diar_27,849,465,1314,0.000406
+2026-01-15,16:29:50,Ruben Di Colloredo- Máster en Dirección Financiera_diar_28,1009,583,1592,0.000501
+2026-01-15,16:30:00,Ruben Di Colloredo- Máster en Dirección Financiera_diar_29,855,482,1337,0.000417
+2026-01-15,16:30:02,Ruben Di Colloredo- Máster en Dirección Financiera_diar_30,362,29,391,0.000072
+2026-01-15,16:30:45,Ruben Di Colloredo- Máster en Dirección Financiera_full,21136,1527,22663,0.004087
+2026-01-15,16:30:55,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_1,816,454,1270,0.000395
+2026-01-15,16:31:10,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_2,876,512,1388,0.000439
+2026-01-15,16:31:22,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_3,840,471,1311,0.000409
+2026-01-15,16:31:33,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_4,807,442,1249,0.000386
+2026-01-15,16:31:45,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_5,934,581,1515,0.000489
+2026-01-15,16:31:56,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_6,751,407,1158,0.000357
+2026-01-15,16:32:07,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_7,786,435,1221,0.000379
+2026-01-15,16:32:18,Sesión sobre Máster en Dirección Financiera _Ania Collado_diar_8,926,570,1496,0.000481
