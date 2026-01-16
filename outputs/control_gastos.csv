@@ -1848,3 +1848,33 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 16/01/2026,13:29:01,rag_temas,3483,215,3698,0.000651
 16/01/2026,13:29:11,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_ligero,3086,520,3606,0.000775
 16/01/2026,13:29:34,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_pesado,8742,785,9527,0.001782
+16/01/2026,14:32:59,rag_temas,3275,200,3475,0.000611
+16/01/2026,14:33:15,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_ligero,3104,583,3687,0.000815
+16/01/2026,14:33:35,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_pesado,12921,730,13651,0.002376
+16/01/2026,14:33:41,rag_temas,3300,223,3523,0.000629
+16/01/2026,14:33:55,Interview - Cindy Navarro_batch_ligero,3111,643,3754,0.000852
+16/01/2026,14:34:13,Interview - Cindy Navarro_batch_pesado,7776,851,8627,0.001677
+16/01/2026,14:34:19,rag_temas,3359,238,3597,0.000647
+16/01/2026,14:34:31,Mary Jany Máster en Innovación y Emprendimiento_batch_ligero,3078,658,3736,0.000857
+16/01/2026,14:34:50,Mary Jany Máster en Innovación y Emprendimiento_batch_pesado,23190,913,24103,0.004026
+16/01/2026,14:34:55,rag_temas,3386,206,3592,0.000631
+16/01/2026,14:35:18,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_ligero,3096,691,3787,0.000879
+16/01/2026,14:35:39,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_pesado,9149,960,10109,0.001948
+16/01/2026,14:35:45,rag_temas,3483,222,3705,0.000656
+16/01/2026,14:36:01,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_ligero,3171,656,3827,0.000869
+16/01/2026,14:36:22,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_pesado,8904,804,9708,0.001818
+16/01/2026,14:39:45,rag_temas,3275,204,3479,0.000614
+16/01/2026,14:39:58,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_ligero,3104,579,3683,0.000813
+16/01/2026,14:40:19,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_pesado,12978,838,13816,0.002449
+16/01/2026,14:40:25,rag_temas,3300,228,3528,0.000632
+16/01/2026,14:40:40,Interview - Cindy Navarro_batch_ligero,3111,636,3747,0.000848
+16/01/2026,14:40:57,Interview - Cindy Navarro_batch_pesado,7742,835,8577,0.001662
+16/01/2026,14:41:02,rag_temas,3359,222,3581,0.000637
+16/01/2026,14:41:17,Mary Jany Máster en Innovación y Emprendimiento_batch_ligero,3078,661,3739,0.000858
+16/01/2026,14:41:44,Mary Jany Máster en Innovación y Emprendimiento_batch_pesado,23190,1015,24205,0.004087
+16/01/2026,14:41:50,rag_temas,3386,205,3591,0.000631
+16/01/2026,14:42:06,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_ligero,3096,683,3779,0.000874
+16/01/2026,14:42:37,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_pesado,9149,1094,10243,0.002029
+16/01/2026,14:42:45,rag_temas,3483,227,3710,0.000659
+16/01/2026,14:43:02,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_ligero,3171,637,3808,0.000858
+16/01/2026,14:43:20,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_pesado,8904,784,9688,0.001806

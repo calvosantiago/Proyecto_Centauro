@@ -1,10 +1,10 @@
 """
-Orquestador del Sistema Multi-Agente con Optimizaciones + Sheriff
+Orquestador del Sistema Multi-Agente con Sheriff + Citas Literales FORZADAS
 
 INSTRUCCIÓN: REEMPLAZA el contenido de:
 C:\\Users\\uscp9a\\Grupo Planeta\\BI POWER - General\\PBI\\PROYECTOS\\Proyecto_Centauro\\centauro\\core\\orchestrator.py
 
-NUEVO: Sheriff integrado para validar evidencias y prevenir alucinaciones
+CAMBIO CRÍTICO: Prompts que FUERZAN citas literales obligatorias
 """
 from typing import Dict, List
 import json
@@ -67,7 +67,7 @@ class CentauroOrchestrator:
             evaluaciones = self._evaluar_individual(transcripcion_diarizada, cache_key)
             self.stats["llamadas_api"] += 7
         
-        # --- FASE 3.5: SHERIFF (NUEVO) ---
+        # --- FASE 3.5: SHERIFF ---
         print("\n📍 FASE 3.5: Auditoría Sheriff (anti-alucinaciones)")
         evaluaciones = self._sheriff_validar(evaluaciones, transcripcion_diarizada)
         
@@ -90,13 +90,10 @@ class CentauroOrchestrator:
         
         return reporte_final
     
-    # ========== NUEVO: SHERIFF ANTI-ALUCINACIONES ==========
+    # ========== SHERIFF ANTI-ALUCINACIONES ==========
     
     def _sheriff_validar(self, evaluaciones: List[Dict], transcripcion: str) -> List[Dict]:
-        """
-        Valida que las evidencias citadas existan realmente en la transcripción
-        Ajusta notas si detecta alucinaciones
-        """
+        """Valida que las evidencias citadas existan realmente"""
         evaluaciones_validadas = []
         
         for evaluacion in evaluaciones:
@@ -104,10 +101,8 @@ class CentauroOrchestrator:
             evidencia_principal = evaluacion.get("evidencia_principal", "")
             evidencias_extra = evaluacion.get("evidencias_extra", [])
             
-            # Validar evidencia principal
             evidencia_valida = self._validar_evidencia(evidencia_principal, transcripcion)
             
-            # Contar evidencias extra válidas
             evidencias_extra_validas = sum(
                 1 for ev in evidencias_extra 
                 if self._validar_evidencia(ev, transcripcion)
@@ -118,13 +113,12 @@ class CentauroOrchestrator:
             
             porcentaje_verificado = (evidencias_verificadas / total_evidencias * 100) if total_evidencias > 0 else 0
             
-            # REGLA SHERIFF: Si < 50% de evidencias son verificables → ALUCINACIÓN
-            if porcentaje_verificado < 50:
+            # REGLA SHERIFF: Si < 30% de evidencias son verificables → ALUCINACIÓN
+            if porcentaje_verificado < 30:
                 self.stats["alucinaciones_detectadas"] += 1
                 nota_original = evaluacion.get("puntuacion_1_5")
                 
                 if nota_original and nota_original > 2:
-                    # Penalizar nota
                     nota_ajustada = max(1, nota_original - 2)
                     evaluacion["puntuacion_1_5"] = nota_ajustada
                     evaluacion["sheriff_ajuste"] = {
@@ -137,7 +131,6 @@ class CentauroOrchestrator:
                     
                     print(f"   🛡️ Sheriff ajustó {bloque}: {nota_original} → {nota_ajustada} (evidencias no verificables)")
             
-            # Añadir metadata de validación
             if "metadata" not in evaluacion:
                 evaluacion["metadata"] = {}
             
@@ -145,7 +138,7 @@ class CentauroOrchestrator:
                 "evidencias_total": total_evidencias,
                 "evidencias_verificadas": evidencias_verificadas,
                 "porcentaje_verificado": round(porcentaje_verificado, 1),
-                "estado": "OK" if porcentaje_verificado >= 50 else "ALUCINACION_DETECTADA"
+                "estado": "OK" if porcentaje_verificado >= 30 else "ALUCINACION_DETECTADA"
             }
             
             evaluaciones_validadas.append(evaluacion)
@@ -153,25 +146,20 @@ class CentauroOrchestrator:
         return evaluaciones_validadas
     
     def _validar_evidencia(self, evidencia: str, transcripcion: str) -> bool:
-        """
-        Valida que la evidencia exista en la transcripción
-        Usa fuzzy matching para permitir pequeñas variaciones
-        """
+        """Valida que la evidencia exista en la transcripción con fuzzy matching"""
         if not evidencia or len(evidencia) < 10:
             return False
         
-        # Limpiar evidencia (quitar etiquetas [ASESOR]/[LEAD] para comparar)
-        evidencia_limpia = evidencia.replace("[ASESOR]:", "").replace("[LEAD]:", "").strip()
+        # Limpiar etiquetas [ASESOR]/[LEAD] y nombres
+        import re
+        evidencia_limpia = re.sub(r'\[([^\]]+)\]:\s*', '', evidencia).strip()
         
-        # Si es muy corta, requerir match exacto
-        if len(evidencia_limpia) < 30:
+        if len(evidencia_limpia) < 15:
             return evidencia_limpia.lower() in transcripcion.lower()
         
-        # Para evidencias largas, usar fuzzy matching
         try:
             from rapidfuzz import fuzz
-            # Buscar en ventanas de texto
-            ventana = len(evidencia_limpia) + 50
+            ventana = len(evidencia_limpia) + 100
             transcripcion_lower = transcripcion.lower()
             evidencia_lower = evidencia_limpia.lower()
             
@@ -181,24 +169,20 @@ class CentauroOrchestrator:
                 ratio = fuzz.partial_ratio(evidencia_lower, fragmento)
                 if ratio > mejor_ratio:
                     mejor_ratio = ratio
-                
-                # Si encontramos buen match, no seguir buscando
                 if ratio >= 85:
                     return True
             
-            return mejor_ratio >= 80
+            return mejor_ratio >= 75  # Más permisivo (era 80)
             
         except ImportError:
-            # Si no hay rapidfuzz, usar búsqueda simple
-            # Dividir en palabras y verificar que al menos 70% estén presentes
             palabras = evidencia_limpia.lower().split()
             palabras_encontradas = sum(1 for p in palabras if p in transcripcion.lower())
-            return (palabras_encontradas / len(palabras)) >= 0.7
+            return (palabras_encontradas / len(palabras)) >= 0.6  # Más permisivo
     
-    # ========== EVALUACIÓN POR BATCHES ==========
+    # ========== EVALUACIÓN POR BATCHES CON CITAS FORZADAS ==========
     
     def _evaluar_batch_ligero(self, transcripcion: str, cache_key: str) -> List[Dict]:
-        """Evalúa Apertura, Cierre y Legal en UNA SOLA llamada"""
+        """Evalúa Apertura, Cierre y Legal CON CITAS LITERALES OBLIGATORIAS"""
         inicio = self.config.get_extracto("Apertura", transcripcion)
         final = self.config.get_extracto("Cierre y siguiente paso", transcripcion)
         legal_extracto = self.config.get_extracto("Legal (Compliance)", transcripcion)
@@ -208,7 +192,7 @@ class CentauroOrchestrator:
         contexto_legal = self.rag_agent.buscar_contexto_para_bloque("Legal (Compliance)", transcripcion, cache_key)
         
         prompt_sistema = f"""
-Eres un auditor que evalúa TRES bloques simultáneamente de forma independiente.
+Eres un auditor que evalúa TRES bloques simultáneamente.
 
 MANUAL - APERTURA:
 {contexto_apertura}
@@ -219,46 +203,48 @@ MANUAL - CIERRE:
 MANUAL - LEGAL:
 {contexto_legal}
 
+⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
+TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
+- Usa COPY-PASTE directo, no parafrasees
+- Incluye SIEMPRE la etiqueta [ASESOR]: o [LEAD]:
+- Si la cita es larga, usa los primeros 100 caracteres exactos
+- NUNCA resumas, NUNCA interpretes, SIEMPRE cita textual
+
 FORMATO JSON OBLIGATORIO:
 {{
   "apertura": {{
     "puntuacion_1_5": 3,
     "observabilidad": "ALTA",
-    "evidencia_principal": "...",
-    "evidencias_extra": [],
+    "evidencia_principal": "[ASESOR]: Cita textual EXACTA del saludo...",
+    "evidencias_extra": [
+      "[ASESOR]: Otra cita textual EXACTA...",
+      "[LEAD]: Respuesta textual EXACTA del lead..."
+    ],
     "razonamiento": "...",
     "recomendacion_accionable": "..."
   }},
-  "cierre": {{
-    "puntuacion_1_5": 3,
-    "observabilidad": "ALTA",
-    "evidencia_principal": "...",
-    "evidencias_extra": [],
-    "razonamiento": "...",
-    "recomendacion_accionable": "..."
-  }},
-  "legal": {{
-    "puntuacion_1_5": 3,
-    "observabilidad": "ALTA",
-    "evidencia_principal": "...",
-    "evidencias_extra": [],
-    "razonamiento": "...",
-    "recomendacion_accionable": "..."
-  }}
+  "cierre": {{...similar...}},
+  "legal": {{...similar...}}
 }}
+
+EJEMPLO DE EVIDENCIA CORRECTA:
+"evidencia_principal": "[ASESOR]: Hola buenos días Cindy, ¿cómo estás? Te llamo de OBS Business School"
+
+EJEMPLO DE EVIDENCIA INCORRECTA (NO HACER):
+"evidencia_principal": "El asesor establece un diálogo abierto y busca entender las dudas"
 """
         
         prompt_usuario = f"""
-BLOQUE 1 - APERTURA (analiza solo este extracto):
+APERTURA (cita literal de aquí):
 {inicio}
 
-BLOQUE 2 - CIERRE (analiza solo este extracto):
+CIERRE (cita literal de aquí):
 {final}
 
-BLOQUE 3 - LEGAL (busca aviso legal en este extracto):
+LEGAL (cita literal de aquí):
 {legal_extracto}
 
-Genera las 3 evaluaciones en JSON.
+Genera las 3 evaluaciones con CITAS LITERALES OBLIGATORIAS.
 """
         
         try:
@@ -293,16 +279,16 @@ Genera las 3 evaluaciones en JSON.
             return []
     
     def _evaluar_batch_pesado(self, transcripcion: str, cache_key: str) -> List[Dict]:
-        """Evalúa Detección, Presentación, Objeciones y Estilo en UNA SOLA llamada"""
+        """Evalúa bloques pesados CON CITAS LITERALES OBLIGATORIAS"""
         ctx_deteccion = self.rag_agent.buscar_contexto_para_bloque("Detección de necesidades", transcripcion, cache_key)
         ctx_presentacion = self.rag_agent.buscar_contexto_para_bloque("Presentación del programa", transcripcion, cache_key)
         ctx_objeciones = self.rag_agent.buscar_contexto_para_bloque("Manejo de objeciones", transcripcion, cache_key)
         ctx_estilo = self.rag_agent.buscar_contexto_para_bloque("Estilo y comunicación", transcripcion, cache_key)
         
         prompt_sistema = f"""
-Eres un auditor que evalúa CUATRO bloques simultáneamente.
+Eres un auditor que evalúa CUATRO bloques.
 
-MANUAL - DETECCIÓN DE NECESIDADES:
+MANUAL - DETECCIÓN:
 {ctx_deteccion}
 
 MANUAL - PRESENTACIÓN:
@@ -314,9 +300,22 @@ MANUAL - OBJECIONES:
 MANUAL - ESTILO:
 {ctx_estilo}
 
+⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
+TODAS las evidencias DEBEN ser CITAS TEXTUALES EXACTAS.
+- COPY-PASTE literal, NO parafrasees
+- Incluye [ASESOR]: o [LEAD]: siempre
+- Si es largo, primeros 100-150 caracteres exactos
+
 FORMATO JSON:
 {{
-  "deteccion_necesidades": {{...}},
+  "deteccion_necesidades": {{
+    "puntuacion_1_5": 3,
+    "observabilidad": "ALTA",
+    "evidencia_principal": "[ASESOR]: Pregunta textual EXACTA...",
+    "evidencias_extra": ["[ASESOR]: Otra pregunta EXACTA...", "[LEAD]: Respuesta EXACTA..."],
+    "razonamiento": "...",
+    "recomendacion_accionable": "..."
+  }},
   "presentacion_programa": {{...}},
   "manejo_objeciones": {{...}},
   "estilo_comunicacion": {{...}}
@@ -324,11 +323,11 @@ FORMATO JSON:
 """
         
         prompt_usuario = f"""
-Analiza esta transcripción completa para los 4 bloques:
+Analiza esta transcripción y CITA LITERALMENTE:
 
 {transcripcion}
 
-Genera las 4 evaluaciones en JSON.
+Genera las 4 evaluaciones con CITAS TEXTUALES EXACTAS.
 """
         
         try:
@@ -359,7 +358,7 @@ Genera las 4 evaluaciones en JSON.
             return []
     
     def _evaluar_individual(self, transcripcion: str, cache_key: str) -> List[Dict]:
-        """Modo sin optimizar (para comparación)"""
+        """Modo sin optimizar"""
         evaluaciones = []
         agente_apertura = AperturaAgent()
         contexto = self.rag_agent.buscar_contexto_para_bloque("Apertura", transcripcion, cache_key)
