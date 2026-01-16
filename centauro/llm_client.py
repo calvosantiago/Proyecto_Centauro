@@ -49,7 +49,7 @@ def registrar_gasto(referencia, uso):
                 
             # Escribir la línea de gasto
             writer.writerow([
-                datetime.date.today(),
+                datetime.datetime.now().strftime("%d/%m/%Y"),
                 datetime.datetime.now().strftime("%H:%M:%S"),
                 referencia,
                 tokens_in,

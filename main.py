@@ -1,7 +1,7 @@
 """
 MAIN.PY - Sistema Multi-Agente v2.0
 
-INSTRUCCIÓN: REEMPLAZA tu main.py actual con este código
+
 """
 import os
 import re   

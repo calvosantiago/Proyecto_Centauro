@@ -1,59 +1,60 @@
 """
-Agente de Diarización Mejorado v2.0
+Agente de Diarización Mejorado v2.1
 
-Mejoras sobre el sistema anterior:
-1. Ventana de contexto deslizante (no chunking ciego)
-2. Detección de cambios de turno con contexto
-3. Validación cruzada con heurísticas
-4. Fusión inteligente de turnos consecutivos
+INSTRUCCIÓN: REEMPLAZA el contenido de:
+C:\\Users\\uscp9a\\Grupo Planeta\\BI POWER - General\\PBI\\PROYECTOS\\Proyecto_Centauro\\centauro\\agents\\diarization_agent.py
+
+SOPORTA:
+- VTT con speakers: <v NOMBRE>texto</v>
+- VTT sin speakers: Usa UUID como identificador
+- Word pre-diarizado: [NOMBRE]: texto (de Teams)
+- Texto plano: Usa LLM + heurística
 """
 import re
 import json
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from ..llm_client import consultar_gpt
-from ..config import settings
 
 class DiarizationAgent:
-    """
-    Agente especializado en separar interlocutores en transcripciones
-    """
+    """Agente especializado en separar interlocutores en transcripciones"""
     
     def __init__(self, nombre_asesor: str):
         self.nombre_asesor = nombre_asesor
-        self.ventana_contexto = 3  # Número de frases anteriores/posteriores
+        self.ventana_contexto = 3
         self.confidence_threshold = 0.7
         
     def diarizar(self, texto_crudo: str, log_id: str = "unknown") -> str:
-        """
-        Proceso completo de diarización
+        """Proceso completo de diarización con detección automática de formato"""
+        print(f"🎙️ [DiarizationAgent v2.1] Iniciando para: {self.nombre_asesor}")
         
-        Args:
-            texto_crudo: Transcripción sin etiquetar
-            log_id: Identificador para logging
-            
-        Returns:
-            Texto diarizado con etiquetas [ASESOR] y [LEAD]
-        """
-        print(f"🎙️ [DiarizationAgent v2.0] Iniciando para: {self.nombre_asesor}")
+        # NUEVO: Detectar si YA está diarizado (Word de Teams)
+        if self._es_word_prediarizado(texto_crudo):
+            print("   🎯 Word pre-diarizado detectado ([NOMBRE]:)")
+            return self._mapear_word_prediarizado(texto_crudo)
         
-        # Paso 1: Segmentación inteligente
+        # Detectar formato VTT con speakers
+        if self._es_vtt_con_speakers(texto_crudo):
+            print("   🎯 VTT con speakers detectado (<v NOMBRE>)")
+            return self._extraer_vtt_con_speakers(texto_crudo)
+        
+        # Detectar VTT con UUID
+        elif self._es_vtt_con_uuid(texto_crudo):
+            print("   🎯 VTT con UUID detectado (speaker por ID)")
+            return self._extraer_vtt_con_uuid(texto_crudo)
+        
+        # Si no es ninguno de los anteriores, usar método contextual
+        print(f"   📝 Texto sin formato específico, usando clasificación contextual")
         frases = self._segmentar_por_pausas_naturales(texto_crudo)
         print(f"   📝 Detectadas {len(frases)} unidades conversacionales")
         
-        # Paso 2: Clasificación con contexto deslizante
         dialogo_etiquetado = []
         speaker_anterior = None
         
         for idx, frase in enumerate(frases):
-            # Determinar speaker con contexto
-            speaker, confianza = self._clasificar_con_contexto(
-                frases, idx, speaker_anterior
-            )
+            speaker, confianza = self._clasificar_con_contexto(frases, idx, speaker_anterior)
             
-            # Si la confianza es baja y hay cambio de speaker, re-evaluar
             if speaker_anterior and speaker != speaker_anterior and confianza < self.confidence_threshold:
                 print(f"   🔄 Re-evaluando turno {idx} (confianza baja: {confianza:.2f})")
-                # Aumentar ventana de contexto temporalmente
                 original_ventana = self.ventana_contexto
                 self.ventana_contexto = 5
                 speaker, confianza = self._clasificar_con_contexto(frases, idx, speaker_anterior)
@@ -68,10 +69,8 @@ class DiarizationAgent:
             
             speaker_anterior = speaker
         
-        # Paso 3: Fusión de turnos consecutivos
         dialogo_fusionado = self._fusionar_turnos_consecutivos(dialogo_etiquetado)
         
-        # Paso 4: Formatear salida
         resultado = "\n\n".join([
             f"[{turno['speaker']}]: {turno['text']}"
             for turno in dialogo_fusionado
@@ -82,41 +81,234 @@ class DiarizationAgent:
         
         return resultado
     
-    def _segmentar_por_pausas_naturales(self, texto: str) -> List[str]:
+    # ========== NUEVO: SOPORTE PARA WORD PRE-DIARIZADO ==========
+    
+    def _es_word_prediarizado(self, texto: str) -> bool:
         """
-        Divide el texto respetando pausas conversacionales naturales
+        Detecta si el texto ya viene diarizado del Word de Teams
+        Formato: [NOMBRE]: texto
+        """
+        patron = r'\[([^\]]+)\]:\s*'
+        matches = re.findall(patron, texto[:2000])
+        return len(matches) >= 2  # Al menos 2 turnos detectados
+    
+    def _mapear_word_prediarizado(self, texto: str) -> str:
+        """
+        Mapea nombres del Word a ASESOR/LEAD
+        """
+        # Extraer todos los nombres únicos
+        patron_nombre = r'\[([^\]]+)\]:'
+        nombres = re.findall(patron_nombre, texto)
+        nombres_unicos = list(set(nombres))
         
-        Mejoras vs sistema anterior:
-        - No corta mid-sentence por límite de caracteres
-        - Respeta puntuación y mayúsculas
-        - Identifica pausas largas (doble salto de línea)
-        """
-        # Si ya tiene estructura (saltos de línea frecuentes), respetarla
+        print(f"   📋 Nombres detectados: {nombres_unicos}")
+        
+        # Mapear nombres a roles
+        mapa_speakers = self._mapear_nombres_a_roles(nombres_unicos)
+        
+        print(f"   🔄 Mapeo: {mapa_speakers}")
+        
+        # Reemplazar nombres por roles
+        resultado = texto
+        for nombre, rol in mapa_speakers.items():
+            # Reemplazar [NOMBRE]: por [ROL]:
+            patron_reemplazo = r'\[' + re.escape(nombre) + r'\]:'
+            resultado = re.sub(patron_reemplazo, f'[{rol}]:', resultado)
+        
+        # Contar turnos
+        turnos_asesor = resultado.count('[ASESOR]:')
+        turnos_lead = resultado.count('[LEAD]:')
+        
+        print(f"   ✅ Mapeo completado: ASESOR={turnos_asesor}, LEAD={turnos_lead}")
+        
+        return resultado
+    
+    # ========== DETECTORES DE FORMATO VTT ==========
+    
+    def _es_vtt_con_speakers(self, texto: str) -> bool:
+        """Detecta VTT con speakers: <v NOMBRE>texto</v>"""
+        patron = r'<v\s+[^>]+>.*?</v>'
+        matches = re.findall(patron, texto[:2000], re.IGNORECASE)
+        return len(matches) >= 2
+    
+    def _es_vtt_con_uuid(self, texto: str) -> bool:
+        """Detecta VTT con UUID (sin speakers explícitos)"""
+        patron = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}-\d+$'
+        lineas = texto.split('\n')[:50]
+        matches = [l for l in lineas if re.match(patron, l.strip())]
+        return len(matches) >= 3
+    
+    def _extraer_vtt_con_speakers(self, texto_vtt: str) -> str:
+        """Extrae diálogo de VTT con speakers explícitos"""
+        patron = r'<v\s+([^>]+)>(.*?)</v>'
+        matches = re.findall(patron, texto_vtt, re.DOTALL)
+        
+        if not matches:
+            print("   ⚠️ No se encontraron speakers, fallback a método contextual")
+            return self.diarizar(self._limpiar_vtt_basico(texto_vtt), "fallback")
+        
+        nombres_unicos = list(set([nombre.strip() for nombre, _ in matches]))
+        mapa_speakers = self._mapear_nombres_a_roles(nombres_unicos)
+        
+        dialogo = []
+        for nombre, texto in matches:
+            nombre_clean = nombre.strip()
+            rol = mapa_speakers.get(nombre_clean, "LEAD")
+            texto_clean = texto.strip()
+            
+            if texto_clean:
+                dialogo.append(f"[{rol}]: {texto_clean}")
+        
+        # Fusionar turnos consecutivos
+        dialogo_fusionado = self._fusionar_texto_consecutivo(dialogo)
+        
+        print(f"   ✅ Extraídos {len(dialogo_fusionado)} turnos con speakers")
+        return "\n\n".join(dialogo_fusionado)
+    
+    def _extraer_vtt_con_uuid(self, texto_vtt: str) -> str:
+        """Extrae diálogo de VTT usando UUID como identificador de speaker"""
+        lineas = texto_vtt.split('\n')
+        
+        patron_uuid = r'^([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})-\d+$'
+        
+        bloques = []
+        uuid_actual = None
+        texto_buffer = []
+        
+        for linea in lineas:
+            linea = linea.strip()
+            
+            match = re.match(patron_uuid, linea)
+            if match:
+                if uuid_actual and texto_buffer:
+                    bloques.append({
+                        "uuid": uuid_actual,
+                        "texto": " ".join(texto_buffer)
+                    })
+                
+                uuid_actual = match.group(1)
+                texto_buffer = []
+            
+            elif re.match(r'\d{2}:\d{2}:\d{2}\.\d{3}', linea):
+                continue
+            
+            elif linea in ['WEBVTT', ''] or linea.startswith('NOTE'):
+                continue
+            
+            elif uuid_actual:
+                texto_buffer.append(linea)
+        
+        if uuid_actual and texto_buffer:
+            bloques.append({
+                "uuid": uuid_actual,
+                "texto": " ".join(texto_buffer)
+            })
+        
+        if not bloques:
+            print("   ⚠️ No se pudieron extraer bloques, fallback")
+            return self.diarizar(self._limpiar_vtt_basico(texto_vtt), "fallback")
+        
+        uuids_unicos = list(set([b["uuid"] for b in bloques]))
+        
+        if len(uuids_unicos) == 1:
+            mapa = {uuids_unicos[0]: "ASESOR"}
+        elif len(uuids_unicos) == 2:
+            primer_uuid = bloques[0]["uuid"]
+            segundo_uuid = [u for u in uuids_unicos if u != primer_uuid][0]
+            mapa = {
+                primer_uuid: "ASESOR",
+                segundo_uuid: "LEAD"
+            }
+        else:
+            mapa = {uuids_unicos[0]: "ASESOR"}
+            for uuid in uuids_unicos[1:]:
+                mapa[uuid] = "LEAD"
+        
+        dialogo = []
+        for bloque in bloques:
+            rol = mapa.get(bloque["uuid"], "LEAD")
+            if bloque["texto"]:
+                dialogo.append(f"[{rol}]: {bloque['texto']}")
+        
+        dialogo_fusionado = self._fusionar_texto_consecutivo(dialogo)
+        
+        print(f"   ✅ Extraídos {len(dialogo_fusionado)} turnos (UUID mapping)")
+        return "\n\n".join(dialogo_fusionado)
+    
+    def _fusionar_texto_consecutivo(self, dialogo: List[str]) -> List[str]:
+        """Fusiona líneas consecutivas del mismo speaker"""
+        if not dialogo:
+            return []
+        
+        fusionado = []
+        buffer = dialogo[0]
+        
+        for i in range(1, len(dialogo)):
+            speaker_actual = dialogo[i].split(']:')[0] + ']'
+            speaker_buffer = buffer.split(']:')[0] + ']'
+            
+            if speaker_actual == speaker_buffer:
+                texto_nuevo = dialogo[i].split(']: ', 1)[1]
+                texto_buffer = buffer.split(']: ', 1)[1]
+                buffer = f"{speaker_actual}: {texto_buffer} {texto_nuevo}"
+            else:
+                fusionado.append(buffer)
+                buffer = dialogo[i]
+        
+        fusionado.append(buffer)
+        return fusionado
+    
+    def _mapear_nombres_a_roles(self, nombres: List[str]) -> Dict[str, str]:
+        """Mapea nombres reales a ASESOR/LEAD"""
+        if len(nombres) == 1:
+            return {nombres[0]: "ASESOR"}
+        
+        mapa = {}
+        
+        for nombre in nombres:
+            # Si el nombre coincide con el asesor configurado
+            if self.nombre_asesor.lower() in nombre.lower() or nombre.lower() in self.nombre_asesor.lower():
+                mapa[nombre] = "ASESOR"
+            else:
+                mapa[nombre] = "LEAD"
+        
+        # Si no mapeamos ninguno como ASESOR, el primero es ASESOR
+        if "ASESOR" not in mapa.values():
+            mapa[nombres[0]] = "ASESOR"
+            for n in nombres[1:]:
+                if n not in mapa:
+                    mapa[n] = "LEAD"
+        
+        return mapa
+    
+    def _limpiar_vtt_basico(self, texto_vtt: str) -> str:
+        """Limpia VTT dejando solo el texto"""
+        texto = texto_vtt.replace("WEBVTT", "")
+        texto = re.sub(r'\d{2}:\d{2}:\d{2}\.\d{3}\s+-->\s+\d{2}:\d{2}:\d{2}\.\d{3}', '', texto)
+        texto = re.sub(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(-\d+)?', '', texto)
+        texto = re.sub(r'<[^>]+>', '', texto)
+        lineas = [linea.strip() for linea in texto.splitlines() if linea.strip()]
+        return " ".join(lineas)
+    
+    # ========== MÉTODOS EXISTENTES ==========
+    
+    def _segmentar_por_pausas_naturales(self, texto: str) -> List[str]:
+        """Divide el texto respetando pausas conversacionales naturales"""
         if texto.count('\n') > len(texto) / 200:
             return [linea.strip() for linea in texto.split('\n') if linea.strip()]
         
-        # Si es muro de texto, segmentar por puntuación
-        # Patrón: Punto/Interrogación/Exclamación + Espacio + Mayúscula
         patron = r'(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ])'
         frases = re.split(patron, texto)
         
-        # Limpiar y filtrar vacíos
         return [frase.strip() for frase in frases if frase.strip() and len(frase) > 10]
     
     def _clasificar_con_contexto(self, frases: List[str], idx: int, 
                                  speaker_anterior: Optional[str]) -> Tuple[str, float]:
-        """
-        Clasifica una frase usando ventana de contexto deslizante
-        
-        Returns:
-            Tuple[speaker, confianza]
-        """
-        # Construir ventana de contexto
+        """Clasifica una frase usando ventana de contexto deslizante"""
         inicio = max(0, idx - self.ventana_contexto)
         fin = min(len(frases), idx + 2)
         contexto_frases = frases[inicio:fin]
         
-        # Marcar la frase objetivo
         contexto_con_marca = []
         for i, frase in enumerate(contexto_frases):
             offset = i + inicio
@@ -127,20 +319,15 @@ class DiarizationAgent:
         
         contexto_texto = "\n".join(contexto_con_marca)
         
-        # Intentar clasificación con LLM
         try:
             resultado = self._clasificar_llm(contexto_texto, speaker_anterior)
             return resultado["speaker"], resultado["confianza"]
         except Exception as e:
-            print(f"   ⚠️ LLM falló en turno {idx}, usando heurística: {e}")
-            # Fallback a clasificación heurística
             speaker = self._clasificar_heuristico(frases[idx], speaker_anterior)
-            return speaker, 0.5  # Confianza media
+            return speaker, 0.5
     
     def _clasificar_llm(self, contexto: str, speaker_anterior: Optional[str]) -> dict:
-        """
-        Clasifica usando el LLM con prompt especializado
-        """
+        """Clasifica usando el LLM con prompt especializado"""
         prompt_sistema = f"""
 Eres un experto en análisis de diálogos comerciales.
 
@@ -150,10 +337,6 @@ CONTEXTO:
 
 TAREA:
 Identifica quién dice la frase marcada con >>> en el contexto siguiente.
-
-REGLAS DE ATRIBUCIÓN:
-- El ASESOR suele: Explicar, preguntar sobre motivaciones, hablar del programa/metodología
-- El LEAD suele: Hablar de su trabajo/vida, expresar dudas, preguntar precios/horarios
 
 {f"CONTEXTO PREVIO: El speaker anterior era {speaker_anterior}" if speaker_anterior else ""}
 
@@ -168,7 +351,6 @@ FORMATO JSON OBLIGATORIO:
         resp = consultar_gpt(prompt_sistema, contexto, f"diar_classify")
         data = json.loads(resp)
         
-        # Validar formato
         if "speaker" not in data:
             raise ValueError("Respuesta sin campo 'speaker'")
         
@@ -179,12 +361,9 @@ FORMATO JSON OBLIGATORIO:
         }
     
     def _clasificar_heuristico(self, frase: str, speaker_anterior: Optional[str]) -> str:
-        """
-        Clasificación de respaldo basada en keywords y patrones
-        """
+        """Clasificación de respaldo basada en keywords"""
         frase_lower = frase.lower()
         
-        # Patrones fuertes de ASESOR (alta confianza)
         patrones_asesor_fuertes = [
             r'\b(obs business school|universidad de barcelona)\b',
             r'\b(matrícula|admisión|documentación necesaria)\b',
@@ -192,25 +371,12 @@ FORMATO JSON OBLIGATORIO:
             r'\b(cuéntame|explícame más|qué te motivó)\b'
         ]
         
-        # Patrones fuertes de LEAD (alta confianza)
         patrones_lead_fuertes = [
             r'\b(mi trabajo|mi jefe|mi empresa|mi situación)\b',
             r'\b(trabajo en|llevo \d+ años|soy de)\b',
             r'\b(cuánto cuesta|precio total|qué incluye)\b'
         ]
         
-        # Patrones débiles (menor peso)
-        patrones_asesor_debiles = [
-            r'\b(campus|metodología|online|presencial)\b',
-            r'\b(programa|master|especialización)\b'
-        ]
-        
-        patrones_lead_debiles = [
-            r'\b(horario|duración|cuando empez)\b',
-            r'\b(no estoy seguro|tengo que pensarlo)\b'
-        ]
-        
-        # Scoring
         score_asesor = 0
         score_lead = 0
         
@@ -222,29 +388,15 @@ FORMATO JSON OBLIGATORIO:
             if re.search(patron, frase_lower):
                 score_lead += 3
         
-        for patron in patrones_asesor_debiles:
-            if re.search(patron, frase_lower):
-                score_asesor += 1
-        
-        for patron in patrones_lead_debiles:
-            if re.search(patron, frase_lower):
-                score_lead += 1
-        
-        # Decidir
         if score_asesor > score_lead:
             return "ASESOR"
         elif score_lead > score_asesor:
             return "LEAD"
         else:
-            # Empate: usar continuidad (mismo speaker que el anterior)
             return speaker_anterior if speaker_anterior else "LEAD"
     
     def _fusionar_turnos_consecutivos(self, dialogo_etiquetado: List[dict]) -> List[dict]:
-        """
-        Une intervenciones consecutivas del mismo speaker
-        
-        Mejora legibilidad y reduce ruido en evaluaciones posteriores
-        """
+        """Une intervenciones consecutivas del mismo speaker"""
         if not dialogo_etiquetado:
             return []
         
@@ -259,12 +411,9 @@ FORMATO JSON OBLIGATORIO:
             turno_actual = dialogo_etiquetado[i]
             
             if turno_actual["speaker"] == buffer["speaker"]:
-                # Mismo speaker: fusionar
                 buffer["text"] += f" {turno_actual['text']}"
-                # Confianza promedio
                 buffer["confidence"] = (buffer["confidence"] + turno_actual["confidence"]) / 2
             else:
-                # Cambio de speaker: guardar buffer
                 fusionado.append(buffer)
                 buffer = {
                     "speaker": turno_actual["speaker"],
@@ -272,15 +421,11 @@ FORMATO JSON OBLIGATORIO:
                     "confidence": turno_actual["confidence"]
                 }
         
-        # Añadir último turno
         fusionado.append(buffer)
-        
         return fusionado
     
     def _calcular_distribucion(self, dialogo: List[dict]) -> str:
-        """
-        Calcula estadísticas de distribución ASESOR vs LEAD
-        """
+        """Calcula estadísticas de distribución ASESOR vs LEAD"""
         total = len(dialogo)
         asesor_count = sum(1 for t in dialogo if t["speaker"] == "ASESOR")
         lead_count = total - asesor_count

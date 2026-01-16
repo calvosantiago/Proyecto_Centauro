@@ -1,8 +1,13 @@
 """
-RAG Dinámico v2.0 con Optimizaciones de Tokens
+RAG Dinámico v2.0 con Optimizaciones de Tokens + Análisis Exhaustivo
 
-INSTRUCCIÓN: Copia este archivo en centauro/core/rag_dynamic.py
-CAMBIO CLAVE: Top-K reducido de 20 → 5 fragmentos
+INSTRUCCIÓN: REEMPLAZA el contenido de:
+C:\\Users\\uscp9a\\Grupo Planeta\\BI POWER - General\\PBI\\PROYECTOS\\Proyecto_Centauro\\centauro\\core\\rag_dynamic.py
+
+CAMBIOS APLICADOS:
+- Top-K reducido de 20 → 5 fragmentos
+- Análisis exhaustivo con 6 muestras distribuidas para llamadas largas
+- Máximo 8 items por categoría de temas
 """
 from typing import List, Dict, Optional
 import json
@@ -34,23 +39,45 @@ class DynamicRAGAgent:
             print("   💾 Usando temas en cache")
             return self.cache_temas[cache_key]
         
-        print("   🔍 Extrayendo temas...")
+        print("   🔍 Extrayendo temas (análisis exhaustivo)...")
         
-        # OPTIMIZACIÓN: Truncar agresivamente (inicio + final)
-        if len(transcripcion) > 8000:
-            # Para llamadas largas: inicio + 2 muestras del medio + final
+        # NUEVO: Muestreo inteligente para llamadas largas
+        if len(transcripcion) > 12000:
+            # Para entrevistas de 40+ min: 6 muestras distribuidas
+            longitud = len(transcripcion)
+            segmento = longitud // 6
+            
+            transcripcion_resumida = (
+                transcripcion[:2500] +                      # Inicio (apertura)
+                "\n\n[... MUESTRA 2 ...]\n\n" +
+                transcripcion[segmento:segmento+2000] +     # ~15% de la llamada
+                "\n\n[... MUESTRA 3 ...]\n\n" +
+                transcripcion[segmento*2:segmento*2+2000] + # ~30% de la llamada
+                "\n\n[... MUESTRA 4 ...]\n\n" +
+                transcripcion[segmento*3:segmento*3+2000] + # ~50% de la llamada
+                "\n\n[... MUESTRA 5 ...]\n\n" +
+                transcripcion[segmento*4:segmento*4+2000] + # ~70% de la llamada
+                "\n\n[... MUESTRA 6 ...]\n\n" +
+                transcripcion[-2500:]                       # Final (cierre)
+            )
+            print(f"      📊 Llamada larga detectada: 6 muestras distribuidas")
+        elif len(transcripcion) > 6000:
+            # Para entrevistas de 20-40 min: 4 muestras
             cuarto = len(transcripcion) // 4
             transcripcion_resumida = (
-            transcripcion[:2500] +           # Inicio
-            "\n\n[...]\n\n" + 
-            transcripcion[cuarto:cuarto+1500] +  # Muestra del medio 1
-            "\n\n[...]\n\n" + 
-            transcripcion[cuarto*2:cuarto*2+1500] +  # Muestra del medio 2
-            "\n\n[...]\n\n" + 
-            transcripcion[-2500:]            # Final
-        )   
+                transcripcion[:2500] +
+                "\n\n[... MUESTRA 2 ...]\n\n" +
+                transcripcion[cuarto:cuarto+1500] +
+                "\n\n[... MUESTRA 3 ...]\n\n" +
+                transcripcion[cuarto*2:cuarto*2+1500] +
+                "\n\n[... MUESTRA 4 ...]\n\n" +
+                transcripcion[-2500:]
+            )
+            print(f"      📊 Llamada media: 4 muestras distribuidas")
         else:
+            # Para entrevistas cortas (<20 min): enviar completa
             transcripcion_resumida = transcripcion
+            print(f"      📊 Llamada corta: análisis completo")
         
         prompt_sistema = """
 Extrae los temas MÁS RELEVANTES de esta llamada comercial.
@@ -76,7 +103,7 @@ Si hay menos de 8, devuelve solo los que existan.
             resp = consultar_gpt(prompt_sistema, transcripcion_resumida, "rag_temas")
             temas = json.loads(resp)
             self.cache_temas[cache_key] = temas
-            print(f"      ✓ Temas: {len(temas.get('temas_principales', []))}")
+            print(f"      ✓ Temas detectados: {len(temas.get('temas_principales', []))}")
             return temas
         except Exception as e:
             print(f"   ⚠️ Error: {e}")
