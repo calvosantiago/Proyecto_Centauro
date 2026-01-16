@@ -1,49 +1,41 @@
+"""
+MAIN.PY - Sistema Multi-Agente v2.0
+
+INSTRUCCIÓN: REEMPLAZA tu main.py actual con este código
+"""
 import os
 import re   
 import time
+import json
 from pathlib import Path
 
-# --- NUEVO: Importación para leer Word ---
 try:
     from docx import Document
 except ImportError:
-    Document = None  # Marcamos como no disponible si falta la librería
+    Document = None
 
-# Importamos tus módulos
 from centauro.config import settings
-from centauro.analyze import analizar_entrevista
 from centauro.rag import indexar_documentacion
-from centauro.reports import generar_pdf 
+from centauro.reports import generar_pdf
 
-# --- FUNCIONES DE LECTURA Y LIMPIEZA ---
+# ===== CAMBIO PRINCIPAL: Nuevo orquestador =====
+from centauro.core import CentauroOrchestrator
+# ================================================
+
+# --- FUNCIONES DE LECTURA (SIN CAMBIOS) ---
 
 def limpiar_formato_vtt(texto_crudo):
-    """
-    Elimina la 'basura' técnica de los archivos VTT para ahorrar tokens y mejorar la lectura.
-    """
-    # 1. Eliminar cabecera WEBVTT
+    """Elimina metadatos técnicos de archivos VTT"""
     texto = texto_crudo.replace("WEBVTT", "")
-
-    # 2. Eliminar Timestamps (Ej: 00:18:03.194 --> 00:18:06.593)
     texto = re.sub(r'\d{2}:\d{2}:\d{2}\.\d{3}\s+-->\s+\d{2}:\d{2}:\d{2}\.\d{3}', '', texto)
-
-    # 3. Eliminar UUIDs/IDs de bloque (Ej: 48665a40-f0b6-49a2...)
     texto = re.sub(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(-\d+)?', '', texto)
-
-    # 4. Eliminar etiquetas de estilo (<v Speaker>, <b>, etc.)
     texto = re.sub(r'<[^>]+>', '', texto)
-
-    # 5. Limpieza final: Quitar líneas vacías y unir párrafos
     lineas = [linea.strip() for linea in texto.splitlines() if linea.strip()]
     texto_limpio = " ".join(lineas)
-    
     return texto_limpio
 
 def leer_word(ruta_archivo):
-    """
-    Extrae texto de un .docx con formato Teams.
-    SOLUCIÓN FINAL: Gestiona 'Soft Returns' (Shift+Enter) dividiendo por '\\n'.
-    """
+    """Extrae texto de archivos Word (Teams)"""
     if not Document:
         print("❌ ERROR: Falta librería 'python-docx'.")
         return ""
@@ -51,55 +43,37 @@ def leer_word(ruta_archivo):
     try:
         doc = Document(ruta_archivo)
         transcript = []
-        
         current_speaker = None
         current_text_buffer = []
-
-        # Regex: Busca "Cualquier cosa" + espacios + "Hora".
-        # Ahora funcionará porque le pasaremos las líneas limpias y separadas.
         patron_teams = re.compile(r"^(.*?)\s+(\d{1,2}:\d{2}(?::\d{2})?)$")
-        
         lines_found = 0 
 
         for para in doc.paragraphs:
-            # --- EL TRUCO MAESTRO ---
-            # Un párrafo de Word puede contener saltos de línea manuales (\n).
-            # Los separamos para analizarlos uno por uno como si fueran párrafos distintos.
-            bloque_texto = para.text.replace('\r', '\n') # Normalizar saltos
+            bloque_texto = para.text.replace('\r', '\n')
             sub_lineas = bloque_texto.split('\n')
 
             for linea in sub_lineas:
                 texto = linea.strip()
-                
                 if not texto:
                     continue 
-
-                # Limpieza de espacios dobles o raros
                 texto_norm = re.sub(r'\s+', ' ', texto)
-
                 match = patron_teams.match(texto_norm)
 
                 if match:
                     lines_found += 1
-                    # Chivato de éxito (solo las primeras 3 veces)
                     if lines_found <= 3:
                         print(f"   🎯 Match: {match.group(1)}")
 
-                    # Guardar bloque anterior
                     if current_speaker and current_text_buffer:
                         contenido = " ".join(current_text_buffer)
                         transcript.append(f"[{current_speaker}]: {contenido}")
                     
-                    # Nuevo turno
                     current_speaker = match.group(1).strip() 
                     current_text_buffer = [] 
-                    
                 else:
-                    # Es contenido hablado
                     if current_speaker:
                         current_text_buffer.append(texto)
 
-        # Guardar último bloque
         if current_speaker and current_text_buffer:
             contenido = " ".join(current_text_buffer)
             transcript.append(f"[{current_speaker}]: {contenido}")
@@ -107,9 +81,9 @@ def leer_word(ruta_archivo):
         full_text = "\n\n".join(transcript)
         
         if not full_text:
-            print("   ❌ FALLO: No se extrajo texto. Revisa el DEBUG anterior.")
+            print("   ❌ FALLO: No se extrajo texto.")
         else:
-            print(f"   ✅ ÉXITO: Diarización completada ({lines_found} intervenciones).")
+            print(f"   ✅ ÉXITO: {lines_found} intervenciones detectadas.")
 
         return full_text
 
@@ -118,35 +92,32 @@ def leer_word(ruta_archivo):
         return ""
 
 def cargar_transcripcion(ruta_archivo):
-    """Detector inteligente de formato (Word, VTT, TXT)."""
+    """Detector inteligente de formato (Word, VTT, TXT)"""
     ext = ruta_archivo.suffix.lower()
 
-    # CASO 1: Archivo Word (.docx)
     if ext == ".docx":
-        print(f"   📄 Leyendo documento Word (Teams Mode)...")
+        print(f"   📄 Leyendo documento Word...")
         return leer_word(ruta_archivo)
 
-    # CASO 2: Archivos de Texto (.txt / .vtt)
     try:
         with open(ruta_archivo, "r", encoding="utf-8") as f:
             texto = f.read()
             
-        # DETECTAR SI ES VTT: Por extensión o contenido
         if ext == ".vtt" or "WEBVTT" in texto[:50]:
-            print(f"   🧹 Limpiando formato VTT (quitando timestamps y IDs)...")
+            print(f"   🧹 Limpiando formato VTT...")
             return limpiar_formato_vtt(texto)
         
-        # Si es TXT normal, pasa tal cual
         return texto
         
     except Exception as e:
-        print(f"❌ Error leyendo archivo de texto {ruta_archivo}: {e}")
+        print(f"❌ Error leyendo archivo {ruta_archivo}: {e}")
         return None
 
-# --- MAIN ---
+# --- MAIN (CON NUEVO ORQUESTADOR) ---
 
 def main():
-    print("🦄 INICIANDO PROYECTO CENTAURO (v2.6 Universal Input)...")
+    print("🦄 INICIANDO PROYECTO CENTAURO v2.0 (Multi-Agente Optimizado)...")
+    print("="*70)
     
     # 1. Asegurar directorios
     os.makedirs(settings.INPUTS_DIR / "docs", exist_ok=True)
@@ -154,61 +125,96 @@ def main():
     os.makedirs(settings.OUTPUTS_DIR, exist_ok=True)
 
     # 2. Indexar Manuales (RAG)
-    print("\n📚 Actualizando memoria RAG...")
+    print("\n📚 Paso 1: Indexando base de conocimiento...")
     indexar_documentacion()
 
-    # 3. Buscar entrevistas (TXT, VTT y ahora DOCX)
+    # 3. Buscar entrevistas
     carpeta = settings.INPUTS_DIR / "transcripts"
-    archivos_transcripcion = list(carpeta.glob("*.txt")) + \
-                             list(carpeta.glob("*.vtt")) + \
-                             list(carpeta.glob("*.docx"))
+    archivos_transcripcion = (
+        list(carpeta.glob("*.txt")) + 
+        list(carpeta.glob("*.vtt")) + 
+        list(carpeta.glob("*.docx"))
+    )
     
     if not archivos_transcripcion:
-        print("⚠️ No hay transcripciones en 'inputs/transcripts/'. Pon archivos .txt, .vtt o .docx ahí.")
+        print("\n⚠️ No hay transcripciones en 'inputs/transcripts/'")
+        print("   Formatos soportados: .txt, .vtt, .docx")
         return
 
-    print(f"\n🚀 Se encontraron {len(archivos_transcripcion)} entrevistas. Procesando...")
+    print(f"\n🚀 Paso 2: Procesando {len(archivos_transcripcion)} entrevista(s)...")
+    print("="*70)
+
+    # ===== CREAR ORQUESTADOR =====
+    orchestrator = CentauroOrchestrator()
+    # ==============================
 
     # 4. Bucle de Procesamiento
-    for archivo in archivos_transcripcion:
-        print(f"\n--------------------------------------------------")
-        print(f"🎧 Analizando: {archivo.name}")
+    for idx, archivo in enumerate(archivos_transcripcion, 1):
+        print(f"\n{'='*70}")
+        print(f"📂 [{idx}/{len(archivos_transcripcion)}] {archivo.name}")
+        print(f"{'='*70}")
         
-        # AQUI OCURRE LA LECTURA Y LIMPIEZA
+        # Cargar transcripción
         texto = cargar_transcripcion(archivo)
+        if not texto: 
+            print("   ⚠️ Archivo vacío o no legible, saltando...")
+            continue
         
-        if not texto: continue
-        # --- 2. INICIAMOS EL CRONÓMETRO AQUÍ ---
+        # Iniciar cronómetro
         inicio_reloj = time.time()
-        print("   ⏳ Enviando a la IA... (Esto puede tardar 1-2 minutos)")
+        print("   ⏳ Analizando con sistema multi-agente...")
 
-        # A) EJECUTAR ANÁLISIS
-        # El texto ya llega limpio (si era VTT) o estructurado (si era Word)
-        reporte = analizar_entrevista(archivo.name, texto)
-        # --- 3. PARAMOS EL CRONÓMETRO AQUÍ ---
+        # ===== EJECUTAR ANÁLISIS CON ORQUESTADOR =====
+        try:
+            reporte = orchestrator.analizar_entrevista_completa(
+                nombre_archivo=archivo.stem,
+                texto_crudo=texto
+            )
+        except Exception as e:
+            print(f"\n   ❌ ERROR en análisis: {e}")
+            print(f"   💡 Tip: Revisa que tu API key de OpenAI sea válida")
+            continue
+        # ==============================================
+        
+        # Cronómetro
         fin_reloj = time.time()
         tiempo_total = fin_reloj - inicio_reloj
         minutos = int(tiempo_total // 60)
         segundos = int(tiempo_total % 60)
 
-        print(f"   ⏱️ Tiempo de análisis: {minutos} min {segundos} seg")
+        print(f"\n   ⏱️ Tiempo de análisis: {minutos} min {segundos} seg")
         
-        # B) GENERAR PDF
+        # Generar outputs
         if reporte:
-            print("   🎨 Generando Informe PDF Premium...")
-            nombre_pdf = f"Reporte_{archivo.stem}.pdf"
+            # JSON
+            json_path = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{archivo.stem}_v2.json"
+            json_path.parent.mkdir(exist_ok=True)
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(reporte, f, indent=2, ensure_ascii=False)
+            print(f"   💾 JSON guardado: {json_path.name}")
             
-            # Convertimos a dict seguro para evitar errores de Pydantic
-            if hasattr(reporte, 'model_dump'):
-                datos_para_pdf = reporte.model_dump()
-            else:
-                datos_para_pdf = reporte
-
-            generar_pdf(datos_para_pdf, nombre_pdf)
+            # PDF
+            print("   🎨 Generando PDF...")
+            nombre_pdf = f"Reporte_{archivo.stem}_v2.pdf"
+            generar_pdf(reporte, nombre_pdf)
+            
+            # Estadísticas de optimización
+            if "meta" in reporte and "stats_optimizacion" in reporte["meta"]:
+                stats = reporte["meta"]["stats_optimizacion"]
+                print(f"\n   📊 Estadísticas:")
+                print(f"      • Llamadas API: {stats.get('llamadas_api', 'N/A')}")
+                print(f"      • Cache hits: {stats.get('cache_hits', 'N/A')}")
+                print(f"      • Tokens ahorrados: ~{stats.get('tokens_ahorrados', 0):,}")
         else:
-            print("   ❌ El análisis falló, no se generará PDF.")
+            print("   ❌ El análisis falló, no se generó reporte.")
 
-    print("\n✅ CICLO TERMINADO. Revisa la carpeta 'outputs/'.")
+    print(f"\n{'='*70}")
+    print("✅ PROCESO COMPLETADO")
+    print(f"{'='*70}")
+    print(f"📁 Revisa tus reportes en: {settings.OUTPUTS_DIR}")
+    print("   • PDFs en: outputs/Reportes_PDF/")
+    print("   • JSONs en: outputs/Reportes_JSON/")
+    print()
 
 if __name__ == "__main__":
     main()

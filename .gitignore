@@ -1,6 +1,8 @@
 # Ignore PDFs and VTT transcripts
 *.pdf
 *.vtt
+*.docx
+*.doc
 
 # --- OS / editor ---
 .DS_Store
@@ -19,3 +21,10 @@ venv/
 
 inputs/
 outputs/
+
+.env
+
+.chroma_db/
+chroma_db/
+__pycache__/
+

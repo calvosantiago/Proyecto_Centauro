@@ -9,7 +9,7 @@ from .rag import buscar_contexto
 from .llm_client import consultar_gpt
 from .schema import ReporteCalidad
 from .privacy import redact_pii
-from .diarization import identificar_interlocutores  # <--- IMPORTAMOS LO NUEVO
+from .diarization_legacy import identificar_interlocutores  # <--- IMPORTAMOS LO NUEVO
 
 try:
     from rapidfuzz import fuzz

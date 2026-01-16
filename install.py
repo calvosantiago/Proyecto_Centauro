@@ -12,8 +12,7 @@ python-dotenv
 tiktoken
 """
 
-CODE_ENV = """OPENAI_API_KEY=sk-PON_TU_CLAVE_AQUI
-"""
+CODE_ENV = """# RENUEVA ESTO CON TU API KEY REAL"""
 
 CODE_CONFIG = """import os
 from pathlib import Path

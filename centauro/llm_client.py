@@ -3,8 +3,10 @@ import os
 import datetime
 from openai import OpenAI
 from .config import settings
+from dotenv import load_dotenv
 
-client = OpenAI()
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # --- TARIFAS GPT-4o-mini (Actualizado Dic 2025) ---
 # Precios por token (USD)
