@@ -99,7 +99,7 @@ class DiarizationAgent:
         # Extraer todos los nombres únicos
         patron_nombre = r'\[([^\]]+)\]:'
         nombres = re.findall(patron_nombre, texto)
-        nombres_unicos = list(set(nombres))
+        nombres_unicos = self._unique_in_order(nombres)
         
         print(f"   📋 Nombres detectados: {nombres_unicos}")
         
@@ -147,7 +147,7 @@ class DiarizationAgent:
             print("   ⚠️ No se encontraron speakers, fallback a método contextual")
             return self.diarizar(self._limpiar_vtt_basico(texto_vtt), "fallback")
         
-        nombres_unicos = list(set([nombre.strip() for nombre, _ in matches]))
+        nombres_unicos = self._unique_in_order([nombre.strip() for nombre, _ in matches])
         mapa_speakers = self._mapear_nombres_a_roles(nombres_unicos)
         
         dialogo = []
@@ -208,7 +208,7 @@ class DiarizationAgent:
             print("   ⚠️ No se pudieron extraer bloques, fallback")
             return self.diarizar(self._limpiar_vtt_basico(texto_vtt), "fallback")
         
-        uuids_unicos = list(set([b["uuid"] for b in bloques]))
+        uuids_unicos = self._unique_in_order([b["uuid"] for b in bloques])
         
         if len(uuids_unicos) == 1:
             mapa = {uuids_unicos[0]: "ASESOR"}
@@ -280,6 +280,19 @@ class DiarizationAgent:
                     mapa[n] = "LEAD"
         
         return mapa
+        
+    @staticmethod
+    def _unique_in_order(valores: List[str]) -> List[str]:
+        """Devuelve valores únicos preservando orden de aparición."""
+        vistos = set()
+        resultado = []
+        for valor in valores:
+            if valor in vistos:
+                continue
+            vistos.add(valor)
+            resultado.append(valor)
+        return resultado
+    
     
     def _limpiar_vtt_basico(self, texto_vtt: str) -> str:
         """Limpia VTT dejando solo el texto"""
