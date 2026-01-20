@@ -1,10 +1,14 @@
 """
-Orquestador del Sistema Multi-Agente con Sheriff + Citas Literales FORZADAS
+Orquestador del Sistema Multi-Agente v2.1
+
+CAMBIOS EN v2.1:
+- NUEVO: Genera resumen_contextual (perfil_lead, fase_funnel, objetivo, barreras)
+- NUEVO: Fase 2.5 dedicada a extracción de contexto del lead
+- FIX: Mejor síntesis de fortalezas/áreas de mejora (no solo por nota)
+- FIX: feedback_resumido más detallado
 
 INSTRUCCIÓN: REEMPLAZA el contenido de:
-C:\\Users\\uscp9a\\Grupo Planeta\\BI POWER - General\\PBI\\PROYECTOS\\Proyecto_Centauro\\centauro\\core\\orchestrator.py
-
-CAMBIO CRÍTICO: Prompts que FUERZAN citas literales obligatorias
+centauro/core/orchestrator.py
 """
 from typing import Dict, List
 import json
@@ -15,8 +19,9 @@ from .config_agents import OptimizacionConfig
 from ..llm_client import consultar_gpt
 from ..config import settings
 
+
 class CentauroOrchestrator:
-    """Orquestador principal con Sheriff anti-alucinaciones"""
+    """Orquestador principal con Sheriff anti-alucinaciones y resumen contextual"""
     
     def __init__(self):
         self.rag_agent = DynamicRAGAgent()
@@ -31,7 +36,7 @@ class CentauroOrchestrator:
         }
     
     def analizar_entrevista_completa(self, nombre_archivo: str, texto_crudo: str) -> Dict:
-        """Pipeline completo orquestado con Sheriff"""
+        """Pipeline completo orquestado con Sheriff y Resumen Contextual"""
         print(f"\n{'='*60}")
         print(f"🎯 ANÁLISIS MULTI-AGENTE OPTIMIZADO: {nombre_archivo}")
         print(f"{'='*60}\n")
@@ -46,6 +51,11 @@ class CentauroOrchestrator:
         print("\n📍 FASE 2: Análisis de contexto")
         cache_key = nombre_archivo
         temas = self.rag_agent.extraer_temas_llamada(transcripcion_diarizada, cache_key)
+        self.stats["llamadas_api"] += 1
+        
+        # --- FASE 2.5: RESUMEN CONTEXTUAL (NUEVO) ---
+        print("\n📍 FASE 2.5: Extracción de perfil del lead")
+        resumen_contextual = self._extraer_resumen_contextual(transcripcion_diarizada, cache_key)
         self.stats["llamadas_api"] += 1
         
         # --- FASE 3: EVALUACIÓN OPTIMIZADA ---
@@ -76,7 +86,8 @@ class CentauroOrchestrator:
         reporte_final = self._sintetizar_evaluaciones(
             evaluaciones,
             transcripcion_diarizada,
-            nombre_archivo
+            nombre_archivo,
+            resumen_contextual  # NUEVO: Pasar el resumen
         )
         self.stats["llamadas_api"] += 1
         
@@ -89,6 +100,112 @@ class CentauroOrchestrator:
         print(f"{'='*60}\n")
         
         return reporte_final
+    
+    # ========== NUEVO: EXTRACCIÓN DE RESUMEN CONTEXTUAL ==========
+    
+    def _extraer_resumen_contextual(self, transcripcion: str, cache_key: str) -> Dict:
+        """
+        Extrae información del perfil del lead y contexto de la llamada.
+        
+        Genera:
+        - perfil_lead: Descripción del candidato
+        - fase_funnel: En qué etapa del proceso está
+        - objetivo_del_lead: Qué busca el candidato
+        - barreras_principales: Obstáculos detectados
+        - resultado_general: Cómo terminó la llamada
+        """
+        print("   🔍 Extrayendo perfil del lead y contexto...")
+        
+        # Tomar muestras del inicio, medio y final para contexto completo
+        lineas = transcripcion.split('\n')
+        total_lineas = len(lineas)
+        
+        # Muestras distribuidas
+        inicio = '\n'.join(lineas[:min(30, total_lineas)])
+        medio = '\n'.join(lineas[total_lineas//3 : total_lineas//3 + 20]) if total_lineas > 60 else ""
+        final = '\n'.join(lineas[-min(30, total_lineas):])
+        
+        muestra = f"""
+=== INICIO DE LA LLAMADA ===
+{inicio}
+
+=== PARTE MEDIA ===
+{medio}
+
+=== FINAL DE LA LLAMADA ===
+{final}
+"""
+        
+        prompt_sistema = """
+Eres un analista de ventas. Extrae información del LEAD (cliente potencial) de esta transcripción.
+
+IMPORTANTE:
+- El [LEAD] es el cliente potencial que está considerando estudiar en OBS
+- El [ASESOR] es quien vende el programa
+
+Analiza SOLO lo que dice el [LEAD] para extraer su perfil.
+
+FORMATO JSON OBLIGATORIO:
+{
+  "perfil_lead": "Descripción breve: profesión, experiencia, situación actual. Ej: 'Ingeniero con 5 años de experiencia en logística, busca especialización para ascender'",
+  "fase_funnel": "AWARENESS | CONSIDERATION | DECISION | CIERRE_INMEDIATO",
+  "objetivo_del_lead": "Qué busca conseguir con el máster. Ej: 'Cambio de carrera hacia análisis de datos'",
+  "barreras_principales": ["Barrera 1", "Barrera 2"],
+  "resultado_general": "POSITIVO_CON_COMPROMISO | POSITIVO_SIN_FECHA | NEUTRO_PENDIENTE | NEGATIVO_OBJECCION_FUERTE"
+}
+
+GUÍA PARA FASE_FUNNEL:
+- AWARENESS: Apenas conoce OBS, explorando opciones
+- CONSIDERATION: Comparando activamente, tiene dudas específicas
+- DECISION: Ya decidido a estudiar, solo falta resolver detalles (precio, fechas)
+- CIERRE_INMEDIATO: Listo para matricularse en esta llamada
+
+GUÍA PARA RESULTADO_GENERAL:
+- POSITIVO_CON_COMPROMISO: Hay fecha de siguiente paso o intención clara
+- POSITIVO_SIN_FECHA: Interesado pero sin compromiso concreto
+- NEUTRO_PENDIENTE: Ni sí ni no, "lo pensaré"
+- NEGATIVO_OBJECCION_FUERTE: Objeción no resuelta (precio, tiempo, etc.)
+
+GUÍA PARA BARRERAS:
+- Ejemplos: "Precio elevado", "Falta de tiempo", "Necesita consultar con pareja/jefe", 
+  "Comparando con otra universidad", "Dudas sobre modalidad online", "Sin urgencia"
+"""
+        
+        prompt_usuario = f"""
+Analiza esta transcripción y extrae el perfil del LEAD:
+
+{muestra}
+
+Genera el JSON con la información del lead.
+"""
+        
+        try:
+            resp = consultar_gpt(prompt_sistema, prompt_usuario, f"{cache_key}_resumen_contextual")
+            data = json.loads(resp)
+            
+            # Validar campos obligatorios
+            campos_requeridos = ["perfil_lead", "fase_funnel", "objetivo_del_lead", 
+                                "barreras_principales", "resultado_general"]
+            
+            for campo in campos_requeridos:
+                if campo not in data:
+                    data[campo] = "No identificado" if campo != "barreras_principales" else []
+            
+            print(f"      ✓ Perfil: {data.get('perfil_lead', 'N/A')[:50]}...")
+            print(f"      ✓ Fase: {data.get('fase_funnel', 'N/A')}")
+            print(f"      ✓ Resultado: {data.get('resultado_general', 'N/A')}")
+            
+            return data
+            
+        except Exception as e:
+            print(f"   ⚠️ Error extrayendo resumen contextual: {e}")
+            return {
+                "perfil_lead": "Error en extracción",
+                "fase_funnel": "CONSIDERATION",
+                "objetivo_del_lead": "No identificado",
+                "barreras_principales": [],
+                "resultado_general": "NEUTRO_PENDIENTE"
+            }
     
     # ========== SHERIFF ANTI-ALUCINACIONES ==========
     
@@ -150,7 +267,6 @@ class CentauroOrchestrator:
         if not evidencia or len(evidencia) < 10:
             return False
         
-        # Limpiar etiquetas [ASESOR]/[LEAD] y nombres
         import re
         evidencia_limpia = re.sub(r'\[([^\]]+)\]:\s*', '', evidencia).strip()
         
@@ -172,14 +288,14 @@ class CentauroOrchestrator:
                 if ratio >= 85:
                     return True
             
-            return mejor_ratio >= 75  # Más permisivo (era 80)
+            return mejor_ratio >= 75
             
         except ImportError:
             palabras = evidencia_limpia.lower().split()
             palabras_encontradas = sum(1 for p in palabras if p in transcripcion.lower())
-            return (palabras_encontradas / len(palabras)) >= 0.6  # Más permisivo
+            return (palabras_encontradas / len(palabras)) >= 0.6
     
-    # ========== EVALUACIÓN POR BATCHES CON CITAS FORZADAS ==========
+    # ========== EVALUACIÓN POR BATCHES ==========
     
     def _evaluar_batch_ligero(self, transcripcion: str, cache_key: str) -> List[Dict]:
         """Evalúa Apertura, Cierre y Legal CON CITAS LITERALES OBLIGATORIAS"""
@@ -192,7 +308,15 @@ class CentauroOrchestrator:
         contexto_legal = self.rag_agent.buscar_contexto_para_bloque("Legal (Compliance)", transcripcion, cache_key)
         
         prompt_sistema = f"""
-Eres un auditor que evalúa TRES bloques simultáneamente.
+Eres un auditor CRÍTICO que evalúa TRES bloques simultáneamente.
+Tu estándar es la EXCELENCIA. No regales notas.
+
+RÚBRICA:
+1 = NEGLIGENTE: Error grave o ausencia total
+2 = DEFICIENTE: Pasivo, inseguro
+3 = MEDIOCRE: Cumple pero sin profundidad
+4 = BUENO: Sólido, profesional, con detalles pulibles
+5 = EXCELENCIA: Liderazgo claro, conecta emocionalmente
 
 MANUAL - APERTURA:
 {contexto_apertura}
@@ -207,44 +331,37 @@ MANUAL - LEGAL:
 TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
 - Usa COPY-PASTE directo, no parafrasees
 - Incluye SIEMPRE la etiqueta [ASESOR]: o [LEAD]:
-- Si la cita es larga, usa los primeros 100 caracteres exactos
-- NUNCA resumas, NUNCA interpretes, SIEMPRE cita textual
+- NUNCA resumas, SIEMPRE cita textual
+
+REGLA DE ORO: Antes de dar un 4 o 5, busca activamente 2 "oportunidades perdidas".
+Si encuentras dónde podría haber profundizado y no lo hizo → la nota baja.
 
 FORMATO JSON OBLIGATORIO:
 {{
   "apertura": {{
     "puntuacion_1_5": 3,
     "observabilidad": "ALTA",
-    "evidencia_principal": "[ASESOR]: Cita textual EXACTA del saludo...",
-    "evidencias_extra": [
-      "[ASESOR]: Otra cita textual EXACTA...",
-      "[LEAD]: Respuesta textual EXACTA del lead..."
-    ],
-    "razonamiento": "...",
-    "recomendacion_accionable": "..."
+    "evidencia_principal": "[ASESOR]: Cita textual EXACTA...",
+    "evidencias_extra": ["[ASESOR]: Otra cita EXACTA..."],
+    "razonamiento": "Explica QUÉ faltó para el 5. Sé CRÍTICO.",
+    "recomendacion_accionable": "Instrucción directa para mejorar."
   }},
   "cierre": {{...similar...}},
   "legal": {{...similar...}}
 }}
-
-EJEMPLO DE EVIDENCIA CORRECTA:
-"evidencia_principal": "[ASESOR]: Hola buenos días Cindy, ¿cómo estás? Te llamo de OBS Business School"
-
-EJEMPLO DE EVIDENCIA INCORRECTA (NO HACER):
-"evidencia_principal": "El asesor establece un diálogo abierto y busca entender las dudas"
 """
         
         prompt_usuario = f"""
-APERTURA (cita literal de aquí):
+APERTURA (primeros minutos):
 {inicio}
 
-CIERRE (cita literal de aquí):
+CIERRE (últimos minutos):
 {final}
 
-LEGAL (cita literal de aquí):
+LEGAL (buscar menciones de documentación, legalización, títulos):
 {legal_extracto}
 
-Genera las 3 evaluaciones con CITAS LITERALES OBLIGATORIAS.
+Evalúa con CITAS LITERALES y sé CRÍTICO con las notas.
 """
         
         try:
@@ -286,7 +403,15 @@ Genera las 3 evaluaciones con CITAS LITERALES OBLIGATORIAS.
         ctx_estilo = self.rag_agent.buscar_contexto_para_bloque("Estilo y comunicación", transcripcion, cache_key)
         
         prompt_sistema = f"""
-Eres un auditor que evalúa CUATRO bloques.
+Eres un auditor EXTREMADAMENTE CRÍTICO que evalúa CUATRO bloques.
+Tu perfil es de Director Comercial exigente.
+
+RÚBRICA DRACONIANA:
+1 = NEGLIGENTE: Error grave que mata la venta
+2 = DEFICIENTE: Pasivo, "tomador de pedidos"
+3 = MEDIOCRE: Cumple el guion sin alma
+4 = BUENO: Profesional, con detalles pulibles
+5 = EXCELENCIA: Liderazgo claro, mueve al cliente
 
 MANUAL - DETECCIÓN:
 {ctx_deteccion}
@@ -300,11 +425,17 @@ MANUAL - OBJECIONES:
 MANUAL - ESTILO:
 {ctx_estilo}
 
-⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
-TODAS las evidencias DEBEN ser CITAS TEXTUALES EXACTAS.
-- COPY-PASTE literal, NO parafrasees
-- Incluye [ASESOR]: o [LEAD]: siempre
-- Si es largo, primeros 100-150 caracteres exactos
+⚠️ REGLAS CRÍTICAS ⚠️
+1. CITAS LITERALES: Copy-paste exacto con [ASESOR]: o [LEAD]:
+2. DISTRIBUCIÓN: Las evidencias deben venir de DIFERENTES partes de la llamada
+3. CRÍTICO: Explica QUÉ faltó. No uses lenguaje positivo vacío.
+4. OPORTUNIDADES PERDIDAS: Antes de dar 4+, busca 2 momentos donde podría haber hecho más.
+
+PENALIZACIONES:
+- Detección: Si el asesor habla más que el lead → máximo 3
+- Presentación: Si no personaliza beneficios → máximo 3
+- Objeciones: Si contradice el manual → máximo 2
+- Estilo: Muletillas, interrupciones → penalizar
 
 FORMATO JSON:
 {{
@@ -312,9 +443,9 @@ FORMATO JSON:
     "puntuacion_1_5": 3,
     "observabilidad": "ALTA",
     "evidencia_principal": "[ASESOR]: Pregunta textual EXACTA...",
-    "evidencias_extra": ["[ASESOR]: Otra pregunta EXACTA...", "[LEAD]: Respuesta EXACTA..."],
-    "razonamiento": "...",
-    "recomendacion_accionable": "..."
+    "evidencias_extra": ["[LEAD]: Respuesta EXACTA...", "[ASESOR]: Seguimiento EXACTO..."],
+    "razonamiento": "Sé CRÍTICO: qué faltó, qué pudo hacer mejor",
+    "recomendacion_accionable": "Instrucción específica"
   }},
   "presentacion_programa": {{...}},
   "manejo_objeciones": {{...}},
@@ -323,11 +454,12 @@ FORMATO JSON:
 """
         
         prompt_usuario = f"""
-Analiza esta transcripción y CITA LITERALMENTE:
+TRANSCRIPCIÓN COMPLETA:
 
 {transcripcion}
 
-Genera las 4 evaluaciones con CITAS TEXTUALES EXACTAS.
+Evalúa los 4 bloques con CITAS TEXTUALES EXACTAS.
+Sé CRÍTICO y busca oportunidades perdidas antes de dar notas altas.
 """
         
         try:
@@ -358,7 +490,7 @@ Genera las 4 evaluaciones con CITAS TEXTUALES EXACTAS.
             return []
     
     def _evaluar_individual(self, transcripcion: str, cache_key: str) -> List[Dict]:
-        """Modo sin optimizar"""
+        """Modo sin optimizar (fallback)"""
         evaluaciones = []
         agente_apertura = AperturaAgent()
         contexto = self.rag_agent.buscar_contexto_para_bloque("Apertura", transcripcion, cache_key)
@@ -366,30 +498,73 @@ Genera las 4 evaluaciones con CITAS TEXTUALES EXACTAS.
         evaluaciones.append(resultado.to_dict())
         return evaluaciones
     
+    # ========== SÍNTESIS MEJORADA ==========
+    
     def _sintetizar_evaluaciones(self, evaluaciones: List[Dict], 
-                                 transcripcion: str, nombre: str) -> Dict:
-        """Genera reporte final consolidado"""
+                                 transcripcion: str, nombre: str,
+                                 resumen_contextual: Dict = None) -> Dict:
+        """Genera reporte final consolidado CON resumen contextual"""
+        
+        # Calcular nota global
         notas_validas = [
             e["puntuacion_1_5"] for e in evaluaciones
             if e.get("puntuacion_1_5") is not None
         ]
-        
         nota_global = round(sum(notas_validas) / len(notas_validas), 2) if notas_validas else 0.0
         
-        return {
+        # Generar fortalezas y áreas de mejora DETALLADAS
+        fortalezas = []
+        areas_mejora = []
+        
+        for e in evaluaciones:
+            bloque = e.get("bloque", "Unknown")
+            nota = e.get("puntuacion_1_5", 0)
+            razonamiento = e.get("razonamiento", "")
+            
+            if nota >= 4:
+                # Extraer la razón de la buena nota
+                fortalezas.append(f"{bloque} ({nota}/5)")
+            elif nota <= 2:
+                # Extraer la recomendación
+                recomendacion = e.get("recomendacion_accionable", razonamiento[:100])
+                areas_mejora.append(f"{bloque}: {recomendacion[:80]}...")
+            elif nota == 3:
+                # Nota media - también es área de mejora
+                recomendacion = e.get("recomendacion_accionable", "Profundizar más")
+                areas_mejora.append(f"{bloque}: {recomendacion[:80]}...")
+        
+        # Si no hay áreas de mejora explícitas, buscar las notas más bajas
+        if not areas_mejora and evaluaciones:
+            notas_ordenadas = sorted(evaluaciones, key=lambda x: x.get("puntuacion_1_5", 5))
+            for e in notas_ordenadas[:2]:
+                bloque = e.get("bloque", "Unknown")
+                recomendacion = e.get("recomendacion_accionable", "Mejorar ejecución")
+                areas_mejora.append(f"{bloque}: {recomendacion[:80]}...")
+        
+        # Construir reporte final
+        reporte = {
             "asesor": nombre,
             "meta": {
-                "version_modelo": "Centauro_V2_MultiAgent_Optimized_Sheriff",
+                "version_modelo": "Centauro_V2.1_MultiAgent_Optimized_Sheriff",
                 "flags_tecnicos": {
                     "modo_batch": self.config.MODO_BATCH,
                     "bloques_evaluados": len(notas_validas),
                     "sheriff_activo": True
                 }
             },
+            "resumen_contextual": resumen_contextual or {
+                "perfil_lead": "No extraído",
+                "fase_funnel": "CONSIDERATION",
+                "objetivo_del_lead": "No identificado",
+                "barreras_principales": [],
+                "resultado_general": "NEUTRO_PENDIENTE"
+            },
             "evaluacion_por_bloques": evaluaciones,
             "puntuacion_global_1_5": nota_global,
             "feedback_resumido": {
-                "fortalezas": [e["bloque"] for e in evaluaciones if e.get("puntuacion_1_5", 0) >= 4],
-                "areas_mejora": [e["bloque"] for e in evaluaciones if e.get("puntuacion_1_5", 5) < 3]
+                "fortalezas": fortalezas if fortalezas else ["Ninguna destacable"],
+                "areas_mejora": areas_mejora if areas_mejora else ["Revisión general recomendada"]
             }
         }
+        
+        return reporte

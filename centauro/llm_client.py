@@ -74,7 +74,8 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido"):
             {"role": "system", "content": prompt_sistema},
             {"role": "user", "content": prompt_usuario}
         ],
-        temperature=0,
+        temperature=0.0,
+        seed=42,
         response_format={"type": "json_object"}
     )
     
