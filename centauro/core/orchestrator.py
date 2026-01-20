@@ -45,6 +45,7 @@ class CentauroOrchestrator:
         print("📍 FASE 1: Diarización")
         diarization_agent = DiarizationAgent(nombre_asesor=nombre_archivo)
         transcripcion_diarizada = diarization_agent.diarizar(texto_crudo, nombre_archivo)
+        asesor_detectado = diarization_agent.asesor_detectado or nombre_archivo
         self.stats["llamadas_api"] += 7
         
         # --- FASE 2: EXTRACCIÓN DE TEMAS ---
@@ -86,7 +87,7 @@ class CentauroOrchestrator:
         reporte_final = self._sintetizar_evaluaciones(
             evaluaciones,
             transcripcion_diarizada,
-            nombre_archivo,
+            asesor_detectado,
             resumen_contextual  # NUEVO: Pasar el resumen
         )
         self.stats["llamadas_api"] += 1
@@ -298,17 +299,15 @@ Genera el JSON con la información del lead.
     # ========== EVALUACIÓN POR BATCHES ==========
     
     def _evaluar_batch_ligero(self, transcripcion: str, cache_key: str) -> List[Dict]:
-        """Evalúa Apertura, Cierre y Legal CON CITAS LITERALES OBLIGATORIAS"""
+        """Evalúa Apertura y Cierre CON CITAS LITERALES OBLIGATORIAS"""
         inicio = self.config.get_extracto("Apertura", transcripcion)
         final = self.config.get_extracto("Cierre y siguiente paso", transcripcion)
-        legal_extracto = self.config.get_extracto("Legal (Compliance)", transcripcion)
         
         contexto_apertura = self.rag_agent.buscar_contexto_para_bloque("Apertura", transcripcion, cache_key)
         contexto_cierre = self.rag_agent.buscar_contexto_para_bloque("Cierre y siguiente paso", transcripcion, cache_key)
-        contexto_legal = self.rag_agent.buscar_contexto_para_bloque("Legal (Compliance)", transcripcion, cache_key)
         
         prompt_sistema = f"""
-Eres un auditor CRÍTICO que evalúa TRES bloques simultáneamente.
+Eres un auditor CRÍTICO que evalúa DOS bloques simultáneamente.
 Tu estándar es la EXCELENCIA. No regales notas.
 
 RÚBRICA:
@@ -323,9 +322,6 @@ MANUAL - APERTURA:
 
 MANUAL - CIERRE:
 {contexto_cierre}
-
-MANUAL - LEGAL:
-{contexto_legal}
 
 ⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
 TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
@@ -346,8 +342,7 @@ FORMATO JSON OBLIGATORIO:
     "razonamiento": "Explica QUÉ faltó para el 5. Sé CRÍTICO.",
     "recomendacion_accionable": "Instrucción directa para mejorar."
   }},
-  "cierre": {{...similar...}},
-  "legal": {{...similar...}}
+  "cierre": {{...similar...}}
 }}
 """
         
@@ -357,9 +352,6 @@ APERTURA (primeros minutos):
 
 CIERRE (últimos minutos):
 {final}
-
-LEGAL (buscar menciones de documentación, legalización, títulos):
-{legal_extracto}
 
 Evalúa con CITAS LITERALES y sé CRÍTICO con las notas.
 """
@@ -382,13 +374,7 @@ Evalúa con CITAS LITERALES y sé CRÍTICO con las notas.
                 eval_cierre["confianza"] = 0.9
                 evaluaciones.append(eval_cierre)
             
-            if "legal" in data:
-                eval_legal = data["legal"]
-                eval_legal["bloque"] = "Legal (Compliance)"
-                eval_legal["confianza"] = 0.9
-                evaluaciones.append(eval_legal)
-            
-            print(f"      ✓ Evaluados 3 bloques en 1 llamada")
+            print(f"      ✓ Evaluados 2 bloques en 1 llamada")
             return evaluaciones
             
         except Exception as e:
@@ -501,7 +487,7 @@ Sé CRÍTICO y busca oportunidades perdidas antes de dar notas altas.
     # ========== SÍNTESIS MEJORADA ==========
     
     def _sintetizar_evaluaciones(self, evaluaciones: List[Dict], 
-                                 transcripcion: str, nombre: str,
+                                 transcripcion: str, asesor: str,
                                  resumen_contextual: Dict = None) -> Dict:
         """Genera reporte final consolidado CON resumen contextual"""
         
@@ -543,7 +529,7 @@ Sé CRÍTICO y busca oportunidades perdidas antes de dar notas altas.
         
         # Construir reporte final
         reporte = {
-            "asesor": nombre,
+            "asesor": asesor,
             "meta": {
                 "version_modelo": "Centauro_V2.1_MultiAgent_Optimized_Sheriff",
                 "flags_tecnicos": {

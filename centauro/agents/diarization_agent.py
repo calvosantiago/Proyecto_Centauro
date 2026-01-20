@@ -34,6 +34,7 @@ class DiarizationAgent:
         self.nombre_asesor = nombre_asesor
         self.ventana_contexto = 3
         self.confidence_threshold = 0.7
+        self.asesor_detectado: Optional[str] = None
         
         # Anclas semánticas que identifican al ASESOR de OBS
         # Estas son palabras/frases que SOLO diría un asesor de ventas de OBS
@@ -94,6 +95,7 @@ class DiarizationAgent:
     def diarizar(self, texto_crudo: str, log_id: str = "unknown") -> str:
         """Proceso completo de diarización con detección automática de formato"""
         print(f"🎙️ [DiarizationAgent v2.3] Iniciando...")
+        self.asesor_detectado = None
         
         # DETECTAR FORMATO Y PROCESAR
         
@@ -137,6 +139,7 @@ class DiarizationAgent:
         IMPORTANTE: El nombre del archivo (self.nombre_asesor) ya NO tiene prioridad
         """
         if len(nombres) == 1:
+            self.asesor_detectado = nombres[0]
             return {nombres[0]: "ASESOR"}
         
         mapa = {}
@@ -221,6 +224,9 @@ class DiarizationAgent:
         for nombre in nombres:
             if nombre not in mapa:
                 mapa[nombre] = "LEAD"
+
+        if "ASESOR" in mapa.values():
+            self.asesor_detectado = next(n for n, rol in mapa.items() if rol == "ASESOR")
         
         return mapa
     
