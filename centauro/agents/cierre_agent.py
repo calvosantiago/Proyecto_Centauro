@@ -133,28 +133,32 @@ FORMATO JSON OBLIGATORIO:
 {{
   "puntuacion_1_5": 3,
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
-  "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso...",
+  "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
-    "[ASESOR]: Resumen de acuerdos...",
-    "[LEAD]: Respuesta confirmando compromiso..."
+    "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
+    "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Propuso paso concreto? ¿Usó técnica? ¿Generó compromiso? ¿Manejó dudas finales?",
-  "recomendacion_accionable": "Acción específica para mejorar",
+  "razonamiento": "¿Propuso paso concreto? ¿Usó técnica? ¿Generó compromiso? ¿Manejó dudas finales? ¿Qué faltó para la nota siguiente?",
+  "recomendacion_accionable": "Acción específica para mejorar (sin repetir lo ya logrado)",
+  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
   "proximo_paso_concreto": "Descripción del próximo paso acordado",
   "compromiso_fecha": true/false,
   "tecnica_cierre": "doble_alternativa" | "asuntivo" | "resumen_accion" | "ninguna",
   "recepcion_cliente": {{
     "estado": "COMPROMETIDO" | "NEUTRO" | "RESISTENTE" | "ENTUSIASTA",
-    "evidencia": "[LEAD]: Respuesta del lead..."
+    "evidencia": "[LEAD]: Respuesta del lead... (COPY-PASTE LITERAL)"
   }}
 }}
 
-REGLA CRÍTICA SOBRE LA TÉCNICA:
-NO evalúes si el lead dijo "SÍ" a comprar.
-Evalúa si el ASESOR aplicó buena técnica de cierre para avanzar al siguiente paso.
-Un lead que dice "Lo pensaré" después de un buen cierre consultivo es mejor que un "Sí" presionado.
-
-EVIDENCIAS LITERALES OBLIGATORIAS.
+REGLAS CRÍTICAS:
+- NO evalúes si el lead dijo "SÍ" a comprar
+- Evalúa si el ASESOR aplicó buena técnica de cierre para avanzar
+- Un lead que dice "Lo pensaré" después de un buen cierre es válido (nota 4 si usó técnica)
+- EVIDENCIAS LITERALES OBLIGATORIAS: Copia exacta de la transcripción, NUNCA parafrasees
+- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
+- Si la ejecución es realmente excelente (resumen + técnica + compromiso + manejo dudas), NO te limites a dar 4
+- En "gap_para_5" explica QUÉ FALTÓ específicamente (ej: "Faltó resumir beneficios clave antes del cierre")
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar
 """
         
         prompt_usuario = f"""

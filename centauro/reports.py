@@ -186,41 +186,30 @@ def generar_pdf(reporte_json, output_filename):
     for bloque in bloques:
         pdf.draw_block_card(bloque)
         
-    # --- SECCIÓN: FEEDBACK RESUMIDO ---
+    # --- SECCIÓN: FEEDBACK RESUMIDO (Solo Áreas de Mejora) ---
     pdf.add_page()
     pdf.set_font('Helvetica', 'B', 14)
     pdf.set_text_color(*COLOR_PRIMARY)
-    pdf.cell(0, 10, "Feedback Ejecutivo & Coaching", 0, 1)
+    pdf.cell(0, 10, "Plan de Accion & Coaching", 0, 1)
     pdf.ln(5)
-    
+
     fb = data.get('feedback_resumido', {})
-    
-    # Fortalezas
-    pdf.set_fill_color(230, 255, 230) # Verde claro fondo
-    pdf.rect(10, pdf.get_y(), 190, 8, 'F')
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.set_text_color(*COLOR_GOOD)
-    pdf.cell(0, 8, "  FORTALEZAS (Keep doing)", 0, 1)
-    pdf.ln(2)
-    pdf.set_font('Helvetica', '', 11)
-    pdf.set_text_color(*COLOR_TEXT_MAIN)
-    for f in fb.get('fortalezas', []):
-        pdf.cell(5) # Indent
-        pdf.cell(0, 6, to_latin1(f"• {f}"), 0, 1)
-    pdf.ln(5)
-    
-    # Áreas de Mejora
+
+    # Áreas de Mejora (CRÍTICO: Texto completo sin cortar)
     pdf.set_fill_color(255, 230, 230) # Rojo claro fondo
     pdf.rect(10, pdf.get_y(), 190, 8, 'F')
     pdf.set_font('Helvetica', 'B', 12)
     pdf.set_text_color(*COLOR_BAD)
     pdf.cell(0, 8, "  ÁREAS DE MEJORA (Action Plan)", 0, 1)
     pdf.ln(2)
-    pdf.set_font('Helvetica', '', 11)
+    pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(*COLOR_TEXT_MAIN)
     for m in fb.get('areas_mejora', []):
-        pdf.cell(5)
-        pdf.cell(0, 6, to_latin1(f"• {m}"), 0, 1)
+        # Indent inicial
+        pdf.set_x(15)
+        # Usar multi_cell para texto largo sin cortar
+        pdf.multi_cell(0, 5, to_latin1(f"• {m}"))
+        pdf.ln(1)  # Espacio entre ítems
         
     # Guardar
     pdf_dir = settings.OUTPUTS_DIR / "Reportes_PDF"

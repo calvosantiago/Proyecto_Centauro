@@ -119,24 +119,29 @@ FORMATO JSON OBLIGATORIO:
 {{
   "puntuacion_1_5": 3,
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
-  "evidencia_principal": "[ASESOR]: Presentación de OBS o programa...",
+  "evidencia_principal": "[ASESOR]: Presentación de OBS o programa... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
-    "[ASESOR]: Explicación de características/beneficios...",
-    "[ASESOR]: Conexión con necesidad del lead...",
-    "[LEAD]: Reacción mostrando interés o comprensión..."
+    "[ASESOR]: Explicación de características/beneficios... (COPY-PASTE LITERAL)",
+    "[ASESOR]: Conexión con necesidad del lead... (COPY-PASTE LITERAL)",
+    "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Análisis: ¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó?",
-  "recomendacion_accionable": "Acción específica para mejorar",
+  "razonamiento": "¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó? ¿Qué faltó para la nota siguiente?",
+  "recomendacion_accionable": "Acción específica para mejorar (sin repetir lo ya logrado)",
+  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto"
 }}
 
 REGLAS CRÍTICAS:
-- Todas las evidencias DEBEN ser copy-paste LITERAL
+- Todas las evidencias DEBEN ser copy-paste LITERAL (COPY-PASTE exacto)
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Personalización = Adaptar la explicación a LO QUE EL LEAD DIJO que necesitaba
 - Diferencia: Características ("12 meses") vs Beneficios ("En 1 año estarás certificado")
+- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
+- Si la ejecución es excelente, NO te limites a dar 4
+- En "gap_para_5" sé específico (ej: "Faltó usar caso de éxito similar al perfil del lead")
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
         prompt_usuario = f"""

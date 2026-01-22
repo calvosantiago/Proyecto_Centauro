@@ -115,22 +115,27 @@ FORMATO JSON OBLIGATORIO:
 {{
   "puntuacion_1_5": 3,
   "observabilidad": "ALTA" | "NO_OBSERVABLE",
-  "evidencia_principal": "[LEAD]: Objeción principal... [ASESOR]: Respuesta...",
+  "evidencia_principal": "[LEAD]: Objeción principal... [ASESOR]: Respuesta... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
-    "[ASESOR]: Validación de la objeción...",
-    "[LEAD]: Reacción posterior..."
+    "[ASESOR]: Validación de la objeción... (COPY-PASTE LITERAL)",
+    "[LEAD]: Reacción posterior... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Validó? ¿Aisló? ¿Usó técnica? ¿Resolvió o generó más resistencia?",
-  "recomendacion_accionable": "Acción específica",
+  "razonamiento": "¿Validó? ¿Aisló? ¿Usó técnica? ¿Resolvió o generó más resistencia? ¿Qué faltó para la nota siguiente?",
+  "recomendacion_accionable": "Acción específica (sin repetir lo ya logrado)",
+  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "ninguna"
 }}
 
 REGLAS CRÍTICAS:
-- Evidencias LITERALES de la transcripción
+- Evidencias LITERALES de la transcripción (COPY-PASTE exacto)
 - Si no hay objeciones → observabilidad "NO_OBSERVABLE" y puntuacion_1_5: null
 - NO evalúes si el lead compró, evalúa si el ASESOR manejó bien la resistencia
 - Una objeción bien manejada puede dejar al lead pensando (eso es OK)
+- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
+- Si la ejecución es excelente, NO te limites a dar 4
+- En "gap_para_5" sé específico (ej: "Faltó usar social proof o caso de éxito")
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
         
         prompt_usuario = f"""
