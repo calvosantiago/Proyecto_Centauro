@@ -2016,3 +2016,31 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 22/01/2026,13:25:11,eval_objeciones,7938,259,8197,0.001346
 22/01/2026,13:25:17,eval_cierre,2327,323,2650,0.000543
 22/01/2026,13:25:26,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7443,491,7934,0.001411
+22/01/2026,17:34:01,rag_temas,3275,198,3473,0.000610
+22/01/2026,17:34:04,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_resumen_contextual,2412,113,2525,0.000430
+22/01/2026,17:34:13,eval_investigacion,2019,392,2411,0.000538
+22/01/2026,17:34:24,eval_admision_economica,12675,345,13020,0.002108
+22/01/2026,17:34:36,eval_objeciones,12550,370,12920,0.002105
+22/01/2026,17:34:43,eval_cierre,2297,267,2564,0.000505
+22/01/2026,17:34:57,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_secundarios,12304,444,12748,0.002112
+22/01/2026,17:35:04,rag_temas,3300,226,3526,0.000631
+22/01/2026,17:35:08,Interview - Cindy Navarro_resumen_contextual,3451,121,3572,0.000590
+22/01/2026,17:35:19,eval_investigacion,2008,475,2483,0.000586
+22/01/2026,17:35:29,eval_admision_economica,6796,402,7198,0.001261
+22/01/2026,17:35:39,eval_objeciones,6912,414,7326,0.001285
+22/01/2026,17:35:44,eval_cierre,2294,272,2566,0.000507
+22/01/2026,17:35:57,Interview - Cindy Navarro_batch_secundarios,6425,555,6980,0.001297
+22/01/2026,17:36:03,rag_temas,3358,227,3585,0.000640
+22/01/2026,17:36:07,Mary Jany Máster en Innovación y Emprendimiento_resumen_contextual,3329,114,3443,0.000568
+22/01/2026,17:36:17,eval_investigacion,1990,413,2403,0.000546
+22/01/2026,17:36:26,eval_admision_economica,22447,369,22816,0.003588
+22/01/2026,17:36:36,eval_objeciones,22093,350,22443,0.003524
+22/01/2026,17:36:42,eval_cierre,2268,310,2578,0.000526
+22/01/2026,17:36:53,Mary Jany Máster en Innovación y Emprendimiento_batch_secundarios,22076,455,22531,0.003584
+22/01/2026,17:37:00,rag_temas,3483,225,3708,0.000657
+22/01/2026,17:37:03,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_resumen_contextual,2075,116,2191,0.000381
+22/01/2026,17:37:13,eval_investigacion,2064,360,2424,0.000526
+22/01/2026,17:37:23,eval_admision_economica,7814,396,8210,0.001410
+22/01/2026,17:37:28,eval_objeciones,7938,283,8221,0.001360
+22/01/2026,17:37:37,eval_cierre,2327,286,2613,0.000521
+22/01/2026,17:37:52,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7443,586,8029,0.001468
