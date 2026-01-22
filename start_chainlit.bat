@@ -11,7 +11,7 @@ python -c "import chainlit" 2>nul
 if %errorlevel% neq 0 (
     echo [ERROR] Chainlit no esta instalado.
     echo.
-    echo Instalando dependencias...
+    echo Instalando dependencias con UV...
     uv pip install -r requirements.txt
     echo.
 )
@@ -24,6 +24,6 @@ echo Presiona CTRL+C para detener el servidor
 echo ================================================
 echo.
 
-chainlit run app.py -w
+python -m chainlit run app.py -w
 
 pause
