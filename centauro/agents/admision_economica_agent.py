@@ -121,14 +121,15 @@ FORMATO JSON OBLIGATORIO:
 {{
   "puntuacion_1_5": 3,
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
-  "evidencia_principal": "[ASESOR]: Explicación de admisión o inversión...",
+  "evidencia_principal": "[ASESOR]: Explicación de admisión o inversión... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
-    "[ASESOR]: Mención de precio/inversión...",
-    "[ASESOR]: Explicación de financiación...",
-    "[LEAD]: Reacción o pregunta sobre precio..."
+    "[ASESOR]: Mención de precio/inversión... (COPY-PASTE LITERAL)",
+    "[ASESOR]: Explicación de financiación... (COPY-PASTE LITERAL)",
+    "[LEAD]: Reacción o pregunta sobre precio... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Análisis: ¿Fue claro en admisión? ¿Transparente con precio? ¿Enfoque valor o precio?",
-  "recomendacion_accionable": "Acción específica para mejorar",
+  "razonamiento": "¿Fue claro en admisión? ¿Transparente con precio? ¿Enfoque valor o precio? ¿Qué faltó para la nota siguiente?",
+  "recomendacion_accionable": "Acción específica para mejorar (sin repetir lo ya logrado)",
+  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
   "menciona_precio": true/false,
   "explica_financiacion": true/false,
   "claridad_admision": "ALTA" | "MEDIA" | "BAJA" | "NO_MENCIONADO",
@@ -136,13 +137,17 @@ FORMATO JSON OBLIGATORIO:
 }}
 
 REGLAS CRÍTICAS:
-- Todas las evidencias DEBEN ser copy-paste LITERAL
+- Todas las evidencias DEBEN ser copy-paste LITERAL (COPY-PASTE exacto)
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Observabilidad puede ser BAJA si no se mencionó el tema en la llamada
 - NO penalices si el tema no surgió naturalmente (puede ser llamada inicial)
 - SÍ penaliza si evitó el tema cuando el lead preguntó directamente
 - Enfoque "valor" = Habla de ROI, beneficios vs inversión
 - Enfoque "precio" = Solo menciona cifra sin contexto
+- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
+- Si la ejecución es excelente, NO te limites a dar 4
+- En "gap_para_5" sé específico (ej: "Faltó vincular inversión con ROI del lead")
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
         prompt_usuario = f"""

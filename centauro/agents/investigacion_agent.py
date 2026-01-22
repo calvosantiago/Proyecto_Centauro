@@ -125,8 +125,9 @@ FORMATO JSON OBLIGATORIO:
     "[LEAD]: Respuesta elaborada revelando motivación...",
     "[ASESOR]: Validación o reformulación (si hay)..."
   ],
-  "razonamiento": "Análisis técnico: ¿Qué hizo bien en apertura? ¿Calidad de preguntas? ¿Qué faltó?",
-  "recomendacion_accionable": "Acción específica para mejorar investigación",
+  "razonamiento": "Análisis técnico: ¿Qué hizo bien en apertura? ¿Calidad de preguntas? ¿Qué faltó para la nota siguiente?",
+  "recomendacion_accionable": "Acción específica y concreta para mejorar (sin repetir lo ya logrado)",
+  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
   "calidad_apertura": "EXCELENTE | BUENA | CORRECTA | DEFICIENTE",
   "indicios_escucha_activa": true/false
 }}
@@ -137,6 +138,10 @@ REGLAS CRÍTICAS:
 - Evalúa TANTO la apertura COMO la investigación
 - NO penalices si el lead es cerrado, penaliza si el asesor no intentó abrir
 - Sé técnico, no motivacional
+- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si el asesor cumple todos los criterios de MAESTRÍA
+- Si la ejecución es realmente excelente, NO te limites a dar 4
+- En "gap_para_5" explica QUÉ FALTÓ específicamente, no generalidades
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo menciona lo que falta mejorar
 """
 
         prompt_usuario = f"""

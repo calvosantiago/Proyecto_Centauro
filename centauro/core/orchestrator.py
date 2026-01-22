@@ -28,6 +28,7 @@ from .rag_dynamic import DynamicRAGAgent
 from .config_agents import OptimizacionConfig
 from ..llm_client import consultar_gpt
 from ..config import settings
+from ..privacy import redact_pii  # NUEVO: Redactar datos sensibles
 
 
 class CentauroOrchestrator:
@@ -55,10 +56,20 @@ class CentauroOrchestrator:
         print(f"⚙️  {self.stats['modo_ejecucion']}")
         print(f"{'='*60}\n")
 
+        # --- FASE 0: REDACCIÓN PII (PRIVACIDAD) ---
+        print("📍 FASE 0: Protección de datos sensibles")
+        resultado_redaccion = redact_pii(texto_crudo)
+        texto_protegido = resultado_redaccion.text
+
+        if sum(resultado_redaccion.stats.values()) > 0:
+            print(f"   🛡️ Datos redactados: {dict(resultado_redaccion.stats)}")
+        else:
+            print("   ✓ No se detectaron datos sensibles")
+
         # --- FASE 1: DIARIZACIÓN ---
-        print("📍 FASE 1: Diarización")
+        print("\n📍 FASE 1: Diarización")
         diarization_agent = DiarizationAgent(nombre_asesor=nombre_archivo)
-        transcripcion_diarizada = diarization_agent.diarizar(texto_crudo, nombre_archivo)
+        transcripcion_diarizada = diarization_agent.diarizar(texto_protegido, nombre_archivo)
         asesor_detectado = diarization_agent.asesor_detectado or nombre_archivo
         self.stats["llamadas_api"] += 7
 
@@ -223,13 +234,28 @@ FORMATO JSON OBLIGATORIO:
   "propuesta_valor": {{
     "puntuacion_1_5": 3,
     "observabilidad": "ALTA",
+    "evidencia_principal": "[ASESOR]: Cita textual EXACTA (COPY-PASTE)...",
+    "evidencias_extra": ["[ASESOR]: Otra cita EXACTA (COPY-PASTE)..."],
+    "razonamiento": "Explica QUÉ faltó para la nota siguiente. Sé CRÍTICO pero justo.",
+    "recomendacion_accionable": "Instrucción directa para mejorar (sin repetir lo ya logrado).",
+    "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'"
+  }},
+  "estilo": {{
+    "puntuacion_1_5": 3,
+    "observabilidad": "ALTA",
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA..."],
-    "razonamiento": "Explica QUÉ faltó para el 5. Sé CRÍTICO.",
-    "recomendacion_accionable": "Instrucción directa para mejorar."
-  }},
-  "estilo": {{...similar...}}
+    "razonamiento": "Análisis del tono, ritmo y empatía. ¿Qué faltó?",
+    "recomendacion_accionable": "Acción concreta para mejorar estilo (sin repetir lo ya logrado).",
+    "gap_para_5": "Si nota es 3 o 4, explica qué faltó. Si nota es 5, pon 'N/A - Ya alcanzado'"
+  }}
 }}
+
+⚠️ REGLAS CRÍTICAS:
+- El 5/5 ES ALCANZABLE si cumplen todos los criterios de excelencia
+- Si la ejecución es realmente excelente, NO te limites a dar 4
+- En "gap_para_5" sé específico, no generalidades
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
         prompt_usuario = f"""
@@ -423,7 +449,7 @@ Genera el JSON con la información del lead.
     # ========== SHERIFF ANTI-ALUCINACIONES ==========
 
     def _sheriff_validar(self, evaluaciones: List[Dict], transcripcion: str) -> List[Dict]:
-        """Valida que las evidencias citadas existan realmente"""
+        """Valida que las evidencias citadas existan realmente en la transcripción COMPLETA"""
         evaluaciones_validadas = []
 
         for evaluacion in evaluaciones:
@@ -431,6 +457,8 @@ Genera el JSON con la información del lead.
             evidencia_principal = evaluacion.get("evidencia_principal", "")
             evidencias_extra = evaluacion.get("evidencias_extra", [])
 
+            # CRÍTICO: Validar contra transcripción COMPLETA (no extracto)
+            # Esto soluciona el problema de alucinaciones en Cierre que usa extracto
             evidencia_valida = self._validar_evidencia(evidencia_principal, transcripcion)
 
             evidencias_extra_validas = sum(
@@ -522,30 +550,34 @@ Genera el JSON con la información del lead.
         ]
         nota_global = round(sum(notas_validas) / len(notas_validas), 2) if notas_validas else 0.0
 
-        # Generar áreas de mejora DETALLADAS (sin truncar recomendaciones)
-        fortalezas = []  # Se mantiene vacío para no mostrar fortalezas en el reporte
+        # Generar áreas de mejora DETALLADAS (sin fortalezas genéricas)
         areas_mejora = []
 
         for e in evaluaciones:
             bloque = e.get("bloque", "Unknown")
             nota = e.get("puntuacion_1_5", 0)
-            razonamiento = e.get("razonamiento", "")
+            recomendacion = e.get("recomendacion_accionable", "")
+            gap_para_5 = e.get("gap_para_5", "")  # NUEVO: Explicación de qué falta para el 5
 
-            # No se listan fortalezas para ocultarlas en el reporte
-            if nota <= 2:
-                recomendacion = e.get("recomendacion_accionable") or razonamiento
-                areas_mejora.append(f"{bloque}: {recomendacion}")
-            elif nota == 3:
-                recomendacion = e.get("recomendacion_accionable") or "Profundizar más"
-                areas_mejora.append(f"{bloque}: {recomendacion}")
+            # REGLA: Incluir en áreas de mejora si nota < 5
+            # (Incluso el 4/5 tiene margen de mejora)
+            if nota is not None and nota < 5 and recomendacion:
+                # Formato: "[Bloque] (nota/5): Recomendación completa"
+                areas_mejora.append(f"[{bloque}] ({nota}/5): {recomendacion}")
 
-        # Si no hay áreas de mejora explícitas, buscar las notas más bajas
+            # Si tiene nota 4 y explicación de gap para 5, añadirlo también
+            elif nota == 4 and gap_para_5:
+                areas_mejora.append(f"[{bloque}] ({nota}/5): Para alcanzar el 5: {gap_para_5}")
+
+        # Si no hay áreas de mejora explícitas, buscar las 3 notas más bajas
         if not areas_mejora and evaluaciones:
-            notas_ordenadas = sorted(evaluaciones, key=lambda x: x.get("puntuacion_1_5", 5))
-            for e in notas_ordenadas[:2]:
+            notas_ordenadas = sorted(evaluaciones, key=lambda x: x.get("puntuacion_1_5", 5) if x.get("puntuacion_1_5") is not None else 5)
+            for e in notas_ordenadas[:3]:
                 bloque = e.get("bloque", "Unknown")
-                recomendacion = e.get("recomendacion_accionable") or "Mejorar ejecución"
-                areas_mejora.append(f"{bloque}: {recomendacion}")
+                nota = e.get("puntuacion_1_5", 0)
+                recomendacion = e.get("recomendacion_accionable", "Mejorar ejecución en este bloque")
+                if recomendacion:
+                    areas_mejora.append(f"[{bloque}] ({nota}/5): {recomendacion}")
 
         # Construir reporte final
         reporte = {
@@ -571,8 +603,7 @@ Genera el JSON con la información del lead.
             "evaluacion_por_bloques": evaluaciones,
             "puntuacion_global_1_5": nota_global,
             "feedback_resumido": {
-                "fortalezas": fortalezas,
-                "areas_mejora": areas_mejora if areas_mejora else ["Revisión general recomendada"]
+                "areas_mejora": areas_mejora if areas_mejora else ["Revisión general de todos los bloques recomendada"]
             }
         }
 
