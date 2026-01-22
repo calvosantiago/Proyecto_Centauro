@@ -26,8 +26,8 @@ class CierreAgent(BaseEvaluatorAgent):
     """
     
     def __init__(self):
-        super().__init__(nombre_bloque="Cierre y siguiente paso")
-        self.longitud_analisis = 2000  # Últimos 2000 caracteres
+        super().__init__(nombre_bloque="Cierre y próximos pasos")
+        self.longitud_analisis = 2500  # Últimos 2500 caracteres
     
     def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
         """Evalúa el cierre usando principalmente el final de la conversación"""
