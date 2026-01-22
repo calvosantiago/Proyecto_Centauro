@@ -12,7 +12,7 @@ if %errorlevel% neq 0 (
     echo [ERROR] Chainlit no esta instalado.
     echo.
     echo Instalando dependencias...
-    pip install -r requirements.txt
+    uv pip install -r requirements.txt
     echo.
 )
 
