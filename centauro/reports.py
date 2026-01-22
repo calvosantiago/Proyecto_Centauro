@@ -195,19 +195,20 @@ def generar_pdf(reporte_json, output_filename):
     
     fb = data.get('feedback_resumido', {})
     
-    # Fortalezas
-    pdf.set_fill_color(230, 255, 230) # Verde claro fondo
-    pdf.rect(10, pdf.get_y(), 190, 8, 'F')
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.set_text_color(*COLOR_GOOD)
-    pdf.cell(0, 8, "  FORTALEZAS (Keep doing)", 0, 1)
-    pdf.ln(2)
-    pdf.set_font('Helvetica', '', 11)
-    pdf.set_text_color(*COLOR_TEXT_MAIN)
-    for f in fb.get('fortalezas', []):
-        pdf.cell(5) # Indent
-        pdf.cell(0, 6, to_latin1(f"• {f}"), 0, 1)
-    pdf.ln(5)
+    fortalezas = fb.get('fortalezas', []) or []
+    if fortalezas:
+        pdf.set_fill_color(230, 255, 230) # Verde claro fondo
+        pdf.rect(10, pdf.get_y(), 190, 8, 'F')
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.set_text_color(*COLOR_GOOD)
+        pdf.cell(0, 8, "  FORTALEZAS (Keep doing)", 0, 1)
+        pdf.ln(2)
+        pdf.set_font('Helvetica', '', 11)
+        pdf.set_text_color(*COLOR_TEXT_MAIN)
+        for f in fortalezas:
+            pdf.cell(5) # Indent
+            pdf.cell(0, 6, to_latin1(f"• {f}"), 0, 1)
+        pdf.ln(5)
     
     # Áreas de Mejora
     pdf.set_fill_color(255, 230, 230) # Rojo claro fondo

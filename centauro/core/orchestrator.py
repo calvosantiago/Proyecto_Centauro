@@ -522,8 +522,8 @@ Genera el JSON con la información del lead.
         ]
         nota_global = round(sum(notas_validas) / len(notas_validas), 2) if notas_validas else 0.0
 
-        # Generar fortalezas y áreas de mejora DETALLADAS
-        fortalezas = []
+        # Generar áreas de mejora DETALLADAS (sin truncar recomendaciones)
+        fortalezas = []  # Se mantiene vacío para no mostrar fortalezas en el reporte
         areas_mejora = []
 
         for e in evaluaciones:
@@ -531,25 +531,21 @@ Genera el JSON con la información del lead.
             nota = e.get("puntuacion_1_5", 0)
             razonamiento = e.get("razonamiento", "")
 
-            if nota >= 4:
-                # Extraer la razón de la buena nota
-                fortalezas.append(f"{bloque} ({nota}/5)")
-            elif nota <= 2:
-                # Extraer la recomendación
-                recomendacion = e.get("recomendacion_accionable", razonamiento[:100])
-                areas_mejora.append(f"{bloque}: {recomendacion[:80]}...")
+            # No se listan fortalezas para ocultarlas en el reporte
+            if nota <= 2:
+                recomendacion = e.get("recomendacion_accionable") or razonamiento
+                areas_mejora.append(f"{bloque}: {recomendacion}")
             elif nota == 3:
-                # Nota media - también es área de mejora
-                recomendacion = e.get("recomendacion_accionable", "Profundizar más")
-                areas_mejora.append(f"{bloque}: {recomendacion[:80]}...")
+                recomendacion = e.get("recomendacion_accionable") or "Profundizar más"
+                areas_mejora.append(f"{bloque}: {recomendacion}")
 
         # Si no hay áreas de mejora explícitas, buscar las notas más bajas
         if not areas_mejora and evaluaciones:
             notas_ordenadas = sorted(evaluaciones, key=lambda x: x.get("puntuacion_1_5", 5))
             for e in notas_ordenadas[:2]:
                 bloque = e.get("bloque", "Unknown")
-                recomendacion = e.get("recomendacion_accionable", "Mejorar ejecución")
-                areas_mejora.append(f"{bloque}: {recomendacion[:80]}...")
+                recomendacion = e.get("recomendacion_accionable") or "Mejorar ejecución"
+                areas_mejora.append(f"{bloque}: {recomendacion}")
 
         # Construir reporte final
         reporte = {
@@ -575,7 +571,7 @@ Genera el JSON con la información del lead.
             "evaluacion_por_bloques": evaluaciones,
             "puntuacion_global_1_5": nota_global,
             "feedback_resumido": {
-                "fortalezas": fortalezas if fortalezas else ["Ninguna destacable"],
+                "fortalezas": fortalezas,
                 "areas_mejora": areas_mejora if areas_mejora else ["Revisión general recomendada"]
             }
         }
