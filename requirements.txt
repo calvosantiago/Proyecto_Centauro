@@ -1,7 +1,14 @@
-docx
+# Core dependencies
+python-docx
 rapidfuzz
-dotenv
+python-dotenv
 chromadb
-openai
-pydantic
+openai>=1.0.0
+pydantic>=2.0.0
 fpdf
+
+# Chainlit para interfaz web
+chainlit>=1.0.0
+
+# Optional (mejora performance)
+uvicorn[standard]
