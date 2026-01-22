@@ -1,0 +1,151 @@
+"""
+Agente Evaluador: Propuesta de Valor Institución y Programa (v3.0)
+
+Renombrado de: PresentacionAgent
+
+Evalúa cómo el asesor presenta:
+- La institución (OBS)
+- El programa específico
+- Conexión con necesidades descubiertas
+"""
+from .base_agent import BaseEvaluatorAgent, EvaluationResult
+from ..llm_client import consultar_gpt
+
+class PropuestaValorAgent(BaseEvaluatorAgent):
+    """
+    Evalúa la presentación de la propuesta de valor institucional y del programa
+
+    Criterios clave:
+    - Presentación clara de la institución (OBS)
+    - Explicación estructurada del programa
+    - Personaliza según necesidades descubiertas
+    - Enfatiza BENEFICIOS sobre características
+    - Conecta con objetivos del lead
+    """
+
+    def __init__(self):
+        super().__init__(nombre_bloque="Propuesta de valor Institución y Programa")
+
+    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+        """Evalúa la propuesta de valor"""
+
+        try:
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual)
+            confianza = self._calcular_confianza(resultado_raw)
+
+            # Validar evidencia de personalización
+            evidencias_extra = resultado_raw.get("evidencias_extra", [])
+            personalizacion = resultado_raw.get("personalizacion_detectada", False)
+
+            if not personalizacion:
+                print(f"   ⚠️ No se detectó personalización en la propuesta")
+                confianza *= 0.85
+
+            return EvaluationResult(
+                bloque=self.nombre_bloque,
+                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                observabilidad=resultado_raw.get("observabilidad", "ALTA"),
+                confianza=confianza,
+                evidencia_principal=resultado_raw.get("evidencia_principal", ""),
+                evidencias_extra=evidencias_extra,
+                razonamiento=resultado_raw.get("razonamiento", ""),
+                recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                metadata={
+                    "personalizacion_detectada": personalizacion,
+                    "enfoque": resultado_raw.get("enfoque", "caracteristicas"),  # vs "beneficios"
+                    "presenta_institucion": resultado_raw.get("presenta_institucion", False)
+                }
+            )
+
+        except Exception as e:
+            print(f"   ❌ Error en evaluación de Propuesta de Valor: {e}")
+            return self._create_fallback_result(str(e))
+
+    def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
+        """Llama al LLM con prompt especializado"""
+
+        prompt_sistema = f"""
+Eres un AUDITOR ESPECIALIZADO en evaluación de PROPUESTA DE VALOR en venta consultiva.
+
+TU TAREA: Evaluar cómo presentó el [ASESOR] la institución (OBS) y el programa.
+
+CONTEXTO DEL MANUAL:
+{manual}
+
+CRITERIOS ESPECÍFICOS (Escala 1-5):
+
+1 = DEFICIENTE / DESORGANIZADO
+   - No explica claramente qué es OBS
+   - Información del programa confusa o contradictoria
+   - No conecta con lo que busca el lead
+
+2 = INSUFICIENTE / DUMP DE INFORMACIÓN
+   - Suelta características sin estructura ("dura 12 meses, es online...")
+   - No personaliza (mismo discurso para todos)
+   - No presenta la institución o lo hace superficialmente
+   - No verifica comprensión
+
+3 = CORRECTO / PRESENTACIÓN ESTÁNDAR (Robot)
+   - Menciona OBS y sus credenciales básicas
+   - Explica características principales del programa de forma ordenada
+   - Clara pero genérica (no adapta al lead)
+   - Menciona algunos beneficios pero no conecta con objetivo del lead
+   - Funcional pero no persuasiva
+
+4 = BUENO / PROPUESTA CONSULTIVA
+   - Presenta OBS con credenciales relevantes (rankings, acreditaciones)
+   - Personaliza según lo descubierto en investigación
+   - Enfatiza BENEFICIOS sobre características
+   - Conecta explícitamente con el objetivo del lead ("Esto te ayudará a...")
+   - Verifica comprensión ("¿Tiene sentido?")
+   - Estructura clara: Institución → Programa → Beneficios para ti
+
+5 = MAESTRÍA / PROPUESTA DE VALOR PERSONALIZADA
+   - Presenta OBS como institución líder para SU caso específico
+   - El programa es LA SOLUCIÓN al problema del lead
+   - Cada característica se traduce en beneficio específico
+   - Usa ejemplos o casos de éxito relevantes
+   - Anticipa dudas y las resuelve proactivamente
+   - El lead expresa que "es justo lo que necesito"
+
+EVIDENCIA REQUERIDA:
+Debes identificar MÍNIMO:
+- 1 ejemplo de presentación de la institución (OBS)
+- 1 ejemplo de explicación del programa
+- 1 ejemplo de conexión con necesidad del lead (si existe)
+- 1 reacción del lead mostrando interés
+
+FORMATO JSON OBLIGATORIO:
+{{
+  "puntuacion_1_5": 3,
+  "observabilidad": "ALTA" | "MEDIA" | "BAJA",
+  "evidencia_principal": "[ASESOR]: Presentación de OBS o programa...",
+  "evidencias_extra": [
+    "[ASESOR]: Explicación de características/beneficios...",
+    "[ASESOR]: Conexión con necesidad del lead...",
+    "[LEAD]: Reacción mostrando interés o comprensión..."
+  ],
+  "razonamiento": "Análisis: ¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó?",
+  "recomendacion_accionable": "Acción específica para mejorar",
+  "personalizacion_detectada": true/false,
+  "presenta_institucion": true/false,
+  "enfoque": "caracteristicas" | "beneficios" | "mixto"
+}}
+
+REGLAS CRÍTICAS:
+- Todas las evidencias DEBEN ser copy-paste LITERAL
+- Incluye SIEMPRE [ASESOR] o [LEAD]
+- Personalización = Adaptar la explicación a LO QUE EL LEAD DIJO que necesitaba
+- Diferencia: Características ("12 meses") vs Beneficios ("En 1 año estarás certificado")
+"""
+
+        prompt_usuario = f"""
+Analiza cómo presentó la institución y el programa en esta conversación:
+
+{transcripcion}
+
+Genera la evaluación en JSON.
+"""
+
+        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_propuesta_valor")
+        return self._extract_json_safe(resp)

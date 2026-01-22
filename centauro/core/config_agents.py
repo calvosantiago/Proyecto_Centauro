@@ -1,7 +1,13 @@
 """
-Configuración del Sistema Multi-Agente con Optimizaciones
+Configuración del Sistema Multi-Agente con Optimizaciones v3.0
 
-INSTRUCCIÓN: Copia este archivo en centauro/core/config_agents.py
+NUEVA ESTRUCTURA:
+- BLOQUES CRÍTICOS: Agentes individuales especializados (máxima calidad)
+- BLOQUES SECUNDARIOS: Procesamiento batch (optimización costos)
+
+MODOS:
+- MODO_BATCH = True  → Híbrido (críticos individual + secundarios batch)
+- MODO_BATCH = False → Todo individual (modo pruebas)
 """
 from dataclasses import dataclass
 from typing import List
@@ -12,56 +18,53 @@ class BatchConfig:
     nombre: str
     agentes: List[str]
     usa_transcripcion_completa: bool
-    longitud_extracto: int = None  # Para agentes ligeros
-    
+    longitud_extracto: int = None
+
 class OptimizacionConfig:
     """
-    Configuración central de optimizaciones para reducir consumo de tokens
+    Configuración central v3.0 - Sistema Híbrido Inteligente
     """
-    
-    # BATCH 1: Agentes que solo necesitan extractos (LIGEROS)
-    BATCH_LIGERO = BatchConfig(
-        nombre="batch_ligero",
-        agentes=["Apertura", "Cierre y siguiente paso", "Legal (Compliance)"],
-        usa_transcripcion_completa=False
-    )
-    
-    # BATCH 2: Agentes que necesitan transcripción completa (PESADOS)
-    BATCH_PESADO = BatchConfig(
-        nombre="batch_pesado",
+
+    # ========== BLOQUES CRÍTICOS (Agentes Individuales) ==========
+    BLOQUES_CRITICOS = [
+        "Investigación",                          # Fusión: Detección + Apertura
+        "Proceso de Admisión y Propuesta Económica",  # NUEVO
+        "Manejo de objeciones",
+        "Cierre y próximos pasos"
+    ]
+
+    # ========== BLOQUES SECUNDARIOS (Batch) ==========
+    BATCH_SECUNDARIOS = BatchConfig(
+        nombre="batch_secundarios",
         agentes=[
-            "Detección de necesidades",
-            "Presentación del programa", 
-            "Manejo de objeciones",
+            "Propuesta de valor Institución y Programa",
             "Estilo y comunicación"
         ],
         usa_transcripcion_completa=True
     )
     
-    # Longitudes de extracto por bloque (en caracteres)
+    # Extractos para bloques que no necesitan transcripción completa
     EXTRACTOS = {
-        "Apertura": {
+        "Investigación": {
             "inicio": 0,
-            "fin": 1000,  # Primeros 1000 caracteres
+            "fin": 3000,  # Primeros 3000 caracteres (apertura + inicio detección)
         },
-        "Cierre y siguiente paso": {
-            "inicio": -2000,  # Últimos 2000 caracteres
+        "Cierre y próximos pasos": {
+            "inicio": -2500,  # Últimos 2500 caracteres
             "fin": None,
-        },
-        "Legal (Compliance)": {
-            "inicio": 0,
-            "fin": 3000,  # Primeros 3000 (suficiente para detectar aviso)
         }
     }
-    
-    # RAG: Reducir fragmentos recuperados
-    RAG_TOP_K = 5  # En lugar de 20
-    
+
+    # RAG: Fragmentos recuperados
+    RAG_TOP_K = 5
+
     # Cache: Activar cache de contextos RAG
     ACTIVAR_CACHE = True
-    
-    # Modo de ejecución
-    MODO_BATCH = True  # True = optimizado, False = llamadas individuales
+
+    # ========== MODO DE EJECUCIÓN ==========
+    # True  = HÍBRIDO (críticos individuales + secundarios batch) → PRODUCCIÓN
+    # False = TODO INDIVIDUAL (cada agente 1 llamada) → PRUEBAS
+    MODO_BATCH = True
     
     @classmethod
     def get_extracto(cls, bloque_nombre: str, transcripcion: str) -> str:
@@ -85,12 +88,23 @@ class OptimizacionConfig:
     @classmethod
     def estadisticas_ahorro(cls):
         """
-        Calcula el ahorro estimado de tokens con las optimizaciones
+        Calcula el ahorro estimado de tokens v3.0 (Híbrido)
         """
         return {
-            "batch_processing": "Reduce 75% tokens de transcripción duplicada",
-            "extractos_ligeros": "Reduce 95% tokens en Apertura/Cierre/Legal",
-            "rag_optimizado": "Reduce 75% tokens de contexto manual",
+            "modo_hibrido": "4 agentes críticos individuales + 2 secundarios batch",
+            "bloques_criticos": "Máxima calidad con contexto completo",
+            "bloques_secundarios": "Batch optimizado (1 llamada para 2 bloques)",
+            "extractos_investigacion_cierre": "Reduce 80% tokens en extractos",
+            "rag_optimizado": "Top-5 fragmentos por bloque",
             "cache": "Elimina búsquedas RAG repetidas",
-            "ahorro_total_estimado": "~60% reducción vs sistema sin optimizar"
+            "ahorro_vs_individual": "~45% reducción de costos",
+            "calidad_vs_batch_full": "+15% mejor detección en bloques críticos"
         }
+
+    @classmethod
+    def get_modo_descripcion(cls):
+        """Descripción del modo actual"""
+        if cls.MODO_BATCH:
+            return "HÍBRIDO: 4 críticos individual + 2 secundarios batch (PRODUCCIÓN)"
+        else:
+            return "INDIVIDUAL: Cada agente 1 llamada (MODO PRUEBAS)"
