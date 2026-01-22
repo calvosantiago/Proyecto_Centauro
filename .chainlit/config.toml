@@ -1,0 +1,54 @@
+[project]
+# Desactivar telemetría
+enable_telemetry = false
+
+# Public folder para assets
+public_path = "public"
+
+[features]
+# Habilitar subida de archivos
+spontaneous_file_upload = {
+    enabled = true,
+    accept = [".txt", ".vtt", ".docx"],
+    max_size_mb = 20
+}
+
+# Modo multi-modal
+multi_modal = true
+
+# Latex rendering
+latex = false
+
+[UI]
+# Nombre de la aplicación
+name = "Centauro v3.0"
+
+# Mostrar readme al inicio
+show_readme_as_default = true
+
+# Ocultar input mientras se procesa
+default_collapse_content = false
+
+# Expandir mensajes por defecto
+default_expand_messages = true
+
+# Mostrar source del código
+show_code_source = false
+
+[UI.theme]
+# Colores corporativos OBS
+primary_color = "#FFDD00"  # Amarillo OBS
+background_color = "#FFFFFF"
+paper_elevation = 1
+
+[UI.theme.light]
+background = "#FAFAFA"
+paper = "#FFFFFF"
+
+[UI.theme.dark]
+background = "#1E1E1E"
+paper = "#2D2D2D"
+
+[meta]
+generated_by = "Centauro Team"
+_schema_version = "1.0.1"
