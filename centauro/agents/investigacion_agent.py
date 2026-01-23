@@ -62,13 +62,16 @@ class InvestigacionAgent(BaseEvaluatorAgent):
     def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
         """Llama al LLM con prompt especializado en investigación completa"""
 
+        # Enriquecer contexto con ejemplos de buenas prácticas
+        manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
+
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de INVESTIGACIÓN en ventas consultivas.
 
 TU TAREA: Evaluar la fase inicial completa (APERTURA + DESCUBRIMIENTO DE NECESIDADES).
 
 CONTEXTO DEL MANUAL:
-{manual}
+{manual_enriquecido}
 
 CRITERIOS ESPECÍFICOS (Escala 1-5):
 

@@ -214,3 +214,70 @@ Si hay menos de 8, devuelve solo los que existan.
         self.cache_temas.clear()
         self.cache_contextos.clear()
         print("   🧹 Cache limpiado")
+
+
+# ==================== FUNCIÓN AUXILIAR PARA BUENAS PRÁCTICAS ====================
+
+def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: int = 3) -> List[Dict]:
+    """
+    Función auxiliar para buscar en colecciones específicas del RAG.
+
+    Esta función permite a los agentes buscar en colecciones especializadas,
+    como la de buenas prácticas, sin afectar el flujo normal del RAG.
+
+    Args:
+        query: Texto de búsqueda
+        collection_name: Nombre de la colección (ej: "buenas_practicas")
+        k: Número de resultados a devolver
+
+    Returns:
+        Lista de diccionarios con 'text' y 'metadata' de cada resultado
+
+    Nota: Si la colección no existe o está vacía, devuelve lista vacía.
+    """
+    try:
+        # Por ahora, usamos la colección principal (collection)
+        # TODO: Implementar múltiples colecciones en ChromaDB
+        # Para v1.0, simplemente filtramos por metadata si existe
+
+        from ..rag import collection
+
+        total_docs = collection.count()
+        if total_docs == 0:
+            return []
+
+        resultados = collection.query(
+            query_texts=[query],
+            n_results=min(k, total_docs)
+        )
+
+        if not resultados['documents'] or not resultados['documents'][0]:
+            return []
+
+        # Convertir a formato estructurado
+        docs = resultados['documents'][0]
+        metadatas = resultados.get('metadatas', [[{}] * len(docs)])[0]
+
+        resultados_estructurados = []
+        for doc, metadata in zip(docs, metadatas):
+            # Si pedimos buenas_practicas, filtrar por source o tipo
+            if collection_name == "buenas_practicas":
+                # Solo incluir si el documento viene de buenas_practicas
+                source = metadata.get('source', '')
+                if 'buenas_practicas' in source or 'buena' in source:
+                    resultados_estructurados.append({
+                        'text': doc,
+                        'metadata': metadata
+                    })
+            else:
+                # Para otras colecciones, incluir todo
+                resultados_estructurados.append({
+                    'text': doc,
+                    'metadata': metadata
+                })
+
+        return resultados_estructurados[:k]
+
+    except Exception as e:
+        print(f"   ⚠️ Error buscando en colección '{collection_name}': {e}")
+        return []

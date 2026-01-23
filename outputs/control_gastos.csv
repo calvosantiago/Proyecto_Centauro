@@ -2058,3 +2058,120 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 23/01/2026,16:44:25,eval_objeciones,12732,420,13152,0.002162
 23/01/2026,16:44:33,eval_cierre,2513,304,2817,0.000559
 23/01/2026,16:44:45,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_batch_secundarios,12592,552,13144,0.002220
+23/01/2026,18:06:14,rag_temas,3300,232,3532,0.000634
+23/01/2026,18:06:21,Interview - Cindy Navarro.docx_resumen_contextual,3451,111,3562,0.000584
+23/01/2026,18:06:31,eval_investigacion,2161,512,2673,0.000631
+23/01/2026,18:06:39,eval_admision_economica,6983,401,7384,0.001288
+23/01/2026,18:06:50,eval_objeciones,7094,557,7651,0.001398
+23/01/2026,18:06:57,eval_cierre,2510,388,2898,0.000609
+23/01/2026,18:07:14,Interview - Cindy Navarro.docx_batch_secundarios,6713,612,7325,0.001374
+23/01/2026,19:48:28,buena_practica_Investigación,3829,308,4137,0.000759
+23/01/2026,19:48:39,buena_practica_Investigación,3671,345,4016,0.000758
+23/01/2026,19:48:47,buena_practica_Investigación,3599,335,3934,0.000741
+23/01/2026,19:48:53,buena_practica_Investigación,3728,282,4010,0.000728
+23/01/2026,19:48:59,buena_practica_Investigación,3609,275,3884,0.000706
+23/01/2026,19:49:07,buena_practica_Investigación,3794,351,4145,0.000780
+23/01/2026,19:49:12,buena_practica_Investigación,3603,216,3819,0.000670
+23/01/2026,20:06:08,buena_practica_Admisión y propuesta económica,3758,223,3981,0.000697
+23/01/2026,20:06:16,buena_practica_Admisión y propuesta económica,3612,283,3895,0.000712
+23/01/2026,20:06:24,buena_practica_Admisión y propuesta económica,3610,338,3948,0.000744
+23/01/2026,20:06:32,buena_practica_Admisión y propuesta económica,3816,307,4123,0.000757
+23/01/2026,20:06:38,buena_practica_Admisión y propuesta económica,3765,240,4005,0.000709
+23/01/2026,20:06:47,buena_practica_Admisión y propuesta económica,3785,294,4079,0.000744
+23/01/2026,20:06:53,buena_practica_Admisión y propuesta económica,3866,290,4156,0.000754
+23/01/2026,20:07:00,buena_practica_Admisión y propuesta económica,3815,265,4080,0.000731
+23/01/2026,20:07:10,buena_practica_Cierre y próximos pasos,3685,344,4029,0.000759
+23/01/2026,20:07:15,buena_practica_Cierre y próximos pasos,3620,264,3884,0.000701
+23/01/2026,20:07:22,buena_practica_Cierre y próximos pasos,3609,333,3942,0.000741
+23/01/2026,20:07:30,buena_practica_Cierre y próximos pasos,3812,312,4124,0.000759
+23/01/2026,20:07:37,buena_practica_Cierre y próximos pasos,3814,264,4078,0.000731
+23/01/2026,20:07:46,buena_practica_Investigación,3829,308,4137,0.000759
+23/01/2026,20:07:54,buena_practica_Investigación,3671,333,4004,0.000750
+23/01/2026,20:08:02,buena_practica_Investigación,3599,338,3937,0.000743
+23/01/2026,20:08:08,buena_practica_Investigación,3728,300,4028,0.000739
+23/01/2026,20:08:14,buena_practica_Investigación,3609,227,3836,0.000678
+23/01/2026,20:08:21,buena_practica_Investigación,3794,287,4081,0.000741
+23/01/2026,20:08:28,buena_practica_Investigación,3603,216,3819,0.000670
+23/01/2026,20:08:36,buena_practica_Manejo de objeciones,3552,284,3836,0.000703
+23/01/2026,20:08:42,buena_practica_Manejo de objeciones,3606,296,3902,0.000718
+23/01/2026,20:08:50,buena_practica_Manejo de objeciones,3734,335,4069,0.000761
+23/01/2026,20:08:56,buena_practica_Manejo de objeciones,3632,252,3884,0.000696
+23/01/2026,20:09:02,buena_practica_Manejo de objeciones,3862,263,4125,0.000737
+23/01/2026,20:09:09,buena_practica_Manejo de objeciones,3599,335,3934,0.000741
+23/01/2026,20:09:14,buena_practica_Propuesta de valor,3724,271,3995,0.000721
+23/01/2026,20:09:21,buena_practica_Propuesta de valor,3603,380,3983,0.000768
+23/01/2026,20:09:27,buena_practica_Propuesta de valor,3809,251,4060,0.000722
+23/01/2026,20:09:34,buena_practica_Propuesta de valor,3471,260,3731,0.000677
+23/01/2026,20:09:39,buena_practica_Propuesta de valor,3704,245,3949,0.000703
+23/01/2026,20:09:45,buena_practica_Propuesta de valor,3732,292,4024,0.000735
+23/01/2026,20:09:51,buena_practica_Propuesta de valor,3994,341,4335,0.000804
+23/01/2026,20:09:57,buena_practica_Propuesta de valor,3668,260,3928,0.000706
+23/01/2026,20:10:03,buena_practica_Propuesta de valor,3808,299,4107,0.000751
+23/01/2026,20:25:37,buena_practica_Admisión y propuesta económica,3758,227,3985,0.000700
+23/01/2026,20:25:44,buena_practica_Admisión y propuesta económica,3612,301,3913,0.000722
+23/01/2026,20:25:50,buena_practica_Admisión y propuesta económica,3816,304,4120,0.000755
+23/01/2026,20:25:56,buena_practica_Admisión y propuesta económica,3765,239,4004,0.000708
+23/01/2026,20:26:03,buena_practica_Admisión y propuesta económica,3785,292,4077,0.000743
+23/01/2026,20:26:10,buena_practica_Admisión y propuesta económica,3866,337,4203,0.000782
+23/01/2026,20:26:17,buena_practica_Admisión y propuesta económica,3815,288,4103,0.000745
+23/01/2026,20:26:25,buena_practica_Cierre y próximos pasos,3685,347,4032,0.000761
+23/01/2026,20:26:29,buena_practica_Cierre y próximos pasos,3620,244,3864,0.000689
+23/01/2026,20:26:36,buena_practica_Cierre y próximos pasos,3601,334,3935,0.000741
+23/01/2026,20:26:44,buena_practica_Cierre y próximos pasos,3609,376,3985,0.000767
+23/01/2026,20:26:51,buena_practica_Cierre y próximos pasos,3812,309,4121,0.000757
+23/01/2026,20:26:58,buena_practica_Cierre y próximos pasos,3814,331,4145,0.000771
+23/01/2026,20:27:04,buena_practica_Investigación,3829,313,4142,0.000762
+23/01/2026,20:27:10,buena_practica_Investigación,3747,267,4014,0.000722
+23/01/2026,20:27:16,buena_practica_Investigación,3671,337,4008,0.000753
+23/01/2026,20:27:21,buena_practica_Investigación,3728,287,4015,0.000731
+23/01/2026,20:27:27,buena_practica_Investigación,3609,250,3859,0.000691
+23/01/2026,20:27:35,buena_practica_Investigación,3794,365,4159,0.000788
+23/01/2026,20:27:40,buena_practica_Investigación,3603,247,3850,0.000689
+23/01/2026,20:27:46,buena_practica_Manejo de objeciones,3552,270,3822,0.000695
+23/01/2026,20:27:52,buena_practica_Manejo de objeciones,3734,321,4055,0.000753
+23/01/2026,20:27:58,buena_practica_Manejo de objeciones,3632,232,3864,0.000684
+23/01/2026,20:28:04,buena_practica_Manejo de objeciones,3862,262,4124,0.000736
+23/01/2026,20:28:12,buena_practica_Manejo de objeciones,3599,342,3941,0.000745
+23/01/2026,20:28:18,buena_practica_Propuesta de valor,3724,328,4052,0.000755
+23/01/2026,20:28:24,buena_practica_Propuesta de valor,3809,308,4117,0.000756
+23/01/2026,20:28:28,buena_practica_Propuesta de valor,3471,214,3685,0.000649
+23/01/2026,20:28:33,buena_practica_Propuesta de valor,3704,282,3986,0.000725
+23/01/2026,20:28:39,buena_practica_Propuesta de valor,3732,314,4046,0.000748
+23/01/2026,20:28:45,buena_practica_Propuesta de valor,3994,296,4290,0.000777
+23/01/2026,20:28:50,buena_practica_Propuesta de valor,3668,244,3912,0.000697
+23/01/2026,20:28:55,buena_practica_Propuesta de valor,3808,264,4072,0.000730
+23/01/2026,20:31:38,rag_temas,3275,192,3467,0.000606
+23/01/2026,20:31:41,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_resumen_contextual,2412,116,2528,0.000431
+23/01/2026,20:31:50,eval_investigacion,2172,434,2606,0.000586
+23/01/2026,20:32:00,eval_admision_economica,12862,372,13234,0.002152
+23/01/2026,20:32:10,eval_objeciones,12732,426,13158,0.002165
+23/01/2026,20:32:15,eval_cierre,2513,305,2818,0.000560
+23/01/2026,20:32:27,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_secundarios,12592,524,13116,0.002203
+23/01/2026,20:32:32,rag_temas,3300,225,3525,0.000630
+23/01/2026,20:32:35,Interview - Cindy Navarro_resumen_contextual,3451,126,3577,0.000593
+23/01/2026,20:32:46,eval_investigacion,2161,533,2694,0.000644
+23/01/2026,20:32:55,eval_admision_economica,6983,417,7400,0.001298
+23/01/2026,20:33:08,eval_objeciones,7094,584,7678,0.001414
+23/01/2026,20:33:17,eval_cierre,2510,383,2893,0.000606
+23/01/2026,20:33:31,Interview - Cindy Navarro_batch_secundarios,6713,602,7315,0.001368
+23/01/2026,20:33:36,rag_temas,3358,230,3588,0.000642
+23/01/2026,20:33:39,Mary Jany Máster en Innovación y Emprendimiento_resumen_contextual,3329,113,3442,0.000567
+23/01/2026,20:33:47,eval_investigacion,2143,384,2527,0.000552
+23/01/2026,20:33:56,eval_admision_economica,22634,452,23086,0.003666
+23/01/2026,20:34:06,eval_objeciones,22275,498,22773,0.003640
+23/01/2026,20:34:14,eval_cierre,2484,381,2865,0.000601
+23/01/2026,20:34:24,Mary Jany Máster en Innovación y Emprendimiento_batch_secundarios,22364,526,22890,0.003670
+23/01/2026,20:34:32,rag_temas,3386,201,3587,0.000628
+23/01/2026,20:34:35,OBS Business School - Andrea Aicinburu - Dirección Financiera_resumen_contextual,2037,109,2146,0.000371
+23/01/2026,20:34:45,eval_investigacion,2161,541,2702,0.000649
+23/01/2026,20:34:54,eval_admision_economica,8414,407,8821,0.001506
+23/01/2026,20:35:03,eval_objeciones,8335,469,8804,0.001532
+23/01/2026,20:35:11,eval_cierre,2509,373,2882,0.000600
+23/01/2026,20:35:29,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_secundarios,8144,634,8778,0.001602
+23/01/2026,20:35:37,rag_temas,3483,219,3702,0.000654
+23/01/2026,20:35:40,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_resumen_contextual,2075,112,2187,0.000378
+23/01/2026,20:35:48,eval_investigacion,2217,415,2632,0.000582
+23/01/2026,20:36:00,eval_admision_economica,8001,436,8437,0.001462
+23/01/2026,20:36:07,eval_objeciones,8120,350,8470,0.001428
+23/01/2026,20:36:12,eval_cierre,2543,314,2857,0.000570
+23/01/2026,20:36:25,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7731,546,8277,0.001487

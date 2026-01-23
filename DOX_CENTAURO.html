@@ -159,16 +159,16 @@
 <div class="container">
 
     <div class="beta-warning">
-        🚀 VERSIÓN ESTABLE: CENTAURO v3.0 - Sistema Multi-Agente Híbrido 🚀<br>
+        🚀 VERSIÓN ESTABLE: CENTAURO v3.1 - Sistema Multi-Agente Híbrido 🚀<br>
         <span style="font-weight: normal; font-size: 0.9em;">
-            Arquitectura inteligente: 4 bloques críticos (agentes individuales especializados) +
-            2 bloques secundarios (batch optimizado) + Sheriff anti-alucinaciones + Extracción de perfil del lead
+            Arquitectura inteligente: 4 bloques críticos + 2 secundarios (batch) + Sheriff anti-alucinaciones +
+            Extracción de perfil del lead + Sistema de Buenas Prácticas + Validación de archivos
         </span>
     </div>
 
     <header>
-        <h1>🦄 Proyecto Centauro v3.0: Manual Técnico Integral</h1>
-        <p><strong>Versión:</strong> 3.0 (Multi-Agente Híbrido Inteligente + Sheriff + RAG Dinámico) | <strong>Última Actualización:</strong> Enero 2025</p>
+        <h1>🦄 Proyecto Centauro v3.1: Manual Técnico Integral</h1>
+        <p><strong>Versión:</strong> 3.1 (Multi-Agente + Sheriff + RAG + Buenas Prácticas + Validaciones) | <strong>Última Actualización:</strong> Enero 2025</p>
     </header>
 
     <section>
@@ -694,7 +694,7 @@ CENTAURO_PROJECT/
 │   │   └── rag_dynamic.py        <-- 🧠 RAG con extracción de temas
 │   │
 │   ├── agents/
-│   │   ├── base_agent.py         <-- Clase base para todos los agentes
+│   │   ├── base_agent.py         <-- Clase base (con soporte buenas prácticas)
 │   │   ├── diarization_agent.py  <-- Separación ASESOR/LEAD
 │   │   ├── investigacion_agent.py      <-- Apertura + Detección necesidades
 │   │   ├── propuesta_valor_agent.py    <-- Presentación OBS/Programa
@@ -703,6 +703,15 @@ CENTAURO_PROJECT/
 │   │   ├── cierre_agent.py             <-- Cierre y próximos pasos
 │   │   └── estilo_agent.py             <-- Estilo y comunicación
 │   │
+│   ├── tools/                     <-- 🛠️ NUEVO: Herramientas de procesamiento
+│   │   ├── procesar_buenas_practicas.py  <-- Procesador de ejemplos .vtt
+│   │   ├── procesar_dossiers.py          <-- Procesador de dossiers programas
+│   │   └── mapeo_secciones.py            <-- Mapeo carpetas→agentes
+│   │
+│   ├── utils/                     <-- 🔧 NUEVO: Utilidades del sistema
+│   │   ├── validaciones.py        <-- Validación nombres de archivo
+│   │   └── __init__.py
+│   │
 │   ├── llm_client.py       <-- Conexión OpenAI (Temp=0)
 │   ├── rag.py              <-- Indexación manuales (legacy, compatible)
 │   ├── privacy.py          <-- Redacción PII (email, teléfono, DNI, IBAN)
@@ -710,9 +719,17 @@ CENTAURO_PROJECT/
 │   ├── schema.py           <-- Modelos Pydantic (reporte, bloques)
 │   └── config.py           <-- Configuración global
 │
+├── app.py                  <-- 🌐 Interfaz Chainlit (con validaciones)
 ├── main.py                 <-- 🚀 Script de ejecución principal
+├── procesar_ejemplos.bat   <-- 📝 Script Windows para procesar ejemplos
 ├── requirements.txt
-└── README.md</pre>
+└── README.md
+
+NUEVOS DOCUMENTOS:
+├── SISTEMA_BUENAS_PRACTICAS_v2.md         <-- Documentación sistema
+├── VALIDACION_NOMBRES_ARCHIVO.md          <-- Documentación validaciones
+├── INSTRUCCIONES_PROCESAR_EJEMPLOS.md     <-- Guía paso a paso
+└── ejemplo_buenas_practicas.md            <-- Ejemplo completo</pre>
     </section>
 
     <section>
@@ -742,7 +759,27 @@ inputs/docs/*.txt
 # Colocar transcripciones en:
 inputs/transcripts/*.vtt
 inputs/transcripts/*.txt
-inputs/transcripts/*.docx</pre>
+inputs/transcripts/*.docx
+
+# NUEVO v3.1: Colocar ejemplos de buenas prácticas (OPCIONAL)
+inputs/buenas_practicas/investigacion/*.vtt
+inputs/buenas_practicas/admision_economica/*.vtt
+inputs/buenas_practicas/objeciones/*.vtt
+inputs/buenas_practicas/cierre_proximos_pasos/*.vtt
+inputs/buenas_practicas/propuesta_valor/*.vtt
+inputs/buenas_practicas/estilo_comunicacion/*.vtt</pre>
+
+        <h3>7.2.1. Procesar ejemplos de buenas prácticas (OPCIONAL)</h3>
+        <pre>
+# Si tienes ejemplos de conversaciones exitosas:
+
+# 1. Colocar archivos .vtt en carpetas correspondientes
+#    (máx 100 caracteres de nombre)
+
+# 2. Procesar ejemplos (UNA SOLA VEZ)
+python -m centauro.tools.procesar_buenas_practicas
+
+# 3. Los ejemplos se indexarán automáticamente al ejecutar main.py</pre>
 
         <h3>7.3. Ejecutar análisis</h3>
         <pre>
@@ -931,27 +968,215 @@ outputs/control_gastos.csv</pre>
     </section>
 
     <section>
-        <h2>11. Roadmap Futuro</h2>
+        <h2>11. Sistema de Buenas Prácticas (NUEVO v3.1)</h2>
 
-        <h3>v3.1 (Q2 2025)</h3>
+        <h3>11.1. Objetivo</h3>
+        <p>Sistema que permite al Sheriff consultar <strong>ejemplos de conversaciones exitosas</strong> como <strong>guía de referencia</strong>, NO como reglas rígidas.</p>
+
+        <div class="highlight-box">
+            <h4>🎯 Filosofía Clave: GUÍA vs. FRONTERA</h4>
+            <p><strong>Los ejemplos son INSPIRACIÓN</strong>, no plantillas obligatorias. El Sheriff debe:</p>
+            <ul>
+                <li>✅ Usarlos para identificar patrones de éxito</li>
+                <li>✅ Citar técnicas concretas en el feedback</li>
+                <li>✅ CELEBRAR técnicas diferentes pero efectivas</li>
+                <li>❌ NO penalizar si la conversación es diferente</li>
+                <li>❌ NO exigir que todo sea exactamente igual</li>
+            </ul>
+        </div>
+
+        <h3>11.2. Estructura de Carpetas</h3>
+        <pre>
+inputs/buenas_practicas/
+├── investigacion/              → Ejemplos de apertura y detección
+├── admision_economica/         → Ejemplos de admisión y propuesta económica
+├── objeciones/                 → Ejemplos de manejo de objeciones
+├── cierre_proximos_pasos/      → Ejemplos de cierre y próximos pasos
+├── propuesta_valor/            → Ejemplos de propuesta de valor
+└── estilo_comunicacion/        → Ejemplos de comunicación efectiva</pre>
+
+        <h3>11.3. Mapeo Garantizado</h3>
+        <p>Archivo <code>centauro/tools/mapeo_secciones.py</code> define explícitamente:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Carpeta</th>
+                    <th>Agente Asignado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>investigacion</td>
+                    <td>Investigación</td>
+                </tr>
+                <tr>
+                    <td>admision_economica</td>
+                    <td>Admisión y propuesta económica</td>
+                </tr>
+                <tr>
+                    <td>objeciones</td>
+                    <td>Manejo de objeciones</td>
+                </tr>
+                <tr>
+                    <td>cierre_proximos_pasos</td>
+                    <td>Cierre y próximos pasos</td>
+                </tr>
+                <tr>
+                    <td>propuesta_valor</td>
+                    <td>Propuesta de valor</td>
+                </tr>
+                <tr>
+                    <td>estilo_comunicacion</td>
+                    <td>Estilo y comunicación</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>11.4. Flujo de Procesamiento</h3>
+        <div class="mermaid">
+            flowchart TB
+            A[Colocar .vtt en carpeta correcta] --> B[python -m centauro.tools.procesar_buenas_practicas]
+            B --> C[GPT analiza y extrae patrones]
+            C --> D[Genera .txt optimizado]
+            D --> E[Indexar en ChromaDB]
+            E --> F[Sheriff consulta ejemplos relevantes]
+            F --> G[Incluye en feedback como GUÍA]
+
+            style B fill:#667eea,color:white
+            style E fill:#28a745,color:white
+            style G fill:#3498db,color:white
+        </div>
+
+        <h3>11.5. Advertencias en el Prompt</h3>
+        <p>Cada vez que el Sheriff usa ejemplos, recibe estas instrucciones:</p>
+        <pre>
+⚠️ ADVERTENCIA CRÍTICA SOBRE EL USO DE ESTOS EJEMPLOS:
+
+Estos ejemplos muestran UNA FORMA EXITOSA, NO LA ÚNICA.
+
+✅ SÍ ESTÁ PERMITIDO:
+  • Usar ejemplos como INSPIRACIÓN
+  • Citar técnicas específicas
+  • Reconocer técnicas DIFERENTES pero EFECTIVAS
+
+❌ NO ESTÁ PERMITIDO:
+  • Penalizar porque no es EXACTAMENTE como el ejemplo
+  • Bajar puntuación solo porque es diferente
+  • Tratar ejemplos como CHECKLIST obligatorio
+
+💡 REGLA DE ORO:
+   Si logra el objetivo con enfoque DIFERENTE pero EFECTIVO
+   → Puntúa alto y RECONÓCELO.</pre>
+
+        <h3>11.6. Costos y Optimización</h3>
         <ul>
+            <li><strong>Procesamiento inicial:</strong> ~$0.03 por ejemplo (UNA SOLA VEZ)</li>
+            <li><strong>Consultas posteriores:</strong> $0 (búsqueda local en ChromaDB)</li>
+            <li><strong>Ahorro:</strong> ~80% de búsquedas irrelevantes gracias al mapeo explícito</li>
+        </ul>
+
+        <div class="warning-box">
+            <h4>⚠️ Límites de Nombres de Archivo</h4>
+            <p><strong>IMPORTANTE:</strong> Los nombres de archivo .vtt deben ser < 100 caracteres para evitar errores en Windows.</p>
+            <p><strong>Sistema de validación automática</strong> implementado en:</p>
+            <ul>
+                <li><code>centauro/utils/validaciones.py</code> - Módulo de validación</li>
+                <li><code>main.py</code> - Valida al analizar conversaciones</li>
+                <li><code>app.py</code> - Valida en Chainlit con mensajes claros al usuario</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>12. Sistema de Validación de Archivos (NUEVO v3.1)</h2>
+
+        <h3>12.1. Problema Resuelto</h3>
+        <p>Windows tiene un límite de <strong>260 caracteres</strong> para paths completos. Archivos con nombres muy largos causan errores crípticos.</p>
+
+        <h3>12.2. Validaciones Implementadas</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Límite</th>
+                    <th>Ubicación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Nombre de archivo</td>
+                    <td>100 caracteres</td>
+                    <td>Terminal + Chainlit</td>
+                </tr>
+                <tr>
+                    <td>Path completo</td>
+                    <td>240 caracteres</td>
+                    <td>Terminal + Chainlit</td>
+                </tr>
+                <tr>
+                    <td>Extensión</td>
+                    <td>.vtt, .txt, .docx</td>
+                    <td>Terminal + Chainlit</td>
+                </tr>
+                <tr>
+                    <td>Archivo vacío</td>
+                    <td>Rechazado</td>
+                    <td>Terminal + Chainlit</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>12.3. Mensajes de Error Claros</h3>
+        <p>Cuando un usuario sube un archivo con nombre muy largo en Chainlit, ve:</p>
+        <pre>
+⚠️ **Error en análisis de conversación**
+
+❌ ERROR: Nombre de archivo demasiado largo
+   Archivo: OBS Business School- Entrevista a Juan...
+   Longitud: 120 caracteres
+   Máximo permitido: 100 caracteres
+
+💡 Sugerencia: Renombra el archivo a algo más corto
+   Ejemplo: Juan_Adames_RRHH.vtt
+
+---
+**¿Necesitas ayuda?**
+Contacta al equipo técnico si el problema persiste.</pre>
+
+        <h3>12.4. Archivos del Sistema</h3>
+        <ul>
+            <li><code>centauro/utils/validaciones.py</code> - Módulo centralizado de validación</li>
+            <li><code>centauro/utils/__init__.py</code> - Exports del módulo</li>
+            <li>Integrado en: <code>main.py</code>, <code>app.py</code>, <code>procesar_buenas_practicas.py</code></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>13. Roadmap Futuro</h2>
+
+        <h3>v3.2 (Q2 2025)</h3>
+        <ul>
+            <li>✅ <strong>Sistema de buenas prácticas</strong> (COMPLETADO - Enero 2025)</li>
+            <li>✅ <strong>Validación de nombres de archivo</strong> (COMPLETADO - Enero 2025)</li>
             <li>Integración con Azure Speech-to-Text (diarización nativa)</li>
             <li>Dashboard web interactivo con filtros por asesor/periodo</li>
-            <li>Comparativa histórica de desempeño por asesor</li>
         </ul>
 
         <h3>v4.0 (Q3 2025)</h3>
         <ul>
-            <li>Sistema de recomendaciones personalizadas por asesor</li>
+            <li>Sistema de recomendaciones personalizadas por asesor basado en patrones de buenas prácticas</li>
             <li>Análisis de sentimiento emocional (tono de voz)</li>
-            <li>Detección automática de mejores prácticas (top performers)</li>
+            <li>Detección automática de técnicas exitosas no documentadas</li>
             <li>API REST para integración con CRM</li>
         </ul>
     </section>
 
     <footer style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #eee; text-align: center; color: #7f8c8d;">
-        <p><strong>Proyecto Centauro v3.0</strong> - Sistema Multi-Agente Híbrido con Sheriff Anti-Alucinaciones</p>
-        <p>Documentación Interna | Última actualización: Enero 2025</p>
+        <p><strong>Proyecto Centauro v3.1</strong> - Sistema Multi-Agente Híbrido + Sheriff + Buenas Prácticas + Validaciones</p>
+        <p>Documentación Interna | Última actualización: 23 Enero 2025</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">
+            Nuevas funcionalidades v3.1: Sistema de Buenas Prácticas con mapeo explícito + Validación de nombres de archivo
+        </p>
     </footer>
 </div>
 

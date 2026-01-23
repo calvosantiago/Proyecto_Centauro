@@ -104,6 +104,25 @@ async def main(message: cl.Message):
     file = files[0]
     file_path = Path(file.path)
 
+    # ==================== VALIDACIÓN CRÍTICA: NOMBRE DE ARCHIVO ====================
+    try:
+        from centauro.utils import validar_archivo_para_procesamiento, generar_mensaje_error_usuario
+
+        validacion = validar_archivo_para_procesamiento(file_path)
+
+        if not validacion:
+            # Generar mensaje de error amigable para Chainlit
+            mensaje_error = generar_mensaje_error_usuario(validacion, "análisis de conversación")
+
+            await cl.Message(
+                content=mensaje_error
+            ).send()
+            return
+    except ImportError:
+        # Si no existe el módulo de validaciones, continuar sin validar
+        pass
+    # ===============================================================================
+
     await cl.Message(
         content=f"📁 Procesando: **{file.name}**\n\nEsto puede tardar 1-2 minutos..."
     ).send()

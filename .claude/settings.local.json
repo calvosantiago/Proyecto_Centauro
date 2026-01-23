@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(python -m pip install:*)",
-      "Bash(chainlit run:*)"
+      "Bash(chainlit run:*)",
+      "Bash(dir:*)",
+      "Bash(python -m centauro.tools.mapeo_secciones:*)",
+      "Bash(python -m centauro.tools.procesar_buenas_practicas:*)"
     ]
   }
 }

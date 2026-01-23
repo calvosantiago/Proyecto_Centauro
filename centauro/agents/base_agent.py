@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional, List
 from dataclasses import dataclass, field
 import json
+from pathlib import Path
 
 @dataclass
 class EvaluationResult:
@@ -39,12 +40,15 @@ class EvaluationResult:
 class BaseEvaluatorAgent(ABC):
     """
     Clase base abstracta para todos los agentes evaluadores.
+
+    Incluye soporte para consultar ejemplos de buenas prácticas.
     """
-    
+
     def __init__(self, nombre_bloque: str):
         self.nombre_bloque = nombre_bloque
         self.version = "2.0"
         self.temperatura = 0.0
+        self._ejemplos_cache = None  # Cache para ejemplos de buenas prácticas
     
     @abstractmethod
     def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
@@ -119,6 +123,117 @@ class BaseEvaluatorAgent(ABC):
             return ratio >= 80
         except ImportError:
             return evidencia.lower() in transcripcion.lower()
-    
+
+    def _buscar_ejemplos_relevantes(self, transcripcion: str, max_ejemplos: int = 2) -> List[str]:
+        """
+        Busca ejemplos de buenas prácticas relevantes para esta evaluación.
+
+        Usa RAG para encontrar fragmentos similares de conversaciones exitosas.
+        Los ejemplos se usan como INSPIRACIÓN, no como reglas rígidas.
+
+        Args:
+            transcripcion: Conversación a evaluar
+            max_ejemplos: Máximo número de ejemplos a devolver
+
+        Returns:
+            Lista de textos de ejemplos relevantes
+        """
+        try:
+            # Importar RAG dinámico
+            from centauro.core.rag_dynamic import buscar_contexto_dinamico
+
+            # Construir query específica para este bloque
+            query = f"Ejemplo de buena práctica en {self.nombre_bloque}: {transcripcion[:500]}"
+
+            # Buscar en la colección de buenas prácticas
+            # Nota: El RAG debe tener indexados los ejemplos de inputs/docs/buenas_practicas/
+            resultados = buscar_contexto_dinamico(
+                query=query,
+                collection_name="buenas_practicas",  # Colección específica
+                k=max_ejemplos
+            )
+
+            if not resultados:
+                return []
+
+            # Extraer textos de ejemplos
+            ejemplos = []
+            for resultado in resultados[:max_ejemplos]:
+                # Formato esperado del RAG: dict con 'text' y 'metadata'
+                if isinstance(resultado, dict):
+                    ejemplos.append(resultado.get('text', ''))
+                else:
+                    ejemplos.append(str(resultado))
+
+            return [e for e in ejemplos if e]  # Filtrar vacíos
+
+        except Exception as e:
+            # Si falla (ej: no hay ejemplos indexados), continuar sin ejemplos
+            print(f"   ℹ️ No se pudieron cargar ejemplos de buenas prácticas: {e}")
+            return []
+
+    def _enriquecer_contexto_con_ejemplos(self, contexto_base: str, transcripcion: str) -> str:
+        """
+        Añade ejemplos de buenas prácticas al contexto del prompt.
+
+        IMPORTANTE: Los ejemplos son REFERENCIAS, no reglas absolutas.
+        El agente debe usarlos como inspiración, no como checklist rígido.
+
+        Args:
+            contexto_base: Contexto original del manual
+            transcripcion: Conversación a evaluar
+
+        Returns:
+            Contexto enriquecido con ejemplos
+        """
+        ejemplos = self._buscar_ejemplos_relevantes(transcripcion, max_ejemplos=2)
+
+        if not ejemplos:
+            return contexto_base
+
+        # Añadir sección de ejemplos al final del contexto
+        contexto_enriquecido = contexto_base + "\n\n"
+        contexto_enriquecido += "="*80 + "\n"
+        contexto_enriquecido += "📚 EJEMPLOS DE BUENAS PRÁCTICAS - USAR COMO GUÍA, NO COMO FRONTERA\n"
+        contexto_enriquecido += "="*80 + "\n\n"
+
+        contexto_enriquecido += "⚠️ ADVERTENCIA CRÍTICA SOBRE EL USO DE ESTOS EJEMPLOS:\n\n"
+
+        contexto_enriquecido += "Estos ejemplos muestran UNA FORMA EXITOSA de hacer las cosas, NO LA ÚNICA.\n\n"
+
+        contexto_enriquecido += "✅ SÍ ESTÁ PERMITIDO:\n"
+        contexto_enriquecido += "  • Usar los ejemplos como INSPIRACIÓN para sugerir mejoras\n"
+        contexto_enriquecido += "  • Citar técnicas específicas que funcionaron bien en los ejemplos\n"
+        contexto_enriquecido += "  • Identificar PATRONES de comunicación exitosa\n"
+        contexto_enriquecido += "  • Dar feedback constructivo basado en lo que se observa que funciona\n"
+        contexto_enriquecido += "  • Reconocer cuando la conversación usa técnicas DIFERENTES pero EFECTIVAS\n\n"
+
+        contexto_enriquecido += "❌ NO ESTÁ PERMITIDO:\n"
+        contexto_enriquecido += "  • Penalizar porque la conversación no es EXACTAMENTE como el ejemplo\n"
+        contexto_enriquecido += "  • Exigir que se use el mismo lenguaje o estructura del ejemplo\n"
+        contexto_enriquecido += "  • Bajar la puntuación solo porque es diferente (si es efectivo)\n"
+        contexto_enriquecido += "  • Tratar los ejemplos como un CHECKLIST obligatorio\n"
+        contexto_enriquecido += "  • Ignorar técnicas válidas que no aparecen en los ejemplos\n\n"
+
+        contexto_enriquecido += "💡 REGLA DE ORO:\n"
+        contexto_enriquecido += "   Si la conversación logra el objetivo del bloque (investigar, cerrar, etc.)\n"
+        contexto_enriquecido += "   usando un enfoque DIFERENTE pero EFECTIVO → Puntúa alto y RECONÓCELO.\n"
+        contexto_enriquecido += "   Los ejemplos son para ENRIQUECER tu análisis, no para LIMITAR tu criterio.\n\n"
+
+        contexto_enriquecido += "🎯 CÓMO USAR LOS EJEMPLOS CORRECTAMENTE:\n"
+        contexto_enriquecido += "  1. Evalúa la conversación PRIMERO por sus propios méritos\n"
+        contexto_enriquecido += "  2. Identifica qué funcionó bien y qué podría mejorar\n"
+        contexto_enriquecido += "  3. LUEGO consulta los ejemplos para sugerencias CONCRETAS de mejora\n"
+        contexto_enriquecido += "  4. Si encuentras técnicas exitosas NO presentes en los ejemplos → ¡Celébralas!\n"
+        contexto_enriquecido += "  5. Menciona los ejemplos solo cuando sean RELEVANTES y ÚTILES\n\n"
+
+        for i, ejemplo in enumerate(ejemplos, 1):
+            contexto_enriquecido += f"--- Ejemplo de referencia {i} (NO obligatorio seguir) ---\n"
+            # Truncar ejemplo si es muy largo
+            ejemplo_truncado = ejemplo[:1000] + "..." if len(ejemplo) > 1000 else ejemplo
+            contexto_enriquecido += ejemplo_truncado + "\n\n"
+
+        return contexto_enriquecido
+
     def __repr__(self):
         return f"<{self.__class__.__name__} bloque='{self.nombre_bloque}' v{self.version}>"

@@ -93,6 +93,23 @@ def leer_word(ruta_archivo):
 
 def cargar_transcripcion(ruta_archivo):
     """Detector inteligente de formato (Word, VTT, TXT)"""
+    # VALIDACIÓN CRÍTICA: Verificar longitud de nombre de archivo
+    try:
+        from centauro.utils import validar_archivo_para_procesamiento, generar_mensaje_error_usuario
+
+        validacion = validar_archivo_para_procesamiento(ruta_archivo)
+
+        if not validacion:
+            # Generar mensaje de error amigable
+            mensaje_error = generar_mensaje_error_usuario(validacion, "análisis de conversación")
+            print("\n" + "="*60)
+            print(mensaje_error)
+            print("="*60 + "\n")
+            return None
+    except ImportError:
+        # Si no existe el módulo de validaciones, continuar sin validar
+        pass
+
     ext = ruta_archivo.suffix.lower()
 
     if ext == ".docx":
@@ -102,13 +119,13 @@ def cargar_transcripcion(ruta_archivo):
     try:
         with open(ruta_archivo, "r", encoding="utf-8") as f:
             texto = f.read()
-            
+
         if ext == ".vtt" or "WEBVTT" in texto[:50]:
             print(f"   🧹 Limpiando formato VTT...")
             return limpiar_formato_vtt(texto)
-        
+
         return texto
-        
+
     except Exception as e:
         print(f"❌ Error leyendo archivo {ruta_archivo}: {e}")
         return None
