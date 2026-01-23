@@ -37,6 +37,6 @@ Centauro analiza transcripciones de llamadas comerciales y proporciona:
 
 ## 📞 Soporte
 
-¿Preguntas? Contacta al equipo de BI & Analytics OBS
+¿Preguntas? Contacta al equipo de BI  OBS
 
 **Versión:** 3.0 | **Última actualización:** Enero 2025
