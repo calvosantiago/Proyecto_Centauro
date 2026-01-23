@@ -27,9 +27,10 @@ Sistema de evaluación automatizada de llamadas comerciales con **IA Multi-Agent
 
 ## 📤 ¿Cómo usarlo?
 
-1. **Sube un archivo** de transcripción (.txt, .vtt o .docx)
-2. Espera mientras el sistema analiza la llamada
-3. Recibe el **reporte completo** con evaluación y recomendaciones
+1. **Usa el botón 📎 (clip) de abajo** o **arrastra el archivo** aquí
+2. Formatos: `.txt`, `.vtt` o `.docx`
+3. Espera 1-2 minutos mientras analiza
+4. Descarga el reporte PDF completo
 
 ---
 
@@ -47,7 +48,7 @@ Sistema de evaluación automatizada de llamadas comerciales con **IA Multi-Agent
 
 **🤖 Tecnología:** Multi-Agente Híbrido + Sheriff Anti-Alucinaciones + RAG Dinámico
 
-Sube tu primera transcripción para comenzar 👇
+👇 **Usa el botón 📎 de abajo para adjuntar tu archivo** 👇
 """
 
     await cl.Message(content=welcome_msg).send()
@@ -63,10 +64,22 @@ Sube tu primera transcripción para comenzar 👇
     # Guardar estado en sesión
     cl.user_session.set("ready", True)
 
-    await cl.Message(
-        content="✅ Sistema listo. Puedes subir un archivo ahora.",
-        author="Sistema"
+    # Configurar settings para permitir archivos
+    await cl.ChatSettings(
+        [
+            cl.input_widget.TextInput(
+                id="file_upload_info",
+                label="ℹ️ Usa el botón 📎 para adjuntar archivos",
+                initial="Formatos: .txt, .vtt, .docx"
+            )
+        ]
     ).send()
+
+
+@cl.action_callback("process_file")
+async def process_file_action(action: cl.Action):
+    """Callback para procesar archivos adjuntos"""
+    await cl.Message(content="📁 Procesando archivo...").send()
 
 
 @cl.on_message
@@ -74,15 +87,18 @@ async def main(message: cl.Message):
     """Procesar transcripciones subidas"""
 
     # Verificar si hay archivos adjuntos
-    if not message.elements:
+    files = [file for file in message.elements if isinstance(file, cl.File)] if message.elements else []
+
+    if not files:
         await cl.Message(
             content="⚠️ **Por favor, sube un archivo de transcripción**\n\n"
+                    "📎 Usa el botón de clip (📎) en la barra inferior\n"
                     "Formatos soportados: `.txt`, `.vtt`, `.docx`"
         ).send()
         return
 
     # Obtener archivo
-    file = message.elements[0]
+    file = files[0]
     file_path = Path(file.path)
 
     await cl.Message(
