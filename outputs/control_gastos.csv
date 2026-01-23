@@ -2044,3 +2044,17 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 22/01/2026,17:37:28,eval_objeciones,7938,283,8221,0.001360
 22/01/2026,17:37:37,eval_cierre,2327,286,2613,0.000521
 22/01/2026,17:37:52,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7443,586,8029,0.001468
+23/01/2026,16:26:59,rag_temas,3483,225,3708,0.000657
+23/01/2026,16:27:13,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia.docx_resumen_contextual,2075,112,2187,0.000378
+23/01/2026,16:27:24,eval_investigacion,2217,399,2616,0.000572
+23/01/2026,16:27:35,eval_admision_economica,8001,451,8452,0.001471
+23/01/2026,16:27:45,eval_objeciones,8120,341,8461,0.001423
+23/01/2026,16:27:52,eval_cierre,2543,307,2850,0.000566
+23/01/2026,16:28:06,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia.docx_batch_secundarios,7731,617,8348,0.001530
+23/01/2026,16:43:46,rag_temas,3275,193,3468,0.000607
+23/01/2026,16:43:51,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_resumen_contextual,2412,114,2526,0.000430
+23/01/2026,16:44:03,eval_investigacion,2172,429,2601,0.000583
+23/01/2026,16:44:14,eval_admision_economica,12862,379,13241,0.002157
+23/01/2026,16:44:25,eval_objeciones,12732,420,13152,0.002162
+23/01/2026,16:44:33,eval_cierre,2513,304,2817,0.000559
+23/01/2026,16:44:45,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_batch_secundarios,12592,552,13144,0.002220

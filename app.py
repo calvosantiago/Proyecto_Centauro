@@ -13,6 +13,9 @@ from centauro.reports import generar_pdf
 from centauro.config import settings
 import json
 
+# Importar funciones de lectura desde main.py (raíz del proyecto)
+from main import leer_word, limpiar_formato_vtt
+
 
 @cl.on_chat_start
 async def start():
@@ -108,14 +111,12 @@ async def main(message: cl.Message):
     # Leer contenido según extensión
     try:
         if file_path.suffix.lower() == '.docx':
-            from centauro.main import leer_word
             texto_crudo = leer_word(file_path)
         else:
             with open(file_path, 'r', encoding='utf-8') as f:
                 texto_crudo = f.read()
 
             if file_path.suffix.lower() == '.vtt':
-                from centauro.main import limpiar_formato_vtt
                 texto_crudo = limpiar_formato_vtt(texto_crudo)
 
         if not texto_crudo or len(texto_crudo) < 100:
@@ -130,165 +131,172 @@ async def main(message: cl.Message):
         ).send()
         return
 
-    # Crear orquestador
-    orchestrator = CentauroOrchestrator()
+    # Envolver TODO en try-catch para capturar errores
+    try:
+        # Crear orquestador
+        orchestrator = CentauroOrchestrator()
 
-    # ==================== FASE 0: PRIVACIDAD ====================
-    async with cl.Step(name="🛡️ FASE 0: Protección de datos sensibles", type="tool") as step:
-        resultado_redaccion = redact_pii(texto_crudo)
-        texto_protegido = resultado_redaccion.text
+        # ==================== FASE 0: PRIVACIDAD ====================
+        async with cl.Step(name="🛡️ FASE 0: Protección de datos sensibles", type="tool") as step:
+            resultado_redaccion = redact_pii(texto_crudo)
+            texto_protegido = resultado_redaccion.text
 
-        stats = resultado_redaccion.stats
-        total_redactado = sum(stats.values())
+            stats = resultado_redaccion.stats
+            total_redactado = sum(stats.values())
 
-        if total_redactado > 0:
-            step.output = f"🔒 Datos redactados: {dict(stats)}\n\n✅ Transcripción sanitizada (RGPD compliant)"
-        else:
-            step.output = "✅ No se detectaron datos sensibles"
-
-    # ==================== FASE 1: DIARIZACIÓN ====================
-    async with cl.Step(name="🎙️ FASE 1: Diarización (ASESOR/LEAD)", type="tool") as step:
-        from centauro.agents import DiarizationAgent
-
-        diarization_agent = DiarizationAgent(nombre_asesor=file.name)
-        transcripcion_diarizada = diarization_agent.diarizar(texto_protegido, file.name)
-
-        asesor_detectado = diarization_agent.asesor_detectado or file.name
-
-        num_lineas = len([l for l in transcripcion_diarizada.split('\n') if l.strip()])
-        step.output = f"✅ Transcripción diarizada\n\n📊 {num_lineas} líneas procesadas\n👤 Asesor: **{asesor_detectado}**"
-
-    # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
-    async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
-        try:
-            cache_key = file.name
-            temas = orchestrator.rag_agent.extraer_temas_llamada(transcripcion_diarizada, cache_key)
-
-            if temas and len(temas) > 0:
-                temas_str = ", ".join(temas[:8])
-                step.output = f"✅ Temas identificados:\n\n🎯 {temas_str}"
+            if total_redactado > 0:
+                step.output = f"🔒 Datos redactados: {dict(stats)}\n\n✅ Transcripción sanitizada (RGPD compliant)"
             else:
-                step.output = "✅ Análisis de contexto completado"
-        except Exception as e:
-            step.output = f"⚠️ Error en extracción de temas: {e}\n\n(Continuará sin RAG dinámico)"
+                step.output = "✅ No se detectaron datos sensibles"
 
-    # ==================== FASE 2.5: PERFIL DEL LEAD ====================
-    async with cl.Step(name="📊 FASE 2.5: Extracción de perfil del lead", type="tool") as step:
-        try:
-            resumen_contextual = orchestrator._extraer_resumen_contextual(transcripcion_diarizada, file.name)
+        # ==================== FASE 1: DIARIZACIÓN ====================
+        async with cl.Step(name="🎙️ FASE 1: Diarización (ASESOR/LEAD)", type="tool") as step:
+            from centauro.agents import DiarizationAgent
 
-            perfil = resumen_contextual.get('perfil_lead', 'N/A')
-            fase = resumen_contextual.get('fase_funnel', 'N/A')
-            resultado = resumen_contextual.get('resultado_general', 'N/A')
+            diarization_agent = DiarizationAgent(nombre_asesor=file.name)
+            transcripcion_diarizada = diarization_agent.diarizar(texto_protegido, file.name)
 
-            step.output = f"""✅ Perfil extraído
+            asesor_detectado = diarization_agent.asesor_detectado or file.name
+
+            num_lineas = len([l for l in transcripcion_diarizada.split('\n') if l.strip()])
+            step.output = f"✅ Transcripción diarizada\n\n📊 {num_lineas} líneas procesadas\n👤 Asesor: **{asesor_detectado}**"
+
+        # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
+        async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
+            try:
+                cache_key = file.name
+                temas = orchestrator.rag_agent.extraer_temas_llamada(transcripcion_diarizada, cache_key)
+
+                # Convertir a lista si no lo es
+                if temas and not isinstance(temas, list):
+                    temas = list(temas) if hasattr(temas, '__iter__') else [str(temas)]
+
+                if temas and len(temas) > 0:
+                    temas_limitados = temas[:8] if len(temas) > 8 else temas
+                    temas_str = ", ".join(str(t) for t in temas_limitados)
+                    step.output = f"✅ Temas identificados:\n\n🎯 {temas_str}"
+                else:
+                    step.output = "✅ Análisis de contexto completado"
+            except Exception as e:
+                step.output = f"⚠️ Error en extracción de temas: {str(e)}\n\n(Continuará sin RAG dinámico)"
+
+        # ==================== FASE 2.5: PERFIL DEL LEAD ====================
+        async with cl.Step(name="📊 FASE 2.5: Extracción de perfil del lead", type="tool") as step:
+            try:
+                resumen_contextual = orchestrator._extraer_resumen_contextual(transcripcion_diarizada, file.name)
+
+                perfil = resumen_contextual.get('perfil_lead', 'N/A')
+                fase = resumen_contextual.get('fase_funnel', 'N/A')
+                resultado = resumen_contextual.get('resultado_general', 'N/A')
+
+                step.output = f"""✅ Perfil extraído
 
 **Perfil:** {perfil[:100]}...
 **Fase Funnel:** {fase}
 **Resultado:** {resultado}"""
-        except Exception as e:
-            step.output = f"⚠️ Error extrayendo perfil: {e}"
+            except Exception as e:
+                step.output = f"⚠️ Error extrayendo perfil: {e}"
 
-    # ==================== FASE 3: EVALUACIÓN MULTI-AGENTE ====================
-    evaluaciones = []
+        # ==================== FASE 3: EVALUACIÓN MULTI-AGENTE ====================
+        evaluaciones = []
 
-    async with cl.Step(name="🤖 FASE 3: Evaluación Multi-Agente Híbrida", type="tool") as fase3:
+        async with cl.Step(name="🤖 FASE 3: Evaluación Multi-Agente Híbrida", type="tool") as fase3:
 
-        # BLOQUES CRÍTICOS (Individual)
-        bloques_criticos = [
-            ("🔍 Investigación", "Investigación"),
-            ("💰 Admisión y Propuesta Económica", "Proceso de Admisión y Propuesta Económica"),
-            ("🛡️ Manejo de objeciones", "Manejo de objeciones"),
-            ("🎬 Cierre y próximos pasos", "Cierre y próximos pasos")
-        ]
+            # BLOQUES CRÍTICOS (Individual)
+            bloques_criticos = [
+                ("🔍 Investigación", "Investigación"),
+                ("💰 Admisión y Propuesta Económica", "Proceso de Admisión y Propuesta Económica"),
+                ("🛡️ Manejo de objeciones", "Manejo de objeciones"),
+                ("🎬 Cierre y próximos pasos", "Cierre y próximos pasos")
+            ]
 
-        for emoji_nombre, bloque_nombre in bloques_criticos:
-            async with cl.Step(name=f"{emoji_nombre}", type="run") as sub_step:
+            for emoji_nombre, bloque_nombre in bloques_criticos:
+                async with cl.Step(name=f"{emoji_nombre}", type="run") as sub_step:
+                    try:
+                        if bloque_nombre == "Investigación":
+                            from centauro.agents import InvestigacionAgent
+                            extracto = orchestrator.config.get_extracto(bloque_nombre, transcripcion_diarizada)
+                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            agente = InvestigacionAgent()
+                            resultado = agente.evaluate(extracto, ctx)
+
+                        elif bloque_nombre == "Proceso de Admisión y Propuesta Económica":
+                            from centauro.agents import AdmisionEconomicaAgent
+                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            agente = AdmisionEconomicaAgent()
+                            resultado = agente.evaluate(transcripcion_diarizada, ctx)
+
+                        elif bloque_nombre == "Manejo de objeciones":
+                            from centauro.agents import ObjecionesAgent
+                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            agente = ObjecionesAgent()
+                            resultado = agente.evaluate(transcripcion_diarizada, ctx)
+
+                        elif bloque_nombre == "Cierre y próximos pasos":
+                            from centauro.agents import CierreAgent
+                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            agente = CierreAgent()
+                            resultado = agente.evaluate(transcripcion_diarizada, ctx)
+
+                        evaluaciones.append(resultado.to_dict())
+                        nota = resultado.puntuacion_1_5 if resultado.puntuacion_1_5 else "N/A"
+                        sub_step.output = f"✅ Evaluado: **{nota}/5**"
+
+                    except Exception as e:
+                        sub_step.output = f"❌ Error: {e}"
+
+            # BLOQUES SECUNDARIOS (Batch)
+            async with cl.Step(name="📦 Propuesta Valor + Estilo (Batch)", type="run") as sub_step:
                 try:
-                    if bloque_nombre == "Investigación":
-                        from centauro.agents import InvestigacionAgent
-                        extracto = orchestrator.config.get_extracto(bloque_nombre, transcripcion_diarizada)
-                        ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
-                        agente = InvestigacionAgent()
-                        resultado = agente.evaluate(extracto, ctx)
-
-                    elif bloque_nombre == "Proceso de Admisión y Propuesta Económica":
-                        from centauro.agents import AdmisionEconomicaAgent
-                        ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
-                        agente = AdmisionEconomicaAgent()
-                        resultado = agente.evaluate(transcripcion_diarizada, ctx)
-
-                    elif bloque_nombre == "Manejo de objeciones":
-                        from centauro.agents import ObjecionesAgent
-                        ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
-                        agente = ObjecionesAgent()
-                        resultado = agente.evaluate(transcripcion_diarizada, ctx)
-
-                    elif bloque_nombre == "Cierre y próximos pasos":
-                        from centauro.agents import CierreAgent
-                        ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
-                        agente = CierreAgent()
-                        resultado = agente.evaluate(transcripcion_diarizada, ctx)
-
-                    evaluaciones.append(resultado.to_dict())
-                    nota = resultado.puntuacion_1_5 if resultado.puntuacion_1_5 else "N/A"
-                    sub_step.output = f"✅ Evaluado: **{nota}/5**"
-
+                    evals_secundarias = orchestrator._evaluar_bloques_secundarios(transcripcion_diarizada, file.name)
+                    evaluaciones.extend(evals_secundarias)
+                    sub_step.output = f"✅ 2 bloques evaluados en batch"
                 except Exception as e:
                     sub_step.output = f"❌ Error: {e}"
 
-        # BLOQUES SECUNDARIOS (Batch)
-        async with cl.Step(name="📦 Propuesta Valor + Estilo (Batch)", type="run") as sub_step:
+            fase3.output = f"✅ {len(evaluaciones)} bloques evaluados correctamente"
+
+        # ==================== FASE 3.5: SHERIFF ====================
+        async with cl.Step(name="🛡️ FASE 3.5: Sheriff Anti-Alucinaciones", type="tool") as step:
+            evaluaciones_validadas = orchestrator._sheriff_validar(evaluaciones, transcripcion_diarizada)
+
+            alucinaciones = orchestrator.stats.get("alucinaciones_detectadas", 0)
+            ajustes = orchestrator.stats.get("notas_ajustadas_sheriff", 0)
+
+            if alucinaciones > 0:
+                step.output = f"⚠️ {alucinaciones} alucinaciones detectadas\n🔧 {ajustes} notas ajustadas"
+            else:
+                step.output = "✅ Todas las evidencias verificadas (0 alucinaciones)"
+
+        # ==================== FASE 4: SÍNTESIS ====================
+        async with cl.Step(name="🎨 FASE 4: Síntesis y generación de reporte", type="tool") as step:
             try:
-                evals_secundarias = orchestrator._evaluar_bloques_secundarios(transcripcion_diarizada, file.name)
-                evaluaciones.extend(evals_secundarias)
-                sub_step.output = f"✅ 2 bloques evaluados en batch"
+                reporte = orchestrator._sintetizar_evaluaciones(
+                    evaluaciones_validadas,
+                    transcripcion_diarizada,
+                    asesor_detectado,
+                    resumen_contextual
+                )
+
+                reporte["meta"]["stats_optimizacion"] = orchestrator.stats
+
+                step.output = "✅ Reporte JSON generado"
             except Exception as e:
-                sub_step.output = f"❌ Error: {e}"
+                step.output = f"❌ Error en síntesis: {e}"
+                return
 
-        fase3.output = f"✅ {len(evaluaciones)} bloques evaluados correctamente"
+        # ==================== RESULTADOS ====================
+        nota_global = reporte['puntuacion_global_1_5']
 
-    # ==================== FASE 3.5: SHERIFF ====================
-    async with cl.Step(name="🛡️ FASE 3.5: Sheriff Anti-Alucinaciones", type="tool") as step:
-        evaluaciones_validadas = orchestrator._sheriff_validar(evaluaciones, transcripcion_diarizada)
-
-        alucinaciones = orchestrator.stats.get("alucinaciones_detectadas", 0)
-        ajustes = orchestrator.stats.get("notas_ajustadas_sheriff", 0)
-
-        if alucinaciones > 0:
-            step.output = f"⚠️ {alucinaciones} alucinaciones detectadas\n🔧 {ajustes} notas ajustadas"
+        # Determinar emoji según nota
+        if nota_global >= 4.0:
+            emoji_nota = "🟢"
+        elif nota_global >= 3.0:
+            emoji_nota = "🟡"
         else:
-            step.output = "✅ Todas las evidencias verificadas (0 alucinaciones)"
+            emoji_nota = "🔴"
 
-    # ==================== FASE 4: SÍNTESIS ====================
-    async with cl.Step(name="🎨 FASE 4: Síntesis y generación de reporte", type="tool") as step:
-        try:
-            reporte = orchestrator._sintetizar_evaluaciones(
-                evaluaciones_validadas,
-                transcripcion_diarizada,
-                asesor_detectado,
-                resumen_contextual
-            )
-
-            reporte["meta"]["stats_optimizacion"] = orchestrator.stats
-
-            step.output = "✅ Reporte JSON generado"
-        except Exception as e:
-            step.output = f"❌ Error en síntesis: {e}"
-            return
-
-    # ==================== RESULTADOS ====================
-    nota_global = reporte['puntuacion_global_1_5']
-
-    # Determinar emoji según nota
-    if nota_global >= 4.0:
-        emoji_nota = "🟢"
-    elif nota_global >= 3.0:
-        emoji_nota = "🟡"
-    else:
-        emoji_nota = "🔴"
-
-    resultado_msg = f"""# 📊 Resultados de la Evaluación
+        resultado_msg = f"""# 📊 Resultados de la Evaluación
 
 ---
 
@@ -303,87 +311,87 @@ async def main(message: cl.Message):
 
 """
 
-    for bloque in reporte['evaluacion_por_bloques']:
-        nota = bloque.get('puntuacion_1_5', 'N/A')
-        nombre = bloque.get('bloque')
+        for bloque in reporte['evaluacion_por_bloques']:
+            nota = bloque.get('puntuacion_1_5', 'N/A')
+            nombre = bloque.get('bloque')
 
-        if nota == 'N/A' or nota is None:
-            emoji = "⚪"
-            nota_str = "N/A"
-        elif nota >= 4:
-            emoji = "🟢"
-            nota_str = f"{nota}/5"
-        elif nota == 3:
-            emoji = "🟡"
-            nota_str = f"{nota}/5"
-        else:
-            emoji = "🔴"
-            nota_str = f"{nota}/5"
+            if nota == 'N/A' or nota is None:
+                emoji = "⚪"
+                nota_str = "N/A"
+            elif nota >= 4:
+                emoji = "🟢"
+                nota_str = f"{nota}/5"
+            elif nota == 3:
+                emoji = "🟡"
+                nota_str = f"{nota}/5"
+            else:
+                emoji = "🔴"
+                nota_str = f"{nota}/5"
 
-        resultado_msg += f"{emoji} **{nombre}**: {nota_str}\n"
+            resultado_msg += f"{emoji} **{nombre}**: {nota_str}\n"
 
-    resultado_msg += f"""
+        resultado_msg += f"""
 ---
 
 ## 🎯 Plan de Acción (Top 3 Áreas de Mejora)
 
 """
 
-    areas_mejora = reporte['feedback_resumido']['areas_mejora'][:3]
-    if areas_mejora:
-        for i, area in enumerate(areas_mejora, 1):
-            # Limitar longitud para legibilidad
-            area_corta = area[:150] + "..." if len(area) > 150 else area
-            resultado_msg += f"{i}. {area_corta}\n\n"
-    else:
-        resultado_msg += "*No hay áreas de mejora críticas detectadas*\n"
+        areas_mejora = reporte['feedback_resumido']['areas_mejora'][:3]
+        if areas_mejora:
+            for i, area in enumerate(areas_mejora, 1):
+                # Limitar longitud para legibilidad
+                area_corta = area[:150] + "..." if len(area) > 150 else area
+                resultado_msg += f"{i}. {area_corta}\n\n"
+        else:
+            resultado_msg += "*No hay áreas de mejora críticas detectadas*\n"
 
-    resultado_msg += """
+        resultado_msg += """
 ---
 
 📄 **Descarga el reporte completo en PDF** más abajo 👇
 """
 
-    await cl.Message(content=resultado_msg).send()
+        await cl.Message(content=resultado_msg).send()
 
-    # ==================== GENERAR PDF ====================
-    async with cl.Step(name="📄 Generando reporte PDF", type="tool") as step:
-        try:
-            pdf_filename = f"Reporte_{file.name.replace('.', '_')}_v3.pdf"
-            generar_pdf(reporte, pdf_filename)
+        # ==================== GENERAR PDF ====================
+        async with cl.Step(name="📄 Generando reporte PDF", type="tool") as step:
+            try:
+                pdf_filename = f"Reporte_{file.name.replace('.', '_')}_v3.pdf"
+                generar_pdf(reporte, pdf_filename)
 
-            pdf_path = settings.OUTPUTS_DIR / "Reportes_PDF" / pdf_filename
+                pdf_path = settings.OUTPUTS_DIR / "Reportes_PDF" / pdf_filename
 
-            if pdf_path.exists():
-                step.output = f"✅ PDF generado: {pdf_filename}"
+                if pdf_path.exists():
+                    step.output = f"✅ PDF generado: {pdf_filename}"
 
-                # Enviar PDF como descargable
-                await cl.Message(
-                    content="📥 **Reporte PDF listo para descargar:**",
-                    elements=[
-                        cl.File(
-                            name=pdf_filename,
-                            path=str(pdf_path),
-                            display="inline"
-                        )
-                    ]
-                ).send()
-            else:
-                step.output = "⚠️ PDF no encontrado en la ruta esperada"
+                    # Enviar PDF como descargable
+                    await cl.Message(
+                        content="📥 **Reporte PDF listo para descargar:**",
+                        elements=[
+                            cl.File(
+                                name=pdf_filename,
+                                path=str(pdf_path),
+                                display="inline"
+                            )
+                        ]
+                    ).send()
+                else:
+                    step.output = "⚠️ PDF no encontrado en la ruta esperada"
 
-        except Exception as e:
-            step.output = f"❌ Error generando PDF: {e}"
+            except Exception as e:
+                step.output = f"❌ Error generando PDF: {e}"
 
-    # ==================== GUARDAR JSON ====================
-    json_path = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{file.name.replace('.', '_')}_v3.json"
-    json_path.parent.mkdir(exist_ok=True, parents=True)
+        # ==================== GUARDAR JSON ====================
+        json_path = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{file.name.replace('.', '_')}_v3.json"
+        json_path.parent.mkdir(exist_ok=True, parents=True)
 
-    with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump(reporte, f, indent=2, ensure_ascii=False)
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(reporte, f, indent=2, ensure_ascii=False)
 
-    # Mensaje final
-    await cl.Message(
-        content=f"""✅ **Análisis completado**
+            # Mensaje final
+            await cl.Message(
+                content=f"""✅ **Análisis completado**
 
 📊 Estadísticas:
 - Llamadas API: {orchestrator.stats['llamadas_api']}
@@ -392,8 +400,31 @@ async def main(message: cl.Message):
 
 🔄 Puedes subir otra transcripción para continuar.
 """,
-        author="Sistema"
-    ).send()
+                author="Sistema"
+            ).send()
+
+    except Exception as e:
+        # Capturar cualquier error no manejado
+        import traceback
+        error_detallado = traceback.format_exc()
+
+        await cl.Message(
+            content=f"""❌ **Error crítico durante el procesamiento**
+
+**Error:** {str(e)}
+
+**Detalles técnicos:**
+```
+{error_detallado}
+```
+
+Por favor, verifica:
+- Que el archivo .env tenga la OPENAI_API_KEY correcta
+- Que todas las dependencias estén instaladas
+- Que el archivo subido sea válido
+""",
+            author="Sistema"
+        ).send()
 
 
 if __name__ == "__main__":
