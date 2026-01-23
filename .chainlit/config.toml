@@ -9,8 +9,9 @@ public_path = "public"
 # Habilitar subida de archivos
 spontaneous_file_upload = {
     enabled = true,
-    accept = [".txt", ".vtt", ".docx"],
-    max_size_mb = 20
+    accept = ["text/plain", "text/vtt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".txt", ".vtt", ".docx"],
+    max_size_mb = 20,
+    max_files = 1
 }
 
 # Modo multi-modal
