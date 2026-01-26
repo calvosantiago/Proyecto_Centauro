@@ -2175,3 +2175,114 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 23/01/2026,20:36:07,eval_objeciones,8120,350,8470,0.001428
 23/01/2026,20:36:12,eval_cierre,2543,314,2857,0.000570
 23/01/2026,20:36:25,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7731,546,8277,0.001487
+26/01/2026,10:09:27,rag_temas,3275,197,3472,0.000609
+26/01/2026,10:09:50,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_resumen_contextual,2412,114,2526,0.000430
+26/01/2026,10:10:04,eval_investigacion,2172,425,2597,0.000581
+26/01/2026,10:10:15,eval_admision_economica,12862,376,13238,0.002155
+26/01/2026,10:10:25,eval_objeciones,12732,430,13162,0.002168
+26/01/2026,10:10:33,eval_cierre,2513,336,2849,0.000579
+26/01/2026,10:10:52,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_secundarios,12592,547,13139,0.002217
+26/01/2026,10:11:02,rag_temas,3300,228,3528,0.000632
+26/01/2026,10:11:04,Interview - Cindy Navarro_resumen_contextual,3451,125,3576,0.000593
+26/01/2026,10:11:19,eval_investigacion,2161,490,2651,0.000618
+26/01/2026,10:11:29,eval_admision_economica,6983,416,7399,0.001297
+26/01/2026,10:11:44,eval_objeciones,7094,533,7627,0.001384
+26/01/2026,10:11:54,eval_cierre,2510,392,2902,0.000612
+26/01/2026,10:12:09,Interview - Cindy Navarro_batch_secundarios,6713,600,7313,0.001367
+26/01/2026,10:12:21,rag_temas,3358,221,3579,0.000636
+26/01/2026,10:12:24,Mary Jany Máster en Innovación y Emprendimiento_resumen_contextual,3329,114,3443,0.000568
+26/01/2026,10:12:32,eval_investigacion,2143,361,2504,0.000538
+26/01/2026,10:12:44,eval_admision_economica,22634,433,23067,0.003655
+26/01/2026,10:12:55,eval_objeciones,22503,530,23033,0.003693
+26/01/2026,10:13:03,eval_cierre,2484,374,2858,0.000597
+26/01/2026,10:13:17,Mary Jany Máster en Innovación y Emprendimiento_batch_secundarios,22364,555,22919,0.003688
+26/01/2026,10:13:39,rag_temas,3386,201,3587,0.000628
+26/01/2026,10:13:42,OBS Business School - Andrea Aicinburu - Dirección Financiera_resumen_contextual,2037,109,2146,0.000371
+26/01/2026,10:13:58,eval_investigacion,2161,629,2790,0.000702
+26/01/2026,10:14:12,eval_admision_economica,8414,390,8804,0.001496
+26/01/2026,10:14:24,eval_objeciones,8335,471,8806,0.001533
+26/01/2026,10:14:33,eval_cierre,2509,389,2898,0.000610
+26/01/2026,10:14:51,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_secundarios,8144,601,8745,0.001582
+26/01/2026,10:15:08,rag_temas,3483,232,3715,0.000662
+26/01/2026,10:15:11,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_resumen_contextual,2075,112,2187,0.000378
+26/01/2026,10:15:21,eval_investigacion,2217,420,2637,0.000585
+26/01/2026,10:15:31,eval_admision_economica,8001,442,8443,0.001465
+26/01/2026,10:15:40,eval_objeciones,8120,351,8471,0.001429
+26/01/2026,10:15:49,eval_cierre,2543,366,2909,0.000601
+26/01/2026,10:16:04,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7731,622,8353,0.001533
+26/01/2026,12:52:58,rag_temas,3386,198,3584,0.000627
+26/01/2026,12:53:21,OBS Business School - Andrea Aicinburu - Dirección Financiera.docx_resumen_contextual,2037,109,2146,0.000371
+26/01/2026,12:53:35,eval_investigacion,3104,610,3714,0.000832
+26/01/2026,12:53:43,eval_admision_economica,8414,411,8825,0.001509
+26/01/2026,12:53:54,eval_objeciones,8335,474,8809,0.001535
+26/01/2026,12:54:03,eval_cierre,2509,374,2883,0.000601
+26/01/2026,12:54:19,OBS Business School - Andrea Aicinburu - Dirección Financiera.docx_batch_secundarios,8144,638,8782,0.001604
+26/01/2026,13:01:36,rag_temas,3275,202,3477,0.000612
+26/01/2026,13:01:39,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_resumen_contextual,2412,114,2526,0.000430
+26/01/2026,13:01:52,eval_investigacion,3116,492,3608,0.000763
+26/01/2026,13:02:02,eval_admision_economica,12862,382,13244,0.002158
+26/01/2026,13:02:16,eval_objeciones,12732,442,13174,0.002175
+26/01/2026,13:02:24,eval_cierre,2513,354,2867,0.000589
+26/01/2026,13:02:37,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_batch_secundarios,12592,546,13138,0.002216
+26/01/2026,14:39:09,rag_temas,3386,209,3595,0.000633
+26/01/2026,14:39:17,OBS Business School - Andrea Aicinburu - Dirección Financiera.docx_resumen_contextual,2037,113,2150,0.000373
+26/01/2026,14:50:16,rag_temas,3386,209,3595,0.000633
+26/01/2026,14:50:23,OBS Business School - Andrea Aicinburu - Dirección Financiera.docx_resumen_contextual,2037,113,2150,0.000373
+26/01/2026,14:50:41,eval_investigacion,3104,559,3663,0.000801
+26/01/2026,14:50:52,eval_admision_economica,8414,477,8891,0.001548
+26/01/2026,14:51:02,eval_objeciones,8389,471,8860,0.001541
+26/01/2026,14:51:10,eval_cierre,2509,377,2886,0.000603
+26/01/2026,14:51:25,OBS Business School - Andrea Aicinburu - Dirección Financiera.docx_batch_secundarios,8144,644,8788,0.001608
+26/01/2026,14:56:01,rag_temas,3275,200,3475,0.000611
+26/01/2026,14:56:03,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_resumen_contextual,2412,119,2531,0.000433
+26/01/2026,14:56:14,eval_investigacion,3116,412,3528,0.000715
+26/01/2026,14:56:23,eval_admision_economica,12862,382,13244,0.002158
+26/01/2026,14:56:33,eval_objeciones,12837,348,13185,0.002134
+26/01/2026,14:56:40,eval_cierre,2513,309,2822,0.000562
+26/01/2026,14:56:53,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse.docx_batch_secundarios,12592,526,13118,0.002204
+26/01/2026,15:11:35,rag_temas,3483,212,3695,0.000650
+26/01/2026,15:11:40,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia.docx_resumen_contextual,2075,116,2191,0.000381
+26/01/2026,15:11:50,eval_investigacion,3177,430,3607,0.000735
+26/01/2026,15:12:01,eval_admision_economica,8001,468,8469,0.001481
+26/01/2026,15:12:13,eval_objeciones,7976,321,8297,0.001389
+26/01/2026,15:12:22,eval_cierre,2543,368,2911,0.000602
+26/01/2026,15:12:38,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia.docx_batch_secundarios,7731,612,8343,0.001527
+26/01/2026,15:47:18,chat_interactivo,1411,728,2139,0.000648
+26/01/2026,16:50:30,chat_interactivo,872,305,1177,0.000314
+26/01/2026,16:58:42,chat_interactivo,1601,664,2265,0.000639
+26/01/2026,17:01:35,chat_interactivo,1459,769,2228,0.000680
+26/01/2026,17:42:55,rag_temas,3275,201,3476,0.000612
+26/01/2026,17:43:00,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_resumen_contextual,2412,114,2526,0.000430
+26/01/2026,17:43:12,eval_investigacion,3731,508,4239,0.000864
+26/01/2026,17:43:21,eval_admision_economica,12862,376,13238,0.002155
+26/01/2026,17:43:31,eval_objeciones,12732,451,13183,0.002180
+26/01/2026,17:43:40,eval_cierre,3026,352,3378,0.000665
+26/01/2026,17:43:55,Ania_Sesión entrevista sobre  Máster en Business Intelligence_Montse_batch_secundarios,12592,548,13140,0.002218
+26/01/2026,17:44:03,rag_temas,3300,230,3530,0.000633
+26/01/2026,17:44:07,Interview - Cindy Navarro_resumen_contextual,3451,121,3572,0.000590
+26/01/2026,17:44:20,eval_investigacion,3729,496,4225,0.000857
+26/01/2026,17:44:29,eval_admision_economica,6983,421,7404,0.001300
+26/01/2026,17:44:48,eval_objeciones,6869,488,7357,0.001323
+26/01/2026,17:44:58,eval_cierre,3023,408,3431,0.000698
+26/01/2026,17:45:14,Interview - Cindy Navarro_batch_secundarios,6713,647,7360,0.001395
+26/01/2026,17:45:21,rag_temas,3358,241,3599,0.000648
+26/01/2026,17:45:25,Mary Jany Máster en Innovación y Emprendimiento_resumen_contextual,3329,114,3443,0.000568
+26/01/2026,17:45:35,eval_investigacion,3705,445,4150,0.000823
+26/01/2026,17:45:47,eval_admision_economica,22634,450,23084,0.003665
+26/01/2026,17:46:02,eval_objeciones,22275,633,22908,0.003721
+26/01/2026,17:46:13,eval_cierre,2997,410,3407,0.000696
+26/01/2026,17:46:31,Mary Jany Máster en Innovación y Emprendimiento_batch_secundarios,22364,519,22883,0.003666
+26/01/2026,17:46:41,rag_temas,3386,201,3587,0.000628
+26/01/2026,17:46:44,OBS Business School - Andrea Aicinburu - Dirección Financiera_resumen_contextual,2037,109,2146,0.000371
+26/01/2026,17:47:01,eval_investigacion,3719,670,4389,0.000960
+26/01/2026,17:47:10,eval_admision_economica,8414,379,8793,0.001489
+26/01/2026,17:47:19,eval_objeciones,8335,425,8760,0.001505
+26/01/2026,17:47:29,eval_cierre,3022,374,3396,0.000678
+26/01/2026,17:47:47,OBS Business School - Andrea Aicinburu - Dirección Financiera_batch_secundarios,8144,626,8770,0.001597
+26/01/2026,17:47:55,rag_temas,3483,229,3712,0.000660
+26/01/2026,17:47:57,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_resumen_contextual,2075,116,2191,0.000381
+26/01/2026,17:48:11,eval_investigacion,3792,428,4220,0.000826
+26/01/2026,17:48:22,eval_admision_economica,8001,451,8452,0.001471
+26/01/2026,17:48:33,eval_objeciones,8120,356,8476,0.001432
+26/01/2026,17:48:42,eval_cierre,3056,364,3420,0.000677
+26/01/2026,17:48:59,OBS BUSINESS SCHOOL - VIDEOCONFERENCIA - Paula Garcia_batch_secundarios,7731,603,8334,0.001521

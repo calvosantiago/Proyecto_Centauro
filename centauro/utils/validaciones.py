@@ -1,13 +1,16 @@
 """
-Validaciones de archivos y paths para el sistema.
+Validaciones de archivos y paths para el sistema v4.0
 
 Incluye validaciones específicas para:
 - Longitud de nombres de archivo (límites de Windows)
 - Caracteres especiales en nombres
 - Paths demasiado largos
+
+ACTUALIZADO v4.0: Usa configuración centralizada
 """
 from pathlib import Path
 from typing import Tuple, Optional
+from centauro.config import centauro_config
 
 
 class ValidacionArchivo:
@@ -21,14 +24,18 @@ class ValidacionArchivo:
         return self.valido
 
 
-def validar_nombre_archivo(ruta: Path, max_nombre: int = 100, max_path: int = 240) -> ValidacionArchivo:
+def validar_nombre_archivo(
+    ruta: Path,
+    max_nombre: int = None,
+    max_path: int = None
+) -> ValidacionArchivo:
     """
     Valida que un archivo tenga nombre y path dentro de los límites seguros.
 
     Args:
         ruta: Path al archivo
-        max_nombre: Longitud máxima del nombre de archivo (default: 100)
-        max_path: Longitud máxima del path completo (default: 240, límite Windows es 260)
+        max_nombre: Longitud máxima del nombre (None = usar config)
+        max_path: Longitud máxima del path (None = usar config)
 
     Returns:
         ValidacionArchivo con el resultado
@@ -39,6 +46,11 @@ def validar_nombre_archivo(ruta: Path, max_nombre: int = 100, max_path: int = 24
         ...     print(validacion.mensaje)
         ...     print(validacion.sugerencia)
     """
+    # Usar valores de configuración si no se especifican
+    if max_nombre is None:
+        max_nombre = centauro_config.MAX_FILENAME_LENGTH
+    if max_path is None:
+        max_path = centauro_config.MAX_PATH_LENGTH
     nombre_archivo = ruta.name
     path_completo = str(ruta.absolute())
 

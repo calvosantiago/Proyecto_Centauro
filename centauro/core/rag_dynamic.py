@@ -12,7 +12,8 @@ CAMBIOS APLICADOS:
 from typing import List, Dict, Optional
 import json
 from ..llm_client import consultar_gpt
-from ..rag import collection
+from ..rag import collection_manuales
+from ..config import centauro_config
 from .config_agents import OptimizacionConfig
 
 class DynamicRAGAgent:
@@ -131,15 +132,16 @@ Si hay menos de 8, devuelve solo los que existan.
         query = self._construir_query_dinamica(nombre_bloque, temas)
         
         try:
-            total_docs = collection.count()
+            # Usar colección de manuales generales
+            total_docs = collection_manuales.count()
             if total_docs == 0:
                 print("   ⚠️ Base vacía")
                 return ""
-            
-            # OPTIMIZACIÓN CRÍTICA: Top-K = 5 (antes 20)
-            n_results = min(self.config.RAG_TOP_K, total_docs)
-            
-            resultados = collection.query(
+
+            # Usar configuración centralizada
+            n_results = min(centauro_config.RAG_TOP_K_GENERAL, total_docs)
+
+            resultados = collection_manuales.query(
                 query_texts=[query],
                 n_results=n_results
             )
@@ -222,12 +224,12 @@ def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: in
     """
     Función auxiliar para buscar en colecciones específicas del RAG.
 
-    Esta función permite a los agentes buscar en colecciones especializadas,
-    como la de buenas prácticas, sin afectar el flujo normal del RAG.
+    ACTUALIZADO v4.0: Ahora usa arquitectura multi-colección de ChromaDB.
+    Ya no necesita filtrado por metadata, búsqueda directa en colección.
 
     Args:
         query: Texto de búsqueda
-        collection_name: Nombre de la colección (ej: "buenas_practicas")
+        collection_name: Nombre de la colección (usar centauro_config.COLLECTION_*)
         k: Número de resultados a devolver
 
     Returns:
@@ -236,47 +238,23 @@ def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: in
     Nota: Si la colección no existe o está vacía, devuelve lista vacía.
     """
     try:
-        # Por ahora, usamos la colección principal (collection)
-        # TODO: Implementar múltiples colecciones en ChromaDB
-        # Para v1.0, simplemente filtramos por metadata si existe
+        from ..rag import buscar_en_coleccion
+        from ..config import centauro_config
 
-        from ..rag import collection
+        # Mapeo de nombres legacy a nombres oficiales
+        if collection_name == "buenas_practicas":
+            collection_name = centauro_config.COLLECTION_BUENAS_PRACTICAS
+        elif collection_name == "default":
+            collection_name = centauro_config.COLLECTION_MANUALES
 
-        total_docs = collection.count()
-        if total_docs == 0:
-            return []
-
-        resultados = collection.query(
-            query_texts=[query],
-            n_results=min(k, total_docs)
+        # Usar función de búsqueda avanzada
+        resultados = buscar_en_coleccion(
+            query=query,
+            collection_name=collection_name,
+            k=k
         )
 
-        if not resultados['documents'] or not resultados['documents'][0]:
-            return []
-
-        # Convertir a formato estructurado
-        docs = resultados['documents'][0]
-        metadatas = resultados.get('metadatas', [[{}] * len(docs)])[0]
-
-        resultados_estructurados = []
-        for doc, metadata in zip(docs, metadatas):
-            # Si pedimos buenas_practicas, filtrar por source o tipo
-            if collection_name == "buenas_practicas":
-                # Solo incluir si el documento viene de buenas_practicas
-                source = metadata.get('source', '')
-                if 'buenas_practicas' in source or 'buena' in source:
-                    resultados_estructurados.append({
-                        'text': doc,
-                        'metadata': metadata
-                    })
-            else:
-                # Para otras colecciones, incluir todo
-                resultados_estructurados.append({
-                    'text': doc,
-                    'metadata': metadata
-                })
-
-        return resultados_estructurados[:k]
+        return resultados
 
     except Exception as e:
         print(f"   ⚠️ Error buscando en colección '{collection_name}': {e}")

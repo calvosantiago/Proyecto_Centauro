@@ -89,40 +89,52 @@ El objetivo suele ser avanzar al siguiente paso del proceso:
 - Agendar llamada de seguimiento
 - Programar entrevista de admisión
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+CRITERIOS ESPECÍFICOS (Escala DECIMAL 1.0-5.0):
+⚠️ USA DECIMALES: 3.0, 3.5, 4.0, 4.5, etc.
 
-1 = PASIVO / SIN CIERRE
+🎯 CALIBRACIÓN: La mayoría de llamadas deben estar en 3.0-3.5 (correcto).
+
+1.0-1.5 = PASIVO / SIN CIERRE
    - Termina con "Piénsalo y me dices"
    - No propone próximo paso concreto
-   - No genera ningún compromiso
    - Despedida genérica sin acción
+   EJEMPLO: "[ASESOR]: Bueno, cualquier duda me escribes. ¡Suerte!"
 
-2 = DÉBIL / PRÓXIMO PASO VAGO
-   - Propone algo pero sin concreción ("Te mando info")
-   - No establece fecha ni hora
-   - No genera compromiso del lead
-   - El lead puede ignorar fácilmente
+2.0-2.5 = DÉBIL / PRÓXIMO PASO VAGO
+   - Propone algo sin concreción: "Te mando info"
+   - NO establece fecha ni hora
+   - Lead puede ignorar fácilmente
+   EJEMPLO: "[ASESOR]: Te envío el brochure por correo. [LEAD]: OK."
 
-3 = ADMINISTRATIVO / PASO DEFINIDO SIN TÉCNICA
-   - Propone próximo paso concreto ("Te envío el formulario")
-   - Pero no usa técnica de cierre
-   - No resume acuerdos
-   - No maneja dudas finales con liderazgo
+3.0 = ADMINISTRATIVO / PASO DEFINIDO SIN TÉCNICA ⭐ (MÁS COMÚN)
+   - Propone próximo paso concreto: "Te envío el formulario"
+   - Pero NO usa técnica de cierre
+   - No resume acuerdos ni maneja dudas con liderazgo
+   EJEMPLO: "[ASESOR]: Te mando el formulario de admisión. [LEAD]: Vale, gracias."
 
-4 = BUENO / CIERRE ESTRUCTURADO
-   - Resume lo acordado ("Entonces quedamos en que...")
-   - Propone próximo paso + fecha concreta
-   - Pide compromiso explícito ("¿Te viene bien el martes?")
-   - Verifica dudas finales
-   - Genera sensación de avance
+3.5 = CORRECTO CON INTENTO DE COMPROMISO
+   - Todo lo del 3.0 PERO pide compromiso básico
+   - Ejemplo: menciona fecha aunque el lead no confirma claramente
+   EJEMPLO: "[ASESOR]: Te lo envío hoy y me lo devuelves esta semana, ¿vale? [LEAD]: Sí, lo reviso."
 
-5 = MAESTRÍA / CIERRE CONSULTIVO
-   - Todo lo anterior PLUS:
-   - Usa técnica de cierre (doble alternativa, asuntivo, etc.)
-   - Maneja dudas de último minuto sin perder momentum
-   - Resume beneficios clave antes de cerrar
-   - Genera entusiasmo en el lead sobre el próximo paso
-   - El lead confirma compromiso de forma clara
+4.0 = BUENO / CIERRE ESTRUCTURADO
+   - Resume lo acordado: "Entonces quedamos en que..."
+   - Próximo paso + fecha CONCRETA
+   - Pide compromiso explícito: "¿Te viene bien el martes?"
+   - Verifica dudas finales con liderazgo
+   EJEMPLO: "[ASESOR]: Perfecto María. Entonces quedamos: te envío el formulario hoy, tú me lo devuelves el viernes, y el lunes tenemos la entrevista de admisión. ¿Te viene bien a las 10am? [LEAD]: Sí, perfecto."
+
+4.5 = MUY BUENO / CASI MAESTRÍA
+   - Todo lo del 4.0 PERO añade resumen de beneficios antes de cerrar
+   - O usa UNA técnica de cierre (doble alternativa o asuntivo)
+
+5.0 = MAESTRÍA / CIERRE CONSULTIVO (RARO)
+   - Resume beneficios clave ANTES de cerrar
+   - Usa técnica de cierre efectiva (doble alternativa o asuntivo)
+   - Maneja dudas de último minuto SIN perder momentum
+   - Genera entusiasmo visible en el lead
+   - Lead confirma compromiso claramente
+   EJEMPLO: "[ASESOR]: María, hemos visto que el máster cubre exactamente tu gap en finanzas y además la modalidad flexible encaja con tu horario de trabajo. Perfecto. Ahora el siguiente paso es la entrevista de admisión, ¿prefieres que la hagamos el martes a las 10 o el jueves a las 15? [LEAD]: El martes perfecto. [ASESOR]: Genial, agendo martes 10am. Te envío la confirmación ahora y nos vemos entonces. ¿Alguna duda de último momento? [LEAD]: No, todo claro. ¡Gracias!"
 
 TÉCNICAS DE CIERRE COMUNES:
 - Doble alternativa: "¿Prefieres que te llame martes o jueves?"
@@ -131,7 +143,7 @@ TÉCNICAS DE CIERRE COMUNES:
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "puntuacion_1_5": 3.0,  ← USA DECIMALES: 3.0, 3.5, 4.0, etc.
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
   "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
@@ -151,12 +163,15 @@ FORMATO JSON OBLIGATORIO:
 }}
 
 REGLAS CRÍTICAS:
-- NO evalúes si el lead dijo "SÍ" a comprar
-- Evalúa si el ASESOR aplicó buena técnica de cierre para avanzar
-- Un lead que dice "Lo pensaré" después de un buen cierre es válido (nota 4 si usó técnica)
-- EVIDENCIAS LITERALES OBLIGATORIAS: Copia exacta de la transcripción, NUNCA parafrasees
-- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
-- Si la ejecución es realmente excelente (resumen + técnica + compromiso + manejo dudas), NO te limites a dar 4
+- NO evalúes si el lead dijo "SÍ" a comprar - evalúa TÉCNICA del asesor
+- Un lead que dice "Lo pensaré" después de un buen cierre = 4.0 si usó técnica
+- EVIDENCIAS LITERALES OBLIGATORIAS: Copia exacta, NUNCA parafrasees
+
+⚠️ CALIBRACIÓN ESTRICTA:
+- El 3.0 es "CORRECTO" - NO es malo, es lo esperado en mayoría de casos
+- NO des 4.0+ solo porque "fue decente" - el 4.0 requiere resumen + fecha + compromiso verificado
+- El 5.0 requiere: resumen beneficios + técnica de cierre + manejo dudas + entusiasmo del lead
+- USA DECIMALES: Si está entre 3.0 y 4.0, usa 3.5
 - En "gap_para_5" explica QUÉ FALTÓ específicamente (ej: "Faltó resumir beneficios clave antes del cierre")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar
 """

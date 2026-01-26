@@ -73,41 +73,56 @@ TU TAREA: Evaluar la fase inicial completa (APERTURA + DESCUBRIMIENTO DE NECESID
 CONTEXTO DEL MANUAL:
 {manual_enriquecido}
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+CRITERIOS ESPECÍFICOS (Escala DECIMAL 1.0-5.0):
+⚠️ IMPORTANTE: Ahora puedes usar .0 o .5 (ejemplo: 3.5, 4.0, 4.5)
 
-1 = NEGLIGENTE / DESASTRE
-   - Apertura fría, sin presentación adecuada
-   - No pregunta nada sobre el lead
-   - Va directo a vender sin investigar
-   - Lead no comparte información
+🎯 REFERENCIA DE CALIBRACIÓN: La mayoría de llamadas deben estar en 3.0-3.5 (CORRECTO).
+   El 4.0+ es para casos con evidencia clara de técnicas avanzadas.
 
-2 = DEFICIENTE / MÍNIMO
-   - Apertura mecánica, sin calidez
-   - Pregunta 1-2 datos básicos ("¿En qué trabajas?")
-   - No profundiza ni construye rapport
-   - Escucha pasiva
+1.0-1.5 = NEGLIGENTE / DESASTRE
+   - Apertura fría o inexistente
+   - Cero preguntas sobre el lead
+   - Va directo a vender
+   EJEMPLO: "[ASESOR]: Hola, te cuento del máster. Cuesta 10mil..."
 
-3 = CORRECTO / PROTOCOLO ESTÁNDAR
-   - Apertura adecuada pero genérica
-   - Hace preguntas del script estándar
-   - Cubre datos básicos (trabajo, experiencia, motivación)
-   - Funcional pero sin profundidad emocional
-   - No descubre el DOLOR real
+2.0-2.5 = DEFICIENTE / MÍNIMO
+   - Apertura mecánica: "Hola, soy Juan"
+   - Solo 1-2 preguntas básicas: "¿En qué trabajas?"
+   - No construye rapport ni profundiza
+   EJEMPLO: "[ASESOR]: ¿Dónde trabajas? [LEAD]: En finanzas. [ASESOR]: OK, te explico el programa..."
 
-4 = BUENO / INVESTIGACIÓN ACTIVA
-   - Apertura cálida que genera confianza
-   - Preguntas abiertas que invitan a desarrollar
-   - Repregunta para clarificar ("¿Qué quieres decir con...?")
-   - Escucha activa (reformula: "Entiendo que...")
-   - Empieza a tocar motivaciones profundas
+3.0 = CORRECTO / PROTOCOLO ESTÁNDAR ⭐ (NOTA MÁS COMÚN)
+   - Apertura adecuada: "Hola María, gracias por tu interés. Cuéntame un poco sobre ti"
+   - Pregunta trabajo, experiencia, motivación (script estándar)
+   - Funcional pero SIN profundidad emocional
+   - NO descubre el dolor real
+   EJEMPLO: "[ASESOR]: ¿Qué te motivó a buscar este máster? [LEAD]: Quiero crecer profesionalmente. [ASESOR]: Perfecto, te cuento..."
 
-5 = MAESTRÍA / DISCOVERY CONSULTIVO
-   - Apertura personalizada que conecta emocionalmente
-   - Pregunta el PORQUÉ detrás de cada respuesta
-   - Descubre el dolor real y urgencia
-   - El LEAD habla 70% del tiempo (asesor escucha)
-   - Valida emocionalmente ("Tiene sentido que...")
-   - Usa técnica SPIN o similar
+3.5 = CORRECTO CON DESTELLOS
+   - Todo lo del 3.0 PERO con 1-2 momentos de repregunta
+   - Alguna validación emocional básica: "Entiendo"
+   EJEMPLO: "[ASESOR]: ¿Qué te motivó? [LEAD]: Crecer. [ASESOR]: ¿Qué significa crecer para ti?"
+
+4.0 = BUENO / INVESTIGACIÓN ACTIVA
+   - Apertura cálida y personalizada
+   - Preguntas abiertas consistentes
+   - Repregunta para clarificar: "¿A qué te refieres con...?"
+   - Reformula: "Entiendo que buscas..."
+   - Empieza a tocar motivaciones profundas (aunque no llega al DOLOR)
+   EJEMPLO: "[ASESOR]: Vi que trabajas en finanzas hace 8 años. ¿Qué te hizo decidir explorar un MBA ahora? [LEAD]: Quiero liderar proyectos. [ASESOR]: ¿Qué significa liderar para ti?"
+
+4.5 = MUY BUENO / CASI MAESTRÍA
+   - Todo lo del 4.0 PERO descubre algún dolor o urgencia
+   - Lead habla 60%+ del tiempo
+   - Usa 1-2 técnicas avanzadas (SPIN parcial, validación emocional fuerte)
+
+5.0 = MAESTRÍA / DISCOVERY CONSULTIVO (RARO)
+   - Apertura que conecta emocionalmente desde el inicio
+   - Pregunta el PORQUÉ detrás de CADA respuesta (técnica SPIN completa)
+   - Descubre dolor real Y urgencia
+   - Lead habla 70%+ del tiempo
+   - Validaciones emocionales: "Tiene sentido que te sientas así..."
+   EJEMPLO: "[ASESOR]: María, vi en tu perfil que llevas 10 años en finanzas corporativas. Cuéntame, ¿qué te ha funcionado bien y qué te está costando más últimamente? [LEAD]: Pues... [habla 3 minutos sobre frustración con liderazgo] [ASESOR]: Suena a que la parte técnica la dominas, pero te frustra no tener herramientas para influir. ¿Es así? ¿Qué pasa si esto no cambia?"
 
 EVIDENCIA REQUERIDA:
 Debes identificar MÍNIMO:
@@ -118,7 +133,7 @@ Debes identificar MÍNIMO:
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "puntuacion_1_5": 3.0,  ← USA DECIMALES: 3.0, 3.5, 4.0, 4.5, etc.
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
   "evidencia_principal": "[ASESOR]: Pregunta o momento clave de apertura...",
   "evidencias_extra": [
@@ -141,10 +156,14 @@ REGLAS CRÍTICAS:
 - Evalúa TANTO la apertura COMO la investigación
 - NO penalices si el lead es cerrado, penaliza si el asesor no intentó abrir
 - Sé técnico, no motivacional
-- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si el asesor cumple todos los criterios de MAESTRÍA
-- Si la ejecución es realmente excelente, NO te limites a dar 4
-- En "gap_para_5" explica QUÉ FALTÓ específicamente, no generalidades
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo menciona lo que falta mejorar
+
+⚠️ CALIBRACIÓN ESTRICTA - LEE ESTO:
+- El 3.0 es "CORRECTO/ESTÁNDAR" - NO es malo, es lo esperado en la mayoría de casos
+- NO des 4.0+ solo porque "fue una llamada decente" - el 4.0 requiere técnicas avanzadas evidentes
+- USA DECIMALES: Si está entre 3.0 y 4.0, usa 3.5
+- El 5.0 es MUY RARO - solo para ejecución impecable con técnicas SPIN completas
+- En "gap_para_5" explica QUÉ FALTÓ específicamente con ejemplos concretos
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta
 """
 
         prompt_usuario = f"""

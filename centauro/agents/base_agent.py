@@ -1,20 +1,25 @@
 """
-Base Agent: Template para todos los agentes evaluadores
+Base Agent v4.0: Template para todos los agentes evaluadores
 Define la interfaz común y utilidades compartidas
 
-INSTRUCCIÓN: Copia TODO este archivo en centauro/agents/base_agent.py
+ACTUALIZADO v4.0: Usa configuración centralizada
 """
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, List
 from dataclasses import dataclass, field
 import json
 from pathlib import Path
+from centauro.config import centauro_config
 
 @dataclass
 class EvaluationResult:
-    """Resultado estandarizado de evaluación"""
+    """Resultado estandarizado de evaluación
+
+    NOTA v4.0: puntuacion_1_5 ahora acepta decimales (float) para mayor granularidad.
+    Valores permitidos: 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0
+    """
     bloque: str
-    puntuacion_1_5: Optional[int]
+    puntuacion_1_5: Optional[float]  # Cambiado de int a float para escala decimal
     observabilidad: str  # ALTA | MEDIA | BAJA | NO_OBSERVABLE_OFF_RECORD
     confianza: float  # 0.0 - 1.0
     evidencia_principal: str
@@ -46,8 +51,8 @@ class BaseEvaluatorAgent(ABC):
 
     def __init__(self, nombre_bloque: str):
         self.nombre_bloque = nombre_bloque
-        self.version = "2.0"
-        self.temperatura = 0.0
+        self.version = "4.0"
+        self.temperatura = centauro_config.LLM_TEMPERATURE_EVALUACION
         self._ejemplos_cache = None  # Cache para ejemplos de buenas prácticas
     
     @abstractmethod
@@ -82,21 +87,21 @@ class BaseEvaluatorAgent(ABC):
     def _calcular_confianza(self, resultado_raw: Dict) -> float:
         """Calcula nivel de confianza basado en la calidad de la respuesta"""
         score = 1.0
-        
+
         evidencia = resultado_raw.get("evidencia_principal", "")
-        if not evidencia or len(evidencia) < 20:
-            score -= 0.3
+        if not evidencia or len(evidencia) < centauro_config.MIN_EVIDENCE_LENGTH:
+            score -= centauro_config.CONFIDENCE_PENALTY_SHORT_EVIDENCE
         if "no se pudo evaluar" in evidencia.lower():
-            score -= 0.3
-        
+            score -= centauro_config.CONFIDENCE_PENALTY_VAGUE_EVIDENCE
+
         razonamiento = resultado_raw.get("razonamiento", "")
-        if len(razonamiento) < 50:
-            score -= 0.2
-        
+        if len(razonamiento) < centauro_config.MIN_REASONING_LENGTH:
+            score -= centauro_config.CONFIDENCE_PENALTY_SHORT_REASONING
+
         obs = resultado_raw.get("observabilidad", "MEDIA")
         if obs in ["BAJA", "NO_OBSERVABLE_OFF_RECORD"]:
-            score -= 0.2
-        
+            score -= centauro_config.CONFIDENCE_PENALTY_LOW_OBSERVABILITY
+
         return max(0.0, min(1.0, score))
     
     def _create_fallback_result(self, error_msg: str) -> EvaluationResult:
@@ -120,11 +125,13 @@ class BaseEvaluatorAgent(ABC):
             evidencia_clean = evidencia.lower().strip()
             transcripcion_clean = transcripcion.lower()
             ratio = fuzz.partial_ratio(evidencia_clean, transcripcion_clean)
-            return ratio >= 80
+            return ratio >= centauro_config.SHERIFF_FUZZY_THRESHOLD
         except ImportError:
             return evidencia.lower() in transcripcion.lower()
 
-    def _buscar_ejemplos_relevantes(self, transcripcion: str, max_ejemplos: int = 2) -> List[str]:
+    def _buscar_ejemplos_relevantes(self, transcripcion: str, max_ejemplos: int = None) -> List[str]:
+        if max_ejemplos is None:
+            max_ejemplos = centauro_config.RAG_TOP_K_BUENAS_PRACTICAS
         """
         Busca ejemplos de buenas prácticas relevantes para esta evaluación.
 
@@ -229,8 +236,9 @@ class BaseEvaluatorAgent(ABC):
 
         for i, ejemplo in enumerate(ejemplos, 1):
             contexto_enriquecido += f"--- Ejemplo de referencia {i} (NO obligatorio seguir) ---\n"
-            # Truncar ejemplo si es muy largo
-            ejemplo_truncado = ejemplo[:1000] + "..." if len(ejemplo) > 1000 else ejemplo
+            # Truncar ejemplo si es muy largo (usar config)
+            max_len = centauro_config.MAX_EJEMPLO_LENGTH_IN_PROMPT
+            ejemplo_truncado = ejemplo[:max_len] + "..." if len(ejemplo) > max_len else ejemplo
             contexto_enriquecido += ejemplo_truncado + "\n\n"
 
         return contexto_enriquecido

@@ -1,12 +1,19 @@
 """
-CENTAURO v3.0 - Interfaz Chainlit
-Sistema de evaluación automatizada de llamadas comerciales
+CENTAURO v4.0 - Interfaz Chainlit
+Sistema de evaluación automatizada de llamadas comerciales con chat interactivo
+
+NUEVO en v4.0:
+- Chat interactivo para consultas al RAG
+- Sistema de memoria y perfiles de asesores
+- Múltiples colecciones ChromaDB
 
 Ejecutar con: chainlit run app.py -w
 """
 import chainlit as cl
 from pathlib import Path
 from centauro.core import CentauroOrchestrator
+from centauro.core.chat_handler import ChatHandler
+from centauro.core.memoria import memory_manager
 from centauro.rag import indexar_documentacion
 from centauro.privacy import redact_pii
 from centauro.reports import generar_pdf
@@ -22,45 +29,75 @@ async def start():
     """Inicialización cuando el usuario conecta"""
 
     # Mensaje de bienvenida
-    welcome_msg = """# 🦄 Bienvenido a **Centauro v3.0**
+    welcome_msg = """#  Bienvenido a **Centauro v4.0**
 
-Sistema de evaluación automatizada de llamadas comerciales con **IA Multi-Agente**.
+Sistema de evaluación automatizada + **Chat Interactivo** con IA Multi-Agente.
 
 ---
 
-## 📤 ¿Cómo usarlo?
+## 💬 **NUEVO: Modo Chat Interactivo**
 
-1. **Usa el botón 📎 (clip) de abajo** o **arrastra el archivo** aquí
+Ahora puedes **preguntar directamente** a Centauro:
+
+**Ejemplos de preguntas:**
+- *"¿Cómo debería hacer una buena apertura?"*
+- *"Muéstrame ejemplos de cierre exitoso"*
+- *"¿Cuál es mi rendimiento histórico?"* (si has sido evaluado)
+- *"Dame estadísticas del equipo"*
+
+**Solo escribe tu pregunta abajo** 👇 y presiona Enter.
+
+---
+
+## 📤 **Modo Evaluación de Llamadas**
+
+1. **Usa el botón 📎 (clip)** o **arrastra tu archivo**
 2. Formatos: `.txt`, `.vtt` o `.docx`
-3. Espera 1-2 minutos mientras analiza
-4. Descarga el reporte PDF completo
+3. Espera 1-2 minutos
+4. Descarga reporte PDF completo
 
 ---
 
-## 🎯 ¿Qué evalúa Centauro?
+## 🎯 **¿Qué evalúa Centauro?**
 
 ✅ **6 Bloques de Venta Consultiva:**
-- 🔍 Investigación (Apertura + Detección)
-- 🎯 Propuesta de Valor
-- 💰 Admisión y Propuesta Económica
-- 🛡️ Manejo de Objeciones
-- 🎬 Cierre y Próximos Pasos
-- 🎭 Estilo y Comunicación
+- 🔍 Investigación • 🎯 Propuesta de Valor
+- 💰 Admisión • 🛡️ Objeciones
+- 🎬 Cierre • 🎭 Estilo
+
+**🆕 Sistema de Memoria:** Cada evaluación mejora a Centauro y trackea tu progreso.
 
 ---
 
-**🤖 Tecnología:** Multi-Agente Híbrido + Sheriff Anti-Alucinaciones + RAG Dinámico
+**🤖 Tecnología v4.0:**
+Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
 
-👇 **Usa el botón 📎 de abajo para adjuntar tu archivo** 👇
+👇 **Escribe tu pregunta o adjunta un archivo** 👇
 """
 
     await cl.Message(content=welcome_msg).send()
 
-    # Indexar manuales en background
+    # Inicializar chat handler en sesión
+    chat_handler = ChatHandler()
+    cl.user_session.set("chat_handler", chat_handler)
+
+    # Indexar manuales en background (solo si está vacío)
     async with cl.Step(name="📚 Inicializando base de conocimiento", type="tool") as step:
         try:
-            indexar_documentacion()
-            step.output = "✅ Manuales OBS indexados correctamente"
+            from centauro.rag import collection_manuales, collection_buenas_practicas
+
+            # Verificar si ya está indexado
+            total_manuales = collection_manuales.count()
+            total_buenas_practicas = collection_buenas_practicas.count()
+            total_docs = total_manuales + total_buenas_practicas
+
+            if total_docs == 0:
+                # Primera vez, indexar todo
+                indexar_documentacion()
+                step.output = "✅ Base de conocimiento indexada correctamente"
+            else:
+                # Ya está indexado, solo informar
+                step.output = f"✅ Base de conocimiento lista ({total_manuales} manuales + {total_buenas_practicas} buenas prácticas)"
         except Exception as e:
             step.output = f"⚠️ Error en indexación (continuará sin RAG): {e}"
 
@@ -87,16 +124,53 @@ async def process_file_action(action: cl.Action):
 
 @cl.on_message
 async def main(message: cl.Message):
-    """Procesar transcripciones subidas"""
+    """Procesar transcripciones subidas O responder consultas de chat"""
 
     # Verificar si hay archivos adjuntos
     files = [file for file in message.elements if isinstance(file, cl.File)] if message.elements else []
 
+    # ==================== MODO CHAT INTERACTIVO ====================
+    if not files and message.content:
+        # El usuario escribió texto sin adjuntar archivo → Modo chat
+        pregunta = message.content.strip()
+
+        if not pregunta:
+            return
+
+        # Obtener chat handler
+        chat_handler = cl.user_session.get("chat_handler")
+        if not chat_handler:
+            chat_handler = ChatHandler()
+            cl.user_session.set("chat_handler", chat_handler)
+
+        # Procesar pregunta
+        await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
+
+        try:
+            # TODO: Detectar nombre de asesor si pregunta por su perfil
+            # Por ahora, intentar extraer de la sesión o usar None
+            nombre_asesor = cl.user_session.get("nombre_asesor", None)
+
+            respuesta = chat_handler.procesar_consulta(pregunta, nombre_asesor)
+
+            await cl.Message(content=respuesta).send()
+
+        except Exception as e:
+            await cl.Message(
+                content=f"❌ Error procesando consulta: {str(e)}\n\nIntenta reformular tu pregunta."
+            ).send()
+
+        return
+
+    # ==================== MODO EVALUACIÓN (archivo adjunto) ====================
     if not files:
         await cl.Message(
-            content="⚠️ **Por favor, sube un archivo de transcripción**\n\n"
-                    "📎 Usa el botón de clip (📎) en la barra inferior\n"
-                    "Formatos soportados: `.txt`, `.vtt`, `.docx`"
+            content="💬 **Escribe tu pregunta** o **adjunta un archivo** para evaluación\n\n"
+                    "**Ejemplos de preguntas:**\n"
+                    "- ¿Cómo hacer una buena investigación?\n"
+                    "- Muéstrame ejemplos de cierre exitoso\n"
+                    "- ¿Cuál es mi rendimiento?\n\n"
+                    "📎 O usa el botón de clip para adjuntar transcripción (.txt, .vtt, .docx)"
         ).send()
         return
 
@@ -171,14 +245,99 @@ async def main(message: cl.Message):
         # ==================== FASE 1: DIARIZACIÓN ====================
         async with cl.Step(name="🎙️ FASE 1: Diarización (ASESOR/LEAD)", type="tool") as step:
             from centauro.agents import DiarizationAgent
+            from centauro.core.gestion_asesores import gestion_asesores
 
             diarization_agent = DiarizationAgent(nombre_asesor=file.name)
             transcripcion_diarizada = diarization_agent.diarizar(texto_protegido, file.name)
 
-            asesor_detectado = diarization_agent.asesor_detectado or file.name
+            # NUEVO: Detección inteligente con validación
+            asesor_detectado_inicial = diarization_agent.asesor_detectado
+
+            # Intentar extraer de transcripción primero
+            if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
+                nombre_de_transcripcion = gestion_asesores.extraer_nombre_de_transcripcion(texto_protegido)
+                if nombre_de_transcripcion:
+                    asesor_detectado_inicial = nombre_de_transcripcion
 
             num_lineas = len([l for l in transcripcion_diarizada.split('\n') if l.strip()])
-            step.output = f"✅ Transcripción diarizada\n\n📊 {num_lineas} líneas procesadas\n👤 Asesor: **{asesor_detectado}**"
+            step.output = f"✅ Transcripción diarizada\n\n📊 {num_lineas} líneas procesadas"
+
+            # Si aún no tenemos un nombre válido, preguntar al usuario
+            if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
+                step.output += "\n\n⚠️ No se pudo detectar el nombre del asesor automáticamente"
+
+        # ==================== CONFIRMACIÓN DE ASESOR ====================
+        # Validar y normalizar nombre del asesor
+        asesor_confirmado = None
+
+        if asesor_detectado_inicial and gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
+            # Buscar si existe uno similar
+            resultado_validacion = gestion_asesores.validar_y_normalizar(asesor_detectado_inicial)
+            nombre_norm, nombre_existente, score = resultado_validacion
+
+            if nombre_existente and score >= 85:
+                # Existe uno muy similar, preguntar cuál usar
+                res = await cl.AskUserMessage(
+                    content=f"👤 **Confirmación de asesor**\n\n"
+                            f"Detectado: **{nombre_norm}**\n"
+                            f"Existe perfil similar: **{nombre_existente}** (similitud: {score}%)\n\n"
+                            f"¿Cuál es correcto?\n"
+                            f"1️⃣ Usar perfil existente: **{nombre_existente}**\n"
+                            f"2️⃣ Crear nuevo perfil: **{nombre_norm}**\n"
+                            f"3️⃣ Escribir nombre manualmente\n\n"
+                            f"Responde: **1**, **2** o escribe el nombre correcto",
+                    timeout=60
+                ).send()
+
+                if res and res.get("output"):
+                    respuesta = res["output"].strip()
+                    if respuesta == "1":
+                        asesor_confirmado = nombre_existente
+                    elif respuesta == "2":
+                        asesor_confirmado = nombre_norm
+                    else:
+                        # Usuario escribió nombre manualmente
+                        try:
+                            asesor_confirmado = gestion_asesores.obtener_nombre_canonico(respuesta)
+                        except ValueError:
+                            await cl.Message(content=f"⚠️ Nombre inválido: '{respuesta}'. Usando detectado: {nombre_norm}").send()
+                            asesor_confirmado = nombre_norm
+                else:
+                    # Timeout, usar existente
+                    asesor_confirmado = nombre_existente
+            else:
+                # No hay similar, usar detectado
+                asesor_confirmado = nombre_norm
+        else:
+            # No se detectó nombre válido, preguntar
+            sugerencias = gestion_asesores.asesores_conocidos[:5] if gestion_asesores.asesores_conocidos else []
+
+            sugerencias_texto = ""
+            if sugerencias:
+                sugerencias_texto = "\n\n**Asesores conocidos:**\n" + "\n".join(f"• {s}" for s in sugerencias)
+
+            res = await cl.AskUserMessage(
+                content=f"👤 **¿Quién es el asesor de esta llamada?**\n\n"
+                        f"No se pudo detectar automáticamente.\n"
+                        f"Por favor, escribe el nombre completo (Nombre Apellido):{sugerencias_texto}",
+                timeout=120
+            ).send()
+
+            if res and res.get("output"):
+                nombre_manual = res["output"].strip()
+                try:
+                    asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
+                except ValueError as e:
+                    await cl.Message(content=f"❌ {e}\n\nUsando 'Asesor Desconocido'").send()
+                    asesor_confirmado = "Asesor Desconocido"
+            else:
+                asesor_confirmado = "Asesor Desconocido"
+
+        # Mostrar confirmación
+        await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
+
+        # Guardar en sesión
+        cl.user_session.set("nombre_asesor", asesor_confirmado)
 
         # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
         async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
@@ -293,7 +452,7 @@ async def main(message: cl.Message):
                 reporte = orchestrator._sintetizar_evaluaciones(
                     evaluaciones_validadas,
                     transcripcion_diarizada,
-                    asesor_detectado,
+                    asesor_confirmado,
                     resumen_contextual
                 )
 
@@ -408,19 +567,48 @@ async def main(message: cl.Message):
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(reporte, f, indent=2, ensure_ascii=False)
 
-            # Mensaje final
-            await cl.Message(
-                content=f"""✅ **Análisis completado**
+        # ==================== REGISTRAR EN MEMORIA (NUEVO v4.0) ====================
+        async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
+            try:
+                # Convertir evaluaciones a formato dict
+                evaluaciones_dict = {
+                    e['bloque']: e for e in evaluaciones_validadas
+                }
 
-📊 Estadísticas:
+                # Registrar evaluación
+                perfil = memory_manager.registrar_evaluacion(
+                    nombre_asesor=asesor_confirmado,
+                    resultado_evaluacion=evaluaciones_dict,
+                    transcripcion_path=str(file_path)
+                )
+
+                # Obtener feedback personalizado
+                feedback_personalizado = perfil.obtener_feedback_personalizado()
+
+                step.output = f"✅ Perfil actualizado\n\n{feedback_personalizado}"
+
+                # Ya está guardado en sesión desde la confirmación
+                # cl.user_session.set("nombre_asesor", asesor_confirmado)
+
+            except Exception as e:
+                step.output = f"⚠️ Error actualizando perfil: {e}"
+
+        # Mensaje final
+        await cl.Message(
+            content=f"""✅ **Análisis completado**
+
+📊 Estadísticas de esta evaluación:
 - Llamadas API: {orchestrator.stats['llamadas_api']}
 - Sheriff: {orchestrator.stats['alucinaciones_detectadas']} alucinaciones detectadas
 - Modo: {orchestrator.stats['modo_ejecucion']}
 
-🔄 Puedes subir otra transcripción para continuar.
+💡 **Ahora puedes:**
+- 🔄 Subir otra transcripción para continuar
+- 💬 Preguntarme: *"¿Cuál es mi rendimiento?"*
+- 📚 Consultar: *"Muéstrame ejemplos de {reporte['feedback_resumido']['areas_mejora'][0][:30] if reporte['feedback_resumido']['areas_mejora'] else 'cierre exitoso'}..."*
 """,
-                author="Sistema"
-            ).send()
+            author="Sistema"
+        ).send()
 
     except Exception as e:
         # Capturar cualquier error no manejado

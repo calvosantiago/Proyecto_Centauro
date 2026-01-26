@@ -64,24 +64,42 @@ def obtener_embedding(texto):
     text = texto.replace("\n", " ")
     return client.embeddings.create(input=[text], model=settings.EMBEDDING_MODEL).data[0].embedding
 
-def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido"):
+def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", force_json=None):
     """
     Envía la consulta a OpenAI y registra el gasto asociado al archivo 'referencia_log'.
+
+    Args:
+        prompt_sistema: Prompt del sistema
+        prompt_usuario: Prompt del usuario
+        referencia_log: Referencia para el log de gastos
+        force_json: Si True, fuerza JSON. Si False, texto libre. Si None, auto-detecta si el prompt pide JSON
     """
-    response = client.chat.completions.create(
-        model=settings.MODEL_NAME,
-        messages=[
+    # Auto-detectar si el prompt pide JSON (para compatibilidad con código existente)
+    if force_json is None:
+        # Si el prompt menciona "JSON" o "json", usar formato JSON
+        prompt_completo = (prompt_sistema + " " + prompt_usuario).lower()
+        force_json = "json" in prompt_completo
+
+    # Configuración base
+    kwargs = {
+        "model": settings.MODEL_NAME,
+        "messages": [
             {"role": "system", "content": prompt_sistema},
             {"role": "user", "content": prompt_usuario}
         ],
-        temperature=0.0,
-        seed=42,
-        response_format={"type": "json_object"}
-    )
-    
+        "temperature": 0.0,
+        "seed": 42
+    }
+
+    # Agregar response_format solo si se necesita JSON
+    if force_json:
+        kwargs["response_format"] = {"type": "json_object"}
+
+    response = client.chat.completions.create(**kwargs)
+
     # --- REGISTRO AUTOMÁTICO DE GASTOS ---
     if response.usage:
         registrar_gasto(referencia_log, response.usage)
     # -------------------------------------
-    
+
     return response.choices[0].message.content
