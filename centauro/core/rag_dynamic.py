@@ -224,8 +224,7 @@ def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: in
     """
     Función auxiliar para buscar en colecciones específicas del RAG.
 
-    ACTUALIZADO v4.0: Ahora usa arquitectura multi-colección de ChromaDB.
-    Ya no necesita filtrado por metadata, búsqueda directa en colección.
+    ACTUALIZADO v4.1: Soporta colección de coaching/libros de ventas.
 
     Args:
         query: Texto de búsqueda
@@ -244,6 +243,8 @@ def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: in
         # Mapeo de nombres legacy a nombres oficiales
         if collection_name == "buenas_practicas":
             collection_name = centauro_config.COLLECTION_BUENAS_PRACTICAS
+        elif collection_name == "coaching_ventas" or collection_name == "coaching":
+            collection_name = centauro_config.COLLECTION_COACHING
         elif collection_name == "default":
             collection_name = centauro_config.COLLECTION_MANUALES
 

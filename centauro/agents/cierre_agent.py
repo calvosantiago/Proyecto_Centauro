@@ -1,8 +1,15 @@
 """
-Agente Evaluador: Cierre y Próximos Pasos
+Agente Evaluador: Cierre y Próximos Pasos (v4.1)
 
-INSTRUCCIÓN: Copia este archivo en:
-C:\\Users\\uscp9a\\Grupo Planeta\\BI POWER - General\\PBI\\PROYECTOS\\Proyecto_Centauro\\centauro\\agents\\cierre_agent.py
+Evalúa:
+- Cómo el asesor cierra la conversación
+- Establecimiento de próximos pasos
+- Técnicas de cierre utilizadas
+
+NUEVO v4.1:
+- Detección de técnicas de cierre avanzadas
+- Feedback personalizado con coaching de libros
+- Bonificación por técnicas efectivas
 """
 from .base_agent import BaseEvaluatorAgent, EvaluationResult
 from ..llm_client import consultar_gpt
@@ -11,44 +18,60 @@ import re
 class CierreAgent(BaseEvaluatorAgent):
     """
     Evalúa cómo el asesor cierra la conversación y establece próximos pasos
-    
+
     IMPORTANTE: El cierre NO es necesariamente una venta inmediata.
     En venta consultiva de formación, el objetivo suele ser:
     - Comprometer envío de documentación al comité de admisiones
     - Agendar próxima llamada/reunión
     - Establecer fecha concreta para siguiente paso
-    
+
     Criterios clave:
     - Define próximo paso claro y específico
     - Genera compromiso (fecha/hora)
     - Resume lo acordado
     - Usa técnica de cierre (no solo "piénsalo")
+
+    v4.1: Detecta y premia técnicas de cierre, genera coaching personalizado
     """
-    
+
     def __init__(self):
         super().__init__(nombre_bloque="Cierre y próximos pasos")
         self.longitud_analisis = 2500  # Últimos 2500 caracteres
-    
+
     def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
         """Evalúa el cierre usando principalmente el final de la conversación"""
-        
+
         # Extraer final de la conversación
         final_conversacion = transcripcion[-self.longitud_analisis:]
-        
+
         # Detectar si la conversación terminó abruptamente (off-record)
         if self._detectar_fin_abrupto(final_conversacion):
             return self._crear_resultado_off_record()
-        
+
         try:
             resultado_raw = self._evaluar_con_llm(final_conversacion, transcripcion, contexto_manual)
             confianza = self._calcular_confianza(resultado_raw)
-            
+
             # Validar que haya próximo paso concreto
             proximo_paso = resultado_raw.get("proximo_paso_concreto", "")
             if not proximo_paso or "vago" in proximo_paso.lower():
                 print(f"   ⚠️ Próximo paso no suficientemente concreto")
                 confianza *= 0.8
-            
+
+            # NUEVO: Detectar técnicas y enriquecer recomendación
+            tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
+            recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            gap_para_5 = resultado_raw.get("gap_para_5", "")
+
+            # Enriquecer con coaching si hay área de mejora clara
+            if gap_para_5 and "N/A" not in gap_para_5:
+                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
+                    recomendacion_base,
+                    area_mejora="técnicas de cierre y compromiso"
+                )
+            else:
+                recomendacion_enriquecida = recomendacion_base
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
@@ -57,15 +80,18 @@ class CierreAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                recomendacion_accionable=recomendacion_enriquecida,
                 metadata={
                     "proximo_paso": proximo_paso,
                     "compromiso_fecha": resultado_raw.get("compromiso_fecha", False),
                     "tecnica_cierre": resultado_raw.get("tecnica_cierre", "ninguna"),
-                    "recepcion_cliente": resultado_raw.get("recepcion_cliente", {})
+                    "recepcion_cliente": resultado_raw.get("recepcion_cliente", {}),
+                    "tecnicas_detectadas": tecnicas_detectadas,
+                    "gap_para_5": gap_para_5,
+                    "feedback_personalizado": resultado_raw.get("feedback_personalizado", "")
                 }
             )
-            
+
         except Exception as e:
             print(f"   ❌ Error en evaluación de Cierre: {e}")
             return self._create_fallback_result(str(e))
@@ -159,8 +185,23 @@ FORMATO JSON OBLIGATORIO:
   "recepcion_cliente": {{
     "estado": "COMPROMETIDO" | "NEUTRO" | "RESISTENTE" | "ENTUSIASTA",
     "evidencia": "[LEAD]: Respuesta del lead... (COPY-PASTE LITERAL)"
-  }}
+  }},
+  "tecnicas_detectadas": ["lista de técnicas que usó, ej: 'doble alternativa', 'resumen beneficios', 'cierre asuntivo'"],
+  "feedback_personalizado": "Mensaje DIRECTO al asesor reconociendo algo ESPECÍFICO que hizo bien y sugiriendo UNA mejora concreta con ejemplo de frase"
 }}
+
+🎯 FEEDBACK PERSONALIZADO - INSTRUCCIONES CRÍTICAS:
+El campo "feedback_personalizado" debe ser un mensaje que el asesor pueda leer y sentir que es PARA ÉL/ELLA.
+
+MALO (genérico): "El asesor debería usar técnicas de cierre"
+BUENO (personalizado): "Bien hecho al proponer enviar el formulario hoy. Para subir al siguiente nivel, antes de cerrar podrías haber resumido: 'María, hemos visto que el MBA encaja con tu objetivo de liderar equipos y la modalidad flexible te permite seguir trabajando. ¿Te parece que avancemos con la documentación?'"
+
+REGLAS DEL FEEDBACK PERSONALIZADO:
+1. USA el nombre del lead si aparece en la transcripción
+2. CITA algo específico que el asesor dijo en el cierre
+3. DA un ejemplo de frase de cierre alternativa que podría usar
+4. SÉ constructivo, no crítico
+5. Máximo 3-4 líneas, directo al grano
 
 REGLAS CRÍTICAS:
 - NO evalúes si el lead dijo "SÍ" a comprar - evalúa TÉCNICA del asesor

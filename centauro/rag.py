@@ -48,6 +48,7 @@ collection_manuales = get_collection(centauro_config.COLLECTION_MANUALES)
 collection_buenas_practicas = get_collection(centauro_config.COLLECTION_BUENAS_PRACTICAS)
 collection_evaluaciones = get_collection(centauro_config.COLLECTION_EVALUACIONES)
 collection_dossiers = get_collection(centauro_config.COLLECTION_DOSSIERS)
+collection_coaching = get_collection(centauro_config.COLLECTION_COACHING)  # NUEVO
 
 # Colección legacy para compatibilidad hacia atrás
 collection = collection_manuales  # Default para código legacy
@@ -269,6 +270,99 @@ def indexar_dossiers():
         print(f"✅ Dossiers indexados: {collection_dossiers.count()} fragmentos totales")
 
 
+# ==================== INDEXACIÓN: COACHING / LIBROS DE VENTAS ====================
+
+def indexar_coaching_ventas():
+    """
+    Indexa libros y materiales de coaching de ventas.
+
+    Carpeta: inputs/docs/coaching_ventas/
+    Formato recomendado de archivos:
+        - spin_selling_rackham.txt
+        - never_split_difference_voss.txt
+        - challenger_sale_dixon.txt
+        etc.
+
+    Cada archivo debe contener fragmentos estructurados con:
+        - Nombre de la técnica
+        - Autor/Libro de referencia
+        - Explicación de la técnica
+        - Ejemplo de aplicación
+    """
+    print("\n--- 📖 Indexando Coaching / Libros de Ventas ---")
+
+    coaching_dir = settings.INPUTS_DIR / "docs" / "coaching_ventas"
+
+    if not coaching_dir.exists():
+        print(f"   ℹ️ Carpeta {coaching_dir} no existe aún. Se creará cuando añadas libros.")
+        return
+
+    archivos = list(coaching_dir.glob("*.txt"))
+
+    if not archivos:
+        print(f"   ℹ️ No hay libros .txt en '{coaching_dir}'")
+        print(f"   💡 Añade fragmentos de libros de ventas aquí para enriquecer el coaching")
+        return
+
+    count_chunks_total = 0
+
+    for archivo in archivos:
+        try:
+            with open(archivo, "r", encoding="utf-8") as f:
+                texto = f.read()
+
+            if not texto:
+                continue
+
+            # Chunking más grande para libros (mantener contexto de técnicas)
+            chunk_size = 1500  # Chunks más grandes para coaching
+            overlap = 300
+            chunks = []
+
+            for i in range(0, len(texto), chunk_size - overlap):
+                chunks.append(texto[i : i + chunk_size])
+
+            if not chunks:
+                continue
+
+            # Extraer autor/libro del nombre de archivo
+            # Formato esperado: tecnica_autor.txt o libro_autor.txt
+            nombre_base = archivo.stem
+            partes = nombre_base.rsplit("_", 1)
+            if len(partes) == 2:
+                tema, autor = partes
+            else:
+                tema = nombre_base
+                autor = "desconocido"
+
+            ids = [f"coaching_{archivo.stem}_{i}" for i in range(len(chunks))]
+            metadatas = [
+                {
+                    "fuente": archivo.name,
+                    "chunk_id": i,
+                    "tipo": "coaching",
+                    "tema": tema.replace("_", " ").title(),
+                    "autor": autor.replace("_", " ").title()
+                }
+                for i in range(len(chunks))
+            ]
+
+            collection_coaching.upsert(
+                ids=ids,
+                documents=chunks,
+                metadatas=metadatas
+            )
+
+            count_chunks_total += len(chunks)
+            print(f"   📖 {archivo.name} ({len(chunks)} fragmentos) - Autor: {autor}")
+
+        except Exception as e:
+            print(f"   ❌ Error procesando {archivo.name}: {e}")
+
+    if count_chunks_total > 0:
+        print(f"✅ Coaching indexado: {collection_coaching.count()} fragmentos totales")
+
+
 # ==================== FUNCIÓN PRINCIPAL ====================
 
 def indexar_documentacion():
@@ -278,17 +372,19 @@ def indexar_documentacion():
     Esta función reemplaza la indexación monolítica anterior.
     """
     print("\n" + "="*70)
-    print("🚀 SISTEMA RAG v4.0 - INDEXACIÓN MULTI-COLECCIÓN")
+    print("SISTEMA RAG v4.1 - INDEXACION MULTI-COLECCION + COACHING")
     print("="*70 + "\n")
 
     indexar_manuales_generales()
     indexar_buenas_practicas()
+    indexar_coaching_ventas()  # NUEVO
     indexar_dossiers()
 
     print("\n" + "="*70)
     print("📊 RESUMEN DE INDEXACIÓN:")
     print(f"   • Manuales generales: {collection_manuales.count()} fragmentos")
     print(f"   • Buenas prácticas: {collection_buenas_practicas.count()} fragmentos")
+    print(f"   • Coaching/Libros: {collection_coaching.count()} fragmentos")
     print(f"   • Evaluaciones históricas: {collection_evaluaciones.count()} fragmentos")
     print(f"   • Dossiers programas: {collection_dossiers.count()} fragmentos")
     print("="*70 + "\n")
@@ -377,6 +473,8 @@ def buscar_en_coleccion(
         col = collection_evaluaciones
     elif collection_name == centauro_config.COLLECTION_DOSSIERS:
         col = collection_dossiers
+    elif collection_name == centauro_config.COLLECTION_COACHING:
+        col = collection_coaching
     else:
         return []
 

@@ -160,6 +160,15 @@ class CentauroConfig:
     COLLECTION_BUENAS_PRACTICAS = "buenas_practicas"
     COLLECTION_EVALUACIONES = "evaluaciones_historicas"
     COLLECTION_DOSSIERS = "dossiers_programas"
+    COLLECTION_COACHING = "coaching_ventas"  # NUEVO: Libros y técnicas de ventas
+
+    # ==================== COACHING: LIBROS DE VENTAS ====================
+
+    # Número de fragmentos de coaching a recuperar por recomendación
+    RAG_TOP_K_COACHING = 2  # fragmentos de libros
+
+    # Longitud máxima de cita de libro en feedback
+    MAX_COACHING_QUOTE_LENGTH = 300  # caracteres
 
 
     # ==================== CHAT INTERACTIVO (CHAINLIT) ====================
@@ -182,5 +191,6 @@ centauro_config = CentauroConfig()
 settings.INPUTS_DIR.mkdir(parents=True, exist_ok=True)
 (settings.INPUTS_DIR / "docs").mkdir(parents=True, exist_ok=True)
 (settings.INPUTS_DIR / "docs" / "buenas_practicas").mkdir(parents=True, exist_ok=True)
+(settings.INPUTS_DIR / "docs" / "coaching_ventas").mkdir(parents=True, exist_ok=True)  # NUEVO
 settings.OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 settings.CHROMA_PATH.mkdir(parents=True, exist_ok=True)

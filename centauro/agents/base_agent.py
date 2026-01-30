@@ -213,7 +213,8 @@ class BaseEvaluatorAgent(ABC):
         contexto_enriquecido += "  • Citar técnicas específicas que funcionaron bien en los ejemplos\n"
         contexto_enriquecido += "  • Identificar PATRONES de comunicación exitosa\n"
         contexto_enriquecido += "  • Dar feedback constructivo basado en lo que se observa que funciona\n"
-        contexto_enriquecido += "  • Reconocer cuando la conversación usa técnicas DIFERENTES pero EFECTIVAS\n\n"
+        contexto_enriquecido += "  • Reconocer cuando la conversación usa técnicas DIFERENTES pero EFECTIVAS\n"
+        contexto_enriquecido += "  • SUMAR PUNTOS (+0.5) cuando detectes técnicas similares a los ejemplos\n\n"
 
         contexto_enriquecido += "❌ NO ESTÁ PERMITIDO:\n"
         contexto_enriquecido += "  • Penalizar porque la conversación no es EXACTAMENTE como el ejemplo\n"
@@ -221,6 +222,12 @@ class BaseEvaluatorAgent(ABC):
         contexto_enriquecido += "  • Bajar la puntuación solo porque es diferente (si es efectivo)\n"
         contexto_enriquecido += "  • Tratar los ejemplos como un CHECKLIST obligatorio\n"
         contexto_enriquecido += "  • Ignorar técnicas válidas que no aparecen en los ejemplos\n\n"
+
+        contexto_enriquecido += "🏆 BONIFICACIÓN POR TÉCNICAS AVANZADAS:\n"
+        contexto_enriquecido += "   Si detectas que el asesor usa técnicas SIMILARES a las de los ejemplos:\n"
+        contexto_enriquecido += "   → Menciona EXPLÍCITAMENTE la técnica en el razonamiento\n"
+        contexto_enriquecido += "   → Considera subir +0.5 puntos si la ejecuta bien\n"
+        contexto_enriquecido += "   → En 'tecnicas_detectadas' lista las técnicas encontradas\n\n"
 
         contexto_enriquecido += "💡 REGLA DE ORO:\n"
         contexto_enriquecido += "   Si la conversación logra el objetivo del bloque (investigar, cerrar, etc.)\n"
@@ -242,6 +249,122 @@ class BaseEvaluatorAgent(ABC):
             contexto_enriquecido += ejemplo_truncado + "\n\n"
 
         return contexto_enriquecido
+
+    def _buscar_coaching_relevante(self, area_mejora: str) -> List[Dict]:
+        """
+        Busca técnicas de coaching/libros de ventas relevantes para un área de mejora.
+
+        Args:
+            area_mejora: Descripción del área a mejorar (ej: "preguntas de descubrimiento")
+
+        Returns:
+            Lista de fragmentos de coaching con técnicas aplicables
+        """
+        try:
+            from centauro.core.rag_dynamic import buscar_contexto_dinamico
+
+            # Query específica para coaching
+            query = f"técnica de ventas para mejorar {area_mejora} {self.nombre_bloque}"
+
+            resultados = buscar_contexto_dinamico(
+                query=query,
+                collection_name="coaching_ventas",
+                k=centauro_config.RAG_TOP_K_COACHING
+            )
+
+            return resultados if resultados else []
+
+        except Exception as e:
+            print(f"   ℹ️ Coaching no disponible: {e}")
+            return []
+
+    def enriquecer_recomendacion_con_coaching(self, recomendacion_base: str, area_mejora: str) -> str:
+        """
+        Enriquece una recomendación con técnicas de libros de ventas.
+
+        Usa LLM para sintetizar el coaching en una recomendación coherente,
+        no simplemente concatena fragmentos crudos del RAG.
+
+        Args:
+            recomendacion_base: Recomendación original del agente
+            area_mejora: Área específica a mejorar
+
+        Returns:
+            Recomendación enriquecida con técnica de coaching sintetizada
+        """
+        coaching = self._buscar_coaching_relevante(area_mejora)
+
+        if not coaching:
+            return recomendacion_base
+
+        # Extraer información del coaching encontrado
+        fragmentos_coaching = []
+        fuentes = []
+
+        for fragmento in coaching[:2]:  # Máximo 2 fragmentos
+            if isinstance(fragmento, dict):
+                texto = fragmento.get('text', '')
+                metadata = fragmento.get('metadata', {})
+                autor = metadata.get('autor', 'Experto en ventas')
+                tema = metadata.get('tema', '')
+                fuente = metadata.get('fuente', '')
+            else:
+                texto = str(fragmento)
+                autor = "Experto en ventas"
+                tema = ""
+                fuente = ""
+
+            if texto:
+                fragmentos_coaching.append(texto)
+                if fuente and fuente not in fuentes:
+                    fuentes.append(f"{tema} ({autor})" if tema else autor)
+
+        if not fragmentos_coaching:
+            return recomendacion_base
+
+        # Usar LLM para sintetizar una recomendación coherente
+        try:
+            from ..llm_client import consultar_gpt
+
+            prompt_sistema = """Eres un coach de ventas experto. Tu tarea es sintetizar una técnica de un libro de ventas en una recomendación PRÁCTICA y ESPECÍFICA para un asesor comercial.
+
+REGLAS CRÍTICAS:
+1. NO copies el texto del libro literalmente
+2. SINTETIZA la técnica en 2-3 oraciones claras
+3. DA un ejemplo concreto de cómo aplicarla en venta de másteres/formación
+4. USA lenguaje directo y actionable
+5. MENCIONA el nombre de la técnica o concepto clave
+6. Máximo 4 líneas de texto
+
+FORMATO DE SALIDA (texto plano, NO JSON):
+[Nombre de la técnica]: [Explicación breve de qué es y cómo funciona]
+Ejemplo: "[Frase ejemplo que el asesor podría usar]"
+"""
+
+            prompt_usuario = f"""Área de mejora del asesor: {area_mejora}
+
+Recomendación base: {recomendacion_base}
+
+Fragmentos de libro de ventas relevantes:
+{chr(10).join(fragmentos_coaching)}
+
+Sintetiza UNA técnica específica que el asesor pueda aplicar. Sé breve y práctico."""
+
+            respuesta = consultar_gpt(prompt_sistema, prompt_usuario, "coaching_sintesis")
+
+            if respuesta and len(respuesta) > 20:
+                # Construir recomendación final
+                fuente_str = fuentes[0] if fuentes else "Coaching de ventas"
+                recomendacion_enriquecida = recomendacion_base + "\n\n"
+                recomendacion_enriquecida += f"TECNICA RECOMENDADA ({fuente_str}):\n"
+                recomendacion_enriquecida += respuesta.strip()
+                return recomendacion_enriquecida
+
+        except Exception as e:
+            print(f"   Info: No se pudo sintetizar coaching: {e}")
+
+        # Fallback: retornar solo la recomendación base si falla la síntesis
+        return recomendacion_base
 
     def __repr__(self):
         return f"<{self.__class__.__name__} bloque='{self.nombre_bloque}' v{self.version}>"

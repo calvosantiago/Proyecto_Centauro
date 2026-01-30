@@ -1,5 +1,5 @@
 """
-Agente Evaluador: Investigación (v3.0)
+Agente Evaluador: Investigación (v4.1)
 
 Fusiona: Apertura + Detección de Necesidades
 
@@ -7,6 +7,11 @@ Evalúa:
 - Bienvenida y establecimiento de rapport (primeros minutos)
 - Exploración de necesidades, motivaciones y situación del lead
 - Calidad de preguntas y escucha activa
+
+NUEVO v4.1:
+- Detección de técnicas avanzadas (SPIN, Mirroring, etc.)
+- Feedback personalizado con coaching de libros de ventas
+- Bonificación por técnicas similares a buenas prácticas
 """
 from .base_agent import BaseEvaluatorAgent, EvaluationResult
 from ..llm_client import consultar_gpt
@@ -21,6 +26,8 @@ class InvestigacionAgent(BaseEvaluatorAgent):
     - Escucha activa (reformula, valida, profundiza)
     - El LEAD habla más que el ASESOR
     - Descubre el DOLOR real, no solo datos superficiales
+
+    v4.1: Detecta y premia técnicas avanzadas, genera coaching personalizado
     """
 
     def __init__(self):
@@ -39,6 +46,20 @@ class InvestigacionAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ Pocas evidencias de investigación ({len(evidencias_extra)})")
                 confianza *= 0.85
 
+            # NUEVO: Detectar técnicas y enriquecer recomendación
+            tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
+            recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            gap_para_5 = resultado_raw.get("gap_para_5", "")
+
+            # Enriquecer con coaching si hay área de mejora clara
+            if gap_para_5 and "N/A" not in gap_para_5:
+                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
+                    recomendacion_base,
+                    area_mejora="preguntas de descubrimiento y apertura"
+                )
+            else:
+                recomendacion_enriquecida = recomendacion_base
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
@@ -47,11 +68,14 @@ class InvestigacionAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                recomendacion_accionable=recomendacion_enriquecida,
                 metadata={
                     "calidad_apertura": resultado_raw.get("calidad_apertura", "MEDIA"),
                     "num_preguntas_detectadas": len([e for e in evidencias_extra if "[ASESOR]" in e and "?" in e]),
-                    "indicios_escucha_activa": resultado_raw.get("indicios_escucha_activa", False)
+                    "indicios_escucha_activa": resultado_raw.get("indicios_escucha_activa", False),
+                    "tecnicas_detectadas": tecnicas_detectadas,
+                    "gap_para_5": gap_para_5,
+                    "feedback_personalizado": resultado_raw.get("feedback_personalizado", "")
                 }
             )
 
@@ -147,8 +171,26 @@ FORMATO JSON OBLIGATORIO:
   "recomendacion_accionable": "Acción específica y concreta para mejorar (sin repetir lo ya logrado)",
   "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
   "calidad_apertura": "EXCELENTE | BUENA | CORRECTA | DEFICIENTE",
-  "indicios_escucha_activa": true/false
+  "indicios_escucha_activa": true/false,
+  "tecnicas_detectadas": ["lista de técnicas que usó el asesor, ej: 'repregunta', 'validación emocional', 'SPIN parcial', 'mirroring'"],
+  "feedback_personalizado": "Mensaje DIRECTO al asesor mencionando su NOMBRE si aparece, reconociendo algo ESPECÍFICO que hizo bien, y sugiriendo UNA mejora concreta con ejemplo de frase que podría usar"
 }}
+
+🎯 FEEDBACK PERSONALIZADO - INSTRUCCIONES CRÍTICAS:
+El campo "feedback_personalizado" debe ser un mensaje que el asesor pueda leer y sentir que es PARA ÉL/ELLA.
+
+MALO (genérico): "El asesor debería hacer más preguntas abiertas"
+BUENO (personalizado): "Hiciste bien al preguntar sobre su experiencia en finanzas. Para subir al siguiente nivel, cuando te dijo 'quiero crecer', podrías haber preguntado: '¿Qué significa crecer para ti? ¿Qué te gustaría estar haciendo en 2 años que hoy no puedes?'"
+
+MALO (genérico): "Falta profundizar en las motivaciones"
+BUENO (personalizado): "Cuando María te contó que lleva 8 años en su empresa, ahí tenías una oportunidad de oro. Podrías haber dicho: 'María, 8 años es mucho tiempo. ¿Qué ha cambiado en este último año que te hizo pensar en un máster ahora?'"
+
+REGLAS DEL FEEDBACK PERSONALIZADO:
+1. USA el nombre del lead si aparece en la transcripción
+2. CITA algo específico que el asesor dijo o hizo
+3. DA un ejemplo de frase alternativa que podría usar
+4. SÉ constructivo, no crítico
+5. Máximo 3-4 líneas, directo al grano
 
 REGLAS CRÍTICAS:
 - Todas las evidencias DEBEN ser copy-paste LITERAL de la transcripción
