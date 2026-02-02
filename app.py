@@ -28,8 +28,12 @@ from main import leer_word, limpiar_formato_vtt
 async def start():
     """Inicialización cuando el usuario conecta"""
 
-    # Mensaje de bienvenida
-    welcome_msg = """#  Bienvenido a **Centauro v4.0**
+    # Verificar si ya se mostró el mensaje de bienvenida en esta sesión
+    already_welcomed = cl.user_session.get("welcomed", False)
+
+    # Mensaje de bienvenida (solo se muestra la primera vez)
+    if not already_welcomed:
+        welcome_msg = """#  Bienvenido a **Centauro v4.0**
 
 Sistema de evaluación automatizada + **Chat Interactivo** con IA Multi-Agente.
 
@@ -74,46 +78,49 @@ Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
 
 👇 **Escribe tu pregunta o adjunta un archivo** 👇
 """
+        await cl.Message(content=welcome_msg).send()
+        cl.user_session.set("welcomed", True)
 
-    await cl.Message(content=welcome_msg).send()
+    # Inicializar chat handler en sesión (solo si no existe)
+    if not cl.user_session.get("chat_handler"):
+        chat_handler = ChatHandler()
+        cl.user_session.set("chat_handler", chat_handler)
 
-    # Inicializar chat handler en sesión
-    chat_handler = ChatHandler()
-    cl.user_session.set("chat_handler", chat_handler)
+    # Solo ejecutar inicialización completa la primera vez
+    if not already_welcomed:
+        # Indexar manuales en background (solo si está vacío)
+        async with cl.Step(name="📚 Inicializando base de conocimiento", type="tool") as step:
+            try:
+                from centauro.rag import collection_manuales, collection_buenas_practicas
 
-    # Indexar manuales en background (solo si está vacío)
-    async with cl.Step(name="📚 Inicializando base de conocimiento", type="tool") as step:
-        try:
-            from centauro.rag import collection_manuales, collection_buenas_practicas
+                # Verificar si ya está indexado
+                total_manuales = collection_manuales.count()
+                total_buenas_practicas = collection_buenas_practicas.count()
+                total_docs = total_manuales + total_buenas_practicas
 
-            # Verificar si ya está indexado
-            total_manuales = collection_manuales.count()
-            total_buenas_practicas = collection_buenas_practicas.count()
-            total_docs = total_manuales + total_buenas_practicas
+                if total_docs == 0:
+                    # Primera vez, indexar todo
+                    indexar_documentacion()
+                    step.output = "✅ Base de conocimiento indexada correctamente"
+                else:
+                    # Ya está indexado, solo informar
+                    step.output = f"✅ Base de conocimiento lista ({total_manuales} manuales + {total_buenas_practicas} buenas prácticas)"
+            except Exception as e:
+                step.output = f"⚠️ Error en indexación (continuará sin RAG): {e}"
 
-            if total_docs == 0:
-                # Primera vez, indexar todo
-                indexar_documentacion()
-                step.output = "✅ Base de conocimiento indexada correctamente"
-            else:
-                # Ya está indexado, solo informar
-                step.output = f"✅ Base de conocimiento lista ({total_manuales} manuales + {total_buenas_practicas} buenas prácticas)"
-        except Exception as e:
-            step.output = f"⚠️ Error en indexación (continuará sin RAG): {e}"
+        # Configurar settings para permitir archivos
+        await cl.ChatSettings(
+            [
+                cl.input_widget.TextInput(
+                    id="file_upload_info",
+                    label="ℹ️ Usa el botón 📎 para adjuntar archivos",
+                    initial="Formatos: .txt, .vtt, .docx"
+                )
+            ]
+        ).send()
 
     # Guardar estado en sesión
     cl.user_session.set("ready", True)
-
-    # Configurar settings para permitir archivos
-    await cl.ChatSettings(
-        [
-            cl.input_widget.TextInput(
-                id="file_upload_info",
-                label="ℹ️ Usa el botón 📎 para adjuntar archivos",
-                initial="Formatos: .txt, .vtt, .docx"
-            )
-        ]
-    ).send()
 
 
 @cl.action_callback("process_file")

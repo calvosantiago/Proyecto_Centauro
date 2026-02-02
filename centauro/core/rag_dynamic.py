@@ -220,16 +220,23 @@ Si hay menos de 8, devuelve solo los que existan.
 
 # ==================== FUNCIÓN AUXILIAR PARA BUENAS PRÁCTICAS ====================
 
-def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: int = 3) -> List[Dict]:
+def buscar_contexto_dinamico(
+    query: str,
+    collection_name: str = "default",
+    k: int = 3,
+    filtro_seccion: str = None
+) -> List[Dict]:
     """
     Función auxiliar para buscar en colecciones específicas del RAG.
 
-    ACTUALIZADO v4.1: Soporta colección de coaching/libros de ventas.
+    ACTUALIZADO v4.2: Soporta filtrado por sección en buenas prácticas.
 
     Args:
         query: Texto de búsqueda
         collection_name: Nombre de la colección (usar centauro_config.COLLECTION_*)
         k: Número de resultados a devolver
+        filtro_seccion: Nombre del bloque para filtrar buenas prácticas
+                        (ej: "Investigación", "Cierre y próximos pasos")
 
     Returns:
         Lista de diccionarios con 'text' y 'metadata' de cada resultado
@@ -248,15 +255,21 @@ def buscar_contexto_dinamico(query: str, collection_name: str = "default", k: in
         elif collection_name == "default":
             collection_name = centauro_config.COLLECTION_MANUALES
 
+        # Construir filtro de metadata si se especifica sección
+        filtro_metadata = None
+        if filtro_seccion and collection_name == centauro_config.COLLECTION_BUENAS_PRACTICAS:
+            filtro_metadata = {"seccion": filtro_seccion}
+
         # Usar función de búsqueda avanzada
         resultados = buscar_en_coleccion(
             query=query,
             collection_name=collection_name,
-            k=k
+            k=k,
+            filtro_metadata=filtro_metadata
         )
 
         return resultados
 
     except Exception as e:
-        print(f"   ⚠️ Error buscando en colección '{collection_name}': {e}")
+        print(f"   Error buscando en coleccion '{collection_name}': {e}")
         return []

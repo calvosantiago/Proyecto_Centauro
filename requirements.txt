@@ -6,7 +6,10 @@ chromadb
 openai>=1.0.0
 pydantic>=2.0.0
 fpdf
-
+scikit-learn
+pandas
+numpy
+# pyannote.audio (solo si vas a meterte con audio puro)
 # Chainlit para interfaz web
 chainlit>=1.0.0
 

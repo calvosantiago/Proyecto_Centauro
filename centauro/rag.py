@@ -129,76 +129,115 @@ def indexar_manuales_generales():
 
 # ==================== INDEXACIÓN: BUENAS PRÁCTICAS ====================
 
+# Mapeo de nombres de subcarpeta a nombres de bloque del sistema
+SECCION_TO_BLOQUE = {
+    "investigacion": "Investigación",
+    "propuesta_valor": "Propuesta de valor",
+    "admision_economica": "Admisión y propuesta económica",
+    "cierre": "Cierre y próximos pasos",
+    "objeciones": "Objeciones"
+}
+
 def indexar_buenas_practicas():
     """
-    Indexa ejemplos de buenas prácticas en colección separada.
+    Indexa ejemplos de buenas prácticas organizados por subcarpetas.
 
-    Permite búsquedas específicas sin mezclar con manuales generales.
+    Estructura esperada:
+        buenas_practicas/
+            investigacion/
+                ejemplo_001.txt
+            propuesta_valor/
+                ejemplo_002.txt
+            admision_economica/
+                ejemplo_003.txt
+            cierre/
+                ejemplo_004.txt
+            objeciones/
+                ejemplo_005.txt
+
+    La sección se detecta por el nombre de la subcarpeta.
     """
-    print("\n--- 📚 Indexando Buenas Prácticas ---")
+    print("\n--- Indexando Buenas Practicas por Seccion ---")
 
     bp_dir = settings.INPUTS_DIR / "docs" / "buenas_practicas"
 
     if not bp_dir.exists():
-        print(f"⚠️ La carpeta {bp_dir} no existe.")
-        return
-
-    archivos = list(bp_dir.glob("*.txt"))
-
-    if not archivos:
-        print(f"⚠️ No hay ejemplos .txt en '{bp_dir}'")
+        print(f"La carpeta {bp_dir} no existe.")
         return
 
     count_chunks_total = 0
+    secciones_indexadas = {}
 
-    for archivo in archivos:
-        try:
-            with open(archivo, "r", encoding="utf-8") as f:
-                texto = f.read()
+    # Buscar en subcarpetas
+    for subcarpeta in bp_dir.iterdir():
+        if not subcarpeta.is_dir():
+            continue
 
-            if not texto:
-                continue
+        seccion_key = subcarpeta.name.lower()
+        seccion_bloque = SECCION_TO_BLOQUE.get(seccion_key, seccion_key)
 
-            # Chunking
-            chunk_size = centauro_config.RAG_CHUNK_SIZE
-            overlap = centauro_config.RAG_CHUNK_OVERLAP
-            chunks = []
+        archivos = list(subcarpeta.glob("*.txt"))
+        if not archivos:
+            continue
 
-            for i in range(0, len(texto), chunk_size - overlap):
-                chunks.append(texto[i : i + chunk_size])
+        seccion_chunks = 0
 
-            if not chunks:
-                continue
+        for archivo in archivos:
+            try:
+                with open(archivo, "r", encoding="utf-8") as f:
+                    texto = f.read()
 
-            # Metadatos enriquecidos para buenas prácticas
-            ids = [f"bp_{archivo.name}_{i}" for i in range(len(chunks))]
+                if not texto:
+                    continue
 
-            # Extraer sección del nombre de archivo (admision_economica_ejemplo_001.txt)
-            seccion = archivo.name.split("_ejemplo_")[0] if "_ejemplo_" in archivo.name else "general"
+                # Chunking
+                chunk_size = centauro_config.RAG_CHUNK_SIZE
+                overlap = centauro_config.RAG_CHUNK_OVERLAP
+                chunks = []
 
-            metadatas = [
-                {
-                    "fuente": archivo.name,
-                    "chunk_id": i,
-                    "tipo": "buena_practica",
-                    "seccion": seccion
-                }
-                for i in range(len(chunks))
-            ]
+                for i in range(0, len(texto), chunk_size - overlap):
+                    chunks.append(texto[i : i + chunk_size])
 
-            # Upsert en colección de buenas prácticas
-            collection_buenas_practicas.upsert(
-                ids=ids,
-                documents=chunks,
-                metadatas=metadatas
-            )
+                if not chunks:
+                    continue
 
-            count_chunks_total += len(chunks)
+                # Metadatos con sección detectada por subcarpeta
+                ids = [f"bp_{seccion_key}_{archivo.stem}_{i}" for i in range(len(chunks))]
 
-        except Exception as e:
-            print(f"   ❌ Error procesando {archivo.name}: {e}")
+                metadatas = [
+                    {
+                        "fuente": archivo.name,
+                        "chunk_id": i,
+                        "tipo": "buena_practica",
+                        "seccion": seccion_bloque,  # Nombre del bloque para filtrar
+                        "seccion_key": seccion_key   # Clave para búsquedas
+                    }
+                    for i in range(len(chunks))
+                ]
 
-    print(f"✅ Buenas prácticas indexadas: {collection_buenas_practicas.count()} fragmentos totales")
+                # Upsert en colección de buenas prácticas
+                collection_buenas_practicas.upsert(
+                    ids=ids,
+                    documents=chunks,
+                    metadatas=metadatas
+                )
+
+                seccion_chunks += len(chunks)
+                count_chunks_total += len(chunks)
+
+            except Exception as e:
+                print(f"   Error procesando {archivo.name}: {e}")
+
+        if seccion_chunks > 0:
+            secciones_indexadas[seccion_bloque] = seccion_chunks
+            print(f"   {seccion_bloque}: {seccion_chunks} fragmentos")
+
+    if count_chunks_total > 0:
+        print(f"Buenas practicas indexadas: {count_chunks_total} fragmentos totales")
+    else:
+        print("   No se encontraron archivos en las subcarpetas.")
+        print("   Estructura esperada: buenas_practicas/[seccion]/*.txt")
+        print("   Secciones validas: investigacion, propuesta_valor, admision_economica, cierre, objeciones")
 
 
 # ==================== INDEXACIÓN: DOSSIERS (SI EXISTEN) ====================

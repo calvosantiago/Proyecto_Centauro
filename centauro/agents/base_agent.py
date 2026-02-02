@@ -130,10 +130,10 @@ class BaseEvaluatorAgent(ABC):
             return evidencia.lower() in transcripcion.lower()
 
     def _buscar_ejemplos_relevantes(self, transcripcion: str, max_ejemplos: int = None) -> List[str]:
-        if max_ejemplos is None:
-            max_ejemplos = centauro_config.RAG_TOP_K_BUENAS_PRACTICAS
         """
         Busca ejemplos de buenas prácticas relevantes para esta evaluación.
+
+        ACTUALIZADO v4.2: Filtra por sección del bloque que está evaluando.
 
         Usa RAG para encontrar fragmentos similares de conversaciones exitosas.
         Los ejemplos se usan como INSPIRACIÓN, no como reglas rígidas.
@@ -145,19 +145,22 @@ class BaseEvaluatorAgent(ABC):
         Returns:
             Lista de textos de ejemplos relevantes
         """
+        if max_ejemplos is None:
+            max_ejemplos = centauro_config.RAG_TOP_K_BUENAS_PRACTICAS
+
         try:
             # Importar RAG dinámico
             from centauro.core.rag_dynamic import buscar_contexto_dinamico
 
             # Construir query específica para este bloque
-            query = f"Ejemplo de buena práctica en {self.nombre_bloque}: {transcripcion[:500]}"
+            query = f"Ejemplo de buena práctica: {transcripcion[:500]}"
 
-            # Buscar en la colección de buenas prácticas
-            # Nota: El RAG debe tener indexados los ejemplos de inputs/docs/buenas_practicas/
+            # Buscar en la colección de buenas prácticas FILTRADO por sección
             resultados = buscar_contexto_dinamico(
                 query=query,
-                collection_name="buenas_practicas",  # Colección específica
-                k=max_ejemplos
+                collection_name="buenas_practicas",
+                k=max_ejemplos,
+                filtro_seccion=self.nombre_bloque  # Filtra por la sección del agente
             )
 
             if not resultados:
@@ -176,7 +179,7 @@ class BaseEvaluatorAgent(ABC):
 
         except Exception as e:
             # Si falla (ej: no hay ejemplos indexados), continuar sin ejemplos
-            print(f"   ℹ️ No se pudieron cargar ejemplos de buenas prácticas: {e}")
+            print(f"   Info: No se pudieron cargar ejemplos de buenas practicas: {e}")
             return []
 
     def _enriquecer_contexto_con_ejemplos(self, contexto_base: str, transcripcion: str) -> str:
