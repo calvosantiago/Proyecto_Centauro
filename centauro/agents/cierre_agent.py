@@ -38,7 +38,7 @@ class CierreAgent(BaseEvaluatorAgent):
         super().__init__(nombre_bloque="Cierre y próximos pasos")
         self.longitud_analisis = 2500  # Últimos 2500 caracteres
 
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa el cierre usando principalmente el final de la conversación"""
 
         # Extraer final de la conversación
@@ -49,7 +49,7 @@ class CierreAgent(BaseEvaluatorAgent):
             return self._crear_resultado_off_record()
 
         try:
-            resultado_raw = self._evaluar_con_llm(final_conversacion, transcripcion, contexto_manual)
+            resultado_raw = self._evaluar_con_llm(final_conversacion, transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
 
             # Validar que haya próximo paso concreto
@@ -96,16 +96,19 @@ class CierreAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Cierre: {e}")
             return self._create_fallback_result(str(e))
     
-    def _evaluar_con_llm(self, final: str, transcripcion_completa: str, manual: str) -> dict:
+    def _evaluar_con_llm(self, final: str, transcripcion_completa: str, manual: str, contexto_usuario: str = None) -> dict:
         """Llama al LLM con prompt especializado"""
-        
+
+        # Enriquecer contexto con ejemplos de buenas prácticas
+        manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion_completa)
+
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de CIERRE Y PRÓXIMOS PASOS en venta consultiva.
 
 TU ÚNICA TAREA: Evaluar cómo cerró el [ASESOR] la conversación y qué próximos pasos estableció.
 
 CONTEXTO DEL MANUAL:
-{manual}
+{manual_enriquecido}
 
 IMPORTANTE SOBRE CIERRE EN VENTA CONSULTIVA:
 En este contexto, el "cierre exitoso" NO es necesariamente que el lead diga "SÍ, lo compro".
@@ -116,51 +119,35 @@ El objetivo suele ser avanzar al siguiente paso del proceso:
 - Programar entrevista de admisión
 
 CRITERIOS ESPECÍFICOS (Escala DECIMAL 1.0-5.0):
-⚠️ USA DECIMALES: 3.0, 3.5, 4.0, 4.5, etc.
-
-🎯 CALIBRACIÓN: La mayoría de llamadas deben estar en 3.0-3.5 (correcto).
+⚠️ USA TODA LA ESCALA. Si el cierre es excelente, da 4.5 o 5.0.
 
 1.0-1.5 = PASIVO / SIN CIERRE
-   - Termina con "Piénsalo y me dices"
-   - No propone próximo paso concreto
-   - Despedida genérica sin acción
-   EJEMPLO: "[ASESOR]: Bueno, cualquier duda me escribes. ¡Suerte!"
+   - Termina con "Piénsalo y me dices", sin próximo paso concreto
 
 2.0-2.5 = DÉBIL / PRÓXIMO PASO VAGO
-   - Propone algo sin concreción: "Te mando info"
-   - NO establece fecha ni hora
-   - Lead puede ignorar fácilmente
-   EJEMPLO: "[ASESOR]: Te envío el brochure por correo. [LEAD]: OK."
+   - Propone algo sin concreción ("Te mando info"), sin fecha ni hora
 
-3.0 = ADMINISTRATIVO / PASO DEFINIDO SIN TÉCNICA ⭐ (MÁS COMÚN)
-   - Propone próximo paso concreto: "Te envío el formulario"
-   - Pero NO usa técnica de cierre
+3.0 = ADMINISTRATIVO / PASO DEFINIDO SIN TÉCNICA
+   - Propone próximo paso concreto pero no usa técnica de cierre
    - No resume acuerdos ni maneja dudas con liderazgo
-   EJEMPLO: "[ASESOR]: Te mando el formulario de admisión. [LEAD]: Vale, gracias."
 
 3.5 = CORRECTO CON INTENTO DE COMPROMISO
-   - Todo lo del 3.0 PERO pide compromiso básico
-   - Ejemplo: menciona fecha aunque el lead no confirma claramente
-   EJEMPLO: "[ASESOR]: Te lo envío hoy y me lo devuelves esta semana, ¿vale? [LEAD]: Sí, lo reviso."
+   - Paso concreto + pide compromiso básico (menciona fecha)
 
 4.0 = BUENO / CIERRE ESTRUCTURADO
-   - Resume lo acordado: "Entonces quedamos en que..."
-   - Próximo paso + fecha CONCRETA
-   - Pide compromiso explícito: "¿Te viene bien el martes?"
-   - Verifica dudas finales con liderazgo
-   EJEMPLO: "[ASESOR]: Perfecto María. Entonces quedamos: te envío el formulario hoy, tú me lo devuelves el viernes, y el lunes tenemos la entrevista de admisión. ¿Te viene bien a las 10am? [LEAD]: Sí, perfecto."
+   - Resume lo acordado, próximo paso + fecha concreta
+   - Pide compromiso explícito, verifica dudas finales
 
-4.5 = MUY BUENO / CASI MAESTRÍA
-   - Todo lo del 4.0 PERO añade resumen de beneficios antes de cerrar
-   - O usa UNA técnica de cierre (doble alternativa o asuntivo)
+4.5 = MUY BUENO
+   - Añade resumen de beneficios antes de cerrar
+   - O usa técnica de cierre (doble alternativa, asuntivo)
+   - Lead confirma compromiso
 
-5.0 = MAESTRÍA / CIERRE CONSULTIVO (RARO)
-   - Resume beneficios clave ANTES de cerrar
-   - Usa técnica de cierre efectiva (doble alternativa o asuntivo)
-   - Maneja dudas de último minuto SIN perder momentum
-   - Genera entusiasmo visible en el lead
-   - Lead confirma compromiso claramente
-   EJEMPLO: "[ASESOR]: María, hemos visto que el máster cubre exactamente tu gap en finanzas y además la modalidad flexible encaja con tu horario de trabajo. Perfecto. Ahora el siguiente paso es la entrevista de admisión, ¿prefieres que la hagamos el martes a las 10 o el jueves a las 15? [LEAD]: El martes perfecto. [ASESOR]: Genial, agendo martes 10am. Te envío la confirmación ahora y nos vemos entonces. ¿Alguna duda de último momento? [LEAD]: No, todo claro. ¡Gracias!"
+5.0 = EXCELENTE / CIERRE CONSULTIVO
+   - Resume beneficios clave vinculados al lead ANTES de cerrar
+   - Usa técnica de cierre efectiva
+   - Maneja dudas finales sin perder momentum
+   - Lead confirma compromiso con claridad
 
 TÉCNICAS DE CIERRE COMUNES:
 - Doble alternativa: "¿Prefieres que te llame martes o jueves?"
@@ -208,16 +195,18 @@ REGLAS CRÍTICAS:
 - Un lead que dice "Lo pensaré" después de un buen cierre = 4.0 si usó técnica
 - EVIDENCIAS LITERALES OBLIGATORIAS: Copia exacta, NUNCA parafrasees
 
-⚠️ CALIBRACIÓN ESTRICTA:
-- El 3.0 es "CORRECTO" - NO es malo, es lo esperado en mayoría de casos
-- NO des 4.0+ solo porque "fue decente" - el 4.0 requiere resumen + fecha + compromiso verificado
-- El 5.0 requiere: resumen beneficios + técnica de cierre + manejo dudas + entusiasmo del lead
+⚠️ CALIBRACIÓN JUSTA:
+- USA TODA LA ESCALA: si el cierre es excelente, da 4.5 o 5.0
+- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
+- Un asesor que resume, propone fecha, usa técnica y el lead confirma merece 4.5+
 - USA DECIMALES: Si está entre 3.0 y 4.0, usa 3.5
 - En "gap_para_5" explica QUÉ FALTÓ específicamente (ej: "Faltó resumir beneficios clave antes del cierre")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar
 """
         
-        prompt_usuario = f"""
+        bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
+
+        prompt_usuario = f"""{bloque_ctx_usuario}
 Contexto completo (para entender el flujo):
 {transcripcion_completa[:1000]}
 [...]

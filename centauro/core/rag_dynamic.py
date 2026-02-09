@@ -25,12 +25,18 @@ class DynamicRAGAgent:
         self.config = OptimizacionConfig()
         
         self.query_base_map = {
+            # Nombres alineados con los agentes y el orquestador
+            "Investigación": "saludo inicial presentación rapport preguntas descubrimiento motivaciones escucha",
+            "Propuesta de valor Institución y Programa": "explicar programa propuesta valor beneficios institución",
+            "Proceso de Admisión y Propuesta Económica": "admisión matrícula precio inversión financiación propuesta económica",
+            "Manejo de objeciones": "objeciones rebatir validar técnicas resolver dudas",
+            "Cierre y próximos pasos": "cierre compromiso siguiente paso fecha matrícula",
+            "Estilo y comunicación": "tono empatía comunicación efectiva escucha activa rapport",
+            # Legacy (compatibilidad)
             "Apertura": "saludo inicial presentación rapport",
             "Detección de necesidades": "preguntas descubrimiento motivaciones escucha",
             "Presentación del programa": "explicar programa propuesta valor",
-            "Manejo de objeciones": "objeciones rebatir validar técnicas",
             "Cierre y siguiente paso": "cierre compromiso siguiente paso",
-            "Estilo y comunicación": "tono empatía comunicación efectiva",
             "Legal (Compliance)": "aviso legal grabación RGPD"
         }
     
@@ -156,27 +162,41 @@ Si hay menos de 8, devuelve solo los que existan.
                     print(f"      Manuales consultados: {', '.join(fuentes_vistas)}")
 
             # 2. Buscar en colección de COACHING / LIBROS DE VENTAS
+            # DIVERSIDAD: Pedir más resultados y seleccionar 1 por libro
             total_docs_coaching = collection_coaching.count()
             if total_docs_coaching > 0:
-                n_coaching = min(centauro_config.RAG_TOP_K_COACHING, total_docs_coaching)
+                n_coaching_query = min(6, total_docs_coaching)  # Pedir más para diversificar
                 resultados_coaching = collection_coaching.query(
                     query_texts=[query],
-                    n_results=n_coaching
+                    n_results=n_coaching_query
                 )
 
                 if resultados_coaching['documents'] and resultados_coaching['documents'][0]:
                     docs_c = resultados_coaching['documents'][0]
                     metadatas_c = resultados_coaching.get('metadatas', [[]])[0]
 
+                    # Forzar diversidad: máximo 1 fragmento por libro
+                    fuentes_coaching_vistas = set()
+                    coaching_count = 0
                     for doc, meta in zip(docs_c, metadatas_c if metadatas_c else [{}]*len(docs_c)):
                         fuente = meta.get('fuente', '') if isinstance(meta, dict) else ''
                         autor = meta.get('autor', '') if isinstance(meta, dict) else ''
+
+                        # Solo incluir si es de un libro que aún no hemos visto
+                        if fuente in fuentes_coaching_vistas:
+                            continue
+                        fuentes_coaching_vistas.add(fuente)
+
                         etiqueta = f"COACHING: {fuente}" if fuente else "COACHING"
                         if autor:
                             etiqueta += f" ({autor})"
                         fragmentos_totales.append(f"[{etiqueta}]\n{doc}")
+                        coaching_count += 1
 
-                    print(f"      Coaching: {len(docs_c)} fragmentos de libros")
+                        if coaching_count >= 3:  # Máximo 3 libros (1 por libro)
+                            break
+
+                    print(f"      Coaching: {coaching_count} libros diversos ({', '.join(fuentes_coaching_vistas)})")
 
             if not fragmentos_totales:
                 print("   ⚠️ No se encontraron fragmentos en ninguna colección")

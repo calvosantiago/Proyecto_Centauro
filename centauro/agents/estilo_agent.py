@@ -22,11 +22,11 @@ class EstiloAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Estilo y comunicación")
     
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa el estilo comunicativo en toda la conversación"""
-        
+
         try:
-            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual)
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
             
             # Validar aspectos críticos
@@ -61,16 +61,19 @@ class EstiloAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Estilo: {e}")
             return self._create_fallback_result(str(e))
     
-    def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
+    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None) -> dict:
         """Llama al LLM con prompt especializado"""
-        
+
+        # Enriquecer contexto con ejemplos de buenas prácticas
+        manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
+
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de ESTILO, TONO Y VOCABULARIO en comunicación comercial.
 
 TU ÚNICA TAREA: Evaluar la CALIDAD COMUNICATIVA del [ASESOR] a lo largo de toda la conversación.
 
 CONTEXTO DEL MANUAL:
-{manual}
+{manual_enriquecido}
 
 ASPECTOS A EVALUAR:
 
@@ -159,9 +162,9 @@ FORMATO JSON OBLIGATORIO:
   "fortaleza_principal": "El aspecto comunicativo más destacable del asesor"
 }}
 
-⚠️ REGLAS CRÍTICAS:
-- El 5/5 ES ALCANZABLE si la comunicación es excepcional
-- Si la ejecución es excelente, NO te limites a dar 4
+⚠️ CALIBRACIÓN JUSTA:
+- USA TODA LA ESCALA: si el estilo comunicativo es excelente, da 4.5 o 5.0
+- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
 - Evidencias LITERALES (COPY-PASTE exacto)
 - En "gap_para_5" sé específico (ej: "Faltó usar metáforas del mundo del lead")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
@@ -174,7 +177,9 @@ REGLAS CRÍTICAS:
 - Identifica patrones: ¿Es consistente o cambia?
 """
         
-        prompt_usuario = f"""
+        bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
+
+        prompt_usuario = f"""{bloque_ctx_usuario}
 Evalúa el estilo comunicativo del [ASESOR] en esta conversación completa:
 
 {transcripcion}

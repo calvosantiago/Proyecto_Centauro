@@ -48,8 +48,16 @@ class CentauroOrchestrator:
             "modo_ejecucion": self.config.get_modo_descripcion()
         }
 
-    def analizar_entrevista_completa(self, nombre_archivo: str, texto_crudo: str) -> Dict:
-        """Pipeline completo orquestado v3.0"""
+    def analizar_entrevista_completa(self, nombre_archivo: str, texto_crudo: str, contexto_usuario: str = None) -> Dict:
+        """Pipeline completo orquestado v3.0
+
+        Args:
+            nombre_archivo: Nombre del archivo de transcripción
+            texto_crudo: Texto crudo de la transcripción
+            contexto_usuario: (Opcional) Contexto adicional proporcionado por el usuario.
+                             Puede incluir info del lead, instrucciones especiales, etc.
+                             Se pasa a todos los agentes evaluadores.
+        """
         print(f"\n{'='*60}")
         print(f"🎯 CENTAURO v3.0 - MODO HÍBRIDO: {nombre_archivo}")
         print(f"{'='*60}")
@@ -95,19 +103,19 @@ class CentauroOrchestrator:
         if self.config.MODO_BATCH:
             # MODO HÍBRIDO: Críticos individual + Secundarios batch
             print("\n   ⭐ BLOQUES CRÍTICOS (agentes individuales):")
-            evaluaciones_criticas = self._evaluar_bloques_criticos(transcripcion_diarizada, cache_key)
+            evaluaciones_criticas = self._evaluar_bloques_criticos(transcripcion_diarizada, cache_key, contexto_usuario)
             evaluaciones.extend(evaluaciones_criticas)
             self.stats["llamadas_api"] += len(self.config.BLOQUES_CRITICOS)
 
             print("\n   📦 BLOQUES SECUNDARIOS (batch optimizado):")
-            evaluaciones_secundarias = self._evaluar_bloques_secundarios(transcripcion_diarizada, cache_key)
+            evaluaciones_secundarias = self._evaluar_bloques_secundarios(transcripcion_diarizada, cache_key, contexto_usuario)
             evaluaciones.extend(evaluaciones_secundarias)
             self.stats["llamadas_api"] += 1
 
         else:
             # MODO INDIVIDUAL: Cada agente una llamada
             print("\n   🔬 MODO PRUEBAS: Todos los agentes individual")
-            evaluaciones = self._evaluar_todos_individual(transcripcion_diarizada, cache_key)
+            evaluaciones = self._evaluar_todos_individual(transcripcion_diarizada, cache_key, contexto_usuario)
             self.stats["llamadas_api"] += 6  # 6 agentes
 
         # --- FASE 3.5: SHERIFF ---
@@ -175,7 +183,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
 
     # ========== EVALUACIÓN: BLOQUES CRÍTICOS (Individual) ==========
 
-    def _evaluar_bloques_criticos(self, transcripcion: str, cache_key: str) -> List[Dict]:
+    def _evaluar_bloques_criticos(self, transcripcion: str, cache_key: str, contexto_usuario: str = None) -> List[Dict]:
         """
         Evalúa bloques críticos con agentes individuales especializados
 
@@ -193,7 +201,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         contexto_investigacion = self.rag_agent.buscar_contexto_para_bloque("Investigación", transcripcion, cache_key)
 
         agente_investigacion = InvestigacionAgent()
-        resultado = agente_investigacion.evaluate(extracto_investigacion, contexto_investigacion)
+        resultado = agente_investigacion.evaluate(extracto_investigacion, contexto_investigacion, contexto_usuario)
         evaluaciones.append(resultado.to_dict())
 
         # 2. PROCESO ADMISIÓN/ECONÓMICA (completo)
@@ -205,7 +213,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         )
 
         agente_admision = AdmisionEconomicaAgent()
-        resultado = agente_admision.evaluate(transcripcion, contexto_admision)
+        resultado = agente_admision.evaluate(transcripcion, contexto_admision, contexto_usuario)
         evaluaciones.append(resultado.to_dict())
 
         # 3. MANEJO DE OBJECIONES (completo)
@@ -213,7 +221,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         contexto_objeciones = self.rag_agent.buscar_contexto_para_bloque("Manejo de objeciones", transcripcion, cache_key)
 
         agente_objeciones = ObjecionesAgent()
-        resultado = agente_objeciones.evaluate(transcripcion, contexto_objeciones)
+        resultado = agente_objeciones.evaluate(transcripcion, contexto_objeciones, contexto_usuario)
         evaluaciones.append(resultado.to_dict())
 
         # 4. CIERRE Y PRÓXIMOS PASOS (con extracto)
@@ -222,7 +230,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         contexto_cierre = self.rag_agent.buscar_contexto_para_bloque("Cierre y próximos pasos", transcripcion, cache_key)
 
         agente_cierre = CierreAgent()
-        resultado = agente_cierre.evaluate(transcripcion, contexto_cierre)  # CierreAgent maneja extracto interno
+        resultado = agente_cierre.evaluate(transcripcion, contexto_cierre, contexto_usuario)  # CierreAgent maneja extracto interno
         evaluaciones.append(resultado.to_dict())
 
         print(f"      ✓ {len(evaluaciones)} bloques críticos evaluados")
@@ -230,7 +238,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
 
     # ========== EVALUACIÓN: BLOQUES SECUNDARIOS (Batch) ==========
 
-    def _evaluar_bloques_secundarios(self, transcripcion: str, cache_key: str) -> List[Dict]:
+    def _evaluar_bloques_secundarios(self, transcripcion: str, cache_key: str, contexto_usuario: str = None) -> List[Dict]:
         """
         Evalúa bloques secundarios en batch (1 llamada para 2 bloques)
 
@@ -239,6 +247,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         2. Estilo y comunicación
 
         ACTUALIZADO v4.3: Incluye ejemplos de buenas prácticas en el prompt
+        ACTUALIZADO v4.4: Soporte para contexto_usuario
         """
         ctx_propuesta = self.rag_agent.buscar_contexto_para_bloque(
             "Propuesta de valor Institución y Programa",
@@ -325,7 +334,18 @@ FORMATO JSON OBLIGATORIO:
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
-        prompt_usuario = f"""
+        # Incluir contexto del usuario si se proporcionó
+        bloque_contexto_usuario = ""
+        if contexto_usuario:
+            bloque_contexto_usuario = f"""
+CONTEXTO ADICIONAL DEL USUARIO:
+{contexto_usuario}
+
+INSTRUCCIÓN: Ten en cuenta este contexto al evaluar. Puede contener información sobre el lead,
+el programa vendido, circunstancias especiales u otras indicaciones relevantes.
+"""
+
+        prompt_usuario = f"""{bloque_contexto_usuario}
 TRANSCRIPCIÓN COMPLETA:
 
 {transcripcion}
@@ -360,7 +380,7 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
 
     # ========== EVALUACIÓN: TODO INDIVIDUAL (Modo Pruebas) ==========
 
-    def _evaluar_todos_individual(self, transcripcion: str, cache_key: str) -> List[Dict]:
+    def _evaluar_todos_individual(self, transcripcion: str, cache_key: str, contexto_usuario: str = None) -> List[Dict]:
         """
         Evalúa TODOS los bloques con agentes individuales
         Solo se usa cuando MODO_BATCH = False (pruebas)
@@ -372,37 +392,37 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
         extracto_inv = self.config.get_extracto("Investigación", transcripcion)
         ctx_inv = self.rag_agent.buscar_contexto_para_bloque("Investigación", transcripcion, cache_key)
         agente = InvestigacionAgent()
-        evaluaciones.append(agente.evaluate(extracto_inv, ctx_inv).to_dict())
+        evaluaciones.append(agente.evaluate(extracto_inv, ctx_inv, contexto_usuario).to_dict())
 
         # 2. Propuesta Valor
         print("      2️⃣ Propuesta de valor Institución y Programa")
         ctx_pv = self.rag_agent.buscar_contexto_para_bloque("Propuesta de valor Institución y Programa", transcripcion, cache_key)
         agente = PropuestaValorAgent()
-        evaluaciones.append(agente.evaluate(transcripcion, ctx_pv).to_dict())
+        evaluaciones.append(agente.evaluate(transcripcion, ctx_pv, contexto_usuario).to_dict())
 
         # 3. Admisión/Económica
         print("      3️⃣ Proceso Admisión y Propuesta Económica")
         ctx_adm = self.rag_agent.buscar_contexto_para_bloque("Proceso de Admisión y Propuesta Económica", transcripcion, cache_key)
         agente = AdmisionEconomicaAgent()
-        evaluaciones.append(agente.evaluate(transcripcion, ctx_adm).to_dict())
+        evaluaciones.append(agente.evaluate(transcripcion, ctx_adm, contexto_usuario).to_dict())
 
         # 4. Objeciones
         print("      4️⃣ Manejo de objeciones")
         ctx_obj = self.rag_agent.buscar_contexto_para_bloque("Manejo de objeciones", transcripcion, cache_key)
         agente = ObjecionesAgent()
-        evaluaciones.append(agente.evaluate(transcripcion, ctx_obj).to_dict())
+        evaluaciones.append(agente.evaluate(transcripcion, ctx_obj, contexto_usuario).to_dict())
 
         # 5. Cierre
         print("      5️⃣ Cierre y próximos pasos")
         ctx_cierre = self.rag_agent.buscar_contexto_para_bloque("Cierre y próximos pasos", transcripcion, cache_key)
         agente = CierreAgent()
-        evaluaciones.append(agente.evaluate(transcripcion, ctx_cierre).to_dict())
+        evaluaciones.append(agente.evaluate(transcripcion, ctx_cierre, contexto_usuario).to_dict())
 
         # 6. Estilo
         print("      6️⃣ Estilo y comunicación")
         ctx_estilo = self.rag_agent.buscar_contexto_para_bloque("Estilo y comunicación", transcripcion, cache_key)
         agente = EstiloAgent()
-        evaluaciones.append(agente.evaluate(transcripcion, ctx_estilo).to_dict())
+        evaluaciones.append(agente.evaluate(transcripcion, ctx_estilo, contexto_usuario).to_dict())
 
         print(f"      ✓ {len(evaluaciones)} agentes ejecutados individualmente")
         return evaluaciones
@@ -539,12 +559,13 @@ Genera el JSON con la información del lead.
             porcentaje_verificado = (evidencias_verificadas / total_evidencias * 100) if total_evidencias > 0 else 0
 
             # REGLA SHERIFF: Si < 30% de evidencias son verificables → ALUCINACIÓN
+            # Penalidad reducida a -1 punto (antes -2) para no destruir evaluaciones
             if porcentaje_verificado < 30:
                 self.stats["alucinaciones_detectadas"] += 1
                 nota_original = evaluacion.get("puntuacion_1_5")
 
                 if nota_original and nota_original > 2:
-                    nota_ajustada = max(1, nota_original - 2)
+                    nota_ajustada = max(1, nota_original - 1)
                     evaluacion["puntuacion_1_5"] = nota_ajustada
                     evaluacion["sheriff_ajuste"] = {
                         "nota_original": nota_original,

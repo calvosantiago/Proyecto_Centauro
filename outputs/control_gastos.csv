@@ -2763,3 +2763,203 @@ Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion)
 09/02/2026,13:11:47,eval_cierre,4318,465,4783,0.000927
 09/02/2026,13:11:48,coaching_sintesis,1009,71,1080,0.000194
 09/02/2026,13:11:56,Interview - Akos Somodi_batch_secundarios,10352,584,10936,0.001903
+09/02/2026,13:43:04,diar_batch,10415,10306,20721,0.007746
+09/02/2026,13:43:49,diar_batch,4465,4420,8885,0.003322
+09/02/2026,13:43:52,rag_temas,3316,181,3497,0.000606
+09/02/2026,13:43:55,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_resumen_contextual,13019,131,13150,0.002031
+09/02/2026,13:44:04,eval_investigacion,4609,561,5170,0.001028
+09/02/2026,13:44:06,coaching_sintesis,1041,91,1132,0.000211
+09/02/2026,13:44:13,eval_admision_economica,18157,488,18645,0.003016
+09/02/2026,13:44:15,coaching_sintesis,997,108,1105,0.000214
+09/02/2026,13:44:21,eval_objeciones,18334,426,18760,0.003006
+09/02/2026,13:44:23,coaching_sintesis,1028,90,1118,0.000208
+09/02/2026,13:44:30,eval_cierre,5415,454,5869,0.001085
+09/02/2026,13:44:31,coaching_sintesis,1024,81,1105,0.000202
+09/02/2026,13:44:40,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_batch_secundarios,18641,595,19236,0.003153
+09/02/2026,13:44:45,rag_temas,3694,206,3900,0.000678
+09/02/2026,13:44:46,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_resumen_contextual,1148,113,1261,0.000240
+09/02/2026,13:44:52,eval_investigacion,4853,509,5362,0.001033
+09/02/2026,13:44:54,coaching_sintesis,1025,96,1121,0.000211
+09/02/2026,13:45:13,eval_admision_economica,20720,422,21142,0.003361
+09/02/2026,13:45:15,coaching_sintesis,996,87,1083,0.000202
+09/02/2026,13:45:21,eval_objeciones,20783,420,21203,0.003369
+09/02/2026,13:45:24,coaching_sintesis,1020,95,1115,0.000210
+09/02/2026,13:45:31,eval_cierre,5404,470,5874,0.001093
+09/02/2026,13:45:33,coaching_sintesis,1009,84,1093,0.000202
+09/02/2026,13:45:42,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_batch_secundarios,21218,581,21799,0.003531
+09/02/2026,13:45:46,rag_temas,3738,269,4007,0.000722
+09/02/2026,13:45:48,OBS Business School - Máster Executive MBA - Entrevista a_ Geraldine Manríquez Plaza_resumen_contextual,1109,104,1213,0.000229
+09/02/2026,13:45:56,eval_investigacion,4792,583,5375,0.001069
+09/02/2026,13:45:58,coaching_sintesis,1040,128,1168,0.000233
+09/02/2026,13:46:05,eval_admision_economica,12813,441,13254,0.002187
+09/02/2026,13:46:08,coaching_sintesis,1007,107,1114,0.000215
+09/02/2026,13:46:16,eval_objeciones,12794,433,13227,0.002179
+09/02/2026,13:46:17,coaching_sintesis,1027,53,1080,0.000186
+09/02/2026,13:46:23,eval_cierre,5461,454,5915,0.001092
+09/02/2026,13:46:25,coaching_sintesis,1025,83,1108,0.000204
+09/02/2026,13:46:35,OBS Business School - Máster Executive MBA - Entrevista a_ Geraldine Manríquez Plaza_batch_secundarios,13263,633,13896,0.002369
+09/02/2026,13:46:38,rag_temas,3585,196,3781,0.000655
+09/02/2026,13:46:40,Gerardo García - Máster en Dirección de Comunicación Corporativa_resumen_contextual,1576,112,1688,0.000304
+09/02/2026,13:46:46,eval_investigacion,4631,549,5180,0.001024
+09/02/2026,13:46:48,coaching_sintesis,1037,96,1133,0.000213
+09/02/2026,13:46:54,eval_admision_economica,14519,426,14945,0.002433
+09/02/2026,13:46:56,coaching_sintesis,1004,87,1091,0.000203
+09/02/2026,13:47:02,eval_objeciones,14654,379,15033,0.002425
+09/02/2026,13:47:05,coaching_sintesis,1021,91,1112,0.000208
+09/02/2026,13:47:12,eval_cierre,5525,474,5999,0.001113
+09/02/2026,13:47:13,coaching_sintesis,1037,79,1116,0.000203
+09/02/2026,13:47:22,Gerardo García - Máster en Dirección de Comunicación Corporativa_batch_secundarios,15142,643,15785,0.002657
+09/02/2026,13:47:25,rag_temas,3297,209,3506,0.000620
+09/02/2026,13:47:27,Interview - Akos Somodi_resumen_contextual,1908,121,2029,0.000359
+09/02/2026,13:47:32,eval_investigacion,4734,516,5250,0.001020
+09/02/2026,13:47:34,coaching_sintesis,1030,96,1126,0.000212
+09/02/2026,13:47:40,eval_admision_economica,9900,389,10289,0.001718
+09/02/2026,13:51:00,coaching_sintesis,996,16384,17380,0.009980
+09/02/2026,13:51:06,eval_objeciones,10125,404,10529,0.001761
+09/02/2026,13:51:08,coaching_sintesis,1027,55,1082,0.000187
+09/02/2026,13:51:15,eval_cierre,5405,487,5892,0.001103
+09/02/2026,13:51:18,coaching_sintesis,1008,77,1085,0.000197
+09/02/2026,13:51:28,Interview - Akos Somodi_batch_secundarios,10477,645,11122,0.001959
+09/02/2026,15:11:27,diar_batch,10415,10322,20737,0.007755
+09/02/2026,15:12:24,diar_batch,4465,4424,8889,0.003324
+09/02/2026,15:12:27,rag_temas,3313,183,3496,0.000607
+09/02/2026,15:12:31,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_resumen_contextual,10606,124,10730,0.001665
+09/02/2026,15:12:41,eval_investigacion,4881,563,5444,0.001070
+09/02/2026,15:15:53,coaching_sintesis,1008,16384,17392,0.009982
+09/02/2026,15:16:01,eval_admision_economica,18663,425,19088,0.003054
+09/02/2026,15:16:05,coaching_sintesis,983,84,1067,0.000198
+09/02/2026,15:16:32,eval_objeciones,18828,2051,20879,0.004055
+09/02/2026,15:19:32,coaching_sintesis,1015,16384,17399,0.009983
+09/02/2026,15:19:38,eval_cierre,5689,414,6103,0.001102
+09/02/2026,15:22:46,coaching_sintesis,1053,16384,17437,0.009988
+09/02/2026,15:23:08,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_batch_secundarios,19733,715,20448,0.003389
+09/02/2026,15:42:25,diar_batch,10415,10321,20736,0.007755
+09/02/2026,15:43:16,diar_batch,4466,4442,8908,0.003335
+09/02/2026,15:43:19,rag_temas,3313,214,3527,0.000625
+09/02/2026,15:43:21,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_resumen_contextual,10187,117,10304,0.001598
+09/02/2026,15:43:30,eval_investigacion,4881,564,5445,0.001071
+09/02/2026,15:43:32,coaching_sintesis,1003,93,1096,0.000206
+09/02/2026,15:43:55,eval_admision_economica,18689,504,19193,0.003106
+09/02/2026,15:43:57,coaching_sintesis,976,76,1052,0.000192
+09/02/2026,15:44:10,eval_objeciones,18854,519,19373,0.003139
+09/02/2026,15:44:13,coaching_sintesis,995,83,1078,0.000199
+09/02/2026,15:44:19,eval_cierre,5689,439,6128,0.001117
+09/02/2026,15:47:37,coaching_sintesis,1052,16384,17436,0.009988
+09/02/2026,15:47:51,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_batch_secundarios,19759,700,20459,0.003384
+09/02/2026,15:47:58,rag_temas,3694,189,3883,0.000667
+09/02/2026,15:48:00,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_resumen_contextual,1148,114,1262,0.000241
+09/02/2026,15:48:10,eval_investigacion,4978,490,5468,0.001041
+09/02/2026,15:48:13,coaching_sintesis,991,94,1085,0.000205
+09/02/2026,15:48:20,eval_admision_economica,21210,393,21603,0.003417
+09/02/2026,15:48:22,coaching_sintesis,973,79,1052,0.000193
+09/02/2026,15:48:43,eval_objeciones,21295,423,21718,0.003448
+09/02/2026,15:49:09,diar_batch,10415,10314,20729,0.007751
+09/02/2026,15:50:02,diar_batch,4466,4437,8903,0.003332
+09/02/2026,15:50:05,rag_temas,3314,206,3520,0.000621
+09/02/2026,15:50:07,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_resumen_contextual,10229,142,10371,0.001620
+09/02/2026,15:50:26,eval_investigacion,4881,552,5433,0.001063
+09/02/2026,15:50:27,coaching_sintesis,1004,91,1095,0.000205
+09/02/2026,15:50:39,eval_admision_economica,18672,623,19295,0.003175
+09/02/2026,15:50:41,coaching_sintesis,974,99,1073,0.000206
+09/02/2026,15:50:50,eval_objeciones,18837,493,19330,0.003121
+09/02/2026,15:52:32,coaching_sintesis,992,16384,17376,0.009979
+09/02/2026,15:52:41,eval_cierre,5780,478,6258,0.001154
+09/02/2026,15:52:43,coaching_sintesis,1040,82,1122,0.000205
+09/02/2026,15:52:57,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_batch_secundarios,22284,540,22824,0.003667
+09/02/2026,15:53:01,rag_temas,3738,241,3979,0.000705
+09/02/2026,15:53:03,OBS Business School - Máster Executive MBA - Entrevista a_ Geraldine Manríquez Plaza_resumen_contextual,1109,104,1213,0.000229
+09/02/2026,15:53:20,eval_investigacion,5038,1103,6141,0.001417
+09/02/2026,15:53:22,coaching_sintesis,986,96,1082,0.000205
+09/02/2026,15:53:30,eval_admision_economica,13398,486,13884,0.002301
+09/02/2026,15:53:31,coaching_sintesis,982,76,1058,0.000193
+09/02/2026,15:53:37,eval_objeciones,13290,370,13660,0.002216
+09/02/2026,15:54:15,coaching_sintesis,1014,16384,17398,0.009983
+09/02/2026,15:54:22,eval_cierre,5689,474,6163,0.001138
+09/02/2026,15:54:24,coaching_sintesis,1053,83,1136,0.000208
+09/02/2026,15:54:34,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_batch_secundarios,19742,624,20366,0.003336
+09/02/2026,15:54:43,rag_temas,3694,207,3901,0.000678
+09/02/2026,15:54:45,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_resumen_contextual,1148,117,1265,0.000242
+09/02/2026,15:54:52,eval_investigacion,4978,492,5470,0.001042
+09/02/2026,15:54:54,coaching_sintesis,994,92,1086,0.000204
+09/02/2026,15:55:00,eval_admision_economica,21210,392,21602,0.003417
+09/02/2026,15:55:01,coaching_sintesis,973,79,1052,0.000193
+09/02/2026,15:55:12,eval_objeciones,21296,451,21747,0.003465
+09/02/2026,15:57:14,coaching_sintesis,1002,16384,17386,0.009981
+09/02/2026,15:57:22,eval_cierre,5694,461,6155,0.001131
+09/02/2026,15:57:24,coaching_sintesis,1068,90,1158,0.000214
+09/02/2026,15:57:37,OBS Business School - Máster Executive MBA - Entrevista a_ Geraldine Manríquez Plaza_batch_secundarios,14340,673,15013,0.002555
+09/02/2026,15:57:41,rag_temas,3585,209,3794,0.000663
+09/02/2026,15:57:42,Gerardo García - Máster en Dirección de Comunicación Corporativa_resumen_contextual,1576,113,1689,0.000304
+09/02/2026,15:57:52,eval_investigacion,4801,537,5338,0.001042
+09/02/2026,15:57:54,coaching_sintesis,1003,86,1089,0.000202
+09/02/2026,15:58:05,eval_admision_economica,15154,362,15516,0.002490
+09/02/2026,15:58:06,coaching_sintesis,979,77,1056,0.000193
+09/02/2026,15:58:14,eval_objeciones,15258,377,15635,0.002515
+09/02/2026,15:58:17,coaching_sintesis,1000,68,1068,0.000191
+09/02/2026,15:58:22,coaching_sintesis,1002,16384,17386,0.009981
+09/02/2026,15:58:24,eval_cierre,5817,487,6304,0.001165
+09/02/2026,15:58:26,coaching_sintesis,1066,79,1145,0.000207
+09/02/2026,15:58:29,eval_cierre,5780,465,6245,0.001146
+09/02/2026,15:58:31,coaching_sintesis,1041,80,1121,0.000204
+09/02/2026,15:58:34,Gerardo García - Máster en Dirección de Comunicación Corporativa_batch_secundarios,16208,587,16795,0.002783
+09/02/2026,15:58:37,rag_temas,3297,211,3508,0.000621
+09/02/2026,15:58:39,Interview - Akos Somodi_resumen_contextual,1908,122,2030,0.000359
+09/02/2026,15:58:40,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_batch_secundarios,22284,622,22906,0.003716
+09/02/2026,15:58:44,rag_temas,3738,241,3979,0.000705
+09/02/2026,15:58:46,OBS Business School - Máster Executive MBA - Entrevista a_ Geraldine Manríquez Plaza_resumen_contextual,1109,102,1211,0.000228
+09/02/2026,15:58:47,eval_investigacion,4883,527,5410,0.001049
+09/02/2026,15:58:49,coaching_sintesis,992,95,1087,0.000206
+09/02/2026,15:58:56,eval_investigacion,5038,675,5713,0.001161
+09/02/2026,15:58:56,eval_admision_economica,10591,432,11023,0.001848
+09/02/2026,15:58:58,coaching_sintesis,1006,96,1102,0.000208
+09/02/2026,15:58:59,coaching_sintesis,978,77,1055,0.000193
+09/02/2026,15:59:04,eval_admision_economica,13398,474,13872,0.002294
+09/02/2026,15:59:06,eval_objeciones,10194,407,10601,0.001773
+09/02/2026,15:59:06,coaching_sintesis,976,95,1071,0.000203
+09/02/2026,15:59:13,eval_objeciones,13297,527,13824,0.002311
+09/02/2026,15:59:15,coaching_sintesis,995,59,1054,0.000185
+09/02/2026,15:59:23,eval_cierre,5694,456,6150,0.001128
+09/02/2026,16:02:31,coaching_sintesis,989,16384,17373,0.009979
+09/02/2026,16:02:38,eval_cierre,5554,497,6051,0.001131
+09/02/2026,16:02:39,coaching_sintesis,1069,16384,17453,0.009991
+09/02/2026,16:02:40,coaching_sintesis,1054,82,1136,0.000207
+09/02/2026,16:02:51,Interview - Akos Somodi_batch_secundarios,11554,595,12149,0.002090
+09/02/2026,16:03:10,OBS Business School - Máster Executive MBA - Entrevista a_ Geraldine Manríquez Plaza_batch_secundarios,14340,672,15012,0.002554
+09/02/2026,16:03:14,rag_temas,3585,197,3782,0.000656
+09/02/2026,16:03:16,Gerardo García - Máster en Dirección de Comunicación Corporativa_resumen_contextual,1576,125,1701,0.000311
+09/02/2026,16:03:27,eval_investigacion,4801,538,5339,0.001043
+09/02/2026,16:03:29,coaching_sintesis,999,91,1090,0.000204
+09/02/2026,16:03:36,eval_admision_economica,15154,353,15507,0.002485
+09/02/2026,16:03:38,coaching_sintesis,975,86,1061,0.000198
+09/02/2026,16:03:45,eval_objeciones,15258,405,15663,0.002532
+09/02/2026,16:03:46,coaching_sintesis,1002,22,1024,0.000163
+09/02/2026,16:03:53,eval_cierre,5817,475,6292,0.001158
+09/02/2026,16:03:55,coaching_sintesis,1064,83,1147,0.000209
+09/02/2026,16:04:05,Gerardo García - Máster en Dirección de Comunicación Corporativa_batch_secundarios,16208,594,16802,0.002788
+09/02/2026,16:04:12,rag_temas,3297,207,3504,0.000619
+09/02/2026,16:04:14,Interview - Akos Somodi_resumen_contextual,1908,121,2029,0.000359
+09/02/2026,16:04:23,eval_investigacion,4883,534,5417,0.001053
+09/02/2026,16:04:25,coaching_sintesis,1002,95,1097,0.000207
+09/02/2026,16:04:31,eval_admision_economica,10591,369,10960,0.001810
+09/02/2026,16:04:33,coaching_sintesis,970,76,1046,0.000191
+09/02/2026,16:04:39,eval_objeciones,10194,407,10601,0.001773
+09/02/2026,16:08:14,coaching_sintesis,991,16384,17375,0.009979
+09/02/2026,16:08:23,eval_cierre,5554,500,6054,0.001133
+09/02/2026,16:08:25,coaching_sintesis,1049,94,1143,0.000214
+09/02/2026,16:08:42,Interview - Akos Somodi_batch_secundarios,11554,564,12118,0.002071
+09/02/2026,17:19:11,diar_batch,10415,10343,20758,0.007768
+09/02/2026,17:20:13,diar_batch,4466,4424,8890,0.003324
+09/02/2026,17:20:17,rag_temas,3312,192,3504,0.000612
+09/02/2026,17:20:21,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_resumen_contextual,7580,142,7722,0.001222
+09/02/2026,17:20:31,eval_investigacion,4665,530,5195,0.001018
+09/02/2026,17:24:07,coaching_sintesis,1130,16384,17514,0.010000
+09/02/2026,17:24:23,eval_admision_economica,18762,440,19202,0.003078
+09/02/2026,17:27:44,coaching_sintesis,1124,16384,17508,0.009999
+09/02/2026,17:28:05,eval_objeciones,18930,419,19349,0.003091
+09/02/2026,17:31:42,coaching_sintesis,1155,16384,17539,0.010004
+09/02/2026,17:31:51,eval_cierre,5305,486,5791,0.001087
+09/02/2026,17:35:43,coaching_sintesis,1198,16384,17582,0.010010
+09/02/2026,17:36:12,Daniela Aguilar Nepomuceno Máster en Supply Chain Management y Logística_batch_secundarios,19765,606,20371,0.003328
+09/02/2026,17:36:24,rag_temas,3694,200,3894,0.000674
+09/02/2026,17:36:27,Juan Jose Adames Máster Dirección de Recursos Humanos y Gestión del Talento_resumen_contextual,1148,112,1260,0.000239
+09/02/2026,17:36:38,eval_investigacion,4762,536,5298,0.001036

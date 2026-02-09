@@ -57,8 +57,9 @@ Ahora puedes **preguntar directamente** a Centauro:
 
 1. **Usa el botón 📎 (clip)** o **arrastra tu archivo**
 2. Formatos: `.txt`, `.vtt` o `.docx`
-3. Espera 1-2 minutos
-4. Descarga reporte PDF completo
+3. **NUEVO:** Puedes escribir contexto junto al archivo (info del lead, programa, etc.)
+4. Espera 1-2 minutos
+5. Descarga reporte PDF completo
 
 ---
 
@@ -184,6 +185,14 @@ async def main(message: cl.Message):
     # Obtener archivo
     file = files[0]
     file_path = Path(file.path)
+
+    # NUEVO: Capturar texto del usuario como contexto adicional
+    # Si el usuario escribe texto junto con el archivo, se usa como contexto
+    contexto_usuario = message.content.strip() if message.content and message.content.strip() else None
+    if contexto_usuario:
+        await cl.Message(
+            content=f"📝 **Contexto del usuario capturado:** Se tendrá en cuenta durante la evaluación."
+        ).send()
 
     # ==================== VALIDACIÓN CRÍTICA: NOMBRE DE ARCHIVO ====================
     try:
@@ -405,25 +414,25 @@ async def main(message: cl.Message):
                             extracto = orchestrator.config.get_extracto(bloque_nombre, transcripcion_diarizada)
                             ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = InvestigacionAgent()
-                            resultado = agente.evaluate(extracto, ctx)
+                            resultado = agente.evaluate(extracto, ctx, contexto_usuario)
 
                         elif bloque_nombre == "Proceso de Admisión y Propuesta Económica":
                             from centauro.agents import AdmisionEconomicaAgent
                             ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = AdmisionEconomicaAgent()
-                            resultado = agente.evaluate(transcripcion_diarizada, ctx)
+                            resultado = agente.evaluate(transcripcion_diarizada, ctx, contexto_usuario)
 
                         elif bloque_nombre == "Manejo de objeciones":
                             from centauro.agents import ObjecionesAgent
                             ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = ObjecionesAgent()
-                            resultado = agente.evaluate(transcripcion_diarizada, ctx)
+                            resultado = agente.evaluate(transcripcion_diarizada, ctx, contexto_usuario)
 
                         elif bloque_nombre == "Cierre y próximos pasos":
                             from centauro.agents import CierreAgent
                             ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = CierreAgent()
-                            resultado = agente.evaluate(transcripcion_diarizada, ctx)
+                            resultado = agente.evaluate(transcripcion_diarizada, ctx, contexto_usuario)
 
                         evaluaciones.append(resultado.to_dict())
                         nota = resultado.puntuacion_1_5 if resultado.puntuacion_1_5 else "N/A"
@@ -435,7 +444,7 @@ async def main(message: cl.Message):
             # BLOQUES SECUNDARIOS (Batch)
             async with cl.Step(name="📦 Propuesta Valor + Estilo (Batch)", type="run") as sub_step:
                 try:
-                    evals_secundarias = orchestrator._evaluar_bloques_secundarios(transcripcion_diarizada, file.name)
+                    evals_secundarias = orchestrator._evaluar_bloques_secundarios(transcripcion_diarizada, file.name, contexto_usuario)
                     evaluaciones.extend(evals_secundarias)
                     sub_step.output = f"✅ 2 bloques evaluados en batch"
                 except Exception as e:

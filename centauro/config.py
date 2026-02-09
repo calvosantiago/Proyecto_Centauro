@@ -73,8 +73,8 @@ class CentauroConfig:
     RAG_TOP_K_GENERAL = 5  # fragmentos
 
     # Número de ejemplos de buenas prácticas a recuperar
-    # 2 = suficiente para inspiración sin saturar el prompt
-    RAG_TOP_K_BUENAS_PRACTICAS = 2  # ejemplos
+    # v4.3: Subido a 3 para mejor calibración de puntuaciones
+    RAG_TOP_K_BUENAS_PRACTICAS = 3  # ejemplos completos
 
     # Umbral de relevancia semántica para filtrar fragmentos
     # 0.3 = mínimo 30% de overlap de palabras clave
@@ -130,7 +130,8 @@ class CentauroConfig:
     MAX_ITEMS_POR_CATEGORIA = 8  # temas/objeciones/necesidades
 
     # Longitud máxima de ejemplo antes de truncar en prompt
-    MAX_EJEMPLO_LENGTH_IN_PROMPT = 1000  # caracteres
+    # v4.3: Subido a 2000 para incluir ejemplos completos (~1400 chars)
+    MAX_EJEMPLO_LENGTH_IN_PROMPT = 2000  # caracteres
 
 
     # ==================== MEMORIA Y APRENDIZAJE ====================

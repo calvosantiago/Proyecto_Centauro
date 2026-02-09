@@ -21,11 +21,11 @@ class ObjecionesAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Manejo de objeciones")
     
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa el manejo de objeciones"""
-        
+
         try:
-            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual)
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
             
             # Validar que se detectaron objeciones
@@ -37,6 +37,17 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 resultado_raw["observabilidad"] = "NO_OBSERVABLE"
                 resultado_raw["puntuacion_1_5"] = None
             
+            # Enriquecer recomendación con coaching si hay área de mejora
+            recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            gap_para_5 = resultado_raw.get("gap_para_5", "")
+            if gap_para_5 and "N/A" not in gap_para_5:
+                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
+                    recomendacion_base,
+                    area_mejora="manejo de objeciones y resolución de dudas"
+                )
+            else:
+                recomendacion_enriquecida = recomendacion_base
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
@@ -45,11 +56,12 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                recomendacion_accionable=recomendacion_enriquecida,
                 metadata={
                     "num_objeciones": len(objeciones_detectadas),
                     "objeciones_identificadas": objeciones_detectadas,
-                    "tecnica_detectada": resultado_raw.get("tecnica_detectada", "ninguna")
+                    "tecnica_detectada": resultado_raw.get("tecnica_detectada", "ninguna"),
+                    "gap_para_5": gap_para_5
                 }
             )
             
@@ -57,16 +69,19 @@ class ObjecionesAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Objeciones: {e}")
             return self._create_fallback_result(str(e))
     
-    def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
+    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None) -> dict:
         """Llama al LLM con prompt especializado"""
-        
+
+        # Enriquecer contexto con ejemplos de buenas prácticas
+        manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
+
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de MANEJO DE OBJECIONES en venta consultiva.
 
 TU ÚNICA TAREA: Evaluar cómo manejó el [ASESOR] las dudas y resistencias del cliente.
 
 CONTEXTO DEL MANUAL:
-{manual}
+{manual_enriquecido}
 
 IMPORTANTE: Si NO hay objeciones claras del [LEAD], marca observabilidad "NO_OBSERVABLE" y puntuacion_1_5: null
 
@@ -132,13 +147,16 @@ REGLAS CRÍTICAS:
 - Si no hay objeciones → observabilidad "NO_OBSERVABLE" y puntuacion_1_5: null
 - NO evalúes si el lead compró, evalúa si el ASESOR manejó bien la resistencia
 - Una objeción bien manejada puede dejar al lead pensando (eso es OK)
-- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
-- Si la ejecución es excelente, NO te limites a dar 4
+⚠️ CALIBRACIÓN JUSTA:
+- USA TODA LA ESCALA: si el manejo de objeciones es excelente, da 4.5 o 5.0
+- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
 - En "gap_para_5" sé específico (ej: "Faltó usar social proof o caso de éxito")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
         
-        prompt_usuario = f"""
+        bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
+
+        prompt_usuario = f"""{bloque_ctx_usuario}
 Identifica y evalúa el manejo de objeciones en esta conversación:
 
 {transcripcion}

@@ -56,11 +56,38 @@ class BaseEvaluatorAgent(ABC):
         self._ejemplos_cache = None  # Cache para ejemplos de buenas prácticas
     
     @abstractmethod
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """
         Método principal de evaluación que cada agente debe implementar
+
+        Args:
+            transcripcion: Transcripción diarizada de la llamada
+            contexto_manual: Contexto del manual de ventas (RAG)
+            contexto_usuario: (Opcional) Contexto adicional del usuario (info del lead, instrucciones, etc.)
         """
         pass
+
+    def _construir_bloque_contexto_usuario(self, contexto_usuario: str = None) -> str:
+        """
+        Construye el bloque de texto para incluir contexto del usuario en los prompts.
+
+        Args:
+            contexto_usuario: Texto libre del usuario con contexto adicional
+
+        Returns:
+            Bloque de texto formateado para incluir en el prompt, o cadena vacía si no hay contexto
+        """
+        if not contexto_usuario or not contexto_usuario.strip():
+            return ""
+
+        return f"""
+CONTEXTO ADICIONAL DEL USUARIO:
+{contexto_usuario.strip()}
+
+INSTRUCCIÓN: Ten en cuenta este contexto al evaluar. Puede incluir información sobre el lead,
+el programa vendido, circunstancias especiales u otras indicaciones relevantes para la evaluación.
+No ignores esta información, intégrala en tu análisis.
+"""
     
     def _extract_json_safe(self, raw_response: str) -> Dict:
         """Extrae JSON de forma robusta"""
@@ -202,78 +229,63 @@ class BaseEvaluatorAgent(ABC):
 
     def _enriquecer_contexto_con_ejemplos(self, contexto_base: str, transcripcion: str) -> str:
         """
-        Añade ejemplos de buenas prácticas al contexto del prompt.
+        Añade ejemplos de buenas prácticas como ANCLAS DE CALIBRACIÓN.
 
-        IMPORTANTE: Los ejemplos son REFERENCIAS, no reglas absolutas.
-        El agente debe usarlos como inspiración, no como checklist rígido.
+        v4.3: Reestructurado para que los ejemplos sean referencia de puntuación,
+        no solo inspiración ignorable.
 
         Args:
             contexto_base: Contexto original del manual
             transcripcion: Conversación a evaluar
 
         Returns:
-            Contexto enriquecido con ejemplos
+            Contexto enriquecido con ejemplos de calibración
         """
-        ejemplos = self._buscar_ejemplos_relevantes(transcripcion, max_ejemplos=2)
+        ejemplos = self._buscar_ejemplos_relevantes(transcripcion)
 
         if not ejemplos:
             return contexto_base
 
-        # Añadir sección de ejemplos al final del contexto
-        contexto_enriquecido = contexto_base + "\n\n"
+        # Posicionar ejemplos ANTES del contexto del manual para mayor visibilidad
+        contexto_enriquecido = ""
         contexto_enriquecido += "="*80 + "\n"
-        contexto_enriquecido += "📚 EJEMPLOS DE BUENAS PRÁCTICAS - USAR COMO GUÍA, NO COMO FRONTERA\n"
+        contexto_enriquecido += "ANCLAS DE CALIBRACION - EJEMPLOS REALES PUNTUADOS\n"
         contexto_enriquecido += "="*80 + "\n\n"
 
-        contexto_enriquecido += "⚠️ ADVERTENCIA CRÍTICA SOBRE EL USO DE ESTOS EJEMPLOS:\n\n"
+        contexto_enriquecido += "Los siguientes son extractos de entrevistas REALES que fueron\n"
+        contexto_enriquecido += "evaluadas manualmente y obtuvieron la puntuacion indicada.\n"
+        contexto_enriquecido += "USALOS PARA CALIBRAR tu evaluacion:\n\n"
 
-        contexto_enriquecido += "Estos ejemplos muestran UNA FORMA EXITOSA de hacer las cosas, NO LA ÚNICA.\n\n"
-
-        contexto_enriquecido += "✅ SÍ ESTÁ PERMITIDO:\n"
-        contexto_enriquecido += "  • Usar los ejemplos como INSPIRACIÓN para sugerir mejoras\n"
-        contexto_enriquecido += "  • Citar técnicas específicas que funcionaron bien en los ejemplos\n"
-        contexto_enriquecido += "  • Identificar PATRONES de comunicación exitosa\n"
-        contexto_enriquecido += "  • Dar feedback constructivo basado en lo que se observa que funciona\n"
-        contexto_enriquecido += "  • Reconocer cuando la conversación usa técnicas DIFERENTES pero EFECTIVAS\n"
-        contexto_enriquecido += "  • SUMAR PUNTOS (+0.5) cuando detectes técnicas similares a los ejemplos\n\n"
-
-        contexto_enriquecido += "❌ NO ESTÁ PERMITIDO:\n"
-        contexto_enriquecido += "  • Penalizar porque la conversación no es EXACTAMENTE como el ejemplo\n"
-        contexto_enriquecido += "  • Exigir que se use el mismo lenguaje o estructura del ejemplo\n"
-        contexto_enriquecido += "  • Bajar la puntuación solo porque es diferente (si es efectivo)\n"
-        contexto_enriquecido += "  • Tratar los ejemplos como un CHECKLIST obligatorio\n"
-        contexto_enriquecido += "  • Ignorar técnicas válidas que no aparecen en los ejemplos\n\n"
-
-        contexto_enriquecido += "🏆 BONIFICACIÓN POR TÉCNICAS AVANZADAS:\n"
-        contexto_enriquecido += "   Si detectas que el asesor usa técnicas SIMILARES a las de los ejemplos:\n"
-        contexto_enriquecido += "   → Menciona EXPLÍCITAMENTE la técnica en el razonamiento\n"
-        contexto_enriquecido += "   → Considera subir +0.5 puntos si la ejecuta bien\n"
-        contexto_enriquecido += "   → En 'tecnicas_detectadas' lista las técnicas encontradas\n\n"
-
-        contexto_enriquecido += "💡 REGLA DE ORO:\n"
-        contexto_enriquecido += "   Si la conversación logra el objetivo del bloque (investigar, cerrar, etc.)\n"
-        contexto_enriquecido += "   usando un enfoque DIFERENTE pero EFECTIVO → Puntúa alto y RECONÓCELO.\n"
-        contexto_enriquecido += "   Los ejemplos son para ENRIQUECER tu análisis, no para LIMITAR tu criterio.\n\n"
-
-        contexto_enriquecido += "🎯 CÓMO USAR LOS EJEMPLOS CORRECTAMENTE:\n"
-        contexto_enriquecido += "  1. Evalúa la conversación PRIMERO por sus propios méritos\n"
-        contexto_enriquecido += "  2. Identifica qué funcionó bien y qué podría mejorar\n"
-        contexto_enriquecido += "  3. LUEGO consulta los ejemplos para sugerencias CONCRETAS de mejora\n"
-        contexto_enriquecido += "  4. Si encuentras técnicas exitosas NO presentes en los ejemplos → ¡Celébralas!\n"
-        contexto_enriquecido += "  5. Menciona los ejemplos solo cuando sean RELEVANTES y ÚTILES\n\n"
+        contexto_enriquecido += "INSTRUCCIONES DE CALIBRACION:\n"
+        contexto_enriquecido += "1. Lee los ejemplos para entender el NIVEL DE CALIDAD que corresponde a cada nota\n"
+        contexto_enriquecido += "2. Los ejemplos muestran UNA forma exitosa, NO la unica. Hay muchas formas\n"
+        contexto_enriquecido += "   de alcanzar un 5/5 sin parecerse al ejemplo\n"
+        contexto_enriquecido += "3. Evalua la conversacion por SUS PROPIOS MERITOS primero:\n"
+        contexto_enriquecido += "   - Si logra el objetivo del bloque con calidad → puntua alto\n"
+        contexto_enriquecido += "   - Si usa tecnicas diferentes pero efectivas → puntua alto\n"
+        contexto_enriquecido += "   - NO exijas que se parezca al ejemplo para dar buena nota\n"
+        contexto_enriquecido += "4. Si la conversacion es la MISMA entrevista que un ejemplo,\n"
+        contexto_enriquecido += "   la puntuacion debe ser COHERENTE con la del ejemplo\n"
+        contexto_enriquecido += "5. Usa los ejemplos para ENRIQUECER tus recomendaciones de mejora,\n"
+        contexto_enriquecido += "   sugiriendo tecnicas concretas que podrian complementar lo que ya hace bien\n\n"
 
         for i, ejemplo in enumerate(ejemplos, 1):
-            contexto_enriquecido += f"--- Ejemplo de referencia {i} (NO obligatorio seguir) ---\n"
-            # Truncar ejemplo si es muy largo (usar config)
             max_len = centauro_config.MAX_EJEMPLO_LENGTH_IN_PROMPT
             ejemplo_truncado = ejemplo[:max_len] + "..." if len(ejemplo) > max_len else ejemplo
+            contexto_enriquecido += f"--- EJEMPLO DE REFERENCIA {i} ---\n"
             contexto_enriquecido += ejemplo_truncado + "\n\n"
+
+        contexto_enriquecido += "="*80 + "\n\n"
+
+        # Luego el contexto del manual
+        contexto_enriquecido += contexto_base
 
         return contexto_enriquecido
 
     def _buscar_coaching_relevante(self, area_mejora: str) -> List[Dict]:
         """
         Busca técnicas de coaching/libros de ventas relevantes para un área de mejora.
+        FUERZA DIVERSIDAD: recupera de fuentes distintas para no sesgar hacia un solo libro.
 
         Args:
             area_mejora: Descripción del área a mejorar (ej: "preguntas de descubrimiento")
@@ -284,16 +296,33 @@ class BaseEvaluatorAgent(ABC):
         try:
             from centauro.core.rag_dynamic import buscar_contexto_dinamico
 
-            # Query específica para coaching
-            query = f"técnica de ventas para mejorar {area_mejora} {self.nombre_bloque}"
+            # Recuperar más resultados para poder diversificar
+            query = f"técnica para {area_mejora} comunicación persuasión ventas"
 
             resultados = buscar_contexto_dinamico(
                 query=query,
                 collection_name="coaching_ventas",
-                k=centauro_config.RAG_TOP_K_COACHING
+                k=6  # Pedir más para poder diversificar
             )
 
-            return resultados if resultados else []
+            if not resultados:
+                return []
+
+            # FORZAR DIVERSIDAD: seleccionar 1 resultado por fuente/libro
+            vistos = set()
+            diversos = []
+            for r in resultados:
+                fuente = r.get('metadata', {}).get('fuente', '') if isinstance(r, dict) else ''
+                if fuente not in vistos:
+                    vistos.add(fuente)
+                    diversos.append(r)
+                if len(diversos) >= centauro_config.RAG_TOP_K_COACHING:
+                    break
+
+            fuentes_str = ', '.join(vistos) if vistos else 'ninguna'
+            print(f"      Coaching diverso: {len(diversos)} libros ({fuentes_str})")
+
+            return diversos
 
         except Exception as e:
             print(f"   ℹ️ Coaching no disponible: {e}")
@@ -347,37 +376,42 @@ class BaseEvaluatorAgent(ABC):
         try:
             from ..llm_client import consultar_gpt
 
-            prompt_sistema = """Eres un coach de ventas experto. Tu tarea es sintetizar una técnica de un libro de ventas en una recomendación PRÁCTICA y ESPECÍFICA para un asesor comercial.
+            prompt_sistema = """Eres un COACH DE VENTAS EXPERTO que asesora a comerciales que venden másteres y formación de posgrado. Tu trabajo es dar recomendaciones PRÁCTICAS, EXPLICADAS y ACCIONABLES.
 
 REGLAS CRÍTICAS:
-1. NO copies el texto del libro literalmente
-2. SINTETIZA la técnica en 2-3 oraciones claras
-3. DA un ejemplo concreto de cómo aplicarla en venta de másteres/formación
-4. USA lenguaje directo y actionable
-5. MENCIONA el nombre de la técnica o concepto clave
-6. Máximo 4 líneas de texto
+1. NO copies el texto del libro literalmente, EXPLICA la técnica con tus palabras
+2. EXPLICA POR QUÉ la técnica funciona (la psicología detrás)
+3. DA 2-3 ejemplos concretos de FRASES que el asesor podría usar en su próxima llamada
+4. ADAPTA la técnica al contexto de venta de formación/másteres
+5. Si hay técnicas de VARIOS libros, combínalas en una recomendación coherente
+6. Habla como un coach que quiere que el asesor ENTIENDA y APLIQUE, no solo que memorice un nombre
 
 FORMATO DE SALIDA (texto plano, NO JSON):
-[Nombre de la técnica]: [Explicación breve de qué es y cómo funciona]
-Ejemplo: "[Frase ejemplo que el asesor podría usar]"
+
+📖 TÉCNICA: [Nombre de la técnica] (de [Libro/Autor])
+💡 POR QUÉ FUNCIONA: [1-2 frases explicando la psicología o el principio]
+🎯 CÓMO APLICARLA:
+  • [Instrucción práctica 1 con ejemplo de frase]
+  • [Instrucción práctica 2 con ejemplo de frase]
+  • [Instrucción práctica 3 con ejemplo de frase (opcional)]
 """
 
             prompt_usuario = f"""Área de mejora del asesor: {area_mejora}
 
 Recomendación base: {recomendacion_base}
 
-Fragmentos de libro de ventas relevantes:
+Fragmentos de libros de ventas relevantes (usa TODOS los que sean útiles, no solo uno):
 {chr(10).join(fragmentos_coaching)}
 
-Sintetiza UNA técnica específica que el asesor pueda aplicar. Sé breve y práctico."""
+Genera una recomendación de coaching COMPLETA que el asesor pueda leer, entender y aplicar inmediatamente. Combina técnicas de los diferentes libros si son complementarias."""
 
             respuesta = consultar_gpt(prompt_sistema, prompt_usuario, "coaching_sintesis")
 
             if respuesta and len(respuesta) > 20:
-                # Construir recomendación final
-                fuente_str = fuentes[0] if fuentes else "Coaching de ventas"
+                # Construir recomendación final con todas las fuentes usadas
+                fuentes_str = ", ".join(fuentes) if fuentes else "Coaching de ventas"
                 recomendacion_enriquecida = recomendacion_base + "\n\n"
-                recomendacion_enriquecida += f"TECNICA RECOMENDADA ({fuente_str}):\n"
+                recomendacion_enriquecida += f"🏋️ COACHING PERSONALIZADO (Fuentes: {fuentes_str}):\n"
                 recomendacion_enriquecida += respuesta.strip()
                 return recomendacion_enriquecida
 

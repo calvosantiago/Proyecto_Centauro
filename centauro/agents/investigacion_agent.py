@@ -33,11 +33,11 @@ class InvestigacionAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Investigación")
 
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa investigación (apertura + detección necesidades)"""
 
         try:
-            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual)
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
 
             # Validar evidencias múltiples
@@ -83,7 +83,7 @@ class InvestigacionAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Investigación: {e}")
             return self._create_fallback_result(str(e))
 
-    def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
+    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None) -> dict:
         """Llama al LLM con prompt especializado en investigación completa"""
 
         # Enriquecer contexto con ejemplos de buenas prácticas
@@ -98,55 +98,41 @@ CONTEXTO DEL MANUAL:
 {manual_enriquecido}
 
 CRITERIOS ESPECÍFICOS (Escala DECIMAL 1.0-5.0):
-⚠️ IMPORTANTE: Ahora puedes usar .0 o .5 (ejemplo: 3.5, 4.0, 4.5)
+⚠️ IMPORTANTE: Usa toda la escala. Un buen asesor MERECE un 4.5 o 5.0.
 
-🎯 REFERENCIA DE CALIBRACIÓN: La mayoría de llamadas deben estar en 3.0-3.5 (CORRECTO).
-   El 4.0+ es para casos con evidencia clara de técnicas avanzadas.
-
-1.0-1.5 = NEGLIGENTE / DESASTRE
-   - Apertura fría o inexistente
-   - Cero preguntas sobre el lead
-   - Va directo a vender
+1.0-1.5 = NEGLIGENTE
+   - Apertura fría o inexistente, va directo a vender
    EJEMPLO: "[ASESOR]: Hola, te cuento del máster. Cuesta 10mil..."
 
-2.0-2.5 = DEFICIENTE / MÍNIMO
-   - Apertura mecánica: "Hola, soy Juan"
-   - Solo 1-2 preguntas básicas: "¿En qué trabajas?"
-   - No construye rapport ni profundiza
+2.0-2.5 = DEFICIENTE
+   - Apertura mecánica, solo 1-2 preguntas básicas, no profundiza
    EJEMPLO: "[ASESOR]: ¿Dónde trabajas? [LEAD]: En finanzas. [ASESOR]: OK, te explico el programa..."
 
-3.0 = CORRECTO / PROTOCOLO ESTÁNDAR ⭐ (NOTA MÁS COMÚN)
-   - Apertura adecuada: "Hola María, gracias por tu interés. Cuéntame un poco sobre ti"
-   - Pregunta trabajo, experiencia, motivación (script estándar)
-   - Funcional pero SIN profundidad emocional
-   - NO descubre el dolor real
-   EJEMPLO: "[ASESOR]: ¿Qué te motivó a buscar este máster? [LEAD]: Quiero crecer profesionalmente. [ASESOR]: Perfecto, te cuento..."
+3.0 = CORRECTO / PROTOCOLO ESTÁNDAR
+   - Apertura adecuada, pregunta trabajo/experiencia/motivación (script estándar)
+   - Funcional pero sin profundidad emocional, no descubre el dolor real
+   EJEMPLO: "[ASESOR]: ¿Qué te motivó? [LEAD]: Quiero crecer. [ASESOR]: Perfecto, te cuento..."
 
 3.5 = CORRECTO CON DESTELLOS
-   - Todo lo del 3.0 PERO con 1-2 momentos de repregunta
-   - Alguna validación emocional básica: "Entiendo"
+   - Todo lo del 3.0 PERO con alguna repregunta o validación emocional básica
    EJEMPLO: "[ASESOR]: ¿Qué te motivó? [LEAD]: Crecer. [ASESOR]: ¿Qué significa crecer para ti?"
 
 4.0 = BUENO / INVESTIGACIÓN ACTIVA
-   - Apertura cálida y personalizada
-   - Preguntas abiertas consistentes
-   - Repregunta para clarificar: "¿A qué te refieres con...?"
-   - Reformula: "Entiendo que buscas..."
-   - Empieza a tocar motivaciones profundas (aunque no llega al DOLOR)
-   EJEMPLO: "[ASESOR]: Vi que trabajas en finanzas hace 8 años. ¿Qué te hizo decidir explorar un MBA ahora? [LEAD]: Quiero liderar proyectos. [ASESOR]: ¿Qué significa liderar para ti?"
+   - Apertura cálida y personalizada, preguntas abiertas consistentes
+   - Repregunta y reformula, toca motivaciones profundas
+   EJEMPLO: "[ASESOR]: Vi que trabajas en finanzas hace 8 años. ¿Qué te hizo explorar un MBA ahora?"
 
-4.5 = MUY BUENO / CASI MAESTRÍA
-   - Todo lo del 4.0 PERO descubre algún dolor o urgencia
-   - Lead habla 60%+ del tiempo
-   - Usa 1-2 técnicas avanzadas (SPIN parcial, validación emocional fuerte)
+4.5 = MUY BUENO
+   - Descubre algún dolor o urgencia real, lead se abre y comparte
+   - Usa técnicas de profundización (repregunta el porqué, valida emociones)
+   - El lead habla con confianza y soltura
 
-5.0 = MAESTRÍA / DISCOVERY CONSULTIVO (RARO)
-   - Apertura que conecta emocionalmente desde el inicio
-   - Pregunta el PORQUÉ detrás de CADA respuesta (técnica SPIN completa)
-   - Descubre dolor real Y urgencia
-   - Lead habla 70%+ del tiempo
-   - Validaciones emocionales: "Tiene sentido que te sientas así..."
-   EJEMPLO: "[ASESOR]: María, vi en tu perfil que llevas 10 años en finanzas corporativas. Cuéntame, ¿qué te ha funcionado bien y qué te está costando más últimamente? [LEAD]: Pues... [habla 3 minutos sobre frustración con liderazgo] [ASESOR]: Suena a que la parte técnica la dominas, pero te frustra no tener herramientas para influir. ¿Es así? ¿Qué pasa si esto no cambia?"
+5.0 = EXCELENTE / DISCOVERY CONSULTIVO
+   - Conexión genuina desde el inicio
+   - Profundiza en motivaciones hasta llegar al dolor real y la urgencia
+   - Validaciones emocionales naturales y efectivas
+   - El lead se siente escuchado y comparte información valiosa
+   EJEMPLO: "[ASESOR]: Cuéntame, ¿qué te ha funcionado bien y qué te está costando más? [LEAD]: [se abre sobre frustración] [ASESOR]: Suena a que la parte técnica la dominas, pero te frustra no tener herramientas para influir. ¿Es así?"
 
 EVIDENCIA REQUERIDA:
 Debes identificar MÍNIMO:
@@ -199,16 +185,18 @@ REGLAS CRÍTICAS:
 - NO penalices si el lead es cerrado, penaliza si el asesor no intentó abrir
 - Sé técnico, no motivacional
 
-⚠️ CALIBRACIÓN ESTRICTA - LEE ESTO:
-- El 3.0 es "CORRECTO/ESTÁNDAR" - NO es malo, es lo esperado en la mayoría de casos
-- NO des 4.0+ solo porque "fue una llamada decente" - el 4.0 requiere técnicas avanzadas evidentes
-- USA DECIMALES: Si está entre 3.0 y 4.0, usa 3.5
-- El 5.0 es MUY RARO - solo para ejecución impecable con técnicas SPIN completas
+⚠️ CALIBRACIÓN JUSTA - LEE ESTO:
+- USA TODA LA ESCALA: si el asesor hizo un trabajo excelente, da 4.5 o 5.0
+- NO limites artificialmente las notas. Si cumple los criterios de 5.0, da 5.0
+- USA DECIMALES: 3.0, 3.5, 4.0, 4.5, 5.0
 - En "gap_para_5" explica QUÉ FALTÓ específicamente con ejemplos concretos
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta
+- IMPORTANTE: Un asesor que profundiza, repregunta y conecta con el lead merece 4.5+
 """
 
-        prompt_usuario = f"""
+        bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
+
+        prompt_usuario = f"""{bloque_ctx_usuario}
 Analiza la fase de INVESTIGACIÓN (apertura + descubrimiento) en esta conversación:
 
 {transcripcion}

@@ -25,11 +25,11 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Proceso de Admisión y Propuesta Económica")
 
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa admisión y propuesta económica"""
 
         try:
-            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual)
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
 
             # Validar que se haya mencionado precio/inversión
@@ -40,6 +40,17 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ No se detectó mención de inversión/precio")
                 confianza *= 0.7
 
+            # Enriquecer recomendación con coaching si hay área de mejora
+            recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            gap_para_5 = resultado_raw.get("gap_para_5", "")
+            if gap_para_5 and "N/A" not in gap_para_5:
+                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
+                    recomendacion_base,
+                    area_mejora="presentación de inversión económica y proceso de admisión"
+                )
+            else:
+                recomendacion_enriquecida = recomendacion_base
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
@@ -48,12 +59,13 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                recomendacion_accionable=recomendacion_enriquecida,
                 metadata={
                     "menciona_precio": menciona_precio,
                     "explica_financiacion": resultado_raw.get("explica_financiacion", False),
                     "claridad_admision": resultado_raw.get("claridad_admision", "MEDIA"),
-                    "enfoque_valor_vs_precio": resultado_raw.get("enfoque_valor_vs_precio", "precio")
+                    "enfoque_valor_vs_precio": resultado_raw.get("enfoque_valor_vs_precio", "precio"),
+                    "gap_para_5": gap_para_5
                 }
             )
 
@@ -61,8 +73,11 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Admisión/Económica: {e}")
             return self._create_fallback_result(str(e))
 
-    def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
+    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None) -> dict:
         """Llama al LLM con prompt especializado"""
+
+        # Enriquecer contexto con ejemplos de buenas prácticas
+        manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
 
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de PROCESO DE ADMISIÓN Y PROPUESTA ECONÓMICA.
@@ -70,7 +85,7 @@ Eres un AUDITOR ESPECIALIZADO en evaluación de PROCESO DE ADMISIÓN Y PROPUESTA
 TU TAREA: Evaluar cómo el [ASESOR] explica el proceso y la inversión.
 
 CONTEXTO DEL MANUAL:
-{manual}
+{manual_enriquecido}
 
 CRITERIOS ESPECÍFICOS (Escala 1-5):
 
@@ -144,13 +159,16 @@ REGLAS CRÍTICAS:
 - SÍ penaliza si evitó el tema cuando el lead preguntó directamente
 - Enfoque "valor" = Habla de ROI, beneficios vs inversión
 - Enfoque "precio" = Solo menciona cifra sin contexto
-- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
-- Si la ejecución es excelente, NO te limites a dar 4
+⚠️ CALIBRACIÓN JUSTA:
+- USA TODA LA ESCALA: si la presentación económica es excelente, da 4.5 o 5.0
+- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
 - En "gap_para_5" sé específico (ej: "Faltó vincular inversión con ROI del lead")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
-        prompt_usuario = f"""
+        bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
+
+        prompt_usuario = f"""{bloque_ctx_usuario}
 Analiza cómo manejó el proceso de admisión y la propuesta económica:
 
 {transcripcion}

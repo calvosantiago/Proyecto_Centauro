@@ -135,7 +135,8 @@ SECCION_TO_BLOQUE = {
     "propuesta_valor": "Propuesta de valor Institución y Programa",
     "admision_economica": "Proceso de Admisión y Propuesta Económica",
     "cierre": "Cierre y próximos pasos",
-    "objeciones": "Manejo de objeciones"
+    "objeciones": "Manejo de objeciones",
+    "estilo": "Estilo y comunicación"
 }
 
 def indexar_buenas_practicas():
@@ -190,40 +191,27 @@ def indexar_buenas_practicas():
                 if not texto:
                     continue
 
-                # Chunking
-                chunk_size = centauro_config.RAG_CHUNK_SIZE
-                overlap = centauro_config.RAG_CHUNK_OVERLAP
-                chunks = []
+                # v4.3: Indexar cada ejemplo COMPLETO (sin chunking)
+                # Los ejemplos son ~1000-1800 chars, se benefician de
+                # indexarse enteros para que el RAG recupere el ejemplo
+                # completo con todas sus técnicas y patrones.
+                doc_id = f"bp_{seccion_key}_{archivo.stem}"
+                metadata = {
+                    "fuente": archivo.name,
+                    "chunk_id": 0,
+                    "tipo": "buena_practica",
+                    "seccion": seccion_bloque,
+                    "seccion_key": seccion_key
+                }
 
-                for i in range(0, len(texto), chunk_size - overlap):
-                    chunks.append(texto[i : i + chunk_size])
-
-                if not chunks:
-                    continue
-
-                # Metadatos con sección detectada por subcarpeta
-                ids = [f"bp_{seccion_key}_{archivo.stem}_{i}" for i in range(len(chunks))]
-
-                metadatas = [
-                    {
-                        "fuente": archivo.name,
-                        "chunk_id": i,
-                        "tipo": "buena_practica",
-                        "seccion": seccion_bloque,  # Nombre del bloque para filtrar
-                        "seccion_key": seccion_key   # Clave para búsquedas
-                    }
-                    for i in range(len(chunks))
-                ]
-
-                # Upsert en colección de buenas prácticas
                 collection_buenas_practicas.upsert(
-                    ids=ids,
-                    documents=chunks,
-                    metadatas=metadatas
+                    ids=[doc_id],
+                    documents=[texto],
+                    metadatas=[metadata]
                 )
 
-                seccion_chunks += len(chunks)
-                count_chunks_total += len(chunks)
+                seccion_chunks += 1
+                count_chunks_total += 1
 
             except Exception as e:
                 print(f"   Error procesando {archivo.name}: {e}")

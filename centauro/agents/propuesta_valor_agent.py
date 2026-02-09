@@ -26,11 +26,11 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Propuesta de valor Institución y Programa")
 
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa la propuesta de valor"""
 
         try:
-            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual)
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
 
             # Validar evidencia de personalización
@@ -41,6 +41,17 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ No se detectó personalización en la propuesta")
                 confianza *= 0.85
 
+            # Enriquecer recomendación con coaching si hay área de mejora
+            recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            gap_para_5 = resultado_raw.get("gap_para_5", "")
+            if gap_para_5 and "N/A" not in gap_para_5:
+                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
+                    recomendacion_base,
+                    area_mejora="propuesta de valor y presentación de beneficios"
+                )
+            else:
+                recomendacion_enriquecida = recomendacion_base
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
@@ -49,11 +60,12 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                recomendacion_accionable=recomendacion_enriquecida,
                 metadata={
                     "personalizacion_detectada": personalizacion,
-                    "enfoque": resultado_raw.get("enfoque", "caracteristicas"),  # vs "beneficios"
-                    "presenta_institucion": resultado_raw.get("presenta_institucion", False)
+                    "enfoque": resultado_raw.get("enfoque", "caracteristicas"),
+                    "presenta_institucion": resultado_raw.get("presenta_institucion", False),
+                    "gap_para_5": gap_para_5
                 }
             )
 
@@ -61,8 +73,11 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Propuesta de Valor: {e}")
             return self._create_fallback_result(str(e))
 
-    def _evaluar_con_llm(self, transcripcion: str, manual: str) -> dict:
+    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None) -> dict:
         """Llama al LLM con prompt especializado"""
+
+        # Enriquecer contexto con ejemplos de buenas prácticas
+        manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
 
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de PROPUESTA DE VALOR en venta consultiva.
@@ -70,7 +85,7 @@ Eres un AUDITOR ESPECIALIZADO en evaluación de PROPUESTA DE VALOR en venta cons
 TU TAREA: Evaluar cómo presentó el [ASESOR] la institución (OBS) y el programa.
 
 CONTEXTO DEL MANUAL:
-{manual}
+{manual_enriquecido}
 
 CRITERIOS ESPECÍFICOS (Escala 1-5):
 
@@ -138,13 +153,16 @@ REGLAS CRÍTICAS:
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Personalización = Adaptar la explicación a LO QUE EL LEAD DIJO que necesitaba
 - Diferencia: Características ("12 meses") vs Beneficios ("En 1 año estarás certificado")
-- ⚠️ IMPORTANTE: El 5/5 ES ALCANZABLE si cumple todos los criterios de MAESTRÍA
-- Si la ejecución es excelente, NO te limites a dar 4
+⚠️ CALIBRACIÓN JUSTA:
+- USA TODA LA ESCALA: si la propuesta de valor es excelente, da 4.5 o 5.0
+- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
 - En "gap_para_5" sé específico (ej: "Faltó usar caso de éxito similar al perfil del lead")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
-        prompt_usuario = f"""
+        bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
+
+        prompt_usuario = f"""{bloque_ctx_usuario}
 Analiza cómo presentó la institución y el programa en esta conversación:
 
 {transcripcion}
