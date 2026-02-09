@@ -133,7 +133,7 @@ class BaseEvaluatorAgent(ABC):
         """
         Busca ejemplos de buenas prácticas relevantes para esta evaluación.
 
-        ACTUALIZADO v4.2: Filtra por sección del bloque que está evaluando.
+        ACTUALIZADO v4.3: Filtra por sección con fallback sin filtro.
 
         Usa RAG para encontrar fragmentos similares de conversaciones exitosas.
         Los ejemplos se usan como INSPIRACIÓN, no como reglas rígidas.
@@ -163,15 +163,33 @@ class BaseEvaluatorAgent(ABC):
                 filtro_seccion=self.nombre_bloque  # Filtra por la sección del agente
             )
 
+            # FALLBACK: Si no encuentra con filtro, buscar sin filtro de sección
+            if not resultados:
+                print(f"   Info: No hay ejemplos para seccion '{self.nombre_bloque}', buscando sin filtro...")
+                resultados = buscar_contexto_dinamico(
+                    query=query,
+                    collection_name="buenas_practicas",
+                    k=max_ejemplos,
+                    filtro_seccion=None
+                )
+
             if not resultados:
                 return []
 
             # Extraer textos de ejemplos
             ejemplos = []
+            fuentes_vistas = set()
             for resultado in resultados[:max_ejemplos]:
                 # Formato esperado del RAG: dict con 'text' y 'metadata'
                 if isinstance(resultado, dict):
-                    ejemplos.append(resultado.get('text', ''))
+                    texto = resultado.get('text', '')
+                    fuente = resultado.get('metadata', {}).get('fuente', '')
+                    seccion = resultado.get('metadata', {}).get('seccion', '')
+                    if texto:
+                        ejemplos.append(texto)
+                        if fuente and fuente not in fuentes_vistas:
+                            fuentes_vistas.add(fuente)
+                            print(f"      Ejemplo encontrado: {fuente} (seccion: {seccion})")
                 else:
                     ejemplos.append(str(resultado))
 

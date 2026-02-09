@@ -73,6 +73,9 @@ class CentauroOrchestrator:
         asesor_detectado = diarization_agent.asesor_detectado or nombre_archivo
         self.stats["llamadas_api"] += 7
 
+        # --- GUARDAR TRANSCRIPCIÓN DIARIZADA PARA DEBUG ---
+        self._guardar_transcripcion_debug(nombre_archivo, transcripcion_diarizada)
+
         # --- FASE 2: EXTRACCIÓN DE TEMAS ---
         print("\n📍 FASE 2: Análisis de contexto")
         cache_key = nombre_archivo
@@ -130,6 +133,45 @@ class CentauroOrchestrator:
         print(f"{'='*60}\n")
 
         return reporte_final
+
+    # ========== DEBUG: GUARDAR TRANSCRIPCIÓN DIARIZADA ==========
+
+    def _guardar_transcripcion_debug(self, nombre_archivo: str, transcripcion: str):
+        """
+        Guarda una copia de la transcripción diarizada para verificación.
+        Permite confirmar que la diarización es correcta y no hay alucinaciones.
+        """
+        try:
+            debug_dir = settings.OUTPUTS_DIR / "Input_Debug"
+            debug_dir.mkdir(parents=True, exist_ok=True)
+
+            # Nombre del archivo de debug
+            nombre_limpio = nombre_archivo.replace(" ", "_").replace("/", "_")
+            debug_path = debug_dir / f"{nombre_limpio}_diarizada.txt"
+
+            # Guardar con encabezado informativo
+            contenido = f"""{'='*70}
+TRANSCRIPCIÓN DIARIZADA - DEBUG
+{'='*70}
+Archivo original: {nombre_archivo}
+Fecha: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+{'='*70}
+
+NOTA: Esta es la transcripción que los agentes evaluadores reciben.
+      Verifica que la diarización (ASESOR/LEAD) sea correcta.
+      Si hay errores aquí, las evaluaciones pueden ser incorrectas.
+
+{'='*70}
+
+{transcripcion}
+"""
+            with open(debug_path, 'w', encoding='utf-8') as f:
+                f.write(contenido)
+
+            print(f"   📝 Debug guardado: {debug_path.name}")
+
+        except Exception as e:
+            print(f"   ⚠️ No se pudo guardar debug: {e}")
 
     # ========== EVALUACIÓN: BLOQUES CRÍTICOS (Individual) ==========
 
@@ -195,6 +237,8 @@ class CentauroOrchestrator:
         Bloques secundarios:
         1. Propuesta de valor Institución y Programa
         2. Estilo y comunicación
+
+        ACTUALIZADO v4.3: Incluye ejemplos de buenas prácticas en el prompt
         """
         ctx_propuesta = self.rag_agent.buscar_contexto_para_bloque(
             "Propuesta de valor Institución y Programa",
@@ -206,6 +250,28 @@ class CentauroOrchestrator:
             transcripcion,
             cache_key
         )
+
+        # Buscar ejemplos de buenas prácticas para propuesta de valor
+        ejemplos_bp_texto = ""
+        try:
+            from .rag_dynamic import buscar_contexto_dinamico
+            from ..config import centauro_config
+
+            ejemplos_pv = buscar_contexto_dinamico(
+                query=f"Ejemplo de buena práctica propuesta de valor: {transcripcion[:300]}",
+                collection_name="buenas_practicas",
+                k=centauro_config.RAG_TOP_K_BUENAS_PRACTICAS,
+                filtro_seccion="Propuesta de valor Institución y Programa"
+            )
+            if ejemplos_pv:
+                ejemplos_bp_texto = "\n\nEJEMPLOS DE BUENAS PRÁCTICAS (usar como INSPIRACIÓN, no como checklist):\n"
+                for i, ej in enumerate(ejemplos_pv, 1):
+                    texto = ej.get('text', '') if isinstance(ej, dict) else str(ej)
+                    if texto:
+                        ejemplos_bp_texto += f"\n--- Ejemplo {i} ---\n{texto[:800]}\n"
+                print(f"      Buenas prácticas incluidas: {len(ejemplos_pv)} ejemplos")
+        except Exception as e:
+            print(f"      Info: No se pudieron cargar buenas prácticas para batch: {e}")
 
         prompt_sistema = f"""
 Eres un auditor CRÍTICO que evalúa DOS bloques secundarios simultáneamente.
@@ -222,6 +288,7 @@ MANUAL - PROPUESTA DE VALOR:
 
 MANUAL - ESTILO:
 {ctx_estilo}
+{ejemplos_bp_texto}
 
 ⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
 TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
@@ -543,12 +610,17 @@ Genera el JSON con la información del lead.
                                  resumen_contextual: Dict = None) -> Dict:
         """Genera reporte final consolidado CON resumen contextual"""
 
+        # NORMALIZAR NOTAS: Convertir todas a float con 1 decimal para consistencia
+        for e in evaluaciones:
+            if e.get("puntuacion_1_5") is not None:
+                e["puntuacion_1_5"] = round(float(e["puntuacion_1_5"]), 1)
+
         # Calcular nota global
         notas_validas = [
             e["puntuacion_1_5"] for e in evaluaciones
             if e.get("puntuacion_1_5") is not None
         ]
-        nota_global = round(sum(notas_validas) / len(notas_validas), 2) if notas_validas else 0.0
+        nota_global = round(sum(notas_validas) / len(notas_validas), 1) if notas_validas else 0.0
 
         # Generar áreas de mejora DETALLADAS (sin fortalezas genéricas)
         areas_mejora = []

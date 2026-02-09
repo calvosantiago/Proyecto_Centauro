@@ -132,10 +132,10 @@ def indexar_manuales_generales():
 # Mapeo de nombres de subcarpeta a nombres de bloque del sistema
 SECCION_TO_BLOQUE = {
     "investigacion": "Investigación",
-    "propuesta_valor": "Propuesta de valor",
-    "admision_economica": "Admisión y propuesta económica",
+    "propuesta_valor": "Propuesta de valor Institución y Programa",
+    "admision_economica": "Proceso de Admisión y Propuesta Económica",
     "cierre": "Cierre y próximos pasos",
-    "objeciones": "Objeciones"
+    "objeciones": "Manejo de objeciones"
 }
 
 def indexar_buenas_practicas():

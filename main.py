@@ -120,9 +120,11 @@ def cargar_transcripcion(ruta_archivo):
         with open(ruta_archivo, "r", encoding="utf-8") as f:
             texto = f.read()
 
+        # NOTA: Ya NO limpiamos VTT aquí. El agente de diarización
+        # necesita el texto crudo para detectar UUIDs de speakers.
+        # La limpieza se hace DESPUÉS de la diarización si es necesario.
         if ext == ".vtt" or "WEBVTT" in texto[:50]:
-            print(f"   🧹 Limpiando formato VTT...")
-            return limpiar_formato_vtt(texto)
+            print(f"   📄 Archivo VTT detectado (se procesará en diarización)")
 
         return texto
 

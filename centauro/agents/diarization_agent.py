@@ -474,95 +474,252 @@ class DiarizationAgent:
         return len(matches) >= 3
     
     def _extraer_vtt_con_uuid(self, texto_vtt: str) -> str:
-        """Extrae diálogo de VTT usando UUID como identificador de speaker"""
+        """
+        Extrae diálogo de VTT con UUIDs.
+
+        LÓGICA v2.6:
+        - Si hay pocos UUIDs únicos (2-5) que se repiten → mapping UUID→speaker
+        - Si cada fragmento tiene UUID único → UUIDs son IDs secuenciales,
+          usar diarización batch por LLM
+        """
         lineas = texto_vtt.split('\n')
-        
         patron_uuid = r'^([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})-\d+$'
-        
-        bloques = []
+
+        # PASO 1: Extraer fragmentos con UUID
+        fragmentos = []
         uuid_actual = None
         texto_buffer = []
-        
+
         for linea in lineas:
             linea = linea.strip()
-            
+
             match = re.match(patron_uuid, linea)
             if match:
                 if uuid_actual and texto_buffer:
-                    bloques.append({
+                    fragmentos.append({
                         "uuid": uuid_actual,
                         "texto": " ".join(texto_buffer)
                     })
-                
                 uuid_actual = match.group(1)
                 texto_buffer = []
-            
+
             elif re.match(r'\d{2}:\d{2}:\d{2}\.\d{3}', linea):
                 continue
-            
             elif linea in ['WEBVTT', ''] or linea.startswith('NOTE'):
                 continue
-            
             elif uuid_actual:
                 texto_buffer.append(linea)
-        
+
         if uuid_actual and texto_buffer:
-            bloques.append({
+            fragmentos.append({
                 "uuid": uuid_actual,
                 "texto": " ".join(texto_buffer)
             })
-        
-        if not bloques:
-            print("   ⚠️ No se pudieron extraer bloques, fallback")
-            return self._diarizar_texto_plano(self._limpiar_vtt_basico(texto_vtt), "fallback_uuid")
-        
-        uuids_unicos = self._unique_in_order([b["uuid"] for b in bloques])
-        
-        # Para UUID, construimos texto temporal para análisis
+
+        if not fragmentos:
+            print("   ⚠️ No se pudieron extraer bloques")
+            return self._diarizar_texto_plano(self._limpiar_vtt_basico(texto_vtt), "fallback")
+
+        # PASO 2: Analizar patrón de UUIDs
+        uuids_secuencia = [f["uuid"] for f in fragmentos]
+        uuids_unicos = set(uuids_secuencia)
+        num_cambios = sum(1 for i in range(1, len(uuids_secuencia)) if uuids_secuencia[i] != uuids_secuencia[i-1])
+
+        print(f"   📊 {len(fragmentos)} fragmentos, {len(uuids_unicos)} UUIDs únicos, {num_cambios} cambios")
+
+        # CASO A: Pocos UUIDs que se repiten (2-10) → son identificadores de speaker
+        if len(uuids_unicos) <= 10 and len(uuids_unicos) < len(fragmentos) * 0.3:
+            print("   🔍 UUIDs identifican speakers (patrón repetitivo)")
+            return self._diarizar_uuid_como_speaker(fragmentos, uuids_unicos)
+
+        # CASO B: Muchos UUIDs únicos → son IDs secuenciales, usar LLM batch
+        print("   🔍 UUIDs son IDs secuenciales, usando diarización batch")
+        return self._diarizar_uuid_secuencial_batch(fragmentos)
+
+    def _diarizar_uuid_como_speaker(self, fragmentos: List[Dict], uuids_unicos: set) -> str:
+        """Cuando los UUIDs identifican speakers (pocos UUIDs que se repiten)."""
+        # Agrupar texto por UUID
         texto_por_uuid = {}
-        for bloque in bloques:
-            uuid = bloque["uuid"]
-            if uuid not in texto_por_uuid:
-                texto_por_uuid[uuid] = []
-            texto_por_uuid[uuid].append(bloque["texto"])
-        
-        # Calcular scores por contenido
+        for f in fragmentos:
+            if f["uuid"] not in texto_por_uuid:
+                texto_por_uuid[f["uuid"]] = []
+            texto_por_uuid[f["uuid"]].append(f["texto"])
+
+        # Calcular scores de ASESOR por UUID
         scores = {}
         for uuid, textos in texto_por_uuid.items():
             texto_completo = " ".join(textos).lower()
-            score = 0
-            for ancla in self.anclas_asesor:
-                if re.search(ancla, texto_completo):
-                    score += 1
+            score = sum(1 for ancla in self.anclas_asesor if re.search(ancla, texto_completo))
             scores[uuid] = score
-        
-        # El UUID con mayor score es el ASESOR
-        if scores:
-            uuid_asesor = max(scores, key=scores.get)
-            if scores[uuid_asesor] > 0:
-                print(f"   🔍 UUID del ASESOR detectado por contenido (score: {scores[uuid_asesor]})")
-            else:
-                uuid_asesor = uuids_unicos[0]
-                print(f"   ⚠️ Sin anclas detectadas, asumiendo primer UUID como ASESOR")
-        else:
-            uuid_asesor = uuids_unicos[0]
-        
+
+        # El UUID con mayor score es ASESOR
+        uuid_asesor = max(scores, key=scores.get)
+
         mapa = {uuid_asesor: "ASESOR"}
         for uuid in uuids_unicos:
             if uuid not in mapa:
                 mapa[uuid] = "LEAD"
-        
+
+        print(f"   ✅ UUID ASESOR detectado (score: {scores[uuid_asesor]})")
+
+        # Construir diálogo
         dialogo = []
-        for bloque in bloques:
-            rol = mapa.get(bloque["uuid"], "LEAD")
-            if bloque["texto"]:
-                dialogo.append(f"[{rol}]: {bloque['texto']}")
-        
+        for f in fragmentos:
+            rol = mapa.get(f["uuid"], "LEAD")
+            if f["texto"].strip():
+                dialogo.append(f"[{rol}]: {f['texto']}")
+
         dialogo_fusionado = self._fusionar_texto_consecutivo(dialogo)
-        
-        print(f"   ✅ Extraídos {len(dialogo_fusionado)} turnos (UUID mapping)")
         return "\n\n".join(dialogo_fusionado)
-    
+
+    def _diarizar_uuid_secuencial_batch(self, fragmentos: List[Dict]) -> str:
+        """
+        Cuando los UUIDs son IDs secuenciales (no identifican speaker).
+        Usa LLM para diarizar. Si el texto es muy largo, procesa en chunks.
+        """
+        # Concatenar todo el texto (ya limpio de UUIDs y timestamps)
+        texto_completo = " ".join([f["texto"] for f in fragmentos])
+
+        palabras = texto_completo.split()
+        total_palabras = len(palabras)
+
+        # Si cabe en una llamada (~10000 palabras max para dejar margen)
+        if total_palabras <= 10000:
+            print(f"   📝 Procesando {total_palabras} palabras en una llamada")
+            return self._diarizar_batch_simple(texto_completo)
+
+        # Si es muy largo, procesar en chunks
+        print(f"   📝 Texto largo ({total_palabras} palabras), procesando en chunks")
+        return self._diarizar_batch_chunks(palabras)
+
+    def _diarizar_batch_simple(self, texto_completo: str) -> str:
+        """Diariza texto completo en una sola llamada LLM."""
+
+        prompt_sistema = """Eres un experto en diarización de conversaciones de ventas educativas.
+
+Tu tarea es identificar quién habla en cada parte de la conversación:
+- ASESOR: El vendedor/consultor de OBS Business School (menciona programas, precios, metodología, admisión)
+- LEAD: El cliente potencial/alumno (habla de su trabajo, experiencia, dudas sobre el programa)
+
+INSTRUCCIONES:
+1. Divide el texto en turnos de palabra
+2. Etiqueta cada turno como [ASESOR] o [LEAD]
+3. Mantén el texto original, solo añade las etiquetas
+4. Si no estás seguro, usa el contexto (el ASESOR suele explicar el programa, el LEAD hace preguntas sobre sí mismo)
+
+Formato de salida:
+[ASESOR]: texto del asesor...
+
+[LEAD]: texto del lead...
+
+[ASESOR]: texto del asesor..."""
+
+        try:
+            resultado = consultar_gpt(
+                prompt_sistema,
+                f"Diariza esta conversación:\n\n{texto_completo}",
+                "diar_batch"
+            )
+
+            if "[ASESOR]" in resultado or "[LEAD]" in resultado:
+                resultado = re.sub(r'\[ASESOR\]:', '\n\n[ASESOR]:', resultado)
+                resultado = re.sub(r'\[LEAD\]:', '\n\n[LEAD]:', resultado)
+                resultado = resultado.strip()
+
+                turnos = [t.strip() for t in resultado.split("\n\n") if t.strip()]
+                print(f"   ✅ Diarización: {len(turnos)} turnos")
+                return "\n\n".join(turnos)
+            else:
+                print("   ⚠️ Formato inválido, usando heurística")
+                return self._diarizar_heuristica_texto(texto_completo)
+
+        except Exception as e:
+            print(f"   ⚠️ Error LLM: {e}, usando heurística")
+            return self._diarizar_heuristica_texto(texto_completo)
+
+    def _diarizar_batch_chunks(self, palabras: List[str]) -> str:
+        """Diariza texto largo procesando en chunks de ~8000 palabras."""
+        CHUNK_SIZE = 8000
+        OVERLAP = 500  # Palabras de overlap para mantener contexto
+
+        chunks = []
+        inicio = 0
+
+        while inicio < len(palabras):
+            fin = min(inicio + CHUNK_SIZE, len(palabras))
+            chunk_palabras = palabras[inicio:fin]
+            chunks.append(" ".join(chunk_palabras))
+            inicio = fin - OVERLAP if fin < len(palabras) else fin
+
+        print(f"   📦 Dividido en {len(chunks)} chunks")
+
+        # Procesar cada chunk
+        resultados_chunks = []
+        ultimo_speaker = None
+
+        for i, chunk in enumerate(chunks):
+            print(f"   📝 Procesando chunk {i+1}/{len(chunks)}...")
+
+            # Añadir contexto del speaker anterior para continuidad
+            contexto = ""
+            if ultimo_speaker:
+                contexto = f"(El último en hablar fue {ultimo_speaker})\n\n"
+
+            resultado = self._diarizar_batch_simple(contexto + chunk)
+
+            # Detectar último speaker para el siguiente chunk
+            if "[ASESOR]" in resultado:
+                ultimo_speaker = "ASESOR" if resultado.rfind("[ASESOR]") > resultado.rfind("[LEAD]") else "LEAD"
+            elif "[LEAD]" in resultado:
+                ultimo_speaker = "LEAD"
+
+            resultados_chunks.append(resultado)
+
+        # Unir resultados (eliminando overlaps duplicados)
+        resultado_final = self._unir_chunks_diarizados(resultados_chunks)
+        return resultado_final
+
+    def _unir_chunks_diarizados(self, chunks: List[str]) -> str:
+        """Une chunks diarizados eliminando posibles duplicados en overlaps."""
+        if len(chunks) == 1:
+            return chunks[0]
+
+        # Por simplicidad, concatenamos y fusionamos turnos consecutivos iguales
+        todo = "\n\n".join(chunks)
+        turnos = [t.strip() for t in todo.split("\n\n") if t.strip()]
+        fusionado = self._fusionar_texto_consecutivo(turnos)
+        return "\n\n".join(fusionado)
+
+    def _diarizar_heuristica_texto(self, texto: str) -> str:
+        """Fallback: diarización por heurísticas sin LLM."""
+        segmentos = re.split(r'(?<=[.?!])\s+(?=[A-ZÁÉÍÓÚ])', texto)
+
+        dialogo = []
+        for seg in segmentos:
+            seg = seg.strip()
+            if not seg:
+                continue
+
+            seg_lower = seg.lower()
+            score_asesor = sum(1 for ancla in self.anclas_asesor if re.search(ancla, seg_lower))
+            score_lead = sum(1 for ancla in self.anclas_lead if re.search(ancla, seg_lower))
+
+            if score_asesor > score_lead:
+                dialogo.append(f"[ASESOR]: {seg}")
+            elif score_lead > score_asesor:
+                dialogo.append(f"[LEAD]: {seg}")
+            else:
+                if dialogo:
+                    ultimo = dialogo[-1]
+                    rol = "LEAD" if ultimo.startswith("[ASESOR]") else "ASESOR"
+                else:
+                    rol = "ASESOR"
+                dialogo.append(f"[{rol}]: {seg}")
+
+        fusionado = self._fusionar_texto_consecutivo(dialogo)
+        print(f"   ✅ Heurística: {len(fusionado)} turnos")
+        return "\n\n".join(fusionado)
+
     # ==========================================================================
     # TEXTO PLANO (usa LLM + heurística)
     # ==========================================================================

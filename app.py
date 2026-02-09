@@ -209,6 +209,8 @@ async def main(message: cl.Message):
     ).send()
 
     # Leer contenido según extensión
+    # NOTA: NO limpiamos VTT aquí - el agente de diarización necesita
+    # el texto crudo para detectar UUIDs de speakers
     try:
         if file_path.suffix.lower() == '.docx':
             texto_crudo = leer_word(file_path)
@@ -216,8 +218,8 @@ async def main(message: cl.Message):
             with open(file_path, 'r', encoding='utf-8') as f:
                 texto_crudo = f.read()
 
-            if file_path.suffix.lower() == '.vtt':
-                texto_crudo = limpiar_formato_vtt(texto_crudo)
+            # Ya no llamamos a limpiar_formato_vtt() aquí
+            # El agente de diarización lo procesa correctamente
 
         if not texto_crudo or len(texto_crudo) < 100:
             await cl.Message(

@@ -12,7 +12,7 @@ CAMBIOS APLICADOS:
 from typing import List, Dict, Optional
 import json
 from ..llm_client import consultar_gpt
-from ..rag import collection_manuales
+from ..rag import collection_manuales, collection_coaching
 from ..config import centauro_config
 from .config_agents import OptimizacionConfig
 
@@ -117,50 +117,88 @@ Si hay menos de 8, devuelve solo los que existan.
             self.cache_temas[cache_key] = temas_fallback
             return temas_fallback
     
-    def buscar_contexto_para_bloque(self, nombre_bloque: str, 
+    def buscar_contexto_para_bloque(self, nombre_bloque: str,
                                     transcripcion: str, cache_key: str) -> str:
-        """Recupera contexto con Top-K REDUCIDO (5 en lugar de 20)"""
+        """Recupera contexto de MÚLTIPLES colecciones (manuales + coaching)"""
         cache_full_key = f"{cache_key}_{nombre_bloque}"
-        
+
         if cache_full_key in self.cache_contextos:
             print(f"   💾 Cache hit: {nombre_bloque}")
             return self.cache_contextos[cache_full_key]
-        
+
         print(f"   🔎 RAG: {nombre_bloque}")
-        
+
         temas = self.extraer_temas_llamada(transcripcion, cache_key)
         query = self._construir_query_dinamica(nombre_bloque, temas)
-        
+
+        fragmentos_totales = []
+
         try:
-            # Usar colección de manuales generales
-            total_docs = collection_manuales.count()
-            if total_docs == 0:
-                print("   ⚠️ Base vacía")
+            # 1. Buscar en colección de MANUALES GENERALES
+            total_docs_manuales = collection_manuales.count()
+            if total_docs_manuales > 0:
+                n_results = min(centauro_config.RAG_TOP_K_GENERAL, total_docs_manuales)
+                resultados_manuales = collection_manuales.query(
+                    query_texts=[query],
+                    n_results=n_results
+                )
+
+                if resultados_manuales['documents'] and resultados_manuales['documents'][0]:
+                    docs = resultados_manuales['documents'][0]
+                    metadatas = resultados_manuales.get('metadatas', [[]])[0]
+                    fuentes_vistas = set()
+
+                    for doc, meta in zip(docs, metadatas if metadatas else [{}]*len(docs)):
+                        fuente = meta.get('fuente', 'desconocido') if isinstance(meta, dict) else 'desconocido'
+                        fuentes_vistas.add(fuente)
+                        fragmentos_totales.append(f"[MANUAL: {fuente}]\n{doc}")
+
+                    print(f"      Manuales consultados: {', '.join(fuentes_vistas)}")
+
+            # 2. Buscar en colección de COACHING / LIBROS DE VENTAS
+            total_docs_coaching = collection_coaching.count()
+            if total_docs_coaching > 0:
+                n_coaching = min(centauro_config.RAG_TOP_K_COACHING, total_docs_coaching)
+                resultados_coaching = collection_coaching.query(
+                    query_texts=[query],
+                    n_results=n_coaching
+                )
+
+                if resultados_coaching['documents'] and resultados_coaching['documents'][0]:
+                    docs_c = resultados_coaching['documents'][0]
+                    metadatas_c = resultados_coaching.get('metadatas', [[]])[0]
+
+                    for doc, meta in zip(docs_c, metadatas_c if metadatas_c else [{}]*len(docs_c)):
+                        fuente = meta.get('fuente', '') if isinstance(meta, dict) else ''
+                        autor = meta.get('autor', '') if isinstance(meta, dict) else ''
+                        etiqueta = f"COACHING: {fuente}" if fuente else "COACHING"
+                        if autor:
+                            etiqueta += f" ({autor})"
+                        fragmentos_totales.append(f"[{etiqueta}]\n{doc}")
+
+                    print(f"      Coaching: {len(docs_c)} fragmentos de libros")
+
+            if not fragmentos_totales:
+                print("   ⚠️ No se encontraron fragmentos en ninguna colección")
                 return ""
 
-            # Usar configuración centralizada
-            n_results = min(centauro_config.RAG_TOP_K_GENERAL, total_docs)
+            # Filtrar por relevancia (solo manuales, coaching siempre se incluye)
+            fragmentos_manuales = [f for f in fragmentos_totales if f.startswith("[MANUAL:")]
+            fragmentos_coaching = [f for f in fragmentos_totales if f.startswith("[COACHING:")]
 
-            resultados = collection_manuales.query(
-                query_texts=[query],
-                n_results=n_results
-            )
-            
-            if not resultados['documents'] or not resultados['documents'][0]:
-                return ""
-            
-            fragmentos = resultados['documents'][0]
-            fragmentos_relevantes = self._filtrar_por_relevancia(fragmentos, query)
-            
-            if not fragmentos_relevantes:
-                fragmentos_relevantes = fragmentos[:2]
-            
-            contexto = "\n\n--- FRAGMENTO ---\n".join(fragmentos_relevantes)
+            fragmentos_manuales_filtrados = self._filtrar_por_relevancia(fragmentos_manuales, query)
+            if not fragmentos_manuales_filtrados:
+                fragmentos_manuales_filtrados = fragmentos_manuales[:3]
+
+            # Combinar: manuales filtrados + coaching (siempre incluido)
+            fragmentos_finales = fragmentos_manuales_filtrados + fragmentos_coaching
+
+            contexto = "\n\n--- FRAGMENTO ---\n".join(fragmentos_finales)
             self.cache_contextos[cache_full_key] = contexto
-            
-            print(f"      ✓ {len(fragmentos_relevantes)} fragmentos")
+
+            print(f"      Total: {len(fragmentos_finales)} fragmentos ({len(fragmentos_manuales_filtrados)} manuales + {len(fragmentos_coaching)} coaching)")
             return contexto
-            
+
         except Exception as e:
             print(f"   ⚠️ Error: {e}")
             return ""
@@ -203,7 +241,7 @@ Si hay menos de 8, devuelve solo los que existan.
             overlap = len(palabras_query.intersection(palabras_frag))
             score = overlap / len(palabras_query) if palabras_query else 0
             
-            if score >= 0.3:
+            if score >= 0.15:
                 fragmentos_con_score.append((frag, score))
         
         fragmentos_con_score.sort(key=lambda x: x[1], reverse=True)
