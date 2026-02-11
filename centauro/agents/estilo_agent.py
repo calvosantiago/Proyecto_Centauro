@@ -150,8 +150,8 @@ FORMATO JSON OBLIGATORIO:
     "Muletilla o problema detectado: [ASESOR]: ... (COPY-PASTE LITERAL)"
   ],
   "razonamiento": "Análisis del tono general, vocabulario, empatía, ritmo y profesionalismo. ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "Acción específica para mejorar el estilo (sin repetir lo ya logrado)",
-  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
+  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
     "vocabulario": "adaptado" | "generico" | "inadecuado",
@@ -168,6 +168,14 @@ FORMATO JSON OBLIGATORIO:
 - Evidencias LITERALES (COPY-PASTE exacto)
 - En "gap_para_5" sé específico (ej: "Faltó usar metáforas del mundo del lead")
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para mejorar el ESTILO comunicativo
+- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+- Da 2 frases concretas que podría haber usado
+- NO copies texto literal del libro, adapta con tus palabras
 
 REGLAS CRÍTICAS:
 - Evalúa TODA la conversación, no solo un momento

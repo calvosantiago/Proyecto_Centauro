@@ -21,7 +21,7 @@ class AperturaAgent(BaseEvaluatorAgent):
         super().__init__(nombre_bloque="Apertura")
         self.longitud_analisis = 800  # Caracteres del inicio a analizar
     
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """
         Evalúa la apertura usando solo los primeros ~800 caracteres
         """

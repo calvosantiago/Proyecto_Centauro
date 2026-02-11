@@ -37,16 +37,9 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 resultado_raw["observabilidad"] = "NO_OBSERVABLE"
                 resultado_raw["puntuacion_1_5"] = None
             
-            # Enriquecer recomendación con coaching si hay área de mejora
+            # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
             gap_para_5 = resultado_raw.get("gap_para_5", "")
-            if gap_para_5 and "N/A" not in gap_para_5:
-                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
-                    recomendacion_base,
-                    area_mejora="manejo de objeciones y resolución de dudas"
-                )
-            else:
-                recomendacion_enriquecida = recomendacion_base
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -56,7 +49,7 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=recomendacion_enriquecida,
+                recomendacion_accionable=recomendacion_base,
                 metadata={
                     "num_objeciones": len(objeciones_detectadas),
                     "objeciones_identificadas": objeciones_detectadas,
@@ -136,11 +129,20 @@ FORMATO JSON OBLIGATORIO:
     "[LEAD]: Reacción posterior... (COPY-PASTE LITERAL)"
   ],
   "razonamiento": "¿Validó? ¿Aisló? ¿Usó técnica? ¿Resolvió o generó más resistencia? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "Acción específica (sin repetir lo ya logrado)",
-  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
+  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "ninguna"
 }}
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para lo que le faltó al asesor
+- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+- Da 2 frases concretas que podría haber usado en ESTA conversación
+- NO copies texto literal del libro, adapta con tus palabras
+- Menciona de qué libro/autor viene
 
 REGLAS CRÍTICAS:
 - Evidencias LITERALES de la transcripción (COPY-PASTE exacto)

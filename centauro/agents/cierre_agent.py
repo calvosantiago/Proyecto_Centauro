@@ -58,19 +58,12 @@ class CierreAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ Próximo paso no suficientemente concreto")
                 confianza *= 0.8
 
-            # NUEVO: Detectar técnicas y enriquecer recomendación
+            # Detectar técnicas
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
             gap_para_5 = resultado_raw.get("gap_para_5", "")
 
-            # Enriquecer con coaching si hay área de mejora clara
-            if gap_para_5 and "N/A" not in gap_para_5:
-                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
-                    recomendacion_base,
-                    area_mejora="técnicas de cierre y compromiso"
-                )
-            else:
-                recomendacion_enriquecida = recomendacion_base
+            # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -80,7 +73,7 @@ class CierreAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=recomendacion_enriquecida,
+                recomendacion_accionable=recomendacion_base,
                 metadata={
                     "proximo_paso": proximo_paso,
                     "compromiso_fecha": resultado_raw.get("compromiso_fecha", False),
@@ -164,8 +157,8 @@ FORMATO JSON OBLIGATORIO:
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
   "razonamiento": "¿Propuso paso concreto? ¿Usó técnica? ¿Generó compromiso? ¿Manejó dudas finales? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "Acción específica para mejorar (sin repetir lo ya logrado)",
-  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
+  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "proximo_paso_concreto": "Descripción del próximo paso acordado",
   "compromiso_fecha": true/false,
   "tecnica_cierre": "doble_alternativa" | "asuntivo" | "resumen_accion" | "ninguna",
@@ -189,6 +182,15 @@ REGLAS DEL FEEDBACK PERSONALIZADO:
 3. DA un ejemplo de frase de cierre alternativa que podría usar
 4. SÉ constructivo, no crítico
 5. Máximo 3-4 líneas, directo al grano
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para lo que le faltó al asesor
+- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+- Da 2 frases concretas que podría haber usado en ESTA conversación
+- NO copies texto literal del libro, adapta con tus palabras
+- Menciona de qué libro/autor viene (ej: "Como sugiere Cialdini...")
 
 REGLAS CRÍTICAS:
 - NO evalúes si el lead dijo "SÍ" a comprar - evalúa TÉCNICA del asesor

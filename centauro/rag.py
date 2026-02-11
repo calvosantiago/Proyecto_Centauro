@@ -341,17 +341,6 @@ def indexar_coaching_ventas():
             if not texto:
                 continue
 
-            # Chunking más grande para libros (mantener contexto de técnicas)
-            chunk_size = 1500  # Chunks más grandes para coaching
-            overlap = 300
-            chunks = []
-
-            for i in range(0, len(texto), chunk_size - overlap):
-                chunks.append(texto[i : i + chunk_size])
-
-            if not chunks:
-                continue
-
             # Extraer autor/libro del nombre de archivo
             # Formato esperado: tecnica_autor.txt o libro_autor.txt
             nombre_base = archivo.stem
@@ -361,6 +350,36 @@ def indexar_coaching_ventas():
             else:
                 tema = nombre_base
                 autor = "desconocido"
+
+            # CHUNKING SEMÁNTICO: Respetar secciones de técnicas
+            # Los libros usan "===" como delimitador de secciones
+            import re
+            secciones = re.split(r'={10,}', texto)  # Dividir por líneas de ====
+
+            chunks = []
+            for seccion in secciones:
+                seccion = seccion.strip()
+                if not seccion or len(seccion) < 50:
+                    continue
+
+                # Si la sección es muy grande (>3000 chars), subdividirla
+                if len(seccion) > 3000:
+                    # Subdividir respetando párrafos
+                    parrafos = seccion.split('\n\n')
+                    chunk_actual = ""
+                    for parrafo in parrafos:
+                        if len(chunk_actual) + len(parrafo) > 2500 and chunk_actual:
+                            chunks.append(chunk_actual.strip())
+                            chunk_actual = parrafo
+                        else:
+                            chunk_actual += "\n\n" + parrafo if chunk_actual else parrafo
+                    if chunk_actual.strip():
+                        chunks.append(chunk_actual.strip())
+                else:
+                    chunks.append(seccion)
+
+            if not chunks:
+                continue
 
             ids = [f"coaching_{archivo.stem}_{i}" for i in range(len(chunks))]
             metadatas = [
@@ -381,7 +400,7 @@ def indexar_coaching_ventas():
             )
 
             count_chunks_total += len(chunks)
-            print(f"   📖 {archivo.name} ({len(chunks)} fragmentos) - Autor: {autor}")
+            print(f"   📖 {archivo.name} ({len(chunks)} técnicas) - Autor: {autor}")
 
         except Exception as e:
             print(f"   ❌ Error procesando {archivo.name}: {e}")

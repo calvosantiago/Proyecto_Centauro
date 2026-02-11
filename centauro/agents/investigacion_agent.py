@@ -46,19 +46,12 @@ class InvestigacionAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ Pocas evidencias de investigación ({len(evidencias_extra)})")
                 confianza *= 0.85
 
-            # NUEVO: Detectar técnicas y enriquecer recomendación
+            # Detectar técnicas
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
             gap_para_5 = resultado_raw.get("gap_para_5", "")
 
-            # Enriquecer con coaching si hay área de mejora clara
-            if gap_para_5 and "N/A" not in gap_para_5:
-                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
-                    recomendacion_base,
-                    area_mejora="preguntas de descubrimiento y apertura"
-                )
-            else:
-                recomendacion_enriquecida = recomendacion_base
+            # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -68,7 +61,7 @@ class InvestigacionAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=recomendacion_enriquecida,
+                recomendacion_accionable=recomendacion_base,
                 metadata={
                     "calidad_apertura": resultado_raw.get("calidad_apertura", "MEDIA"),
                     "num_preguntas_detectadas": len([e for e in evidencias_extra if "[ASESOR]" in e and "?" in e]),
@@ -154,12 +147,12 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Validación o reformulación (si hay)..."
   ],
   "razonamiento": "Análisis técnico: ¿Qué hizo bien en apertura? ¿Calidad de preguntas? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "Acción específica y concreta para mejorar (sin repetir lo ya logrado)",
-  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
+  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máximo 6-8 líneas. NO copies texto literal de los libros, explícalo con tus palabras adaptado a esta conversación específica.",
+  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "calidad_apertura": "EXCELENTE | BUENA | CORRECTA | DEFICIENTE",
   "indicios_escucha_activa": true/false,
-  "tecnicas_detectadas": ["lista de técnicas que usó el asesor, ej: 'repregunta', 'validación emocional', 'SPIN parcial', 'mirroring'"],
-  "feedback_personalizado": "Mensaje DIRECTO al asesor mencionando su NOMBRE si aparece, reconociendo algo ESPECÍFICO que hizo bien, y sugiriendo UNA mejora concreta con ejemplo de frase que podría usar"
+  "tecnicas_detectadas": ["lista de técnicas que usó el asesor"],
+  "feedback_personalizado": "Mensaje DIRECTO al asesor: reconoce algo ESPECÍFICO que hizo bien, sugiere UNA mejora concreta con ejemplo de frase. Máximo 3-4 líneas."
 }}
 
 🎯 FEEDBACK PERSONALIZADO - INSTRUCCIONES CRÍTICAS:
@@ -177,6 +170,15 @@ REGLAS DEL FEEDBACK PERSONALIZADO:
 3. DA un ejemplo de frase alternativa que podría usar
 4. SÉ constructivo, no crítico
 5. Máximo 3-4 líneas, directo al grano
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para lo que le faltó al asesor
+- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+- Da 2 frases concretas que podría haber usado en ESTA conversación
+- NO copies texto literal del libro, adapta con tus palabras
+- Menciona de qué libro/autor viene la técnica (ej: "Como sugiere Rackham en SPIN Selling...")
 
 REGLAS CRÍTICAS:
 - Todas las evidencias DEBEN ser copy-paste LITERAL de la transcripción

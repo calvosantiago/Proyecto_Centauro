@@ -583,8 +583,8 @@ class DiarizationAgent:
         palabras = texto_completo.split()
         total_palabras = len(palabras)
 
-        # Si cabe en una llamada (~10000 palabras max para dejar margen)
-        if total_palabras <= 10000:
+        # Umbral conservador para evitar timeouts de API
+        if total_palabras <= 4000:
             print(f"   📝 Procesando {total_palabras} palabras en una llamada")
             return self._diarizar_batch_simple(texto_completo)
 
@@ -592,8 +592,24 @@ class DiarizationAgent:
         print(f"   📝 Texto largo ({total_palabras} palabras), procesando en chunks")
         return self._diarizar_batch_chunks(palabras)
 
-    def _diarizar_batch_simple(self, texto_completo: str) -> str:
-        """Diariza texto completo en una sola llamada LLM."""
+    def _diarizar_batch_simple(self, texto_completo: str, contexto_previo: str = "") -> str:
+        """Diariza texto completo en una sola llamada LLM.
+
+        Args:
+            texto_completo: Texto a diarizar
+            contexto_previo: Últimas líneas ya diarizadas del chunk anterior (solo contexto,
+                             NO se incluyen en la salida)
+        """
+        seccion_contexto = ""
+        if contexto_previo:
+            seccion_contexto = f"""
+CONTEXTO DEL FRAGMENTO ANTERIOR (ya diarizado, NO lo repitas en la salida):
+---
+{contexto_previo}
+---
+El texto nuevo a diarizar continúa justo después. Mantén la coherencia de roles.
+
+"""
 
         prompt_sistema = """Eres un experto en diarización de conversaciones de ventas educativas.
 
@@ -606,6 +622,7 @@ INSTRUCCIONES:
 2. Etiqueta cada turno como [ASESOR] o [LEAD]
 3. Mantén el texto original, solo añade las etiquetas
 4. Si no estás seguro, usa el contexto (el ASESOR suele explicar el programa, el LEAD hace preguntas sobre sí mismo)
+5. Si se indica contexto previo, úsalo para mantener coherencia pero NO lo repitas en la salida
 
 Formato de salida:
 [ASESOR]: texto del asesor...
@@ -617,7 +634,7 @@ Formato de salida:
         try:
             resultado = consultar_gpt(
                 prompt_sistema,
-                f"Diariza esta conversación:\n\n{texto_completo}",
+                f"{seccion_contexto}Diariza este fragmento de conversación:\n\n{texto_completo}",
                 "diar_batch"
             )
 
@@ -638,9 +655,9 @@ Formato de salida:
             return self._diarizar_heuristica_texto(texto_completo)
 
     def _diarizar_batch_chunks(self, palabras: List[str]) -> str:
-        """Diariza texto largo procesando en chunks de ~8000 palabras."""
-        CHUNK_SIZE = 8000
-        OVERLAP = 500  # Palabras de overlap para mantener contexto
+        """Diariza texto largo procesando en chunks de ~3500 palabras."""
+        CHUNK_SIZE = 3500  # Reducido para evitar timeouts de API
+        OVERLAP = 200  # Palabras de overlap para mantener contexto
 
         chunks = []
         inicio = 0
@@ -655,23 +672,17 @@ Formato de salida:
 
         # Procesar cada chunk
         resultados_chunks = []
-        ultimo_speaker = None
+        contexto_previo = ""  # Últimas líneas diarizadas del chunk anterior
 
         for i, chunk in enumerate(chunks):
             print(f"   📝 Procesando chunk {i+1}/{len(chunks)}...")
 
-            # Añadir contexto del speaker anterior para continuidad
-            contexto = ""
-            if ultimo_speaker:
-                contexto = f"(El último en hablar fue {ultimo_speaker})\n\n"
+            resultado = self._diarizar_batch_simple(chunk, contexto_previo=contexto_previo)
 
-            resultado = self._diarizar_batch_simple(contexto + chunk)
-
-            # Detectar último speaker para el siguiente chunk
-            if "[ASESOR]" in resultado:
-                ultimo_speaker = "ASESOR" if resultado.rfind("[ASESOR]") > resultado.rfind("[LEAD]") else "LEAD"
-            elif "[LEAD]" in resultado:
-                ultimo_speaker = "LEAD"
+            # Extraer las últimas 3 líneas diarizadas para usarlas como contexto del siguiente chunk
+            turnos_resultado = [t.strip() for t in resultado.split("\n\n") if t.strip()]
+            if turnos_resultado:
+                contexto_previo = "\n".join(turnos_resultado[-3:])
 
             resultados_chunks.append(resultado)
 
@@ -725,43 +736,16 @@ Formato de salida:
     # ==========================================================================
     
     def _diarizar_texto_plano(self, texto_crudo: str, log_id: str) -> str:
-        """Diariza texto plano usando clasificación contextual"""
-        frases = self._segmentar_por_pausas_naturales(texto_crudo)
-        print(f"   📝 Detectadas {len(frases)} unidades conversacionales")
-        
-        dialogo_etiquetado = []
-        speaker_anterior = None
-        
-        for idx, frase in enumerate(frases):
-            speaker, confianza = self._clasificar_con_contexto(frases, idx, speaker_anterior)
-            
-            if speaker_anterior and speaker != speaker_anterior and confianza < self.confidence_threshold:
-                print(f"   🔄 Re-evaluando turno {idx} (confianza baja: {confianza:.2f})")
-                original_ventana = self.ventana_contexto
-                self.ventana_contexto = 5
-                speaker, confianza = self._clasificar_con_contexto(frases, idx, speaker_anterior)
-                self.ventana_contexto = original_ventana
-            
-            dialogo_etiquetado.append({
-                "speaker": speaker,
-                "text": frase,
-                "confidence": confianza,
-                "index": idx
-            })
-            
-            speaker_anterior = speaker
-        
-        dialogo_fusionado = self._fusionar_turnos_consecutivos(dialogo_etiquetado)
-        
-        resultado = "\n\n".join([
-            f"[{turno['speaker']}]: {turno['text']}"
-            for turno in dialogo_fusionado
-        ])
-        
-        print(f"   ✅ Diarización completada: {len(dialogo_fusionado)} turnos")
-        print(f"   📊 Distribución: {self._calcular_distribucion(dialogo_fusionado)}")
-        
-        return resultado
+        """Diariza texto plano usando diarización batch (1 llamada LLM por chunk)"""
+        palabras = texto_crudo.split()
+        total_palabras = len(palabras)
+        print(f"   📝 Texto plano: {total_palabras} palabras → diarización batch")
+
+        # Umbral bajo (4000 palabras) para que cada chunk quepa bien en el timeout
+        if total_palabras <= 4000:
+            return self._diarizar_batch_simple(texto_crudo)
+        else:
+            return self._diarizar_batch_chunks(palabras)
     
     # ==========================================================================
     # UTILIDADES

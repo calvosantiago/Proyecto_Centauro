@@ -43,7 +43,7 @@ echo Navegador: http://localhost:8000
 echo.
 
 REM 4. Ejecutar la app
-python -m chainlit run app.py -w
+python -m chainlit run app.py
 
 if %errorlevel% neq 0 (
     echo.

@@ -41,16 +41,9 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ No se detectó personalización en la propuesta")
                 confianza *= 0.85
 
-            # Enriquecer recomendación con coaching si hay área de mejora
+            # NOTA: El coaching se integra directamente en el prompt del agente via RAG
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
             gap_para_5 = resultado_raw.get("gap_para_5", "")
-            if gap_para_5 and "N/A" not in gap_para_5:
-                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
-                    recomendacion_base,
-                    area_mejora="propuesta de valor y presentación de beneficios"
-                )
-            else:
-                recomendacion_enriquecida = recomendacion_base
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -60,7 +53,7 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=recomendacion_enriquecida,
+                recomendacion_accionable=recomendacion_base,
                 metadata={
                     "personalizacion_detectada": personalizacion,
                     "enfoque": resultado_raw.get("enfoque", "caracteristicas"),
@@ -141,12 +134,21 @@ FORMATO JSON OBLIGATORIO:
     "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
   "razonamiento": "¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "Acción específica para mejorar (sin repetir lo ya logrado)",
-  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
+  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto"
 }}
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para mejorar la propuesta de valor
+- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+- Da 2 frases concretas que podría haber usado en ESTA conversación
+- NO copies texto literal del libro, adapta con tus palabras
+- Menciona de qué libro/autor viene
 
 REGLAS CRÍTICAS:
 - Todas las evidencias DEBEN ser copy-paste LITERAL (COPY-PASTE exacto)

@@ -40,16 +40,9 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
                 print(f"   ⚠️ No se detectó mención de inversión/precio")
                 confianza *= 0.7
 
-            # Enriquecer recomendación con coaching si hay área de mejora
+            # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
             gap_para_5 = resultado_raw.get("gap_para_5", "")
-            if gap_para_5 and "N/A" not in gap_para_5:
-                recomendacion_enriquecida = self.enriquecer_recomendacion_con_coaching(
-                    recomendacion_base,
-                    area_mejora="presentación de inversión económica y proceso de admisión"
-                )
-            else:
-                recomendacion_enriquecida = recomendacion_base
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -59,7 +52,7 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
-                recomendacion_accionable=recomendacion_enriquecida,
+                recomendacion_accionable=recomendacion_base,
                 metadata={
                     "menciona_precio": menciona_precio,
                     "explica_financiacion": resultado_raw.get("explica_financiacion", False),
@@ -143,13 +136,22 @@ FORMATO JSON OBLIGATORIO:
     "[LEAD]: Reacción o pregunta sobre precio... (COPY-PASTE LITERAL)"
   ],
   "razonamiento": "¿Fue claro en admisión? ¿Transparente con precio? ¿Enfoque valor o precio? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "Acción específica para mejorar (sin repetir lo ya logrado)",
-  "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'",
+  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "menciona_precio": true/false,
   "explica_financiacion": true/false,
   "claridad_admision": "ALTA" | "MEDIA" | "BAJA" | "NO_MENCIONADO",
   "enfoque_valor_vs_precio": "valor" | "precio" | "equilibrado"
 }}
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para lo que le faltó al asesor
+- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+- Da 2 frases concretas que podría haber usado en ESTA conversación
+- NO copies texto literal del libro, adapta con tus palabras
+- Menciona de qué libro/autor viene
 
 REGLAS CRÍTICAS:
 - Todas las evidencias DEBEN ser copy-paste LITERAL (COPY-PASTE exacto)

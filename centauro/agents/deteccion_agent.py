@@ -21,7 +21,7 @@ class DeteccionNecesidadesAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Detección de necesidades")
     
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa el descubrimiento de necesidades"""
         
         try:

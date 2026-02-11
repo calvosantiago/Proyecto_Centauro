@@ -1,12 +1,15 @@
 import csv
 import os
 import datetime
-from openai import OpenAI
+import time
+from openai import OpenAI, APITimeoutError, APIConnectionError, RateLimitError, APIError
 from .config import settings
 from dotenv import load_dotenv
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+GPT_TIMEOUT_SECONDS = 180  # Aumentado para transcripciones largas (diarización batch)
+GPT_MAX_RETRIES = 2
 
 # --- TARIFAS GPT-4o-mini (Actualizado Dic 2025) ---
 # Precios por token (USD)
@@ -95,7 +98,36 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
     if force_json:
         kwargs["response_format"] = {"type": "json_object"}
 
-    response = client.chat.completions.create(**kwargs)
+    response = None
+    ultimo_error = None
+
+    for intento in range(1, GPT_MAX_RETRIES + 2):
+        try:
+            response = client.chat.completions.create(
+                **kwargs,
+                timeout=GPT_TIMEOUT_SECONDS
+            )
+            break
+        except (APITimeoutError, APIConnectionError, RateLimitError) as e:
+            ultimo_error = e
+            if intento > GPT_MAX_RETRIES:
+                break
+
+            espera = min(2 ** (intento - 1), 8)
+            print(
+                f"⚠️ GPT intento {intento}/{GPT_MAX_RETRIES + 1} falló ({type(e).__name__}). "
+                f"Reintentando en {espera}s..."
+            )
+            time.sleep(espera)
+        except APIError as e:
+            ultimo_error = e
+            # Errores de API no transitorios: cortar directamente
+            break
+
+    if response is None:
+        raise RuntimeError(
+            f"Fallo al consultar GPT tras {GPT_MAX_RETRIES + 1} intentos: {ultimo_error}"
+        )
 
     # --- REGISTRO AUTOMÁTICO DE GASTOS ---
     if response.usage:

@@ -21,7 +21,7 @@ class PresentacionAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Presentación del programa")
     
-    def evaluate(self, transcripcion: str, contexto_manual: str) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa la presentación del programa"""
         
         try:

@@ -266,7 +266,8 @@ async def main(message: cl.Message):
             from centauro.core.gestion_asesores import gestion_asesores
 
             diarization_agent = DiarizationAgent(nombre_asesor=file.name)
-            transcripcion_diarizada = diarization_agent.diarizar(texto_protegido, file.name)
+            # Ejecutar diarización en hilo para no bloquear el loop async de Chainlit
+            transcripcion_diarizada = await cl.make_async(diarization_agent.diarizar)(texto_protegido, file.name)
 
             # NUEVO: Detección inteligente con validación
             asesor_detectado_inicial = diarization_agent.asesor_detectado
@@ -288,13 +289,20 @@ async def main(message: cl.Message):
         # Validar y normalizar nombre del asesor
         asesor_confirmado = None
 
+        # Intentar extraer nombre del contexto_usuario si no se detectó
+        if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
+            if contexto_usuario:
+                nombre_de_contexto = gestion_asesores.extraer_nombre_de_transcripcion(contexto_usuario)
+                if nombre_de_contexto:
+                    asesor_detectado_inicial = nombre_de_contexto
+
         if asesor_detectado_inicial and gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
             # Buscar si existe uno similar
             resultado_validacion = gestion_asesores.validar_y_normalizar(asesor_detectado_inicial)
             nombre_norm, nombre_existente, score = resultado_validacion
 
             if nombre_existente and score >= 85:
-                # Existe uno muy similar, preguntar cuál usar
+                # Existe uno muy similar, preguntar cuál usar (timeout corto)
                 res = await cl.AskUserMessage(
                     content=f"👤 **Confirmación de asesor**\n\n"
                             f"Detectado: **{nombre_norm}**\n"
@@ -302,9 +310,9 @@ async def main(message: cl.Message):
                             f"¿Cuál es correcto?\n"
                             f"1️⃣ Usar perfil existente: **{nombre_existente}**\n"
                             f"2️⃣ Crear nuevo perfil: **{nombre_norm}**\n"
-                            f"3️⃣ Escribir nombre manualmente\n\n"
-                            f"Responde: **1**, **2** o escribe el nombre correcto",
-                    timeout=60
+                            f"O escribe el nombre correcto\n\n"
+                            f"_(Si no respondes en 30s, se usará el perfil existente)_",
+                    timeout=30
                 ).send()
 
                 if res and res.get("output"):
@@ -314,20 +322,19 @@ async def main(message: cl.Message):
                     elif respuesta == "2":
                         asesor_confirmado = nombre_norm
                     else:
-                        # Usuario escribió nombre manualmente
                         try:
                             asesor_confirmado = gestion_asesores.obtener_nombre_canonico(respuesta)
                         except ValueError:
                             await cl.Message(content=f"⚠️ Nombre inválido: '{respuesta}'. Usando detectado: {nombre_norm}").send()
                             asesor_confirmado = nombre_norm
                 else:
-                    # Timeout, usar existente
+                    # Timeout, usar existente automáticamente
                     asesor_confirmado = nombre_existente
             else:
-                # No hay similar, usar detectado
+                # No hay similar, usar detectado directamente sin preguntar
                 asesor_confirmado = nombre_norm
         else:
-            # No se detectó nombre válido, preguntar
+            # No se detectó nombre válido — preguntar solo si no hay asesores conocidos con sugerencias
             sugerencias = gestion_asesores.asesores_conocidos[:5] if gestion_asesores.asesores_conocidos else []
 
             sugerencias_texto = ""
@@ -337,18 +344,22 @@ async def main(message: cl.Message):
             res = await cl.AskUserMessage(
                 content=f"👤 **¿Quién es el asesor de esta llamada?**\n\n"
                         f"No se pudo detectar automáticamente.\n"
-                        f"Por favor, escribe el nombre completo (Nombre Apellido):{sugerencias_texto}",
-                timeout=120
+                        f"Escribe el nombre (Nombre Apellido) o **skip** para continuar sin perfil:{sugerencias_texto}",
+                timeout=60
             ).send()
 
             if res and res.get("output"):
                 nombre_manual = res["output"].strip()
-                try:
-                    asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
-                except ValueError as e:
-                    await cl.Message(content=f"❌ {e}\n\nUsando 'Asesor Desconocido'").send()
+                if nombre_manual.lower() in ("skip", "omitir", "-", "n/a"):
                     asesor_confirmado = "Asesor Desconocido"
+                else:
+                    try:
+                        asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
+                    except ValueError as e:
+                        await cl.Message(content=f"⚠️ Nombre no reconocido: '{nombre_manual}'. Usando como está.").send()
+                        asesor_confirmado = nombre_manual.strip().title()
             else:
+                # Timeout → continuar sin bloquear
                 asesor_confirmado = "Asesor Desconocido"
 
         # Mostrar confirmación
@@ -361,7 +372,7 @@ async def main(message: cl.Message):
         async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
             try:
                 cache_key = file.name
-                temas = orchestrator.rag_agent.extraer_temas_llamada(transcripcion_diarizada, cache_key)
+                temas = await cl.make_async(orchestrator.rag_agent.extraer_temas_llamada)(transcripcion_diarizada, cache_key)
 
                 # Convertir a lista si no lo es
                 if temas and not isinstance(temas, list):
@@ -379,7 +390,7 @@ async def main(message: cl.Message):
         # ==================== FASE 2.5: PERFIL DEL LEAD ====================
         async with cl.Step(name="📊 FASE 2.5: Extracción de perfil del lead", type="tool") as step:
             try:
-                resumen_contextual = orchestrator._extraer_resumen_contextual(transcripcion_diarizada, file.name)
+                resumen_contextual = await cl.make_async(orchestrator._extraer_resumen_contextual)(transcripcion_diarizada, file.name)
 
                 perfil = resumen_contextual.get('perfil_lead', 'N/A')
                 fase = resumen_contextual.get('fase_funnel', 'N/A')
@@ -412,27 +423,27 @@ async def main(message: cl.Message):
                         if bloque_nombre == "Investigación":
                             from centauro.agents import InvestigacionAgent
                             extracto = orchestrator.config.get_extracto(bloque_nombre, transcripcion_diarizada)
-                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            ctx = await cl.make_async(orchestrator.rag_agent.buscar_contexto_para_bloque)(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = InvestigacionAgent()
-                            resultado = agente.evaluate(extracto, ctx, contexto_usuario)
+                            resultado = await cl.make_async(agente.evaluate)(extracto, ctx, contexto_usuario)
 
                         elif bloque_nombre == "Proceso de Admisión y Propuesta Económica":
                             from centauro.agents import AdmisionEconomicaAgent
-                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            ctx = await cl.make_async(orchestrator.rag_agent.buscar_contexto_para_bloque)(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = AdmisionEconomicaAgent()
-                            resultado = agente.evaluate(transcripcion_diarizada, ctx, contexto_usuario)
+                            resultado = await cl.make_async(agente.evaluate)(transcripcion_diarizada, ctx, contexto_usuario)
 
                         elif bloque_nombre == "Manejo de objeciones":
                             from centauro.agents import ObjecionesAgent
-                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            ctx = await cl.make_async(orchestrator.rag_agent.buscar_contexto_para_bloque)(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = ObjecionesAgent()
-                            resultado = agente.evaluate(transcripcion_diarizada, ctx, contexto_usuario)
+                            resultado = await cl.make_async(agente.evaluate)(transcripcion_diarizada, ctx, contexto_usuario)
 
                         elif bloque_nombre == "Cierre y próximos pasos":
                             from centauro.agents import CierreAgent
-                            ctx = orchestrator.rag_agent.buscar_contexto_para_bloque(bloque_nombre, transcripcion_diarizada, file.name)
+                            ctx = await cl.make_async(orchestrator.rag_agent.buscar_contexto_para_bloque)(bloque_nombre, transcripcion_diarizada, file.name)
                             agente = CierreAgent()
-                            resultado = agente.evaluate(transcripcion_diarizada, ctx, contexto_usuario)
+                            resultado = await cl.make_async(agente.evaluate)(transcripcion_diarizada, ctx, contexto_usuario)
 
                         evaluaciones.append(resultado.to_dict())
                         nota = resultado.puntuacion_1_5 if resultado.puntuacion_1_5 else "N/A"
@@ -444,7 +455,7 @@ async def main(message: cl.Message):
             # BLOQUES SECUNDARIOS (Batch)
             async with cl.Step(name="📦 Propuesta Valor + Estilo (Batch)", type="run") as sub_step:
                 try:
-                    evals_secundarias = orchestrator._evaluar_bloques_secundarios(transcripcion_diarizada, file.name, contexto_usuario)
+                    evals_secundarias = await cl.make_async(orchestrator._evaluar_bloques_secundarios)(transcripcion_diarizada, file.name, contexto_usuario)
                     evaluaciones.extend(evals_secundarias)
                     sub_step.output = f"✅ 2 bloques evaluados en batch"
                 except Exception as e:
@@ -454,7 +465,7 @@ async def main(message: cl.Message):
 
         # ==================== FASE 3.5: SHERIFF ====================
         async with cl.Step(name="🛡️ FASE 3.5: Sheriff Anti-Alucinaciones", type="tool") as step:
-            evaluaciones_validadas = orchestrator._sheriff_validar(evaluaciones, transcripcion_diarizada)
+            evaluaciones_validadas = await cl.make_async(orchestrator._sheriff_validar)(evaluaciones, transcripcion_diarizada)
 
             alucinaciones = orchestrator.stats.get("alucinaciones_detectadas", 0)
             ajustes = orchestrator.stats.get("notas_ajustadas_sheriff", 0)
@@ -467,7 +478,7 @@ async def main(message: cl.Message):
         # ==================== FASE 4: SÍNTESIS ====================
         async with cl.Step(name="🎨 FASE 4: Síntesis y generación de reporte", type="tool") as step:
             try:
-                reporte = orchestrator._sintetizar_evaluaciones(
+                reporte = await cl.make_async(orchestrator._sintetizar_evaluaciones)(
                     evaluaciones_validadas,
                     transcripcion_diarizada,
                     asesor_confirmado,

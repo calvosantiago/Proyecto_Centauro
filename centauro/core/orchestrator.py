@@ -122,6 +122,10 @@ class CentauroOrchestrator:
         print("\n📍 FASE 3.5: Auditoría Sheriff (anti-alucinaciones)")
         evaluaciones = self._sheriff_validar(evaluaciones, transcripcion_diarizada)
 
+        # NOTA: El coaching ahora está integrado directamente en cada agente evaluador.
+        # Los fragmentos de libros de ventas llegan vía RAG y cada agente los integra
+        # orgánicamente en su recomendacion_accionable. No se necesita fase separada.
+
         # --- FASE 4: SÍNTESIS ---
         print("\n📍 FASE 4: Síntesis y validación")
         reporte_final = self._sintetizar_evaluaciones(
@@ -130,7 +134,7 @@ class CentauroOrchestrator:
             asesor_detectado,
             resumen_contextual
         )
-        self.stats["llamadas_api"] += 1
+        # NOTA: _sintetizar_evaluaciones NO hace llamada LLM, es puro Python
 
         reporte_final["meta"]["stats_optimizacion"] = self.stats
 
@@ -313,8 +317,8 @@ FORMATO JSON OBLIGATORIO:
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA (COPY-PASTE)...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA (COPY-PASTE)..."],
     "razonamiento": "Explica QUÉ faltó para la nota siguiente. Sé CRÍTICO pero justo.",
-    "recomendacion_accionable": "Instrucción directa para mejorar (sin repetir lo ya logrado).",
-    "gap_para_5": "Si nota es 3 o 4, explica ESPECÍFICAMENTE qué faltó para alcanzar el 5. Si nota es 5, pon 'N/A - Ya alcanzado'"
+    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar, (2) UNA técnica de los libros del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 frases ejemplo adaptadas a ESTA conversación. Máx 6-8 líneas.",
+    "gap_para_5": "Si nota < 5, explica qué faltó. Si nota es 5, pon 'N/A'"
   }},
   "estilo": {{
     "puntuacion_1_5": 3,
@@ -322,10 +326,19 @@ FORMATO JSON OBLIGATORIO:
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA..."],
     "razonamiento": "Análisis del tono, ritmo y empatía. ¿Qué faltó?",
-    "recomendacion_accionable": "Acción concreta para mejorar estilo (sin repetir lo ya logrado).",
-    "gap_para_5": "Si nota es 3 o 4, explica qué faltó. Si nota es 5, pon 'N/A - Ya alcanzado'"
+    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar en estilo, (2) UNA técnica de los libros del CONTEXTO que aplique, dando 2 frases ejemplo. Máx 6-8 líneas.",
+    "gap_para_5": "Si nota < 5, explica qué faltó. Si nota es 5, pon 'N/A'"
   }}
 }}
+
+REGLAS PARA RECOMENDACIÓN CON COACHING:
+El contexto incluye fragmentos de libros marcados como [COACHING: ...].
+DEBES integrarlos en cada "recomendacion_accionable" de forma ORGÁNICA:
+- Elige la técnica MÁS relevante para cada bloque
+- Explica POR QUÉ le ayudaría, conectando con la situación real
+- Da 2 frases concretas adaptadas a ESTA conversación
+- NO copies texto literal del libro, adapta con tus palabras
+- Menciona de qué libro/autor viene
 
 ⚠️ REGLAS CRÍTICAS:
 - El 5/5 ES ALCANZABLE si cumplen todos los criterios de excelencia

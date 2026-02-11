@@ -139,14 +139,14 @@ cot = "full"
 
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
-# custom_css = "/public/test.css"
+custom_css = "/public/custom.css"
 
 # Specify additional attributes for a custom CSS file
 # custom_css_attributes = "media=\"print\""
 
 # Specify a JavaScript file that can be used to customize the user interface.
 # The JavaScript file can be served from the public directory.
-# custom_js = "/public/test.js"
+# custom_js = "/public/custom.js"
 
 # The style of alert boxes. Can be "classic" or "modern".
 alert_style = "classic"
@@ -210,10 +210,10 @@ text_secondary = "#757575"     # Gris
 
 # TEMA OSCURO (activo por defecto)
 [UI.theme.dark]
-background = "#2B2D2F"         # Gris plomo oscuro (fondo principal)
+background = "#1F2125"         # Fondo OBS
 paper = "#3A3C3E"              # Gris más claro (tarjetas y mensajes)
 primary = "#FFDD00"            # Amarillo OBS (botones, enlaces)
-accent = "#FFC107"             # Amarillo brillante (destacados)
+accent = "#FFDD00"             # Amarillo OBS (destacados)
 text_primary = "#FFFFFF"       # Blanco (texto principal)
 text_secondary = "#B0B0B0"     # Gris claro (texto secundario)
 

@@ -183,11 +183,26 @@ def main():
         inicio_reloj = time.time()
         print("   ⏳ Analizando con sistema multi-agente...")
 
+        # ===== CARGAR CONTEXTO DEL USUARIO (si existe) =====
+        # Busca un archivo con el mismo nombre + extensión .ctx
+        # Ejemplo: "entrevista_01.txt" → busca "entrevista_01.ctx"
+        contexto_usuario = None
+        archivo_ctx = archivo.with_suffix('.ctx')
+        if archivo_ctx.exists():
+            try:
+                with open(archivo_ctx, 'r', encoding='utf-8') as f_ctx:
+                    contexto_usuario = f_ctx.read().strip()
+                if contexto_usuario:
+                    print(f"   📝 Contexto del usuario cargado desde: {archivo_ctx.name}")
+            except Exception as e:
+                print(f"   ⚠️ Error leyendo contexto {archivo_ctx.name}: {e}")
+
         # ===== EJECUTAR ANÁLISIS CON ORQUESTADOR =====
         try:
             reporte = orchestrator.analizar_entrevista_completa(
                 nombre_archivo=archivo.stem,
-                texto_crudo=texto
+                texto_crudo=texto,
+                contexto_usuario=contexto_usuario
             )
         except Exception as e:
             print(f"\n   ❌ ERROR en análisis: {e}")
