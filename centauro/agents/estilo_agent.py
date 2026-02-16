@@ -72,8 +72,17 @@ Eres un AUDITOR ESPECIALIZADO en evaluación de ESTILO, TONO Y VOCABULARIO en co
 
 TU ÚNICA TAREA: Evaluar la CALIDAD COMUNICATIVA del [ASESOR] a lo largo de toda la conversación.
 
-CONTEXTO DEL MANUAL:
+CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
 {manual_enriquecido}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EL SPEECH COMO CARRETERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El speech NO define un tono o vocabulario exacto a imitar. Es la CARRETERA: define
+los límites de lo profesional y apropiado. Un asesor con un estilo propio, cálido
+y efectivo que conecta con el lead → BUENO, aunque no suene al speech de referencia.
+Lo que evalúas es si el estilo DAÑA la conversación (tono inapropiado, muletillas
+excesivas, falta de empatía) o si conduce bien dentro de los límites del profesionalismo.
 
 ASPECTOS A EVALUAR:
 
@@ -106,23 +115,24 @@ ASPECTOS A EVALUAR:
 
 CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-🔴 MALO — cuando el estilo comunicativo es inapropiado o genera rechazo:
-   - Tono grosero, condescendiente o excesivamente informal
-   - Vocabulario inapropiado, muletillas constantes que restan credibilidad
-   - Cero empatía, trata al lead como un número
-   - Genera incomodidad o rechazo en el lead
+🔴 MALO — el estilo comunicativo genera rechazo, incomodidad o rompe la confianza:
+   - Tono grosero, condescendiente, o excesivamente informal para el contexto
+   - Muletillas constantes que restan credibilidad o dificultan la comprensión
+   - Cero empatía: el asesor habla sin considerar cómo se siente el lead
+   - Genera incomodidad, distancia o rechazo visible en el lead
+   - También: tono agresivo, impaciente o que hace sentir al lead presionado
 
-🟡 MEJORABLE — cuando el estilo es correcto pero mecánico y genérico:
-   - Tono educado pero mecánico, sin personalidad
-   - Vocabulario correcto pero no adaptado al lead
-   - Empáticamente neutro: ni frío ni cálido
-   - Profesional pero no memorable ni cercano
+🟡 MEJORABLE — el estilo es correcto pero frío, mecánico y sin conexión real:
+   - Tono educado pero robótico, como si siguiera un guión
+   - Sin momentos de empatía o cercanía genuina a lo largo de la conversación
+   - El lead responde pero no hay señales de que se sienta cómodo o escuchado
+   - Profesional pero impersonal: correcto, pero no conecta
 
-🟢 BUENO — cuando el estilo es profesional, cercano y genera confianza real:
-   - Tono profesional Y cercano, adaptado al lead específico
-   - Muestra empatía en momentos clave ("Entiendo tu situación...")
-   - Ritmo equilibrado: el lead participa activamente
-   - El lead se siente escuchado y cómodo
+🟢 BUENO — el estilo genera confianza y el lead se siente cómodo participando:
+   - Hay al menos un momento de empatía real o cercanía genuina
+   - El tono es profesional sin ser rígido
+   - El lead participa activamente y no parece incómodo
+   - No es necesario que sea perfecto: basta con que el estilo sume a la conversación en vez de restarle
 
 FORMATO JSON OBLIGATORIO:
 {{
@@ -148,9 +158,10 @@ FORMATO JSON OBLIGATORIO:
 
 ⚠️ REGLAS PARA CALIFICAR:
 - Sé decisivo: elige UNA etiqueta.
-- BUENO no requiere perfección comunicativa, requiere cercanía + profesionalismo + empatía real.
-- MEJORABLE es correcto pero mecánico y sin personalidad.
-- MALO cuando el estilo genera rechazo o incomodidad.
+- BUENO cuando el estilo suma a la conversación: el lead se siente cómodo y hay al menos un momento de conexión real.
+- MEJORABLE cuando el estilo es correcto pero mecánico: educado pero sin calidez, sin momentos de empatía.
+- MALO cuando el estilo daña la conversación: genera distancia, incomodidad o desconfianza.
+- Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
 - Evidencias LITERALES (COPY-PASTE exacto).
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 
@@ -165,9 +176,9 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 REGLAS CRÍTICAS:
 - Evalúa TODA la conversación, no solo un momento
 - Evidencias LITERALES de la transcripción
-- Diferencia entre "robot profesional" (3) y "humano profesional" (4-5)
-- Un 5 requiere que el lead se sienta realmente conectado con el asesor
-- Identifica patrones: ¿Es consistente o cambia?
+- Diferencia entre "robot profesional" (MEJORABLE) y "humano profesional" (BUENO)
+- BUENO requiere que el lead se sienta realmente conectado con el asesor en algún momento
+- Identifica patrones: ¿Es consistente o cambia a lo largo de la conversación?
 """
         
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
