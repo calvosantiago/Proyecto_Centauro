@@ -61,13 +61,12 @@ class CierreAgent(BaseEvaluatorAgent):
             # Detectar técnicas
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
-            gap_para_5 = resultado_raw.get("gap_para_5", "")
 
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -80,7 +79,6 @@ class CierreAgent(BaseEvaluatorAgent):
                     "tecnica_cierre": resultado_raw.get("tecnica_cierre", "ninguna"),
                     "recepcion_cliente": resultado_raw.get("recepcion_cliente", {}),
                     "tecnicas_detectadas": tecnicas_detectadas,
-                    "gap_para_5": gap_para_5,
                     "feedback_personalizado": resultado_raw.get("feedback_personalizado", "")
                 }
             )
@@ -111,36 +109,22 @@ El objetivo suele ser avanzar al siguiente paso del proceso:
 - Agendar llamada de seguimiento
 - Programar entrevista de admisión
 
-CRITERIOS ESPECÍFICOS (Escala DECIMAL 1.0-5.0):
-⚠️ USA TODA LA ESCALA. Si el cierre es excelente, da 4.5 o 5.0.
+CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-1.0-1.5 = PASIVO / SIN CIERRE
-   - Termina con "Piénsalo y me dices", sin próximo paso concreto
+🔴 MALO — cuando el asesor no cierra o lo hace de forma pasiva:
+   - Termina con "Piénsalo y me dices" sin ningún próximo paso concreto
+   - Propone algo vago sin concreción ("Te mando info") sin fecha ni compromiso
+   - No genera ningún avance real en el proceso de venta
 
-2.0-2.5 = DÉBIL / PRÓXIMO PASO VAGO
-   - Propone algo sin concreción ("Te mando info"), sin fecha ni hora
+🟡 MEJORABLE — cuando el asesor propone un próximo paso pero sin técnica:
+   - Define un próximo paso concreto pero no usa ninguna técnica de cierre
+   - No resume lo acordado ni maneja dudas finales con liderazgo
+   - El lead acepta sin mayor compromiso emocional o convicción
 
-3.0 = ADMINISTRATIVO / PASO DEFINIDO SIN TÉCNICA
-   - Propone próximo paso concreto pero no usa técnica de cierre
-   - No resume acuerdos ni maneja dudas con liderazgo
-
-3.5 = CORRECTO CON INTENTO DE COMPROMISO
-   - Paso concreto + pide compromiso básico (menciona fecha)
-
-4.0 = BUENO / CIERRE ESTRUCTURADO
-   - Resume lo acordado, próximo paso + fecha concreta
-   - Pide compromiso explícito, verifica dudas finales
-
-4.5 = MUY BUENO
-   - Añade resumen de beneficios antes de cerrar
-   - O usa técnica de cierre (doble alternativa, asuntivo)
-   - Lead confirma compromiso
-
-5.0 = EXCELENTE / CIERRE CONSULTIVO
-   - Resume beneficios clave vinculados al lead ANTES de cerrar
-   - Usa técnica de cierre efectiva
-   - Maneja dudas finales sin perder momentum
-   - Lead confirma compromiso con claridad
+🟢 BUENO — cuando el asesor cierra con estructura y el lead confirma compromiso:
+   - Resume lo acordado y propone próximo paso con fecha concreta
+   - Usa alguna técnica de cierre (doble alternativa, asuntivo, resumen-acción)
+   - Pide compromiso explícito y el lead lo confirma con claridad
 
 TÉCNICAS DE CIERRE COMUNES:
 - Doble alternativa: "¿Prefieres que te llame martes o jueves?"
@@ -149,16 +133,15 @@ TÉCNICAS DE CIERRE COMUNES:
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3.0,  ← USA DECIMALES: 3.0, 3.5, 4.0, etc.
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
   "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
     "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Propuso paso concreto? ¿Usó técnica? ¿Generó compromiso? ¿Manejó dudas finales? ¿Qué faltó para la nota siguiente?",
+  "razonamiento": "¿Propuso paso concreto? ¿Usó técnica? ¿Generó compromiso? ¿Manejó dudas finales? ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "proximo_paso_concreto": "Descripción del próximo paso acordado",
   "compromiso_fecha": true/false,
   "tecnica_cierre": "doble_alternativa" | "asuntivo" | "resumen_accion" | "ninguna",
@@ -197,13 +180,12 @@ REGLAS CRÍTICAS:
 - Un lead que dice "Lo pensaré" después de un buen cierre = 4.0 si usó técnica
 - EVIDENCIAS LITERALES OBLIGATORIAS: Copia exacta, NUNCA parafrasees
 
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si el cierre es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- Un asesor que resume, propone fecha, usa técnica y el lead confirma merece 4.5+
-- USA DECIMALES: Si está entre 3.0 y 4.0, usa 3.5
-- En "gap_para_5" explica QUÉ FALTÓ específicamente (ej: "Faltó resumir beneficios clave antes del cierre")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO no requiere un cierre de libro, requiere próximo paso + fecha + alguna técnica + compromiso del lead.
+- MEJORABLE es cuando define un paso pero sin técnica ni resumen.
+- MALO cuando no hay próximo paso real o termina con "piénsalo".
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar.
 """
         
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
@@ -250,7 +232,7 @@ Evalúa el cierre y próximos pasos en JSON.
         """Resultado para casos donde la grabación cortó antes del cierre"""
         return EvaluationResult(
             bloque=self.nombre_bloque,
-            puntuacion_1_5=None,
+            calificacion=None,
             observabilidad="NO_OBSERVABLE_OFF_RECORD",
             confianza=1.0,
             evidencia_principal="Grabación finalizó antes del cierre (corte detectado)",

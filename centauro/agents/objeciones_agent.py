@@ -35,15 +35,14 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 print(f"   ℹ️ No se detectaron objeciones en la conversación")
                 # No es malo, simplemente no hubo objeciones
                 resultado_raw["observabilidad"] = "NO_OBSERVABLE"
-                resultado_raw["puntuacion_1_5"] = None
-            
+                resultado_raw["calificacion"] = None
+
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
-            gap_para_5 = resultado_raw.get("gap_para_5", "")
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -53,8 +52,7 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 metadata={
                     "num_objeciones": len(objeciones_detectadas),
                     "objeciones_identificadas": objeciones_detectadas,
-                    "tecnica_detectada": resultado_raw.get("tecnica_detectada", "ninguna"),
-                    "gap_para_5": gap_para_5
+                    "tecnica_detectada": resultado_raw.get("tecnica_detectada", "ninguna")
                 }
             )
             
@@ -76,41 +74,27 @@ TU ÚNICA TAREA: Evaluar cómo manejó el [ASESOR] las dudas y resistencias del 
 CONTEXTO DEL MANUAL:
 {manual_enriquecido}
 
-IMPORTANTE: Si NO hay objeciones claras del [LEAD], marca observabilidad "NO_OBSERVABLE" y puntuacion_1_5: null
+IMPORTANTE: Si NO hay objeciones claras del [LEAD], marca observabilidad "NO_OBSERVABLE" y calificacion: null
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-1 = PÉSIMO / DEFENSIVO
-   - Ignora o minimiza la objeción
+🔴 MALO — cuando el asesor maneja la objeción de forma contraproducente:
+   - Ignora o minimiza la objeción del lead
    - Se pone a la defensiva ("No es caro, otros cobran más")
-   - Presiona al lead ("Tienes que decidirte ya")
-   - Genera más resistencia
+   - Presiona al lead sin escucharle ("Tienes que decidirte ya")
+   - Genera más resistencia en vez de reducirla
 
-2 = INSUFICIENTE / RESPUESTA DÉBIL
-   - Responde superficialmente sin resolver la duda real
-   - No valida la preocupación del lead
-   - Da información pero no persuade
-   - El lead queda igual de dudoso
+🟡 MEJORABLE — cuando el asesor responde pero sin técnica ni profundidad:
+   - Responde con información correcta pero de forma mecánica
+   - No valida la preocupación ni profundiza en el porqué de la objeción
+   - El lead queda igual de dudoso después de la respuesta
+   - Intenta resolver pero no usa ninguna técnica estructurada
 
-3 = CORRECTO / MANEJO ESTÁNDAR (Robot)
-   - Responde con información correcta
-   - Intenta resolver pero de forma mecánica
-   - No profundiza en el PORQUÉ de la objeción
-   - Funcional pero no elimina la resistencia
-
-4 = BUENO / TÉCNICA ESTRUCTURADA
+🟢 BUENO — cuando el asesor maneja la objeción con técnica y el lead suaviza su postura:
    - Valida la objeción ("Entiendo tu preocupación...")
-   - Aísla la objeción real ("¿Es solo el tiempo o hay algo más?")
-   - Usa técnica (feel-felt-found, boomerang, etc.)
-   - Resuelve con ejemplos o casos
-   - El lead suaviza su postura
-
-5 = MAESTRÍA / TRANSFORMACIÓN
-   - Valida emocionalmente ("Tiene sentido que pienses así")
-   - Convierte la objeción en motivo para comprar
-   - Usa storytelling o social proof efectivo
-   - Genera micro-compromiso ("Si resolvemos esto, ¿seguimos?")
-   - El lead pasa de resistencia a apertura
+   - Profundiza para entender la objeción real ("¿Es solo el tiempo o hay algo más?")
+   - Usa técnica estructurada (feel-felt-found, boomerang, aislamiento, etc.)
+   - El lead suaviza su resistencia o expresa más apertura
 
 TIPOS COMUNES DE OBJECIONES:
 - Precio ("Es caro", "No tengo presupuesto")
@@ -121,16 +105,15 @@ TIPOS COMUNES DE OBJECIONES:
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO" | null,
   "observabilidad": "ALTA" | "NO_OBSERVABLE",
   "evidencia_principal": "[LEAD]: Objeción principal... [ASESOR]: Respuesta... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
     "[ASESOR]: Validación de la objeción... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción posterior... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Validó? ¿Aisló? ¿Usó técnica? ¿Resolvió o generó más resistencia? ¿Qué faltó para la nota siguiente?",
+  "razonamiento": "¿Validó? ¿Aisló? ¿Usó técnica? ¿Resolvió o generó más resistencia? ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "ninguna"
 }}
@@ -146,14 +129,15 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 
 REGLAS CRÍTICAS:
 - Evidencias LITERALES de la transcripción (COPY-PASTE exacto)
-- Si no hay objeciones → observabilidad "NO_OBSERVABLE" y puntuacion_1_5: null
+- Si no hay objeciones → observabilidad "NO_OBSERVABLE" y calificacion: null
 - NO evalúes si el lead compró, evalúa si el ASESOR manejó bien la resistencia
 - Una objeción bien manejada puede dejar al lead pensando (eso es OK)
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si el manejo de objeciones es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- En "gap_para_5" sé específico (ej: "Faltó usar social proof o caso de éxito")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta (o null si no hay objeciones).
+- BUENO requiere validación + alguna técnica + que el lead suavice su postura.
+- MEJORABLE es responder correctamente pero sin técnica ni profundidad.
+- MALO cuando el asesor agrava la situación o ignora la objeción.
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
         
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)

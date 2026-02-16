@@ -15,11 +15,10 @@ from centauro.config import centauro_config
 class EvaluationResult:
     """Resultado estandarizado de evaluación
 
-    NOTA v4.0: puntuacion_1_5 ahora acepta decimales (float) para mayor granularidad.
-    Valores permitidos: 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0
+    v5.0: Calificación ordinal MALO | MEJORABLE | BUENO (reemplaza escala 1-5)
     """
     bloque: str
-    puntuacion_1_5: Optional[float]  # Cambiado de int a float para escala decimal
+    calificacion: Optional[str]  # MALO | MEJORABLE | BUENO | None (no observable)
     observabilidad: str  # ALTA | MEDIA | BAJA | NO_OBSERVABLE_OFF_RECORD
     confianza: float  # 0.0 - 1.0
     evidencia_principal: str
@@ -27,12 +26,12 @@ class EvaluationResult:
     razonamiento: str = ""
     recomendacion_accionable: str = ""
     metadata: Dict = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict:
         """Convierte a diccionario para compatibilidad con schema.py"""
         return {
             "bloque": self.bloque,
-            "puntuacion_1_5": self.puntuacion_1_5,
+            "calificacion": self.calificacion,
             "observabilidad": self.observabilidad,
             "confianza": self.confianza,
             "evidencia_principal": self.evidencia_principal,
@@ -135,7 +134,7 @@ No ignores esta información, intégrala en tu análisis.
         """Genera resultado de fallback cuando la evaluación falla"""
         return EvaluationResult(
             bloque=self.nombre_bloque,
-            puntuacion_1_5=None,
+            calificacion=None,
             observabilidad="ERROR_EVALUACION",
             confianza=0.0,
             evidencia_principal=f"Error: {error_msg}",
@@ -253,19 +252,18 @@ No ignores esta información, intégrala en tu análisis.
         contexto_enriquecido += "="*80 + "\n\n"
 
         contexto_enriquecido += "Los siguientes son extractos de entrevistas REALES que fueron\n"
-        contexto_enriquecido += "evaluadas manualmente y obtuvieron la puntuacion indicada.\n"
-        contexto_enriquecido += "USALOS PARA CALIBRAR tu evaluacion:\n\n"
+        contexto_enriquecido += "evaluadas manualmente. USALOS PARA CALIBRAR tu evaluacion:\n\n"
 
         contexto_enriquecido += "INSTRUCCIONES DE CALIBRACION:\n"
-        contexto_enriquecido += "1. Lee los ejemplos para entender el NIVEL DE CALIDAD que corresponde a cada nota\n"
+        contexto_enriquecido += "1. Lee los ejemplos para entender el NIVEL DE CALIDAD que corresponde a cada calificacion\n"
         contexto_enriquecido += "2. Los ejemplos muestran UNA forma exitosa, NO la unica. Hay muchas formas\n"
-        contexto_enriquecido += "   de alcanzar un 5/5 sin parecerse al ejemplo\n"
+        contexto_enriquecido += "   de ser BUENO sin parecerse al ejemplo\n"
         contexto_enriquecido += "3. Evalua la conversacion por SUS PROPIOS MERITOS primero:\n"
-        contexto_enriquecido += "   - Si logra el objetivo del bloque con calidad → puntua alto\n"
-        contexto_enriquecido += "   - Si usa tecnicas diferentes pero efectivas → puntua alto\n"
-        contexto_enriquecido += "   - NO exijas que se parezca al ejemplo para dar buena nota\n"
+        contexto_enriquecido += "   - Si logra el objetivo del bloque con calidad → BUENO\n"
+        contexto_enriquecido += "   - Si usa tecnicas diferentes pero efectivas → BUENO\n"
+        contexto_enriquecido += "   - NO exijas que se parezca al ejemplo para calificar como BUENO\n"
         contexto_enriquecido += "4. Si la conversacion es la MISMA entrevista que un ejemplo,\n"
-        contexto_enriquecido += "   la puntuacion debe ser COHERENTE con la del ejemplo\n"
+        contexto_enriquecido += "   la calificacion debe ser COHERENTE con la del ejemplo\n"
         contexto_enriquecido += "5. Usa los ejemplos para ENRIQUECER tus recomendaciones de mejora,\n"
         contexto_enriquecido += "   sugiriendo tecnicas concretas que podrian complementar lo que ya hace bien\n\n"
 

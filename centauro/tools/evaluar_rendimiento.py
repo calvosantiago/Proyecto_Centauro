@@ -258,18 +258,16 @@ INSTRUCCIONES PARA BENCHMARK MANUAL
 ====================================
 
 1. Selecciona 5-10 transcripciones de llamadas variadas (buenas, regulares, malas)
-2. Evalúa cada una manualmente según los criterios de OBS (1-5)
-3. Registra tus notas en la sección 'evaluaciones_humano'
+2. Evalúa cada una manualmente según los criterios de OBS (MALO/MEJORABLE/BUENO)
+3. Registra tus calificaciones en la sección 'evaluacion_humano'
 4. Ejecuta Centauro sobre las mismas llamadas
-5. Registra las notas de Centauro en 'evaluaciones_centauro'
+5. Registra las calificaciones de Centauro en 'evaluacion_centauro'
 6. Ejecuta el análisis de comparación
 
-CRITERIOS DE EVALUACIÓN (1-5):
-- 1: Muy deficiente
-- 2: Deficiente
-- 3: Aceptable
-- 4: Bueno
-- 5: Excelente
+CRITERIOS DE EVALUACIÓN:
+- MALO: Insuficiente o contraproducente
+- MEJORABLE: Correcto pero genérico o sin profundidad real
+- BUENO: Personalizado, profesional y efectivo
         """,
         "fecha_creacion": datetime.now().isoformat(),
         "evaluaciones": [
@@ -284,7 +282,7 @@ CRITERIOS DE EVALUACIÓN (1-5):
                     "Cierre y próximos pasos": None,
                     "Objeciones": None,
                     "Estilo comunicativo": None,
-                    "nota_global": None,
+                    "calificacion_global": None,
                     "comentarios": ""
                 },
                 "evaluacion_centauro": {
@@ -294,7 +292,7 @@ CRITERIOS DE EVALUACIÓN (1-5):
                     "Cierre y próximos pasos": None,
                     "Objeciones": None,
                     "Estilo comunicativo": None,
-                    "nota_global": None
+                    "calificacion_global": None
                 }
             }
         ]
@@ -343,8 +341,8 @@ def analizar_benchmark(benchmark_path: Optional[str] = None):
         "Cierre y próximos pasos", "Objeciones", "Estilo comunicativo"
     ]
 
-    diferencias_por_seccion = {s: [] for s in secciones}
-    diferencias_globales = []
+    coincidencias_por_seccion = {s: [] for s in secciones}
+    coincidencias_globales = []
 
     evaluaciones_completas = 0
 
@@ -353,26 +351,26 @@ def analizar_benchmark(benchmark_path: Optional[str] = None):
         centauro = eval_item.get("evaluacion_centauro", {})
 
         # Verificar que ambas evaluaciones están completas
-        if humano.get("nota_global") is None or centauro.get("nota_global") is None:
+        if humano.get("calificacion_global") is None or centauro.get("calificacion_global") is None:
             continue
 
         evaluaciones_completas += 1
 
-        # Calcular diferencias por sección
+        # Calcular coincidencias por sección
         for seccion in secciones:
-            nota_h = humano.get(seccion)
-            nota_c = centauro.get(seccion)
+            cal_h = humano.get(seccion)
+            cal_c = centauro.get(seccion)
 
-            if nota_h is not None and nota_c is not None:
-                diff = nota_c - nota_h
-                diferencias_por_seccion[seccion].append(diff)
+            if cal_h is not None and cal_c is not None:
+                coincidencias_por_seccion[seccion].append(cal_h == cal_c)
 
-        # Diferencia global
-        diff_global = centauro["nota_global"] - humano["nota_global"]
-        diferencias_globales.append(diff_global)
+        # Coincidencia global
+        coincide_global = centauro["calificacion_global"] == humano["calificacion_global"]
+        coincidencias_globales.append(coincide_global)
 
+        match_icon = "✅" if coincide_global else "❌"
         print(f"\n📄 {eval_item.get('archivo', eval_item['id'])}")
-        print(f"   Humano: {humano['nota_global']:.1f} | Centauro: {centauro['nota_global']:.1f} | Diff: {diff_global:+.2f}")
+        print(f"   Humano: {humano['calificacion_global']} | Centauro: {centauro['calificacion_global']} | {match_icon}")
 
     if evaluaciones_completas == 0:
         print("\n⚠️ No hay evaluaciones completas para analizar.")
@@ -381,44 +379,33 @@ def analizar_benchmark(benchmark_path: Optional[str] = None):
 
     # Estadísticas
     print("\n" + "-"*70)
-    print("📈 ESTADÍSTICAS POR SECCIÓN")
+    print("📈 COINCIDENCIA POR SECCIÓN")
     print("-"*70)
 
-    for seccion, diffs in diferencias_por_seccion.items():
-        if diffs:
-            media = sum(diffs) / len(diffs)
-            abs_media = sum(abs(d) for d in diffs) / len(diffs)
-            print(f"  {seccion:35} | Sesgo: {media:+.2f} | Error medio: {abs_media:.2f}")
+    for seccion, coincidencias in coincidencias_por_seccion.items():
+        if coincidencias:
+            tasa = sum(coincidencias) / len(coincidencias) * 100
+            print(f"  {seccion:35} | Coincidencia: {tasa:.0f}% ({sum(coincidencias)}/{len(coincidencias)})")
 
     # Resumen global
-    if diferencias_globales:
-        media_global = sum(diferencias_globales) / len(diferencias_globales)
-        error_medio_global = sum(abs(d) for d in diferencias_globales) / len(diferencias_globales)
-        max_error = max(abs(d) for d in diferencias_globales)
+    if coincidencias_globales:
+        tasa_global = sum(coincidencias_globales) / len(coincidencias_globales) * 100
 
         print("\n" + "-"*70)
         print("📊 RESUMEN GLOBAL")
         print("-"*70)
         print(f"  Evaluaciones analizadas: {evaluaciones_completas}")
         print(f"  Sesgo medio (Centauro - Humano): {media_global:+.2f}")
-        print(f"  Error absoluto medio: {error_medio_global:.2f}")
-        print(f"  Error máximo: {max_error:.2f}")
+        print(f"  Tasa de coincidencia global: {tasa_global:.0f}%")
 
         # Interpretación
         print("\n💡 INTERPRETACIÓN:")
-        if abs(media_global) < 0.3:
-            print("  ✅ Sesgo bajo - Centauro no sobrevalora ni infravalora sistemáticamente")
-        elif media_global > 0.3:
-            print("  ⚠️ Centauro tiende a SOBREVALOR las llamadas")
+        if tasa_global >= 70:
+            print("  ✅ Alta coincidencia - Centauro es consistente con el criterio humano")
+        elif tasa_global >= 50:
+            print("  ⚠️ Coincidencia moderada - Hay margen de mejora en la calibración")
         else:
-            print("  ⚠️ Centauro tiende a INFRAVALOR las llamadas")
-
-        if error_medio_global < 0.5:
-            print("  ✅ Error bajo - Las notas son consistentes con el criterio humano")
-        elif error_medio_global < 1.0:
-            print("  ⚠️ Error moderado - Hay margen de mejora en la calibración")
-        else:
-            print("  ❌ Error alto - Revisar criterios de evaluación")
+            print("  ❌ Coincidencia baja - Revisar criterios y rubricas de evaluación")
 
 
 # ============================================================

@@ -43,7 +43,7 @@ class EstiloAgent(BaseEvaluatorAgent):
             
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -104,44 +104,29 @@ ASPECTOS A EVALUAR:
    - Sin muletillas excesivas ("ehhh", "bueno", "vale vale")
    - Seguro vs dubitativo
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-1 = INAPROPIADO / CONTRAPRODUCENTE
+🔴 MALO — cuando el estilo comunicativo es inapropiado o genera rechazo:
    - Tono grosero, condescendiente o excesivamente informal
-   - Vocabulario inapropiado (coloquialismos, errores graves)
-   - Cero empatía, trata al lead como número
-   - Genera rechazo o incomodidad
+   - Vocabulario inapropiado, muletillas constantes que restan credibilidad
+   - Cero empatía, trata al lead como un número
+   - Genera incomodidad o rechazo en el lead
 
-2 = DEFICIENTE / POCO PROFESIONAL
-   - Tono inconsistente (a veces formal, a veces demasiado casual)
-   - Muletillas constantes que restan profesionalismo
-   - Poca adaptación al lead
-   - No genera confianza
+🟡 MEJORABLE — cuando el estilo es correcto pero mecánico y genérico:
+   - Tono educado pero mecánico, sin personalidad
+   - Vocabulario correcto pero no adaptado al lead
+   - Empáticamente neutro: ni frío ni cálido
+   - Profesional pero no memorable ni cercano
 
-3 = CORRECTO / ESTÁNDAR (Robot)
-   - Tono educado pero mecánico
-   - Vocabulario correcto pero genérico
-   - Empáticamente neutro (no frío, pero tampoco cálido)
-   - Profesional pero sin personalidad
-   - Funcional pero no memorable
-
-4 = BUENO / COMUNICACIÓN EFECTIVA
-   - Tono profesional Y cercano
-   - Adapta vocabulario al lead
-   - Muestra empatía en momentos clave
-   - Ritmo equilibrado (lead participa activamente)
-   - Genera confianza
-
-5 = MAESTRÍA / COMUNICACIÓN EXCEPCIONAL
-   - Tono perfecto para el contexto y el lead
-   - Vocabulario que conecta (usa metáforas, ejemplos del mundo del lead)
-   - Empatía genuina que genera conexión real
-   - Ritmo magistral (sabe cuándo hablar y cuándo callar)
-   - El lead se siente escuchado, comprendido y valorado
+🟢 BUENO — cuando el estilo es profesional, cercano y genera confianza real:
+   - Tono profesional Y cercano, adaptado al lead específico
+   - Muestra empatía en momentos clave ("Entiendo tu situación...")
+   - Ritmo equilibrado: el lead participa activamente
+   - El lead se siente escuchado y cómodo
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA",
   "evidencia_principal": "[ASESOR]: Ejemplo representativo del tono/estilo... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
@@ -149,9 +134,8 @@ FORMATO JSON OBLIGATORIO:
     "Ejemplo de vocabulario adaptado: [ASESOR]: ... (COPY-PASTE LITERAL)",
     "Muletilla o problema detectado: [ASESOR]: ... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Análisis del tono general, vocabulario, empatía, ritmo y profesionalismo. ¿Qué faltó para la nota siguiente?",
+  "razonamiento": "Análisis del tono general, vocabulario, empatía, ritmo y profesionalismo. ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
     "vocabulario": "adaptado" | "generico" | "inadecuado",
@@ -162,12 +146,13 @@ FORMATO JSON OBLIGATORIO:
   "fortaleza_principal": "El aspecto comunicativo más destacable del asesor"
 }}
 
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si el estilo comunicativo es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- Evidencias LITERALES (COPY-PASTE exacto)
-- En "gap_para_5" sé específico (ej: "Faltó usar metáforas del mundo del lead")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO no requiere perfección comunicativa, requiere cercanía + profesionalismo + empatía real.
+- MEJORABLE es correcto pero mecánico y sin personalidad.
+- MALO cuando el estilo genera rechazo o incomodidad.
+- Evidencias LITERALES (COPY-PASTE exacto).
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
 En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].

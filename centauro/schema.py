@@ -9,14 +9,14 @@ class RecepcionCliente(BaseModel):
 
 class BloqueEvaluacion(BaseModel):
     bloque: str
-    puntuacion_1_5: Optional[int] = Field(None, description="Nota 1-5. Null si es no observable")
+    calificacion: Optional[str] = Field(None, description="MALO | MEJORABLE | BUENO. Null si no es observable")
     observabilidad: str = "ALTA" # ALTA|MEDIA|BAJA|NO_OBSERVABLE_OFF_RECORD
     confianza: float = 0.0
     evidencia_principal: str = ""
     evidencias_extra: List[str] = []
     razonamiento: str = ""
     recomendacion_accionable: str = ""
-    
+
     # Campo especial solo para el bloque de cierre (opcional en otros)
     recepcion_cliente: Optional[RecepcionCliente] = None
 
@@ -58,5 +58,5 @@ class ReporteCalidad(BaseModel):
     cobertura_revision: CoberturaRevision
     momentos_clave: List[MomentoClave] = []
     evaluacion_por_bloques: List[BloqueEvaluacion]
-    puntuacion_global_1_5: float = 0.0
+    calificacion_global: Optional[str] = None  # MALO | MEJORABLE | BUENO
     feedback_resumido: FeedbackResumido

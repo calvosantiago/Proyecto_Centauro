@@ -43,11 +43,10 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
 
             # NOTA: El coaching se integra directamente en el prompt del agente via RAG
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
-            gap_para_5 = resultado_raw.get("gap_para_5", "")
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -57,8 +56,7 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 metadata={
                     "personalizacion_detectada": personalizacion,
                     "enfoque": resultado_raw.get("enfoque", "caracteristicas"),
-                    "presenta_institucion": resultado_raw.get("presenta_institucion", False),
-                    "gap_para_5": gap_para_5
+                    "presenta_institucion": resultado_raw.get("presenta_institucion", False)
                 }
             )
 
@@ -80,41 +78,26 @@ TU TAREA: Evaluar cómo presentó el [ASESOR] la institución (OBS) y el program
 CONTEXTO DEL MANUAL:
 {manual_enriquecido}
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-1 = DEFICIENTE / DESORGANIZADO
-   - No explica claramente qué es OBS
-   - Información del programa confusa o contradictoria
-   - No conecta con lo que busca el lead
+🔴 MALO — cuando la presentación es claramente insuficiente o desorganizada:
+   - No explica claramente qué es OBS o el programa
+   - Suelta características sin estructura ni conexión
+   - No conecta en ningún momento con lo que busca el lead
+   - Información confusa o contradictoria
 
-2 = INSUFICIENTE / DUMP DE INFORMACIÓN
-   - Suelta características sin estructura ("dura 12 meses, es online...")
-   - No personaliza (mismo discurso para todos)
-   - No presenta la institución o lo hace superficialmente
-   - No verifica comprensión
+🟡 MEJORABLE — cuando la presentación es funcional pero genérica:
+   - Menciona OBS y explica características del programa de forma ordenada
+   - Clara pero genérica (mismo discurso para todos los leads)
+   - Menciona beneficios pero no los conecta con el objetivo específico del lead
+   - No personaliza ni verifica comprensión
 
-3 = CORRECTO / PRESENTACIÓN ESTÁNDAR (Robot)
-   - Menciona OBS y sus credenciales básicas
-   - Explica características principales del programa de forma ordenada
-   - Clara pero genérica (no adapta al lead)
-   - Menciona algunos beneficios pero no conecta con objetivo del lead
-   - Funcional pero no persuasiva
-
-4 = BUENO / PROPUESTA CONSULTIVA
-   - Presenta OBS con credenciales relevantes (rankings, acreditaciones)
-   - Personaliza según lo descubierto en investigación
+🟢 BUENO — cuando la propuesta es consultiva y personalizada:
+   - Presenta OBS con credenciales relevantes
+   - Personaliza la explicación según lo descubierto en la investigación
    - Enfatiza BENEFICIOS sobre características
    - Conecta explícitamente con el objetivo del lead ("Esto te ayudará a...")
-   - Verifica comprensión ("¿Tiene sentido?")
-   - Estructura clara: Institución → Programa → Beneficios para ti
-
-5 = MAESTRÍA / PROPUESTA DE VALOR PERSONALIZADA
-   - Presenta OBS como institución líder para SU caso específico
-   - El programa es LA SOLUCIÓN al problema del lead
-   - Cada característica se traduce en beneficio específico
-   - Usa ejemplos o casos de éxito relevantes
-   - Anticipa dudas y las resuelve proactivamente
-   - El lead expresa que "es justo lo que necesito"
+   - El lead muestra interés genuino o comprensión real
 
 EVIDENCIA REQUERIDA:
 Debes identificar MÍNIMO:
@@ -125,7 +108,7 @@ Debes identificar MÍNIMO:
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
   "evidencia_principal": "[ASESOR]: Presentación de OBS o programa... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
@@ -133,9 +116,8 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Conexión con necesidad del lead... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó? ¿Qué faltó para la nota siguiente?",
+  "razonamiento": "¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó? ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto"
@@ -155,11 +137,12 @@ REGLAS CRÍTICAS:
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Personalización = Adaptar la explicación a LO QUE EL LEAD DIJO que necesitaba
 - Diferencia: Características ("12 meses") vs Beneficios ("En 1 año estarás certificado")
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si la propuesta de valor es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- En "gap_para_5" sé específico (ej: "Faltó usar caso de éxito similar al perfil del lead")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO no requiere perfección, requiere personalización real y conexión con el lead.
+- MEJORABLE es la presentación correcta pero genérica.
+- MALO cuando la presentación es confusa, desordenada o completamente genérica sin ningún intento.
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)

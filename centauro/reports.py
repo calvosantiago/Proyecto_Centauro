@@ -44,11 +44,11 @@ class ModernReport(FPDF):
         self.set_text_color(*COLOR_TEXT_MUTED)
         self.cell(0, 10, f'Página {self.page_no()} | OBS Business School', 0, 0, 'C')
 
-    def get_score_color(self, score):
-        if score is None: return COLOR_NEUTRAL
-        if score >= 4: return COLOR_GOOD
-        if score >= 3: return COLOR_MID
-        return COLOR_BAD
+    def get_score_color(self, calificacion):
+        if calificacion == "BUENO":    return COLOR_GOOD
+        if calificacion == "MEJORABLE": return COLOR_MID
+        if calificacion == "MALO":     return COLOR_BAD
+        return COLOR_NEUTRAL
 
     def draw_badge(self, texto, color_rgb):
         """Dibuja una etiqueta de color."""
@@ -71,29 +71,29 @@ class ModernReport(FPDF):
 
         # Datos del bloque
         nombre = bloque.get('bloque', 'Bloque Desconocido')
-        nota = bloque.get('puntuacion_1_5')
+        calificacion = bloque.get('calificacion')
         razon = bloque.get('razonamiento', '')
         evidencia = bloque.get('evidencia_principal', '')
         accion = bloque.get('recomendacion_accionable', '')
-        
-        # Color según nota
-        score_color = self.get_score_color(nota)
-        texto_nota = f"{nota}/5" if nota is not None else "N/A"
-        
+
+        # Color según calificación ordinal
+        score_color = self.get_score_color(calificacion)
+        texto_cal = calificacion if calificacion is not None else "N/A"
+
         # 1. Barra lateral de estado
         self.set_fill_color(*score_color)
         self.rect(10, start_y, 2, 35, 'F') # Altura mínima
-        
-        # 2. Título del Bloque y Nota
+
+        # 2. Título del Bloque y Calificación
         self.set_xy(15, start_y)
         self.set_font('Helvetica', 'B', 12)
         self.set_text_color(*COLOR_PRIMARY)
         self.cell(140, 8, to_latin1(nombre), 0, 0)
-        
-        # Badge de Nota a la derecha
+
+        # Badge de Calificación a la derecha
         self.set_font('Helvetica', 'B', 14)
         self.set_text_color(*score_color)
-        self.cell(0, 8, texto_nota, 0, 1, 'R')
+        self.cell(0, 8, texto_cal, 0, 1, 'R')
         
         # 3. Razonamiento (Feedback)
         self.set_x(15)
@@ -111,8 +111,8 @@ class ModernReport(FPDF):
             self.multi_cell(0, 5, to_latin1(f'"{evidencia}"'), border=0, fill=True)
             self.ln(2)
 
-        # 5. Recomendación (Acción) - Si la nota es baja
-        if accion and (nota is None or nota < 5):
+        # 5. Recomendación (Acción) - Si calificación es MALO, MEJORABLE o N/A
+        if accion and calificacion in ("MALO", "MEJORABLE", None):
             self.set_x(15)
             self.set_font('Helvetica', 'B', 9)
             self.set_text_color(*COLOR_ACCENT) # Amarillo OBS para resaltar acción
@@ -140,29 +140,27 @@ def generar_pdf(reporte_json, output_filename):
     # --- DASHBOARD SUPERIOR ---
     pdf.set_y(30)
     
-    # 1. Nota Global (Círculo/Cuadro Grande)
-    nota_global = data.get('puntuacion_global_1_5', 0)
-    color_global = pdf.get_score_color(nota_global)
-    
+    # 1. Calificación Global (Cuadro Grande con etiqueta)
+    cal_global = data.get('calificacion_global')
+    color_global = pdf.get_score_color(cal_global)
+    texto_global = cal_global if cal_global else "N/A"
+
     pdf.set_fill_color(*color_global)
-    pdf.rect(10, 30, 40, 40, 'F')
-    
-    pdf.set_xy(10, 40)
+    pdf.rect(10, 30, 50, 40, 'F')
+
+    pdf.set_xy(10, 43)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_font('Helvetica', 'B', 26)
-    pdf.cell(40, 10, f"{nota_global}", 0, 1, 'C')
-    pdf.set_font('Helvetica', '', 10)
-    pdf.set_xy(10, 52)
-    pdf.cell(40, 5, "/ 5.0", 0, 0, 'C')
+    pdf.set_font('Helvetica', 'B', 16)
+    pdf.cell(50, 10, texto_global, 0, 1, 'C')
     
     # 2. Datos Asesor y Contexto
-    pdf.set_xy(55, 30)
+    pdf.set_xy(65, 30)
     pdf.set_text_color(*COLOR_PRIMARY)
     pdf.set_font('Helvetica', 'B', 14)
     asesor = data.get('asesor', 'Asesor OBS')
     pdf.cell(0, 8, to_latin1(f"Asesor: {asesor}"), 0, 1)
     
-    pdf.set_xy(55, 40)
+    pdf.set_xy(65, 40)
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(*COLOR_TEXT_MAIN)
     

@@ -139,7 +139,7 @@ class CentauroOrchestrator:
         reporte_final["meta"]["stats_optimizacion"] = self.stats
 
         print(f"\n{'='*60}")
-        print(f"✅ COMPLETADO - Nota: {reporte_final['puntuacion_global_1_5']}/5")
+        print(f"✅ COMPLETADO - Calificación: {reporte_final['calificacion_global']}")
         print(f"📊 Llamadas API: {self.stats['llamadas_api']}")
         print(f"🛡️ Sheriff: {self.stats['alucinaciones_detectadas']} alucinaciones detectadas")
         print(f"{'='*60}\n")
@@ -289,12 +289,10 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         prompt_sistema = f"""
 Eres un auditor CRÍTICO que evalúa DOS bloques secundarios simultáneamente.
 
-RÚBRICA:
-1 = NEGLIGENTE: Error grave o ausencia total
-2 = DEFICIENTE: Pasivo, inseguro
-3 = MEDIOCRE: Cumple pero sin profundidad
-4 = BUENO: Sólido, profesional, con detalles pulibles
-5 = EXCELENCIA: Liderazgo claro, conecta emocionalmente
+CALIFICACIÓN ORDINAL (elige UNA etiqueta por bloque):
+🔴 MALO: Insuficiente, desorganizado o contraproducente
+🟡 MEJORABLE: Correcto pero genérico, mecánico, sin profundidad real
+🟢 BUENO: Personalizado, profesional, conecta con el lead
 
 MANUAL - PROPUESTA DE VALOR:
 {ctx_propuesta}
@@ -312,22 +310,20 @@ TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
 FORMATO JSON OBLIGATORIO:
 {{
   "propuesta_valor": {{
-    "puntuacion_1_5": 3,
+    "calificacion": "MALO" | "MEJORABLE" | "BUENO",
     "observabilidad": "ALTA",
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA (COPY-PASTE)...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA (COPY-PASTE)..."],
-    "razonamiento": "Explica QUÉ faltó para la nota siguiente. Sé CRÍTICO pero justo.",
-    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar, (2) UNA técnica de los libros del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 frases ejemplo adaptadas a ESTA conversación. Máx 6-8 líneas.",
-    "gap_para_5": "Si nota < 5, explica qué faltó. Si nota es 5, pon 'N/A'"
+    "razonamiento": "¿Personalizó? ¿Beneficios o características? ¿Conectó con el lead? ¿Por qué esa calificación?",
+    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar, (2) UNA técnica de los libros del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 frases ejemplo adaptadas a ESTA conversación. Máx 6-8 líneas."
   }},
   "estilo": {{
-    "puntuacion_1_5": 3,
+    "calificacion": "MALO" | "MEJORABLE" | "BUENO",
     "observabilidad": "ALTA",
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA..."],
-    "razonamiento": "Análisis del tono, ritmo y empatía. ¿Qué faltó?",
-    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar en estilo, (2) UNA técnica de los libros del CONTEXTO que aplique, dando 2 frases ejemplo. Máx 6-8 líneas.",
-    "gap_para_5": "Si nota < 5, explica qué faltó. Si nota es 5, pon 'N/A'"
+    "razonamiento": "Análisis del tono, ritmo y empatía. ¿Por qué esa calificación?",
+    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar en estilo, (2) UNA técnica de los libros del CONTEXTO que aplique, dando 2 frases ejemplo. Máx 6-8 líneas."
   }}
 }}
 
@@ -341,9 +337,8 @@ DEBES integrarlos en cada "recomendacion_accionable" de forma ORGÁNICA:
 - Menciona de qué libro/autor viene
 
 ⚠️ REGLAS CRÍTICAS:
-- El 5/5 ES ALCANZABLE si cumplen todos los criterios de excelencia
-- Si la ejecución es realmente excelente, NO te limites a dar 4
-- En "gap_para_5" sé específico, no generalidades
+- Sé decisivo: elige UNA etiqueta por bloque
+- BUENO no requiere perfección, requiere personalización y conexión real con el lead
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
 """
 
@@ -572,23 +567,26 @@ Genera el JSON con la información del lead.
             porcentaje_verificado = (evidencias_verificadas / total_evidencias * 100) if total_evidencias > 0 else 0
 
             # REGLA SHERIFF: Si < 30% de evidencias son verificables → ALUCINACIÓN
-            # Penalidad reducida a -1 punto (antes -2) para no destruir evaluaciones
+            # Penalidad: bajar un nivel (BUENO→MEJORABLE, MEJORABLE→MALO)
+            ORDEN_CALIFICACIONES = ["MALO", "MEJORABLE", "BUENO"]
             if porcentaje_verificado < 30:
                 self.stats["alucinaciones_detectadas"] += 1
-                nota_original = evaluacion.get("puntuacion_1_5")
+                cal_original = evaluacion.get("calificacion")
 
-                if nota_original and nota_original > 2:
-                    nota_ajustada = max(1, nota_original - 1)
-                    evaluacion["puntuacion_1_5"] = nota_ajustada
-                    evaluacion["sheriff_ajuste"] = {
-                        "nota_original": nota_original,
-                        "nota_ajustada": nota_ajustada,
-                        "razon": f"Evidencias no verificables ({porcentaje_verificado:.0f}%)",
-                        "evidencias_verificadas": f"{evidencias_verificadas}/{total_evidencias}"
-                    }
-                    self.stats["notas_ajustadas_sheriff"] += 1
+                if cal_original and cal_original in ORDEN_CALIFICACIONES:
+                    idx = ORDEN_CALIFICACIONES.index(cal_original)
+                    if idx > 0:  # No se puede bajar más de MALO
+                        cal_ajustada = ORDEN_CALIFICACIONES[idx - 1]
+                        evaluacion["calificacion"] = cal_ajustada
+                        evaluacion["sheriff_ajuste"] = {
+                            "calificacion_original": cal_original,
+                            "calificacion_ajustada": cal_ajustada,
+                            "razon": f"Evidencias no verificables ({porcentaje_verificado:.0f}%)",
+                            "evidencias_verificadas": f"{evidencias_verificadas}/{total_evidencias}"
+                        }
+                        self.stats["notas_ajustadas_sheriff"] += 1
 
-                    print(f"   🛡️ Sheriff ajustó {bloque}: {nota_original} → {nota_ajustada} (evidencias no verificables)")
+                        print(f"   🛡️ Sheriff ajustó {bloque}: {cal_original} → {cal_ajustada} (evidencias no verificables)")
 
             if "metadata" not in evaluacion:
                 evaluacion["metadata"] = {}
@@ -643,60 +641,55 @@ Genera el JSON con la información del lead.
                                  transcripcion: str, asesor: str,
                                  resumen_contextual: Dict = None) -> Dict:
         """Genera reporte final consolidado CON resumen contextual"""
+        from collections import Counter
 
-        # NORMALIZAR NOTAS: Convertir todas a float con 1 decimal para consistencia
-        for e in evaluaciones:
-            if e.get("puntuacion_1_5") is not None:
-                e["puntuacion_1_5"] = round(float(e["puntuacion_1_5"]), 1)
-
-        # Calcular nota global
-        notas_validas = [
-            e["puntuacion_1_5"] for e in evaluaciones
-            if e.get("puntuacion_1_5") is not None
+        # Calcular calificación global por mayoría simple
+        CALIFICACIONES_VALIDAS = {"MALO", "MEJORABLE", "BUENO"}
+        calificaciones_validas = [
+            e["calificacion"] for e in evaluaciones
+            if e.get("calificacion") in CALIFICACIONES_VALIDAS
         ]
-        nota_global = round(sum(notas_validas) / len(notas_validas), 1) if notas_validas else 0.0
 
-        # Generar áreas de mejora DETALLADAS (sin fortalezas genéricas)
+        if calificaciones_validas:
+            conteo = Counter(calificaciones_validas)
+            calificacion_global = conteo.most_common(1)[0][0]
+        else:
+            calificacion_global = None
+
+        # Generar áreas de mejora: bloques MALO o MEJORABLE con recomendación
         areas_mejora = []
-
         for e in evaluaciones:
             bloque = e.get("bloque", "Unknown")
-            nota = e.get("puntuacion_1_5", 0)
+            cal = e.get("calificacion")
             recomendacion = e.get("recomendacion_accionable", "")
-            gap_para_5 = e.get("gap_para_5", "")  # NUEVO: Explicación de qué falta para el 5
 
-            # REGLA: Incluir en áreas de mejora si nota < 5
-            # (Incluso el 4/5 tiene margen de mejora)
-            if nota is not None and nota < 5 and recomendacion:
-                # Formato: "[Bloque] (nota/5): Recomendación completa"
-                areas_mejora.append(f"[{bloque}] ({nota}/5): {recomendacion}")
+            if cal in ("MALO", "MEJORABLE") and recomendacion:
+                areas_mejora.append(f"[{bloque}] ({cal}): {recomendacion}")
 
-            # Si tiene nota 4 y explicación de gap para 5, añadirlo también
-            elif nota == 4 and gap_para_5:
-                areas_mejora.append(f"[{bloque}] ({nota}/5): Para alcanzar el 5: {gap_para_5}")
-
-        # Si no hay áreas de mejora explícitas, buscar las 3 notas más bajas
+        # Si no hay áreas de mejora explícitas (todos BUENOS), incluir recomendaciones igual
         if not areas_mejora and evaluaciones:
-            notas_ordenadas = sorted(evaluaciones, key=lambda x: x.get("puntuacion_1_5", 5) if x.get("puntuacion_1_5") is not None else 5)
-            for e in notas_ordenadas[:3]:
+            for e in evaluaciones:
                 bloque = e.get("bloque", "Unknown")
-                nota = e.get("puntuacion_1_5", 0)
-                recomendacion = e.get("recomendacion_accionable", "Mejorar ejecución en este bloque")
+                recomendacion = e.get("recomendacion_accionable", "")
                 if recomendacion:
-                    areas_mejora.append(f"[{bloque}] ({nota}/5): {recomendacion}")
+                    areas_mejora.append(f"[{bloque}]: {recomendacion}")
+                    break  # Solo la primera para no saturar
+
+        bloques_con_calificacion = len(calificaciones_validas)
 
         # Construir reporte final
         reporte = {
             "asesor": asesor,
             "meta": {
-                "version_modelo": "Centauro_V3.0_Hibrido_Inteligente",
+                "version_modelo": "Centauro_V5.0_Calificacion_Ordinal",
                 "flags_tecnicos": {
                     "modo_batch": self.config.MODO_BATCH,
                     "modo_descripcion": self.stats["modo_ejecucion"],
-                    "bloques_evaluados": len(notas_validas),
+                    "bloques_evaluados": bloques_con_calificacion,
                     "bloques_criticos": len(self.config.BLOQUES_CRITICOS),
                     "bloques_secundarios": len(self.config.BATCH_SECUNDARIOS.agentes),
-                    "sheriff_activo": True
+                    "sheriff_activo": True,
+                    "distribucion_calificaciones": dict(Counter(calificaciones_validas))
                 }
             },
             "resumen_contextual": resumen_contextual or {
@@ -707,7 +700,7 @@ Genera el JSON con la información del lead.
                 "resultado_general": "NEUTRO_PENDIENTE"
             },
             "evaluacion_por_bloques": evaluaciones,
-            "puntuacion_global_1_5": nota_global,
+            "calificacion_global": calificacion_global,
             "feedback_resumido": {
                 "areas_mejora": areas_mejora if areas_mejora else ["Revisión general de todos los bloques recomendada"]
             }
