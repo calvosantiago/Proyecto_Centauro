@@ -10,13 +10,39 @@ CAMBIOS PRINCIPALES:
 import os
 from typing import List, Dict, Optional
 import chromadb
-import chromadb.utils.embedding_functions as embedding_functions
+from openai import OpenAI
 from .config import settings, centauro_config
+from .llm_client import registrar_gasto_embedding
 
 # ==================== INICIALIZACIÓN ====================
 
+class LoggingOpenAIEmbeddingFunction:
+    """
+    Embedding function compatible con Chroma que registra coste/uso en control_gastos.csv.
+    """
+
+    def __init__(self, api_key: str, model_name: str):
+        self.client = OpenAI(api_key=api_key)
+        self.model_name = model_name
+
+    def __call__(self, input: List[str]) -> List[List[float]]:
+        texts = [str(t) for t in input]
+        response = self.client.embeddings.create(
+            model=self.model_name,
+            input=texts
+        )
+        if response.usage:
+            registrar_gasto_embedding(
+                referencia=f"chroma_embedding_batch_{len(texts)}",
+                total_tokens=getattr(response.usage, "total_tokens", 0),
+                model_name=self.model_name,
+                request_id=getattr(response, "id", ""),
+            )
+        return [item.embedding for item in response.data]
+
+
 # Función de embeddings compartida
-openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+openai_ef = LoggingOpenAIEmbeddingFunction(
     api_key=settings.OPENAI_API_KEY,
     model_name=settings.MODELO_EMBEDDING
 )
