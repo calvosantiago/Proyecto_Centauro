@@ -4,7 +4,9 @@
       "Bash(dir:*)",
       "Bash(findstr:*)",
       "Bash(python:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(del \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\tmp_costs.py\")"
     ]
   }
 }

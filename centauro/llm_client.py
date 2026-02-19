@@ -2,6 +2,8 @@ import csv
 import os
 import datetime
 import time
+from pathlib import Path
+from typing import Any, Dict, List
 from openai import OpenAI, APITimeoutError, APIConnectionError, RateLimitError, APIError
 from .config import settings
 from dotenv import load_dotenv
@@ -11,61 +13,240 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 GPT_TIMEOUT_SECONDS = 180  # Aumentado para transcripciones largas (diarización batch)
 GPT_MAX_RETRIES = 2
 
-# --- TARIFAS GPT-4o-mini (Actualizado Dic 2025) ---
-# Precios por token (USD)
-# Input: $0.15 por 1 millón
-# Output: $0.60 por 1 millón
+# --- TARIFAS OPENAI (Standard API, Feb 2026) ---
+# gpt-4o-mini: input $0.15/M, cached input $0.075/M, output $0.60/M
+# text-embedding-3-small: $0.02/M
 COST_PER_INPUT_TOKEN = 0.15 / 1_000_000
+COST_PER_CACHED_INPUT_TOKEN = 0.075 / 1_000_000
 COST_PER_OUTPUT_TOKEN = 0.60 / 1_000_000
+COST_PER_EMBEDDING_TOKEN = 0.02 / 1_000_000
 
-def registrar_gasto(referencia, uso):
-    """
-    Registra el consumo de tokens y el coste en un archivo CSV.
-    Si el archivo no existe, lo crea con cabeceras.
-    """
-    archivo_csv = settings.OUTPUTS_DIR / "control_gastos.csv"
-    archivo_existe = os.path.isfile(archivo_csv)
-    
-    # Extraer datos de uso
-    tokens_in = uso.prompt_tokens
-    tokens_out = uso.completion_tokens
-    total_tokens = uso.total_tokens
-    
-    # Calcular coste
-    coste_usd = (tokens_in * COST_PER_INPUT_TOKEN) + (tokens_out * COST_PER_OUTPUT_TOKEN)
-    
+CSV_COLUMNS = [
+    "Timestamp",
+    "Fecha",
+    "Hora",
+    "Archivo/Referencia",
+    "Operacion",
+    "Endpoint",
+    "Modelo",
+    "Prompt Tokens",
+    "Prompt Tokens Cacheados",
+    "Prompt Tokens No Cacheados",
+    "Completion Tokens",
+    "Embedding Tokens",
+    "Total Tokens",
+    "Coste Input (USD)",
+    "Coste Input Cacheado (USD)",
+    "Coste Output (USD)",
+    "Coste Embedding (USD)",
+    "Coste Total (USD)",
+    "Request ID",
+]
+
+
+def _control_gastos_path() -> Path:
+    return settings.OUTPUTS_DIR / "control_gastos.csv"
+
+
+def _safe_int(value: Any) -> int:
+    if value is None:
+        return 0
     try:
-        with open(archivo_csv, mode='a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            
-            # Escribir cabecera si es nuevo
-            if not archivo_existe:
-                writer.writerow([
-                    "Fecha", 
-                    "Hora", 
-                    "Archivo/Referencia", 
-                    "Tokens Entrada (Prompt)", 
-                    "Tokens Salida (Completion)", 
-                    "Total Tokens", 
-                    "Coste Estimado (USD)"
-                ])
-                
-            # Escribir la línea de gasto
-            writer.writerow([
-                datetime.datetime.now().strftime("%d/%m/%Y"),
-                datetime.datetime.now().strftime("%H:%M:%S"),
-                referencia,
-                tokens_in,
-                tokens_out,
-                total_tokens,
-                f"{coste_usd:.6f}" # 6 decimales para ver los micro-centavos
-            ])
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _safe_float(value: Any) -> float:
+    if value is None:
+        return 0.0
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _migrar_csv_legacy_si_hace_falta(archivo_csv: Path) -> None:
+    if not archivo_csv.exists():
+        return
+
+    try:
+        with open(archivo_csv, mode="r", newline="", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            header = next(reader, None)
+    except Exception:
+        return
+
+    if header == CSV_COLUMNS:
+        return
+
+    # Migrar formato legacy:
+    # Fecha,Hora,Archivo/Referencia,Tokens Entrada (Prompt),Tokens Salida (Completion),Total Tokens,Coste Estimado (USD)
+    legacy_rows: List[Dict[str, Any]] = []
+    try:
+        with open(archivo_csv, mode="r", newline="", encoding="utf-8") as f:
+            dict_reader = csv.DictReader(f)
+            for row in dict_reader:
+                fecha = row.get("Fecha", "")
+                hora = row.get("Hora", "")
+                referencia = row.get("Archivo/Referencia", "Desconocido")
+                prompt_tokens = _safe_int(row.get("Tokens Entrada (Prompt)", 0))
+                completion_tokens = _safe_int(row.get("Tokens Salida (Completion)", 0))
+                total_tokens = _safe_int(row.get("Total Tokens", prompt_tokens + completion_tokens))
+                coste_total = _safe_float(row.get("Coste Estimado (USD)", 0.0))
+
+                legacy_rows.append({
+                    "Timestamp": "",
+                    "Fecha": fecha,
+                    "Hora": hora,
+                    "Archivo/Referencia": referencia,
+                    "Operacion": "chat_completion_legacy",
+                    "Endpoint": "v1/chat/completions",
+                    "Modelo": settings.MODEL_NAME,
+                    "Prompt Tokens": prompt_tokens,
+                    "Prompt Tokens Cacheados": "",
+                    "Prompt Tokens No Cacheados": "",
+                    "Completion Tokens": completion_tokens,
+                    "Embedding Tokens": "",
+                    "Total Tokens": total_tokens,
+                    "Coste Input (USD)": "",
+                    "Coste Input Cacheado (USD)": "",
+                    "Coste Output (USD)": "",
+                    "Coste Embedding (USD)": "",
+                    "Coste Total (USD)": f"{coste_total:.6f}",
+                    "Request ID": "",
+                })
     except Exception as e:
-        print(f"⚠️ Aviso: No se pudo guardar el registro de gastos: {e}")
+        print(f"⚠️ Aviso: No se pudo migrar control_gastos.csv: {e}")
+        return
+
+    try:
+        with open(archivo_csv, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
+            writer.writeheader()
+            if legacy_rows:
+                writer.writerows(legacy_rows)
+    except Exception as e:
+        print(f"⚠️ Aviso: No se pudo reescribir control_gastos.csv migrado: {e}")
+
+
+def _append_cost_row(row: Dict[str, Any]) -> None:
+    archivo_csv = _control_gastos_path()
+    _migrar_csv_legacy_si_hace_falta(archivo_csv)
+
+    if not archivo_csv.exists():
+        with open(archivo_csv, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
+            writer.writeheader()
+
+    with open(archivo_csv, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
+        writer.writerow(row)
+
+
+def registrar_gasto_chat(
+    referencia: str,
+    uso: Any,
+    model_name: str,
+    request_id: str = "",
+) -> None:
+    """
+    Registra el coste de una llamada chat.completions.
+    """
+    prompt_tokens = _safe_int(getattr(uso, "prompt_tokens", 0))
+    completion_tokens = _safe_int(getattr(uso, "completion_tokens", 0))
+    total_tokens = _safe_int(getattr(uso, "total_tokens", prompt_tokens + completion_tokens))
+
+    prompt_details = getattr(uso, "prompt_tokens_details", None)
+    cached_tokens = _safe_int(getattr(prompt_details, "cached_tokens", 0))
+    non_cached_prompt_tokens = max(prompt_tokens - cached_tokens, 0)
+
+    cost_input = non_cached_prompt_tokens * COST_PER_INPUT_TOKEN
+    cost_input_cached = cached_tokens * COST_PER_CACHED_INPUT_TOKEN
+    cost_output = completion_tokens * COST_PER_OUTPUT_TOKEN
+    cost_total = cost_input + cost_input_cached + cost_output
+
+    now = datetime.datetime.now()
+    row = {
+        "Timestamp": now.isoformat(timespec="seconds"),
+        "Fecha": now.strftime("%Y-%m-%d"),
+        "Hora": now.strftime("%H:%M:%S"),
+        "Archivo/Referencia": referencia,
+        "Operacion": "chat_completion",
+        "Endpoint": "v1/chat/completions",
+        "Modelo": model_name,
+        "Prompt Tokens": prompt_tokens,
+        "Prompt Tokens Cacheados": cached_tokens,
+        "Prompt Tokens No Cacheados": non_cached_prompt_tokens,
+        "Completion Tokens": completion_tokens,
+        "Embedding Tokens": "",
+        "Total Tokens": total_tokens,
+        "Coste Input (USD)": f"{cost_input:.6f}",
+        "Coste Input Cacheado (USD)": f"{cost_input_cached:.6f}",
+        "Coste Output (USD)": f"{cost_output:.6f}",
+        "Coste Embedding (USD)": "",
+        "Coste Total (USD)": f"{cost_total:.6f}",
+        "Request ID": request_id or "",
+    }
+
+    try:
+        _append_cost_row(row)
+    except Exception as e:
+        print(f"⚠️ Aviso: No se pudo guardar el registro de gastos (chat): {e}")
+
+
+def registrar_gasto_embedding(
+    referencia: str,
+    total_tokens: int,
+    model_name: str,
+    request_id: str = "",
+) -> None:
+    """
+    Registra el coste de una llamada de embeddings.
+    """
+    embedding_tokens = _safe_int(total_tokens)
+    cost_embedding = embedding_tokens * COST_PER_EMBEDDING_TOKEN
+
+    now = datetime.datetime.now()
+    row = {
+        "Timestamp": now.isoformat(timespec="seconds"),
+        "Fecha": now.strftime("%Y-%m-%d"),
+        "Hora": now.strftime("%H:%M:%S"),
+        "Archivo/Referencia": referencia,
+        "Operacion": "embedding",
+        "Endpoint": "v1/embeddings",
+        "Modelo": model_name,
+        "Prompt Tokens": "",
+        "Prompt Tokens Cacheados": "",
+        "Prompt Tokens No Cacheados": "",
+        "Completion Tokens": "",
+        "Embedding Tokens": embedding_tokens,
+        "Total Tokens": embedding_tokens,
+        "Coste Input (USD)": "",
+        "Coste Input Cacheado (USD)": "",
+        "Coste Output (USD)": "",
+        "Coste Embedding (USD)": f"{cost_embedding:.6f}",
+        "Coste Total (USD)": f"{cost_embedding:.6f}",
+        "Request ID": request_id or "",
+    }
+
+    try:
+        _append_cost_row(row)
+    except Exception as e:
+        print(f"⚠️ Aviso: No se pudo guardar el registro de gastos (embedding): {e}")
+
 
 def obtener_embedding(texto):
     text = texto.replace("\n", " ")
-    return client.embeddings.create(input=[text], model=settings.EMBEDDING_MODEL).data[0].embedding
+    resp = client.embeddings.create(input=[text], model=settings.MODELO_EMBEDDING)
+    if resp.usage:
+        registrar_gasto_embedding(
+            referencia="embedding_directo_llm_client",
+            total_tokens=getattr(resp.usage, "total_tokens", 0),
+            model_name=settings.MODELO_EMBEDDING,
+            request_id=getattr(resp, "id", ""),
+        )
+    return resp.data[0].embedding
 
 def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", force_json=None):
     """
@@ -131,7 +312,12 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
 
     # --- REGISTRO AUTOMÁTICO DE GASTOS ---
     if response.usage:
-        registrar_gasto(referencia_log, response.usage)
+        registrar_gasto_chat(
+            referencia=referencia_log,
+            uso=response.usage,
+            model_name=settings.MODEL_NAME,
+            request_id=getattr(response, "id", ""),
+        )
     # -------------------------------------
 
     return response.choices[0].message.content

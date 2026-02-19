@@ -356,8 +356,8 @@ async def main(message: cl.Message):
                             agente = CierreAgent()
                             resultado = await cl.make_async(agente.evaluate)(transcripcion_diarizada, ctx, contexto_usuario)
                         evaluaciones.append(resultado.to_dict())
-                        nota = resultado.puntuacion_1_5 if resultado.puntuacion_1_5 else "N/A"
-                        sub_step.output = f"✅ Evaluado: **{nota}/5**"
+                        nota = resultado.calificacion if resultado.calificacion else "N/A"
+                        sub_step.output = f"✅ Evaluado: **{nota}**"
                     except Exception as e:
                         sub_step.output = f"❌ Error: {e}"
             # BLOQUES SECUNDARIOS (Batch)
@@ -393,38 +393,23 @@ async def main(message: cl.Message):
                 step.output = f"❌ Error en síntesis: {e}"
                 return
         # ==================== RESULTADOS ====================
-        nota_global = reporte['puntuacion_global_1_5']
-        # Determinar emoji según nota
-        if nota_global >= 4.0:
-            emoji_nota = "🟢"
-        elif nota_global >= 3.0:
-            emoji_nota = "🟡"
-        else:
-            emoji_nota = "🔴"
+        cal_global = reporte.get('calificacion_global', 'N/A')
+        # Determinar emoji según calificación ordinal
+        EMOJI_CAL = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+        emoji_nota = EMOJI_CAL.get(cal_global, "⚪")
         resultado_msg = f"""# 📊 Resultados de la Evaluación
 ---
-## {emoji_nota} Nota Global: **{nota_global}/5.0**
+## {emoji_nota} Calificación Global: **{cal_global}**
 **Asesor:** {reporte['asesor']}
 **Perfil Lead:** {reporte['resumen_contextual'].get('perfil_lead', 'N/A')[:80]}...
 ---
 ## 📈 Evaluación por Bloques
 """
         for bloque in reporte['evaluacion_por_bloques']:
-            nota = bloque.get('puntuacion_1_5', 'N/A')
+            cal = bloque.get('calificacion', 'N/A')
             nombre = bloque.get('bloque')
-            if nota == 'N/A' or nota is None:
-                emoji = "⚪"
-                nota_str = "N/A"
-            elif nota >= 4:
-                emoji = "🟢"
-                nota_str = f"{nota}/5"
-            elif nota == 3:
-                emoji = "🟡"
-                nota_str = f"{nota}/5"
-            else:
-                emoji = "🔴"
-                nota_str = f"{nota}/5"
-            resultado_msg += f"{emoji} **{nombre}**: {nota_str}\n"
+            emoji = EMOJI_CAL.get(cal, "⚪")
+            resultado_msg += f"{emoji} **{nombre}**: {cal}\n"
         resultado_msg += f"""
 ---
 ## 🎯 Plan de Acción (Top 3 Áreas de Mejora)
