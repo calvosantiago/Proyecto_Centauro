@@ -43,7 +43,7 @@ class EstiloAgent(BaseEvaluatorAgent):
             
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -72,8 +72,17 @@ Eres un AUDITOR ESPECIALIZADO en evaluación de ESTILO, TONO Y VOCABULARIO en co
 
 TU ÚNICA TAREA: Evaluar la CALIDAD COMUNICATIVA del [ASESOR] a lo largo de toda la conversación.
 
-CONTEXTO DEL MANUAL:
+CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
 {manual_enriquecido}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EL SPEECH COMO CARRETERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El speech NO define un tono o vocabulario exacto a imitar. Es la CARRETERA: define
+los límites de lo profesional y apropiado. Un asesor con un estilo propio, cálido
+y efectivo que conecta con el lead → BUENO, aunque no suene al speech de referencia.
+Lo que evalúas es si el estilo DAÑA la conversación (tono inapropiado, muletillas
+excesivas, falta de empatía) o si conduce bien dentro de los límites del profesionalismo.
 
 ASPECTOS A EVALUAR:
 
@@ -104,44 +113,30 @@ ASPECTOS A EVALUAR:
    - Sin muletillas excesivas ("ehhh", "bueno", "vale vale")
    - Seguro vs dubitativo
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-1 = INAPROPIADO / CONTRAPRODUCENTE
-   - Tono grosero, condescendiente o excesivamente informal
-   - Vocabulario inapropiado (coloquialismos, errores graves)
-   - Cero empatía, trata al lead como número
-   - Genera rechazo o incomodidad
+🔴 MALO — el estilo comunicativo genera rechazo, incomodidad o rompe la confianza:
+   - Tono grosero, condescendiente, o excesivamente informal para el contexto
+   - Muletillas constantes que restan credibilidad o dificultan la comprensión
+   - Cero empatía: el asesor habla sin considerar cómo se siente el lead
+   - Genera incomodidad, distancia o rechazo visible en el lead
+   - También: tono agresivo, impaciente o que hace sentir al lead presionado
 
-2 = DEFICIENTE / POCO PROFESIONAL
-   - Tono inconsistente (a veces formal, a veces demasiado casual)
-   - Muletillas constantes que restan profesionalismo
-   - Poca adaptación al lead
-   - No genera confianza
+🟡 MEJORABLE — el estilo es correcto pero frío, mecánico y sin conexión real:
+   - Tono educado pero robótico, como si siguiera un guión
+   - Sin momentos de empatía o cercanía genuina a lo largo de la conversación
+   - El lead responde pero no hay señales de que se sienta cómodo o escuchado
+   - Profesional pero impersonal: correcto, pero no conecta
 
-3 = CORRECTO / ESTÁNDAR (Robot)
-   - Tono educado pero mecánico
-   - Vocabulario correcto pero genérico
-   - Empáticamente neutro (no frío, pero tampoco cálido)
-   - Profesional pero sin personalidad
-   - Funcional pero no memorable
-
-4 = BUENO / COMUNICACIÓN EFECTIVA
-   - Tono profesional Y cercano
-   - Adapta vocabulario al lead
-   - Muestra empatía en momentos clave
-   - Ritmo equilibrado (lead participa activamente)
-   - Genera confianza
-
-5 = MAESTRÍA / COMUNICACIÓN EXCEPCIONAL
-   - Tono perfecto para el contexto y el lead
-   - Vocabulario que conecta (usa metáforas, ejemplos del mundo del lead)
-   - Empatía genuina que genera conexión real
-   - Ritmo magistral (sabe cuándo hablar y cuándo callar)
-   - El lead se siente escuchado, comprendido y valorado
+🟢 BUENO — el estilo genera confianza y el lead se siente cómodo participando:
+   - Hay al menos un momento de empatía real o cercanía genuina
+   - El tono es profesional sin ser rígido
+   - El lead participa activamente y no parece incómodo
+   - No es necesario que sea perfecto: basta con que el estilo sume a la conversación en vez de restarle
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA",
   "evidencia_principal": "[ASESOR]: Ejemplo representativo del tono/estilo... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
@@ -149,9 +144,8 @@ FORMATO JSON OBLIGATORIO:
     "Ejemplo de vocabulario adaptado: [ASESOR]: ... (COPY-PASTE LITERAL)",
     "Muletilla o problema detectado: [ASESOR]: ... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Análisis del tono general, vocabulario, empatía, ritmo y profesionalismo. ¿Qué faltó para la nota siguiente?",
+  "razonamiento": "Análisis del tono general, vocabulario, empatía, ritmo y profesionalismo. ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
     "vocabulario": "adaptado" | "generico" | "inadecuado",
@@ -162,12 +156,14 @@ FORMATO JSON OBLIGATORIO:
   "fortaleza_principal": "El aspecto comunicativo más destacable del asesor"
 }}
 
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si el estilo comunicativo es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- Evidencias LITERALES (COPY-PASTE exacto)
-- En "gap_para_5" sé específico (ej: "Faltó usar metáforas del mundo del lead")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO cuando el estilo suma a la conversación: el lead se siente cómodo y hay al menos un momento de conexión real.
+- MEJORABLE cuando el estilo es correcto pero mecánico: educado pero sin calidez, sin momentos de empatía.
+- MALO cuando el estilo daña la conversación: genera distancia, incomodidad o desconfianza.
+- Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
+- Evidencias LITERALES (COPY-PASTE exacto).
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
 En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
@@ -180,9 +176,9 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 REGLAS CRÍTICAS:
 - Evalúa TODA la conversación, no solo un momento
 - Evidencias LITERALES de la transcripción
-- Diferencia entre "robot profesional" (3) y "humano profesional" (4-5)
-- Un 5 requiere que el lead se sienta realmente conectado con el asesor
-- Identifica patrones: ¿Es consistente o cambia?
+- Diferencia entre "robot profesional" (MEJORABLE) y "humano profesional" (BUENO)
+- BUENO requiere que el lead se sienta realmente conectado con el asesor en algún momento
+- Identifica patrones: ¿Es consistente o cambia a lo largo de la conversación?
 """
         
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)

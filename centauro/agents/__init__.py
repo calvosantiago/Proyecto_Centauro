@@ -1,45 +1,29 @@
 """
-Módulo de Agentes Especializados v3.0
+Paquete de Agentes Evaluadores - Proyecto Centauro v5.0
 
-NUEVA ESTRUCTURA:
-- InvestigacionAgent (fusiona Apertura + Detección)
-- PropuestaValorAgent (renombrado de Presentación)
-- AdmisionEconomicaAgent (NUEVO)
-- ObjecionesAgent (sin cambios)
-- CierreAgent (sin cambios)
-- EstiloAgent (sin cambios)
+Agentes disponibles:
+- DiarizationAgent: Identifica speakers en la transcripción
+- InvestigacionAgent: Evalúa la fase de investigación/necesidades
+- PropuestaValorAgent: Evalúa la propuesta de valor
+- AdmisionEconomicaAgent: Evalúa admisión y propuesta económica
+- ObjecionesAgent: Evalúa el manejo de objeciones
+- CierreAgent: Evalúa el cierre y próximos pasos
+- EstiloAgent: Evalúa el estilo y comunicación
 """
-from .base_agent import BaseEvaluatorAgent, EvaluationResult
 from .diarization_agent import DiarizationAgent
-
-# Nuevos agentes v3.0
 from .investigacion_agent import InvestigacionAgent
 from .propuesta_valor_agent import PropuestaValorAgent
 from .admision_economica_agent import AdmisionEconomicaAgent
-
-# Agentes sin cambios
 from .objeciones_agent import ObjecionesAgent
 from .cierre_agent import CierreAgent
 from .estilo_agent import EstiloAgent
 
-# Legacy (mantener para compatibilidad temporal)
-from .apertura_agent import AperturaAgent
-from .deteccion_agent import DeteccionNecesidadesAgent
-from .presentacion_agent import PresentacionAgent
-
 __all__ = [
-    'BaseEvaluatorAgent',
-    'EvaluationResult',
     'DiarizationAgent',
-    # v3.0
     'InvestigacionAgent',
     'PropuestaValorAgent',
     'AdmisionEconomicaAgent',
     'ObjecionesAgent',
     'CierreAgent',
     'EstiloAgent',
-    # Legacy
-    'AperturaAgent',
-    'DeteccionNecesidadesAgent',
-    'PresentacionAgent',
 ]

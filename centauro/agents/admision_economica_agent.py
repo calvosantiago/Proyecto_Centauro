@@ -1,14 +1,12 @@
 """
-Agente Evaluador: Proceso de Admisión y Propuesta Económica (v3.0 - NUEVO)
+Agente Evaluador: Proceso de Admisión y Propuesta Económica
 
-Este agente evalúa cómo el asesor:
-- Explica el proceso de admisión y requisitos
-- Presenta la inversión económica y opciones de financiación
-- Maneja la conversación sobre precio/valor
-- Facilita el acceso sin presionar
+INSTRUCCIÓN: Copia este archivo en:
+C:\\Users\\uscp9a\\Grupo Planeta\\BI POWER - General\\PBI\\PROYECTOS\\Proyecto_Centauro\\centauro\\agents\\admision_economica_agent.py
 """
 from .base_agent import BaseEvaluatorAgent, EvaluationResult
 from ..llm_client import consultar_gpt
+
 
 class AdmisionEconomicaAgent(BaseEvaluatorAgent):
     """
@@ -27,38 +25,37 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
 
     def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa admisión y propuesta económica"""
-
         try:
             resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
 
             # Validar que se haya mencionado precio/inversión
-            evidencias_extra = resultado_raw.get("evidencias_extra", [])
             menciona_precio = resultado_raw.get("menciona_precio", False)
-
             if not menciona_precio:
                 print(f"   ⚠️ No se detectó mención de inversión/precio")
                 confianza *= 0.7
 
-            # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
-            gap_para_5 = resultado_raw.get("gap_para_5", "")
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "MEDIA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
-                evidencias_extra=evidencias_extra,
+                evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
                 recomendacion_accionable=recomendacion_base,
                 metadata={
                     "menciona_precio": menciona_precio,
                     "explica_financiacion": resultado_raw.get("explica_financiacion", False),
+                    "menciona_comite": resultado_raw.get("menciona_comite", False),
+                    "comite_con_emocion": resultado_raw.get("comite_con_emocion", False),
+                    "valor_antes_precio": resultado_raw.get("valor_antes_precio", False),
+                    "usa_storytelling": resultado_raw.get("usa_storytelling", False),
+                    "secuencia_correcta": resultado_raw.get("secuencia_correcta", False),
                     "claridad_admision": resultado_raw.get("claridad_admision", "MEDIA"),
                     "enfoque_valor_vs_precio": resultado_raw.get("enfoque_valor_vs_precio", "precio"),
-                    "gap_para_5": gap_para_5
                 }
             )
 
@@ -73,73 +70,118 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
         manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
 
         prompt_sistema = f"""
-Eres un AUDITOR ESPECIALIZADO en evaluación de PROCESO DE ADMISIÓN Y PROPUESTA ECONÓMICA.
+Eres un AUDITOR ESPECIALIZADO en evaluación de PROCESO DE ADMISIÓN Y PROPUESTA ECONÓMICA en venta consultiva de formación.
 
-TU TAREA: Evaluar cómo el [ASESOR] explica el proceso y la inversión.
+TU TAREA: Evaluar cómo el [ASESOR] presenta el comité de admisión, construye valor y maneja la propuesta económica.
 
-CONTEXTO DEL MANUAL:
+CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
 {manual_enriquecido}
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EL SPEECH COMO CARRETERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El speech NO es una checklist de frases que el asesor debe decir palabra por palabra.
+Es la CARRETERA: define los límites de lo que se puede y no se puede hacer.
+Un asesor que construye valor con sus propias palabras pero logra el objetivo → BUENO.
+Lo que evalúas es si se sale de los límites (dar precio sin contexto, omitir comité, etc.)
+o si conduce bien dentro de ellos.
 
-1 = NEGLIGENTE / EVITA EL TEMA
-   - No menciona proceso de admisión
-   - Evita hablar de precio o es evasivo
-   - Genera confusión o desconfianza
-   - No aclara pasos a seguir
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLAVES DE ESTA FASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-2 = DEFICIENTE / INFORMACIÓN INCOMPLETA
-   - Menciona precio pero sin contexto (suelta cifra y ya)
-   - No explica proceso de admisión claramente
-   - No menciona opciones de financiación
-   - Reacciona defensivamente si el lead pregunta por precio
+1. ANÁLISIS FINANCIERO DEL LEAD:
+   El asesor debe explorar la situación económica del lead ANTES de hablar de precio.
+   No se trata de interrogar, sino de entender su capacidad y expectativas para adaptar
+   la presentación. ¿Preguntó si tiene financiación en mente? ¿Validó el rango que maneja?
 
-3 = CORRECTO / PRESENTACIÓN ESTÁNDAR
-   - Explica proceso de admisión de forma básica
-   - Menciona precio/inversión cuando se pregunta
-   - Informa sobre financiación si existe
-   - Funcional pero no genera confianza especial
-   - Enfoque más en "precio" que en "valor"
+2. COMITÉ DE ADMISIÓN:
+   El comité de admisión genera importancia, exclusividad y emoción en el lead.
+   Aunque sea un proceso interno, el lead no lo sabe, y debe sentir que está siendo
+   evaluado/seleccionado, no solo comprando. El asesor debe:
+   - Mencionar el comité con convicción y darle peso real
+   - Generar ilusión y sentido de oportunidad ("No todos los candidatos son admitidos")
+   - No mencionar el comité de forma mecánica o de pasada
 
-4 = BUENO / TRANSPARENCIA PROFESIONAL
-   - Explica proceso de admisión paso a paso con claridad
-   - Presenta inversión de forma transparente y proactiva
-   - Contextualiza precio con valor ("Inversión de X que incluye Y, Z...")
-   - Explica opciones de financiación detalladamente
-   - Facilita decisión sin presionar
-   - Anticipa dudas sobre precio
+3. VALOR ANTES QUE PRECIO:
+   El precio NUNCA se da al inicio. Primero se construye todo el valor del programa
+   (qué incluye, beneficios, diferenciadores, ROI) y SOLO DESPUÉS se menciona la
+   inversión completa. El orden correcto es:
+   → Valor completo (lo que incluye, lo que te aporta) → Precio sin descuento → Descuento
+   Un asesor que da el precio antes de construir el valor = MALO en este bloque.
 
-5 = MAESTRÍA / FACILITADOR DE DECISIÓN
-   - Proceso de admisión cristalino y sencillo
-   - Presenta inversión como "inversión en ti mismo" vinculada a ROI
-   - Compara valor recibido vs inversión (no solo precio)
-   - Ofrece múltiples opciones de financiación adaptadas
-   - Maneja objeciones de precio con confianza y empatía
-   - El lead siente que es transparente y honesto
-   - Genera confianza para tomar decisión informada
+4. DESCUENTO COMO REMATE, NO COMO PUNTO DE PARTIDA:
+   El descuento se presenta DESPUÉS de haber explicado el valor completo y mencionado
+   el precio de lista. Ejemplo correcto:
+   "El programa completo tiene un valor de 7.700€ [pausa — el lead asimila el valor].
+   En este momento contamos con una bonificación especial que lo deja en X€."
+   Un asesor que abre con el precio rebajado o lo da sin contexto = MEJORABLE o MALO.
 
-EVIDENCIA REQUERIDA:
+5. VALIDACIÓN, NO SUPUESTOS:
+   El asesor debe verificar que el lead entiende y procesa cada elemento antes de avanzar.
+   No da por supuesto que el lead entendió el valor, el proceso o la financiación.
+   Usa preguntas de comprobación: "¿Esto tiene sentido para ti?" / "¿Cómo lo ves?"
+
+6. STORYTELLING:
+   Se valora que el asesor use historias, ejemplos de otros alumnos o situaciones
+   reales para hacer tangible el valor del programa. Un caso real bien contado
+   vale más que una lista de características.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CRITERIOS DE CALIFICACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔴 MALO — presentación económica o de admisión negligente o que daña la conversación:
+   - Da el precio sin construir ningún valor previo (precio antes que valor)
+   - Omite completamente el comité de admisión
+   - Es evasivo o defensivo ante preguntas del lead sobre precio
+   - Genera confusión, desconfianza o presión innecesaria
+   - También: el lead pregunta directamente por el precio o el proceso y el asesor lo esquiva o lo gestiona mal
+
+🟡 MEJORABLE — funcional pero mecánico, sin impacto emocional real:
+   - Menciona el comité de forma mecánica, sin darle peso ni emoción
+   - Explica el precio de forma ordenada pero sin haber construido valor suficiente primero
+   - La secuencia valor→precio existe pero es superficial
+   - No valida ni explora la situación financiera del lead
+   - No usa storytelling ni ejemplos que hagan tangible el valor del programa
+
+🟢 BUENO — presentación estructurada que construye valor y genera confianza antes del precio:
+   - Construye valor del programa antes de mencionar el precio
+   - Presenta el comité de admisión con convicción, no como trámite
+   - Introduce el precio después del valor, con contexto claro
+   - Valida la comprensión del lead en al menos un punto clave
+   - No es necesario que use todas las técnicas: basta con que el lead sienta que la inversión tiene sentido
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EVIDENCIA REQUERIDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Debes identificar MÍNIMO:
-- 1 ejemplo de explicación del proceso de admisión (si se menciona)
-- 1 ejemplo de mención de inversión/precio
-- 1 ejemplo de financiación o contextualización (si existe)
+- 1 ejemplo de cómo se presentó el comité de admisión (si se menciona)
+- 1 ejemplo de construcción de valor antes del precio
+- 1 ejemplo de mención de precio/inversión
+- 1 ejemplo de financiación o descuento (si existe)
 - 1 reacción del lead sobre el tema económico
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
-  "evidencia_principal": "[ASESOR]: Explicación de admisión o inversión... (COPY-PASTE LITERAL)",
+  "evidencia_principal": "[ASESOR]: Momento clave de la propuesta económica o comité... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
-    "[ASESOR]: Mención de precio/inversión... (COPY-PASTE LITERAL)",
-    "[ASESOR]: Explicación de financiación... (COPY-PASTE LITERAL)",
-    "[LEAD]: Reacción o pregunta sobre precio... (COPY-PASTE LITERAL)"
+    "[ASESOR]: Presentación del comité de admisión... (COPY-PASTE LITERAL)",
+    "[ASESOR]: Construcción de valor antes del precio... (COPY-PASTE LITERAL)",
+    "[ASESOR]: Mención de precio/descuento... (COPY-PASTE LITERAL)",
+    "[LEAD]: Reacción o pregunta sobre precio/admisión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Fue claro en admisión? ¿Transparente con precio? ¿Enfoque valor o precio? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
+  "razonamiento": "¿Hizo análisis financiero? ¿Presentó comité con emoción? ¿Valor antes que precio? ¿Secuencia correcta? ¿Storytelling? ¿Por qué esa calificación?",
+  "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "menciona_precio": true/false,
   "explica_financiacion": true/false,
+  "menciona_comite": true/false,
+  "comite_con_emocion": true/false,
+  "valor_antes_precio": true/false,
+  "usa_storytelling": true/false,
+  "secuencia_correcta": true/false,
   "claridad_admision": "ALTA" | "MEDIA" | "BAJA" | "NO_MENCIONADO",
   "enfoque_valor_vs_precio": "valor" | "precio" | "equilibrado"
 }}
@@ -158,14 +200,15 @@ REGLAS CRÍTICAS:
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Observabilidad puede ser BAJA si no se mencionó el tema en la llamada
 - NO penalices si el tema no surgió naturalmente (puede ser llamada inicial)
-- SÍ penaliza si evitó el tema cuando el lead preguntó directamente
-- Enfoque "valor" = Habla de ROI, beneficios vs inversión
-- Enfoque "precio" = Solo menciona cifra sin contexto
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si la presentación económica es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- En "gap_para_5" sé específico (ej: "Faltó vincular inversión con ROI del lead")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien
+- SÍ penaliza con MALO si evitó el tema cuando el lead preguntó directamente
+
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO cuando el asesor construye valor antes del precio y el lead procesa la inversión con calma, aunque no use todas las técnicas.
+- MEJORABLE cuando hay estructura mínima pero el impacto es plano: el lead no entiende por qué vale lo que vale.
+- MALO cuando el precio aparece sin contexto, el comité se omite, o el asesor genera confusión o desconfianza.
+- Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión con sentido? Si sí → BUENO.
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)

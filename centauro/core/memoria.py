@@ -26,10 +26,10 @@ class EvaluacionHistorica:
     """Registro de una evaluación pasada (simplificado)"""
     fecha: str  # ISO format: "2025-01-26T14:30:00"
     asesor: str
-    puntuacion_global: float  # Promedio de todos los bloques
-    puntuaciones_por_bloque: Dict[str, Optional[int]]  # {"Investigación": 4, ...}
-    fortalezas: List[str]  # Bloques con 4/5
-    areas_mejora: List[str]  # Bloques con 1-2/5
+    calificacion_global: Optional[str]  # MALO | MEJORABLE | BUENO
+    calificaciones_por_bloque: Dict[str, Optional[str]]  # {"Investigación": "BUENO", ...}
+    fortalezas: List[str]  # Bloques con BUENO
+    areas_mejora: List[str]  # Bloques con MALO
     transcripcion_path: Optional[str] = None  # Path al archivo original
 
 
@@ -40,18 +40,17 @@ class AsesorProfile:
     evaluaciones: List[EvaluacionHistorica] = field(default_factory=list)
 
     # Estadísticas agregadas (calculadas automáticamente)
-    puntuacion_promedio: float = 0.0
     total_evaluaciones: int = 0
     fecha_primera_evaluacion: Optional[str] = None
     fecha_ultima_evaluacion: Optional[str] = None
 
     # Análisis por bloque (calculado automáticamente)
-    fortalezas_consistentes: List[str] = field(default_factory=list)  # Bloques con promedio ≥4
-    areas_mejora_consistentes: List[str] = field(default_factory=list)  # Bloques con promedio <3
+    fortalezas_consistentes: List[str] = field(default_factory=list)  # Bloques mayoritariamente BUENO
+    areas_mejora_consistentes: List[str] = field(default_factory=list)  # Bloques mayoritariamente MALO
 
-    # Tendencias recientes
+    # Tendencias recientes (en escala ordinal: MALO=0, MEJORABLE=1, BUENO=2)
     tendencia_global: str = "estable"  # "mejorando" | "empeorando" | "estable"
-    cambio_reciente: float = 0.0  # Diferencia últimas 5 vs primeras 5 evaluaciones
+    cambio_reciente: float = 0.0  # Diferencia últimas 5 vs primeras 5 (escala 0-2)
 
     def actualizar_estadisticas(self):
         """Recalcula todas las estadísticas basadas en evaluaciones"""
@@ -66,10 +65,6 @@ class AsesorProfile:
         self.fecha_primera_evaluacion = self.evaluaciones[0].fecha
         self.fecha_ultima_evaluacion = self.evaluaciones[-1].fecha
 
-        # Promedio global
-        puntuaciones = [e.puntuacion_global for e in self.evaluaciones if e.puntuacion_global > 0]
-        self.puntuacion_promedio = statistics.mean(puntuaciones) if puntuaciones else 0.0
-
         # Análisis por bloque
         self._calcular_fortalezas_debilidades()
 
@@ -77,47 +72,51 @@ class AsesorProfile:
         self._calcular_tendencia()
 
     def _calcular_fortalezas_debilidades(self):
-        """Identifica bloques consistentemente fuertes o débiles"""
-        # Acumular puntuaciones por bloque
-        bloques_puntuaciones: Dict[str, List[int]] = {}
+        """Identifica bloques consistentemente BUENOS o MALOS"""
+        from collections import Counter
+
+        bloques_calificaciones: Dict[str, List[str]] = {}
 
         for evaluacion in self.evaluaciones:
-            for bloque, puntuacion in evaluacion.puntuaciones_por_bloque.items():
-                if puntuacion is not None:
-                    if bloque not in bloques_puntuaciones:
-                        bloques_puntuaciones[bloque] = []
-                    bloques_puntuaciones[bloque].append(puntuacion)
+            for bloque, cal in evaluacion.calificaciones_por_bloque.items():
+                if cal is not None:
+                    if bloque not in bloques_calificaciones:
+                        bloques_calificaciones[bloque] = []
+                    bloques_calificaciones[bloque].append(cal)
 
-        # Calcular promedios y clasificar
         self.fortalezas_consistentes = []
         self.areas_mejora_consistentes = []
 
-        for bloque, puntuaciones in bloques_puntuaciones.items():
-            if len(puntuaciones) >= 3:  # Mínimo 3 evaluaciones para considerar
-                promedio = statistics.mean(puntuaciones)
-                if promedio >= 4.0:
+        for bloque, calificaciones in bloques_calificaciones.items():
+            if len(calificaciones) >= 3:  # Mínimo 3 evaluaciones
+                conteo = Counter(calificaciones)
+                mayoria = conteo.most_common(1)[0][0]
+                if mayoria == "BUENO":
                     self.fortalezas_consistentes.append(bloque)
-                elif promedio < 3.0:
+                elif mayoria == "MALO":
                     self.areas_mejora_consistentes.append(bloque)
 
     def _calcular_tendencia(self):
-        """Detecta si el asesor está mejorando o empeorando"""
+        """Detecta si el asesor está mejorando o empeorando (escala ordinal MALO=0, MEJORABLE=1, BUENO=2)"""
+        ORDEN = {"MALO": 0, "MEJORABLE": 1, "BUENO": 2}
+
         if len(self.evaluaciones) < 5:
             self.tendencia_global = "datos_insuficientes"
             return
 
-        # Tomar últimas N evaluaciones
         n = min(centauro_config.EVALUACIONES_PARA_TENDENCIA // 2, len(self.evaluaciones) // 2)
 
         primeras = self.evaluaciones[:n]
         ultimas = self.evaluaciones[-n:]
 
-        promedio_inicial = statistics.mean([e.puntuacion_global for e in primeras])
-        promedio_reciente = statistics.mean([e.puntuacion_global for e in ultimas])
+        def valor_cal(e):
+            return ORDEN.get(e.calificacion_global, 1)  # MEJORABLE como default
+
+        promedio_inicial = statistics.mean([valor_cal(e) for e in primeras])
+        promedio_reciente = statistics.mean([valor_cal(e) for e in ultimas])
 
         self.cambio_reciente = promedio_reciente - promedio_inicial
 
-        # Clasificar tendencia
         if abs(self.cambio_reciente) < centauro_config.THRESHOLD_CAMBIO_SIGNIFICATIVO:
             self.tendencia_global = "estable"
         elif self.cambio_reciente > 0:
@@ -134,11 +133,11 @@ class AsesorProfile:
 
         # Tendencia
         if self.tendencia_global == "mejorando":
-            feedback.append(f"📈 **Progreso detectado**: Has mejorado {abs(self.cambio_reciente):.1f} puntos en las últimas {self.total_evaluaciones} llamadas.")
+            feedback.append(f"📈 **Progreso detectado**: Tendencia de mejora en las últimas {self.total_evaluaciones} llamadas.")
         elif self.tendencia_global == "empeorando":
-            feedback.append(f"📉 **Alerta**: Se detectó una caída de {abs(self.cambio_reciente):.1f} puntos. Revisa las áreas de mejora.")
+            feedback.append(f"📉 **Alerta**: Se detectó tendencia de empeoramiento. Revisa las áreas de mejora.")
         else:
-            feedback.append(f"➡️ **Desempeño consistente**: Promedio estable en {self.puntuacion_promedio:.1f}/5")
+            feedback.append(f"➡️ **Desempeño consistente**: Nivel estable en las últimas evaluaciones.")
 
         # Fortalezas
         if self.fortalezas_consistentes:
@@ -151,7 +150,7 @@ class AsesorProfile:
             feedback.append(f"🎯 **Foco recomendado**: {bloques_str} (área recurrente de mejora)")
 
         # Contexto histórico
-        feedback.append(f"📊 Evaluación #{self.total_evaluaciones} | Promedio histórico: {self.puntuacion_promedio:.1f}/5")
+        feedback.append(f"📊 Evaluación #{self.total_evaluaciones}")
 
         return "\n".join(feedback)
 
@@ -169,7 +168,6 @@ class AsesorProfile:
         perfil = cls(
             nombre=data['nombre'],
             evaluaciones=evaluaciones,
-            puntuacion_promedio=data.get('puntuacion_promedio', 0.0),
             total_evaluaciones=data.get('total_evaluaciones', 0),
             fecha_primera_evaluacion=data.get('fecha_primera_evaluacion'),
             fecha_ultima_evaluacion=data.get('fecha_ultima_evaluacion'),
@@ -248,32 +246,32 @@ class MemoryManager:
         perfil = self.cargar_perfil(nombre_asesor)
 
         # Extraer datos de evaluación
-        puntuaciones_por_bloque = {}
+        calificaciones_por_bloque = {}
         fortalezas = []
         areas_mejora = []
-        puntuaciones_validas = []
 
-        for bloque, data in resultado_evaluacion.items():
-            if isinstance(data, dict) and 'puntuacion_1_5' in data:
-                puntuacion = data['puntuacion_1_5']
-                puntuaciones_por_bloque[bloque] = puntuacion
+        # Iterar sobre los bloques en evaluacion_por_bloques
+        bloques = resultado_evaluacion.get("evaluacion_por_bloques", [])
+        for bloque_data in bloques:
+            if isinstance(bloque_data, dict):
+                nombre_bloque = bloque_data.get("bloque", "")
+                cal = bloque_data.get("calificacion")
+                calificaciones_por_bloque[nombre_bloque] = cal
 
-                if puntuacion is not None and puntuacion > 0:
-                    puntuaciones_validas.append(puntuacion)
-                    if puntuacion >= 4:
-                        fortalezas.append(bloque)
-                    elif puntuacion <= 2:
-                        areas_mejora.append(bloque)
+                if cal == "BUENO":
+                    fortalezas.append(nombre_bloque)
+                elif cal == "MALO":
+                    areas_mejora.append(nombre_bloque)
 
-        # Calcular puntuación global
-        puntuacion_global = statistics.mean(puntuaciones_validas) if puntuaciones_validas else 0.0
+        # Calificación global del reporte
+        cal_global = resultado_evaluacion.get("calificacion_global")
 
         # Crear registro histórico
         evaluacion = EvaluacionHistorica(
             fecha=datetime.now().isoformat(),
             asesor=nombre_asesor,
-            puntuacion_global=puntuacion_global,
-            puntuaciones_por_bloque=puntuaciones_por_bloque,
+            calificacion_global=cal_global,
+            calificaciones_por_bloque=calificaciones_por_bloque,
             fortalezas=fortalezas,
             areas_mejora=areas_mejora,
             transcripcion_path=transcripcion_path
@@ -288,8 +286,8 @@ class MemoryManager:
         # Guardar
         self.guardar_perfil(perfil)
 
-        # Si es excelente (≥4), considerar añadir al RAG
-        if puntuacion_global >= centauro_config.MIN_SCORE_PARA_APRENDIZAJE:
+        # Si es BUENO, considerar añadir al RAG como ejemplo de aprendizaje
+        if cal_global == centauro_config.MIN_CALIFICACION_PARA_APRENDIZAJE:
             self._agregar_a_rag_historico(evaluacion, transcripcion_path)
 
         return perfil
@@ -333,7 +331,7 @@ class MemoryManager:
                     "tipo": "evaluacion_historica",
                     "asesor": evaluacion.asesor,
                     "fecha": evaluacion.fecha,
-                    "puntuacion_global": evaluacion.puntuacion_global,
+                    "calificacion_global": evaluacion.calificacion_global or "BUENO",
                     "fortalezas": ",".join(evaluacion.fortalezas)
                 }
                 for i in range(len(chunks))
@@ -391,9 +389,8 @@ class MemoryManager:
             return {"total_asesores": 0}
 
         # Calcular estadísticas
+        from collections import Counter
         total_evaluaciones = sum(p.total_evaluaciones for p in perfiles)
-        promedios_validos = [p.puntuacion_promedio for p in perfiles if p.puntuacion_promedio > 0]
-        promedio_global = statistics.mean(promedios_validos) if promedios_validos else 0.0
 
         mejorando = [p for p in perfiles if p.tendencia_global == "mejorando"]
         empeorando = [p for p in perfiles if p.tendencia_global == "empeorando"]
@@ -401,7 +398,6 @@ class MemoryManager:
         return {
             "total_asesores": len(perfiles),
             "total_evaluaciones": total_evaluaciones,
-            "promedio_global": promedio_global,
             "asesores_mejorando": len(mejorando),
             "asesores_empeorando": len(empeorando),
             "conversaciones_en_rag": collection_evaluaciones.count()

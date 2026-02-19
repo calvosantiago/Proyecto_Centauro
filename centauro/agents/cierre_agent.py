@@ -61,13 +61,12 @@ class CierreAgent(BaseEvaluatorAgent):
             # Detectar técnicas
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
-            gap_para_5 = resultado_raw.get("gap_para_5", "")
 
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -77,10 +76,10 @@ class CierreAgent(BaseEvaluatorAgent):
                 metadata={
                     "proximo_paso": proximo_paso,
                     "compromiso_fecha": resultado_raw.get("compromiso_fecha", False),
+                    "valido_antes_cerrar": resultado_raw.get("valido_antes_cerrar", False),
                     "tecnica_cierre": resultado_raw.get("tecnica_cierre", "ninguna"),
                     "recepcion_cliente": resultado_raw.get("recepcion_cliente", {}),
                     "tecnicas_detectadas": tecnicas_detectadas,
-                    "gap_para_5": gap_para_5,
                     "feedback_personalizado": resultado_raw.get("feedback_personalizado", "")
                 }
             )
@@ -96,92 +95,117 @@ class CierreAgent(BaseEvaluatorAgent):
         manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion_completa)
 
         prompt_sistema = f"""
-Eres un AUDITOR ESPECIALIZADO en evaluación de CIERRE Y PRÓXIMOS PASOS en venta consultiva.
+Eres un AUDITOR ESPECIALIZADO en evaluación de CIERRE Y PRÓXIMOS PASOS en venta consultiva de formación.
 
 TU ÚNICA TAREA: Evaluar cómo cerró el [ASESOR] la conversación y qué próximos pasos estableció.
 
-CONTEXTO DEL MANUAL:
+CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
 {manual_enriquecido}
 
-IMPORTANTE SOBRE CIERRE EN VENTA CONSULTIVA:
-En este contexto, el "cierre exitoso" NO es necesariamente que el lead diga "SÍ, lo compro".
-El objetivo suele ser avanzar al siguiente paso del proceso:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EL SPEECH COMO CARRETERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El speech NO es una checklist de frases exactas. Es la CARRETERA: define los límites.
+Un asesor que cierra con sus propias palabras pero logra compromiso real → BUENO.
+Lo que evalúas es si se sale de los límites (cierre pasivo, sin próximo paso, sin validar)
+o si conduce bien dentro de ellos.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SOBRE EL CIERRE EN VENTA CONSULTIVA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El "cierre exitoso" NO es necesariamente que el lead diga "SÍ, lo compro ahora".
+El objetivo es avanzar al siguiente paso del proceso:
 - Envío de documentación al comité de admisiones
 - Compromiso de enviar CV/titulación
-- Agendar llamada de seguimiento
+- Agendar llamada de seguimiento con fecha concreta
 - Programar entrevista de admisión
 
-CRITERIOS ESPECÍFICOS (Escala DECIMAL 1.0-5.0):
-⚠️ USA TODA LA ESCALA. Si el cierre es excelente, da 4.5 o 5.0.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLAVES DE ESTE CIERRE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1.0-1.5 = PASIVO / SIN CIERRE
-   - Termina con "Piénsalo y me dices", sin próximo paso concreto
+1. VALIDACIÓN ANTES DE CERRAR:
+   El asesor no da por supuesto que el lead está convencido. Valida explícitamente
+   antes de pedir el compromiso: "¿Cómo lo ves hasta aquí?" / "¿Tienes alguna duda
+   antes de avanzar?" No asumir, preguntar.
 
-2.0-2.5 = DÉBIL / PRÓXIMO PASO VAGO
-   - Propone algo sin concreción ("Te mando info"), sin fecha ni hora
+2. GENERAR IMPORTANCIA DEL COMITÉ:
+   Si en este punto se vuelve a mencionar el comité de admisión, debe hacerse con
+   sentido de urgencia y exclusividad: "Las plazas del comité se van cubriendo"
+   / "Tu candidatura tiene que entrar esta semana para ser evaluada."
 
-3.0 = ADMINISTRATIVO / PASO DEFINIDO SIN TÉCNICA
-   - Propone próximo paso concreto pero no usa técnica de cierre
-   - No resume acuerdos ni maneja dudas con liderazgo
+3. PRÓXIMO PASO CONCRETO CON FECHA:
+   El siguiente paso debe ser específico y con fecha real. "Te llamo la semana que
+   viene" no es un cierre. "Te llamo el martes a las 11, ¿te va bien?" sí lo es.
 
-3.5 = CORRECTO CON INTENTO DE COMPROMISO
-   - Paso concreto + pide compromiso básico (menciona fecha)
+4. TÉCNICA DE CIERRE:
+   - Doble alternativa: "¿Prefieres que te llame martes o jueves?"
+   - Asuntivo: "Entonces te envío el formulario hoy y tú me lo devuelves el viernes, ¿perfecto?"
+   - Resumen-acción: "Hemos visto que X encaja con tu objetivo Y. El siguiente paso es Z."
 
-4.0 = BUENO / CIERRE ESTRUCTURADO
-   - Resume lo acordado, próximo paso + fecha concreta
-   - Pide compromiso explícito, verifica dudas finales
+5. NO CIERRE PASIVO:
+   "Piénsalo y me dices" sin fecha ni compromiso = MALO. El asesor lidera el proceso,
+   no espera que el lead tome la iniciativa.
 
-4.5 = MUY BUENO
-   - Añade resumen de beneficios antes de cerrar
-   - O usa técnica de cierre (doble alternativa, asuntivo)
-   - Lead confirma compromiso
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CRITERIOS DE CALIFICACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-5.0 = EXCELENTE / CIERRE CONSULTIVO
-   - Resume beneficios clave vinculados al lead ANTES de cerrar
-   - Usa técnica de cierre efectiva
-   - Maneja dudas finales sin perder momentum
-   - Lead confirma compromiso con claridad
+🔴 MALO — el asesor no cierra, lo hace de forma completamente pasiva, o deja el proceso sin avance:
+   - Termina con "Piénsalo y me dices" sin ningún próximo paso concreto
+   - No propone ni fecha, ni acción, ni compromiso de ningún tipo
+   - No genera ningún avance en el proceso de admisión
+   - También: el lead pregunta por el siguiente paso y el asesor no lo define
 
-TÉCNICAS DE CIERRE COMUNES:
-- Doble alternativa: "¿Prefieres que te llame martes o jueves?"
-- Asuntivo: "Entonces te envío el formulario hoy y tú me lo devuelves el viernes, ¿perfecto?"
-- Resumen-acción: "Hemos visto que X encaja con tu objetivo Y. El siguiente paso es Z."
+🟡 MEJORABLE — hay un cierre mínimo pero sin estructura ni liderazgo real:
+   - Propone algo concreto (enviar documentación, llamar) pero sin técnica ni fecha específica
+   - No valida si el lead tiene dudas antes de cerrar
+   - El lead acepta de forma pasiva, sin convicción real
+   - El asesor no conecta el cierre con el objetivo del lead ni resume lo acordado
+
+🟢 BUENO — el asesor lidera el cierre y genera un compromiso claro:
+   - Propone el siguiente paso de forma clara con fecha o plazo concreto
+   - Valida si el lead tiene dudas antes de cerrar, o resume lo acordado
+   - Usa alguna técnica de cierre (doble alternativa, asuntivo, resumen-acción)
+   - El lead confirma su compromiso con claridad
+   - No es necesario que use todas las técnicas: basta con que lidere el proceso y el lead avance
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EVIDENCIA REQUERIDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 1 frase de cierre del asesor con próximo paso
+- 1 validación previa al cierre (si existe)
+- 1 respuesta del lead confirmando (o no) el compromiso
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3.0,  ← USA DECIMALES: 3.0, 3.5, 4.0, etc.
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
   "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
+    "[ASESOR]: Validación antes del cierre (si existe)... (COPY-PASTE LITERAL)",
     "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Propuso paso concreto? ¿Usó técnica? ¿Generó compromiso? ¿Manejó dudas finales? ¿Qué faltó para la nota siguiente?",
-  "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
-  "proximo_paso_concreto": "Descripción del próximo paso acordado",
+  "razonamiento": "¿Validó antes de cerrar? ¿Usó técnica? ¿Generó compromiso real? ¿Próximo paso con fecha? ¿Por qué esa calificación?",
+  "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
+  "proximo_paso_concreto": "Descripción del próximo paso acordado (o 'ninguno' si no lo hubo)",
   "compromiso_fecha": true/false,
+  "valido_antes_cerrar": true/false,
   "tecnica_cierre": "doble_alternativa" | "asuntivo" | "resumen_accion" | "ninguna",
   "recepcion_cliente": {{
     "estado": "COMPROMETIDO" | "NEUTRO" | "RESISTENTE" | "ENTUSIASTA",
     "evidencia": "[LEAD]: Respuesta del lead... (COPY-PASTE LITERAL)"
   }},
-  "tecnicas_detectadas": ["lista de técnicas que usó, ej: 'doble alternativa', 'resumen beneficios', 'cierre asuntivo'"],
-  "feedback_personalizado": "Mensaje DIRECTO al asesor reconociendo algo ESPECÍFICO que hizo bien y sugiriendo UNA mejora concreta con ejemplo de frase"
+  "tecnicas_detectadas": ["lista de técnicas que usó"],
+  "feedback_personalizado": "Mensaje DIRECTO al asesor: algo específico que hizo bien + UNA mejora concreta con ejemplo de frase. Máx 3-4 líneas."
 }}
-
-🎯 FEEDBACK PERSONALIZADO - INSTRUCCIONES CRÍTICAS:
-El campo "feedback_personalizado" debe ser un mensaje que el asesor pueda leer y sentir que es PARA ÉL/ELLA.
-
-MALO (genérico): "El asesor debería usar técnicas de cierre"
-BUENO (personalizado): "Bien hecho al proponer enviar el formulario hoy. Para subir al siguiente nivel, antes de cerrar podrías haber resumido: 'María, hemos visto que el MBA encaja con tu objetivo de liderar equipos y la modalidad flexible te permite seguir trabajando. ¿Te parece que avancemos con la documentación?'"
 
 REGLAS DEL FEEDBACK PERSONALIZADO:
 1. USA el nombre del lead si aparece en la transcripción
 2. CITA algo específico que el asesor dijo en el cierre
 3. DA un ejemplo de frase de cierre alternativa que podría usar
-4. SÉ constructivo, no crítico
-5. Máximo 3-4 líneas, directo al grano
+4. SÉ constructivo, no crítico — máximo 3-4 líneas
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
 En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
@@ -190,20 +214,20 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 - Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
 - Da 2 frases concretas que podría haber usado en ESTA conversación
 - NO copies texto literal del libro, adapta con tus palabras
-- Menciona de qué libro/autor viene (ej: "Como sugiere Cialdini...")
+- Menciona de qué libro/autor viene
 
 REGLAS CRÍTICAS:
-- NO evalúes si el lead dijo "SÍ" a comprar - evalúa TÉCNICA del asesor
-- Un lead que dice "Lo pensaré" después de un buen cierre = 4.0 si usó técnica
-- EVIDENCIAS LITERALES OBLIGATORIAS: Copia exacta, NUNCA parafrasees
+- NO evalúes si el lead dijo "SÍ" a comprar — evalúa TÉCNICA del asesor
+- Un lead que dice "Lo pensaré" después de un buen cierre = BUENO si usó técnica
+- EVIDENCIAS LITERALES OBLIGATORIAS: copia exacta, NUNCA parafrasees
 
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si el cierre es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- Un asesor que resume, propone fecha, usa técnica y el lead confirma merece 4.5+
-- USA DECIMALES: Si está entre 3.0 y 4.0, usa 3.5
-- En "gap_para_5" explica QUÉ FALTÓ específicamente (ej: "Faltó resumir beneficios clave antes del cierre")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO cuando el asesor lidera el cierre y el lead avanza con compromiso, aunque no use todas las técnicas.
+- MEJORABLE cuando hay cierre mínimo pero el lead no queda comprometido de verdad.
+- MALO cuando no hay cierre real o es completamente pasivo.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor lideró el proceso o fue el lead quien tomó la iniciativa? Si el asesor lideró → BUENO.
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
         
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
@@ -250,7 +274,7 @@ Evalúa el cierre y próximos pasos en JSON.
         """Resultado para casos donde la grabación cortó antes del cierre"""
         return EvaluationResult(
             bloque=self.nombre_bloque,
-            puntuacion_1_5=None,
+            calificacion=None,
             observabilidad="NO_OBSERVABLE_OFF_RECORD",
             confianza=1.0,
             evidencia_principal="Grabación finalizó antes del cierre (corte detectado)",

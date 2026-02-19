@@ -43,11 +43,10 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
 
             # NOTA: El coaching se integra directamente en el prompt del agente via RAG
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
-            gap_para_5 = resultado_raw.get("gap_para_5", "")
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
-                puntuacion_1_5=resultado_raw.get("puntuacion_1_5"),
+                calificacion=resultado_raw.get("calificacion"),
                 observabilidad=resultado_raw.get("observabilidad", "ALTA"),
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
@@ -57,8 +56,7 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 metadata={
                     "personalizacion_detectada": personalizacion,
                     "enfoque": resultado_raw.get("enfoque", "caracteristicas"),
-                    "presenta_institucion": resultado_raw.get("presenta_institucion", False),
-                    "gap_para_5": gap_para_5
+                    "presenta_institucion": resultado_raw.get("presenta_institucion", False)
                 }
             )
 
@@ -77,44 +75,37 @@ Eres un AUDITOR ESPECIALIZADO en evaluación de PROPUESTA DE VALOR en venta cons
 
 TU TAREA: Evaluar cómo presentó el [ASESOR] la institución (OBS) y el programa.
 
-CONTEXTO DEL MANUAL:
+CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
 {manual_enriquecido}
 
-CRITERIOS ESPECÍFICOS (Escala 1-5):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EL SPEECH COMO CARRETERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El speech NO es una checklist de frases que el asesor debe decir palabra por palabra.
+Es la CARRETERA: define los límites de lo que se puede y no se puede decir/hacer.
+Un asesor que presenta el valor con sus propias palabras pero logra conectar con el lead → BUENO.
+Lo que evalúas es si se sale de los límites (presentación genérica sin personalización,
+no conecta con lo descubierto en investigación) o si conduce bien dentro de ellos.
 
-1 = DEFICIENTE / DESORGANIZADO
-   - No explica claramente qué es OBS
-   - Información del programa confusa o contradictoria
-   - No conecta con lo que busca el lead
+CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
-2 = INSUFICIENTE / DUMP DE INFORMACIÓN
-   - Suelta características sin estructura ("dura 12 meses, es online...")
-   - No personaliza (mismo discurso para todos)
-   - No presenta la institución o lo hace superficialmente
-   - No verifica comprensión
+🔴 MALO — la presentación es confusa, desorganizada o completamente genérica sin ningún intento de conectar:
+   - No explica con claridad qué es OBS o qué incluye el programa
+   - Suelta características sin estructura, sin orden y sin conexión
+   - No hace ningún intento de conectar con lo que busca el lead
+   - La información es confusa, contradictoria o tan genérica que no aporta nada
 
-3 = CORRECTO / PRESENTACIÓN ESTÁNDAR (Robot)
-   - Menciona OBS y sus credenciales básicas
-   - Explica características principales del programa de forma ordenada
-   - Clara pero genérica (no adapta al lead)
-   - Menciona algunos beneficios pero no conecta con objetivo del lead
-   - Funcional pero no persuasiva
+🟡 MEJORABLE — la presentación es correcta pero no conecta con este lead en particular:
+   - Explica OBS y el programa de forma ordenada, pero es un discurso genérico válido para cualquier lead
+   - No usa lo que descubrió en la investigación para personalizar
+   - Menciona características o beneficios genéricos sin vincularlos al objetivo del lead
+   - El lead escucha pero no hay señales de que sienta que el programa es para él/ella
 
-4 = BUENO / PROPUESTA CONSULTIVA
-   - Presenta OBS con credenciales relevantes (rankings, acreditaciones)
-   - Personaliza según lo descubierto en investigación
-   - Enfatiza BENEFICIOS sobre características
-   - Conecta explícitamente con el objetivo del lead ("Esto te ayudará a...")
-   - Verifica comprensión ("¿Tiene sentido?")
-   - Estructura clara: Institución → Programa → Beneficios para ti
-
-5 = MAESTRÍA / PROPUESTA DE VALOR PERSONALIZADA
-   - Presenta OBS como institución líder para SU caso específico
-   - El programa es LA SOLUCIÓN al problema del lead
-   - Cada característica se traduce en beneficio específico
-   - Usa ejemplos o casos de éxito relevantes
-   - Anticipa dudas y las resuelve proactivamente
-   - El lead expresa que "es justo lo que necesito"
+🟢 BUENO — la presentación conecta el programa con lo que importa a ESTE lead:
+   - Menciona al menos un beneficio vinculado explícitamente a lo que el lead dijo que necesita
+   - Enfatiza beneficios sobre características (qué le aporta, no solo qué incluye)
+   - El lead muestra interés o comprensión genuina
+   - No es necesario personalizar todo: basta con que el asesor conecte al menos un punto clave con el lead
 
 EVIDENCIA REQUERIDA:
 Debes identificar MÍNIMO:
@@ -125,7 +116,7 @@ Debes identificar MÍNIMO:
 
 FORMATO JSON OBLIGATORIO:
 {{
-  "puntuacion_1_5": 3,
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
   "evidencia_principal": "[ASESOR]: Presentación de OBS o programa... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
@@ -133,9 +124,8 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Conexión con necesidad del lead... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó? ¿Qué faltó para la nota siguiente?",
+  "razonamiento": "¿Presentó OBS? ¿Personalizó? ¿Beneficios o características? ¿Conectó? ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
-  "gap_para_5": "Si nota < 5, explica ESPECÍFICAMENTE qué faltó. Si nota es 5, pon 'N/A'",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto"
@@ -155,11 +145,13 @@ REGLAS CRÍTICAS:
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Personalización = Adaptar la explicación a LO QUE EL LEAD DIJO que necesitaba
 - Diferencia: Características ("12 meses") vs Beneficios ("En 1 año estarás certificado")
-⚠️ CALIBRACIÓN JUSTA:
-- USA TODA LA ESCALA: si la propuesta de valor es excelente, da 4.5 o 5.0
-- NO limites artificialmente las notas. Si cumple los criterios, puntúa en consecuencia
-- En "gap_para_5" sé específico (ej: "Faltó usar caso de éxito similar al perfil del lead")
-- En "recomendacion_accionable" NO repitas lo que ya hizo bien
+⚠️ REGLAS PARA CALIFICAR:
+- Sé decisivo: elige UNA etiqueta.
+- BUENO cuando el asesor conecta el programa con lo que el lead necesita, aunque sea en un solo punto clave.
+- MEJORABLE cuando la presentación es correcta pero es el mismo discurso para todos, sin ninguna conexión específica con este lead.
+- MALO cuando la presentación es confusa o completamente desordenada y el lead no entiende qué se le está ofreciendo.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo de lo que el lead dijo antes? Si sí → BUENO.
+- En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)

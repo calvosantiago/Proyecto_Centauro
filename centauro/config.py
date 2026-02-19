@@ -111,6 +111,11 @@ class CentauroConfig:
     LLM_TEMPERATURE_PATRONES = 0.2  # semi-determinista
 
 
+    # ==================== EVALUACIÓN: CALIFICACIÓN ORDINAL ====================
+
+    # Valores válidos para calificación ordinal
+    CALIFICACIONES_VALIDAS = {"MALO", "MEJORABLE", "BUENO"}
+
     # ==================== EVALUACIÓN: CONFIANZA ====================
 
     # Penalizaciones para cálculo de confianza
@@ -140,9 +145,9 @@ class CentauroConfig:
     # Evita saturación: solo las mejores conversaciones
     MAX_CONVERSACIONES_EN_RAG = 500  # conversaciones
 
-    # Umbral mínimo de puntuación para añadir a RAG histórico
-    # Solo conversaciones excelentes (4/5 y 5/5)
-    MIN_SCORE_PARA_APRENDIZAJE = 4  # puntuación (1-5)
+    # Calificación mínima para añadir al RAG histórico
+    # Solo llamadas BUENAS se usan como ejemplos de aprendizaje
+    MIN_CALIFICACION_PARA_APRENDIZAJE = "BUENO"
 
     # Ventana temporal para conversaciones históricas (días)
     # Rolling window: solo últimos 6 meses relevantes
@@ -151,8 +156,8 @@ class CentauroConfig:
     # Número de evaluaciones recientes para análisis de tendencias
     EVALUACIONES_PARA_TENDENCIA = 10  # últimas evaluaciones
 
-    # Umbral de mejora/empeoramiento para alertas
-    THRESHOLD_CAMBIO_SIGNIFICATIVO = 0.5  # puntos en escala 1-5
+    # Umbral de cambio para detección de tendencias (en escala ordinal 0=MALO, 1=MEJORABLE, 2=BUENO)
+    THRESHOLD_CAMBIO_SIGNIFICATIVO = 0.5  # unidades en escala 0-2
 
 
     # ==================== NOMBRES DE COLECCIONES CHROMADB ====================
