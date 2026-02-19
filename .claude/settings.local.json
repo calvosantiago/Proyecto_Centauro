@@ -6,7 +6,11 @@
       "Bash(python:*)",
       "Bash(ls:*)",
       "Bash(git add:*)",
-      "Bash(del \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\tmp_costs.py\")"
+      "Bash(del \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\tmp_costs.py\")",
+      "Bash(pip install:*)",
+      "Bash(wmic computersystem get:*)",
+      "Bash(wmic:*)",
+      "Bash(wmic path win32_VideoController get Name,AdapterRAM:*)"
     ]
   }
 }

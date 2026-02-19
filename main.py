@@ -175,10 +175,39 @@ def main():
         
         # Cargar transcripción
         texto = cargar_transcripcion(archivo)
-        if not texto: 
+        if not texto:
             print("   ⚠️ Archivo vacío o no legible, saltando...")
             continue
-        
+
+        # ===== VALIDACIÓN DE CALIDAD + PLAN B AUTOMÁTICO =====
+        try:
+            from centauro.tools.transcript_validator import validar_transcripcion, activar_plan_b_whisper
+
+            resultado_val = validar_transcripcion(texto, nombre_archivo=archivo.name)
+
+            if resultado_val.es_valida:
+                if resultado_val.advertencias:
+                    print(f"   ✅ Transcripción válida (score: {resultado_val.score:.2f})")
+                    for adv in resultado_val.advertencias:
+                        print(f"      🟡 {adv}")
+                else:
+                    print(f"   ✅ Transcripción válida (score: {resultado_val.score:.2f})")
+            else:
+                print(f"   ❌ Transcripción de baja calidad (score: {resultado_val.score:.2f})")
+                for prob in resultado_val.problemas:
+                    print(f"      🔴 {prob}")
+                print(f"   🔄 Activando Plan B: Groq Whisper...")
+                texto_whisper = activar_plan_b_whisper(archivo.stem)
+                if texto_whisper:
+                    texto = texto_whisper
+                    print(f"   ✅ Plan B completado, usando transcripción de Whisper")
+                else:
+                    print(f"   ⚠️ Plan B falló, continuando con transcripción original")
+
+        except Exception as e:
+            print(f"   ⚠️ Validador no disponible, continuando sin validar: {e}")
+        # ======================================================
+
         # Iniciar cronómetro
         inicio_reloj = time.time()
         print("   ⏳ Analizando con sistema multi-agente...")

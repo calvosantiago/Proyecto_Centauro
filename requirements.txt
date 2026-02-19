@@ -13,5 +13,8 @@ numpy
 # Chainlit para interfaz web
 chainlit>=1.0.0
 
+# Lectura de metadatos de audio (duración MP3 para cálculo de costes Whisper)
+mutagen
+
 # Optional (mejora performance)
 uvicorn[standard]

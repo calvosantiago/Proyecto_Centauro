@@ -49,6 +49,15 @@ class CentauroOrchestrator:
         }
 
     def analizar_entrevista_completa(self, nombre_archivo: str, texto_crudo: str, contexto_usuario: str = None) -> Dict:
+        # Reset stats por cada evaluación (evita acumulación entre asesores en la misma sesión)
+        self.stats = {
+            "llamadas_api": 0,
+            "tokens_ahorrados": 0,
+            "cache_hits": 0,
+            "alucinaciones_detectadas": 0,
+            "notas_ajustadas_sheriff": 0,
+            "modo_ejecucion": self.config.get_modo_descripcion()
+        }
         """Pipeline completo orquestado v3.0
 
         Args:

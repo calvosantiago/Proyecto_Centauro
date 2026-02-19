@@ -3,1182 +3,706 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentación Técnica - Proyecto Centauro v3.0 (Multi-Agente Híbrido)</title>
+    <title>Proyecto Centauro - Documentación Técnica Integral (Estado real del código)</title>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.5/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
     </script>
     <style>
+        :root {
+            --bg: #f3f6fb;
+            --panel: #ffffff;
+            --text: #1f2937;
+            --muted: #4b5563;
+            --brand: #1f6feb;
+            --brand-2: #0ea5e9;
+            --ok: #2e7d32;
+            --warn: #b45309;
+            --danger: #b91c1c;
+            --border: #dbe4f0;
+        }
+
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f6f9;
             margin: 0;
             padding: 20px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: radial-gradient(circle at top right, #e8f1ff 0%, var(--bg) 35%, var(--bg) 100%);
         }
+
         .container {
-            max-width: 1200px;
+            max-width: 1220px;
             margin: 0 auto;
-            background: #fff;
-            padding: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-radius: 8px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+            padding: 44px;
         }
+
         h1 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 15px;
-            font-size: 2.2em;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 3px solid var(--brand);
+            padding-bottom: 12px;
+            color: #0f172a;
         }
+
         h2 {
-            color: #2980b9;
-            margin-top: 50px;
-            border-left: 6px solid #3498db;
-            padding-left: 15px;
-            background-color: #f9fbfd;
-            padding: 10px 15px;
-            border-radius: 0 4px 4px 0;
+            margin-top: 44px;
+            border-left: 6px solid var(--brand);
+            background: #f8fbff;
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            color: #0b3f77;
         }
+
         h3 {
-            color: #34495e;
             margin-top: 30px;
-            font-weight: 700;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+            border-bottom: 1px solid #e9eef7;
+            padding-bottom: 4px;
+            color: #1e3a5f;
         }
+
         h4 {
-            color: #7f8c8d;
-            margin-top: 20px;
+            margin-top: 22px;
+            color: #334155;
             text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 1px;
+            font-size: 0.9rem;
+            letter-spacing: 0.05rem;
         }
+
         p, li {
             font-size: 16px;
-            color: #444;
+            color: var(--muted);
         }
+
+        ul, ol {
+            margin-top: 8px;
+        }
+
         code {
-            background-color: #f0f0f0;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            color: #c7254e;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 2px 6px;
+            color: #7c2d12;
+            font-family: Consolas, Monaco, monospace;
             font-size: 0.9em;
         }
+
         pre {
-            background-color: #2d3436;
-            color: #dfe6e9;
-            padding: 15px;
-            border-radius: 6px;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
             overflow-x: auto;
-            font-family: 'Consolas', 'Monaco', monospace;
-            margin-bottom: 20px;
-            border-left: 5px solid #e17055;
+            border-left: 4px solid var(--brand-2);
             font-size: 0.9em;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 25px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            border-radius: 8px;
         }
+
         th, td {
-            padding: 12px 15px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--border);
+            padding: 10px 12px;
             text-align: left;
+            vertical-align: top;
         }
+
         th {
-            background-color: #34495e;
-            color: white;
-            font-weight: 600;
+            background: #eaf3ff;
+            color: #0f3a67;
         }
+
         tr:nth-child(even) {
-            background-color: #f8f9fa;
+            background: #fbfdff;
         }
-        .beta-warning {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid #5568d3;
+
+        .info-box {
+            background: linear-gradient(135deg, #1f6feb 0%, #0ea5e9 100%);
             color: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 10px;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
-        }
-        .mermaid {
-            margin: 30px auto;
-            text-align: center;
-            background-color: #fff;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            color: white;
-            font-weight: bold;
-        }
-        .bg-critico { background-color: #dc3545; }
-        .bg-secundario { background-color: #17a2b8; }
-        .bg-batch { background-color: #28a745; }
-
-        .prompt-box {
-            background-color: #e8f4f8;
-            border: 1px solid #b8daff;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-
-        .agent-box {
-            background-color: #fff3cd;
-            border-left: 5px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .highlight-box {
-            background-color: #d1ecf1;
-            border-left: 5px solid #0c5460;
-            padding: 15px;
-            margin: 20px 0;
+            margin-bottom: 26px;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
         }
 
         .warning-box {
-            background-color: #f8d7da;
-            border-left: 5px solid #721c24;
-            padding: 15px;
-            margin: 20px 0;
+            background: #fff8e1;
+            border-left: 5px solid var(--warn);
+            padding: 14px;
+            margin: 16px 0;
         }
+
+        .ok-box {
+            background: #ecfdf3;
+            border-left: 5px solid var(--ok);
+            padding: 14px;
+            margin: 16px 0;
+        }
+
+        .danger-box {
+            background: #fef2f2;
+            border-left: 5px solid var(--danger);
+            padding: 14px;
+            margin: 16px 0;
+        }
+
+        .mermaid {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 18px 0;
+        }
+
+        .small {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .pill {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 2px 10px;
+            font-size: 0.78rem;
+            color: white;
+            margin-right: 6px;
+        }
+
+        .p-green { background: #2e7d32; }
+        .p-blue { background: #1f6feb; }
+        .p-orange { background: #c2410c; }
+        .p-gray { background: #475569; }
     </style>
 </head>
 <body>
-
 <div class="container">
 
-    <div class="beta-warning">
-        🚀 VERSIÓN ESTABLE: CENTAURO v3.1 - Sistema Multi-Agente Híbrido 🚀<br>
-        <span style="font-weight: normal; font-size: 0.9em;">
-            Arquitectura inteligente: 4 bloques críticos + 2 secundarios (batch) + Sheriff anti-alucinaciones +
-            Extracción de perfil del lead + Sistema de Buenas Prácticas + Validación de archivos
-        </span>
+    <div class="info-box">
+        <strong>Proyecto Centauro - Manual Técnico Integral (actualizado al código real)</strong><br>
+        Este documento está reconstruido desde el repositorio actual y cubre arquitectura, evaluación, agentes, tools, diarización, transcripción, flujos de entrada y contexto teórico (incluyendo RAG).
     </div>
 
     <header>
-        <h1>🦄 Proyecto Centauro v3.1: Manual Técnico Integral</h1>
-        <p><strong>Versión:</strong> 3.1 (Multi-Agente + Sheriff + RAG + Buenas Prácticas + Validaciones) | <strong>Última Actualización:</strong> Enero 2025</p>
+        <h1>Proyecto Centauro: Documentación Técnica Integral</h1>
+        <p><strong>Estado de referencia:</strong> Código del repositorio a fecha <strong>19 de febrero de 2026</strong>.<br>
+        <strong>Stack vigente observado:</strong> Multi-Agente Híbrido + Sheriff + RAG Multi-Colección + Chat + Memoria Continua.</p>
     </header>
 
     <section>
-        <h2>1. Resumen Ejecutivo del Sistema</h2>
-        <p>Centauro v3.0 es un sistema automatizado de evaluación de llamadas comerciales basado en <strong>arquitectura multi-agente especializada</strong> con <strong>modo híbrido inteligente</strong>. Combina la máxima calidad de análisis en bloques críticos con optimización de costos en bloques secundarios.</p>
+        <h2>1. Qué Es Centauro</h2>
+        <p>Centauro es un sistema de evaluación automatizada de llamadas comerciales (educación) que analiza conversaciones, etiqueta interlocutores, evalúa bloques consultivos y genera feedback accionable con evidencia literal.</p>
 
-        <h3>1.1. Innovaciones Clave v3.0</h3>
+        <h3>1.1 Objetivo Operativo</h3>
         <ul>
-            <li><strong>🎯 Arquitectura Híbrida:</strong> 4 agentes críticos individuales + 2 agentes secundarios en batch</li>
-            <li><strong>🧠 6 Agentes Especializados:</strong> Cada uno experto en un aspecto específico de la venta consultiva</li>
-            <li><strong>🛡️ Sheriff Anti-Alucinaciones:</strong> Valida evidencias con fuzzy matching (85% precisión)</li>
-            <li><strong>📊 Extracción de Perfil del Lead:</strong> Análisis automático del cliente (fase funnel, barreras, objetivos)</li>
-            <li><strong>⚡ Optimización 45%:</strong> Reducción de costos vs. modo individual completo sin pérdida de calidad</li>
-            <li><strong>🎨 Extractos Inteligentes:</strong> Investigación (primeros 3000 chars) y Cierre (últimos 2500 chars)</li>
+            <li>Evaluar calidad comercial por bloques específicos.</li>
+            <li>Reducir alucinaciones del LLM con validación de evidencias (Sheriff).</li>
+            <li>Aportar recomendaciones accionables apoyadas en manuales, buenas prácticas y coaching.</li>
+            <li>Permitir operación tanto por lotes/CLI como por interfaz interactiva (Chainlit).</li>
         </ul>
 
-        <h3>1.2. Flujo End-to-End v3.0</h3>
+        <h3>1.2 Modos de Uso</h3>
+        <ul>
+            <li><strong>Modo evaluación (archivo):</strong> procesamiento end-to-end de una llamada y generación de JSON/PDF.</li>
+            <li><strong>Modo chat interactivo:</strong> preguntas al conocimiento RAG y a memoria de asesores.</li>
+            <li><strong>Modo CLI batch:</strong> proceso de múltiples transcripciones desde <code>inputs/transcripts</code>.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2. Arquitectura Real Del Sistema</h2>
+
+        <h3>2.1 Flujo E2E General</h3>
         <div class="mermaid">
-            flowchart TB
-            A[inputs/transcripts/*.vtt, *.txt, *.docx] -->|Limpieza VTT| B[Transcripción limpia]
-            B -->|Redacción PII| C[Transcripción segura]
-            C -->|Diarización LLM| D[Transcripción diarizada ASESOR/LEAD]
+flowchart TD
+    A[Entrada]
+    B{Tipo de entrada}
+    C[Transcripcion txt vtt docx]
+    D[Audio mp3]
+    E[Video]
+    F[Extract audio]
+    G[Whisper transcribe]
+    H[Lectura transcripcion]
+    I[Fase 0 Redaccion PII]
+    J[Fase 1 Diarizacion]
+    K[Fase 2 Temas]
+    L[Fase 2_5 Perfil lead]
+    M[Fase 3 Evaluacion]
+    N[Fase 3_5 Sheriff]
+    O[Fase 4 Sintesis]
+    P[Salida JSON PDF]
+    Q[Memoria y aprendizaje]
 
-            D --> E[🎯 FASE 2: Extracción de Temas]
-            E -->|RAG Dinámico| F[ChromaDB: Top-5 fragmentos]
-
-            D --> G[📊 FASE 2.5: Perfil del Lead]
-            G -->|LLM Contextual| H[Fase funnel + Barreras + Objetivo]
-
-            D --> I[🤖 FASE 3: Evaluación Híbrida]
-            I --> J[⭐ CRÍTICOS: 4 Agentes Individual]
-            I --> K[📦 SECUNDARIOS: 2 Agentes Batch]
-
-            J --> L[🛡️ Sheriff Anti-Alucinaciones]
-            K --> L
-
-            L --> M[🎨 Síntesis Final]
-            M --> N[Reporte JSON + PDF]
-
-            style I fill:#667eea,color:white
-            style L fill:#e74c3c,color:white
-            style H fill:#28a745,color:white
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    E --> F
+    F --> G
+    D --> G
+    G --> H
+    C --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+    M --> N
+    N --> O
+    O --> P
+    P --> Q
         </div>
 
-        <h3>1.3. Comparativa de Arquitecturas</h3>
+        <h3>2.2 Módulos Principales</h3>
         <table>
             <thead>
-                <tr>
-                    <th>Característica</th>
-                    <th>v2.0 (Legacy)</th>
-                    <th>v3.0 (Híbrido)</th>
-                </tr>
+                <tr><th>Módulo</th><th>Archivo(s)</th><th>Función</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>Número de llamadas API</strong></td>
-                    <td>6 individuales</td>
-                    <td>4 individuales + 1 batch (5 total)</td>
-                </tr>
-                <tr>
-                    <td><strong>Estructura de bloques</strong></td>
-                    <td>7 bloques uniformes</td>
-                    <td>4 críticos + 2 secundarios</td>
-                </tr>
-                <tr>
-                    <td><strong>Optimización tokens</strong></td>
-                    <td>Transcripción completa siempre</td>
-                    <td>Extractos inteligentes (Investigación/Cierre)</td>
-                </tr>
-                <tr>
-                    <td><strong>Sheriff anti-alucinaciones</strong></td>
-                    <td>Básico (70% precisión)</td>
-                    <td>Avanzado con fuzzy matching (85%)</td>
-                </tr>
-                <tr>
-                    <td><strong>Perfil del lead</strong></td>
-                    <td>No incluido</td>
-                    <td>✅ Automático con fase funnel</td>
-                </tr>
-                <tr>
-                    <td><strong>Ahorro de costos</strong></td>
-                    <td>Baseline</td>
-                    <td>~45% reducción</td>
-                </tr>
+                <tr><td>Interfaz Web</td><td><code>app.py</code></td><td>Chainlit: chat y evaluación de archivos adjuntos.</td></tr>
+                <tr><td>Orquestación</td><td><code>centauro/core/orchestrator.py</code></td><td>Ejecuta pipeline por fases (PII, diarización, RAG, agentes, Sheriff, síntesis).</td></tr>
+                <tr><td>RAG Dinámico</td><td><code>centauro/core/rag_dynamic.py</code>, <code>centauro/rag.py</code></td><td>Extracción de temas y recuperación de contexto por bloque.</td></tr>
+                <tr><td>Agentes evaluadores</td><td><code>centauro/agents/*.py</code></td><td>Evaluación especializada por bloque comercial.</td></tr>
+                <tr><td>Diarización</td><td><code>centauro/agents/diarization_agent.py</code></td><td>Mapeo de roles ASESOR/LEAD según formato y contenido.</td></tr>
+                <tr><td>Privacidad</td><td><code>centauro/privacy.py</code></td><td>Redacción de PII (email, teléfono, DNI/NIE, IBAN).</td></tr>
+                <tr><td>Memoria</td><td><code>centauro/core/memoria.py</code></td><td>Perfiles históricos por asesor y tendencias.</td></tr>
+                <tr><td>Chat semántico</td><td><code>centauro/core/chat_handler.py</code></td><td>Intención + consulta multi-colección + respuesta LLM.</td></tr>
+                <tr><td>Reportes</td><td><code>centauro/reports.py</code>, <code>centauro/schema.py</code></td><td>Salida PDF y estructura de reporte JSON.</td></tr>
+                <tr><td>Costes</td><td><code>centauro/llm_client.py</code>, <code>centauro/tools/whisper_transcribe.py</code></td><td>Registro de costes de chat, embeddings y Whisper.</td></tr>
             </tbody>
         </table>
     </section>
 
     <section>
-        <h2>2. Arquitectura Multi-Agente v3.0</h2>
+        <h2>3. Entradas, Preproceso Y Flujos (Texto, Audio, Video)</h2>
 
-        <h3>2.1. Los 6 Agentes Especializados</h3>
+        <h3>3.1 Entradas soportadas en evaluación</h3>
+        <ul>
+            <li><code>.txt</code></li>
+            <li><code>.vtt</code></li>
+            <li><code>.docx</code></li>
+        </ul>
+        <p>Validaciones en <code>centauro/utils/validaciones.py</code>:</p>
+        <ul>
+            <li>Extensión permitida.</li>
+            <li>Archivo existente y no vacío.</li>
+            <li>Límite de nombre y ruta (Windows), configurable en <code>centauro/config.py</code>.</li>
+        </ul>
 
-        <div class="agent-box">
-            <h4>🔍 1. InvestigacionAgent (Fusión: Apertura + Detección)</h4>
-            <p><span class="badge bg-critico">CRÍTICO</span> <strong>Extracto:</strong> Primeros 3000 caracteres</p>
-            <p><strong>Evalúa:</strong> Saludo inicial, conexión personal y detección de necesidades/motivaciones</p>
-            <p><strong>Rúbrica:</strong></p>
-            <ul>
-                <li><strong>1:</strong> Sin saludo o preguntas superficiales</li>
-                <li><strong>3:</strong> Saludo mecánico + preguntas genéricas</li>
-                <li><strong>5:</strong> Conexión cálida + indagación profunda de motivaciones</li>
-            </ul>
-        </div>
-
-        <div class="agent-box">
-            <h4>🎯 2. PropuestaValorAgent</h4>
-            <p><span class="badge bg-secundario">SECUNDARIO (BATCH)</span> <strong>Transcripción completa</strong></p>
-            <p><strong>Evalúa:</strong> Presentación de OBS y del programa académico personalizado al perfil del lead</p>
-            <p><strong>Rúbrica:</strong></p>
-            <ul>
-                <li><strong>1:</strong> No menciona OBS ni el programa</li>
-                <li><strong>3:</strong> Presenta características del programa sin personalizar</li>
-                <li><strong>5:</strong> Conecta beneficios del programa con objetivos específicos del lead</li>
-            </ul>
-        </div>
-
-        <div class="agent-box">
-            <h4>💰 3. AdmisionEconomicaAgent (NUEVO en v3.0)</h4>
-            <p><span class="badge bg-critico">CRÍTICO</span> <strong>Transcripción completa</strong></p>
-            <p><strong>Evalúa:</strong> Proceso de admisión académica + presentación económica (precio, financiación, becas)</p>
-            <p><strong>Rúbrica:</strong></p>
-            <ul>
-                <li><strong>1:</strong> Omite requisitos o no menciona precio</li>
-                <li><strong>3:</strong> Informa requisitos y precio de forma administrativa</li>
-                <li><strong>5:</strong> Valida perfil académico + presenta inversión con opciones financieras adaptadas</li>
-            </ul>
-        </div>
-
-        <div class="agent-box">
-            <h4>🛡️ 4. ObjecionesAgent</h4>
-            <p><span class="badge bg-critico">CRÍTICO</span> <strong>Transcripción completa</strong></p>
-            <p><strong>Evalúa:</strong> Manejo de dudas, resistencias y objeciones con técnica consultiva</p>
-            <p><strong>Rúbrica:</strong></p>
-            <ul>
-                <li><strong>1:</strong> Ignora objeciones o responde defensivamente</li>
-                <li><strong>3:</strong> Responde correctamente pero sin técnica (sin validar-aislar-revalorizar)</li>
-                <li><strong>5:</strong> Valida emoción + aísla objeción + revaloriza + cierra con pregunta guía</li>
-            </ul>
-        </div>
-
-        <div class="agent-box">
-            <h4>🎬 5. CierreAgent</h4>
-            <p><span class="badge bg-critico">CRÍTICO</span> <strong>Extracto:</strong> Últimos 2500 caracteres</p>
-            <p><strong>Evalúa:</strong> Cierre con próximos pasos concretos (fecha, documentación, micro-compromisos)</p>
-            <p><strong>⚠️ IMPORTANTE:</strong> NO se evalúa si el cliente dijo "sí", sino la TÉCNICA del asesor</p>
-            <p><strong>Rúbrica:</strong></p>
-            <ul>
-                <li><strong>1:</strong> "Piénsalo y me dices" sin fecha ni compromiso</li>
-                <li><strong>3:</strong> Propone siguiente paso pero pasivo/administrativo</li>
-                <li><strong>5:</strong> Resume compromisos + fecha concreta + técnica asuntiva/doble alternativa</li>
-            </ul>
-        </div>
-
-        <div class="agent-box">
-            <h4>🎭 6. EstiloAgent</h4>
-            <p><span class="badge bg-secundario">SECUNDARIO (BATCH)</span> <strong>Transcripción completa</strong></p>
-            <p><strong>Evalúa:</strong> Tono de voz, ritmo, empatía y lenguaje corporal verbal (consistente en toda la llamada)</p>
-            <p><strong>Rúbrica:</strong></p>
-            <ul>
-                <li><strong>1:</strong> Tono agresivo, interrumpe constantemente o lenguaje inapropiado</li>
-                <li><strong>3:</strong> Tono correcto pero plano, sin modulación emocional</li>
-                <li><strong>5:</strong> Tono cálido, ritmo adecuado, empatía genuina y adaptación al lead</li>
-            </ul>
-        </div>
-
-        <h3>2.2. Orquestador Híbrido (CentauroOrchestrator)</h3>
-        <p>El orquestador coordina la evaluación en <strong>4 fases</strong>:</p>
-
-        <div class="highlight-box">
-            <h4>FASE 1: Diarización</h4>
-            <p>Etiqueta cada frase con <code>[ASESOR]:</code> o <code>[LEAD]:</code> usando LLM con anclas semánticas</p>
-            <pre>
-[ASESOR]: Hola buenos días, soy Juan de OBS Business School
-[LEAD]: Hola, vi información sobre el Máster en Marketing Digital
-[ASESOR]: Perfecto, cuéntame qué te ha llamado la atención</pre>
-        </div>
-
-        <div class="highlight-box">
-            <h4>FASE 2: Extracción de Temas (RAG Dinámico)</h4>
-            <p>Analiza la transcripción y genera query semántico para ChromaDB</p>
-            <p><strong>Ejemplo:</strong> "proceso admisión becas financiación consultoría técnica cierre objeciones"</p>
-            <p>Recupera <strong>Top-5</strong> fragmentos relevantes del manual OBS</p>
-        </div>
-
-        <div class="highlight-box">
-            <h4>FASE 2.5: Extracción de Perfil del Lead (NUEVO v3.0)</h4>
-            <p>Extrae automáticamente:</p>
-            <ul>
-                <li><strong>perfil_lead:</strong> "Ingeniero con 5 años exp. en logística, busca especialización"</li>
-                <li><strong>fase_funnel:</strong> AWARENESS | CONSIDERATION | DECISION | CIERRE_INMEDIATO</li>
-                <li><strong>objetivo_del_lead:</strong> "Cambio de carrera hacia análisis de datos"</li>
-                <li><strong>barreras_principales:</strong> ["Precio elevado", "Falta de tiempo"]</li>
-                <li><strong>resultado_general:</strong> POSITIVO_CON_COMPROMISO | POSITIVO_SIN_FECHA | NEUTRO_PENDIENTE | NEGATIVO_OBJECCION_FUERTE</li>
-            </ul>
-        </div>
-
-        <div class="highlight-box">
-            <h4>FASE 3: Evaluación Híbrida</h4>
-            <p><strong>BLOQUES CRÍTICOS</strong> (4 agentes individuales):</p>
-            <ol>
-                <li>Investigación → Con extracto (primeros 3000 chars)</li>
-                <li>Proceso Admisión/Económica → Transcripción completa</li>
-                <li>Manejo de objeciones → Transcripción completa</li>
-                <li>Cierre y próximos pasos → Con extracto (últimos 2500 chars)</li>
-            </ol>
-
-            <p><strong>BLOQUES SECUNDARIOS</strong> (1 llamada batch para 2 agentes):</p>
-            <ol start="5">
-                <li>Propuesta de valor Institución y Programa</li>
-                <li>Estilo y comunicación</li>
-            </ol>
-
-            <p><strong>Total:</strong> 5 llamadas LLM (vs. 6 en v2.0) = <strong>~17% reducción</strong></p>
-        </div>
-
-        <div class="highlight-box">
-            <h4>FASE 3.5: Sheriff Anti-Alucinaciones</h4>
-            <p>Valida que todas las evidencias citadas existan realmente en la transcripción</p>
-            <p><strong>Algoritmo:</strong></p>
-            <pre>
-1. Extraer evidencia_principal + evidencias_extra
-2. Para cada evidencia:
-   - Limpiar etiquetas [ASESOR]/[LEAD]
-   - Buscar en transcripción con fuzzy matching (ratio >= 85%)
-3. Calcular % de evidencias verificadas
-4. Si < 30% verificado → ALUCINACIÓN DETECTADA
-   - Ajustar nota: máximo 3/5 (nota original - 2)
-5. Registrar en metadata: sheriff_validacion</pre>
-        </div>
-
-        <div class="highlight-box">
-            <h4>FASE 4: Síntesis Final</h4>
-            <p>Genera reporte consolidado con:</p>
-            <ul>
-                <li>Resumen contextual del lead (perfil, fase, barreras)</li>
-                <li>Evaluación por bloques (nota 1-5 + evidencias literales)</li>
-                <li>Puntuación global (promedio de bloques observables)</li>
-                <li>Fortalezas (nota >= 4) y Áreas de mejora (nota <= 3)</li>
-                <li>Estadísticas del Sheriff (alucinaciones detectadas, notas ajustadas)</li>
-            </ul>
-        </div>
-    </section>
-
-    <section>
-        <h2>3. Configuración del Sistema (config_agents.py)</h2>
-
-        <h3>3.1. OptimizacionConfig</h3>
-        <pre>
-class OptimizacionConfig:
-    # BLOQUES CRÍTICOS (agentes individuales)
-    BLOQUES_CRITICOS = [
-        "Investigación",
-        "Proceso de Admisión y Propuesta Económica",
-        "Manejo de objeciones",
-        "Cierre y próximos pasos"
-    ]
-
-    # BLOQUES SECUNDARIOS (batch)
-    BATCH_SECUNDARIOS = BatchConfig(
-        nombre="batch_secundarios",
-        agentes=[
-            "Propuesta de valor Institución y Programa",
-            "Estilo y comunicación"
-        ],
-        usa_transcripcion_completa=True
-    )
-
-    # EXTRACTOS INTELIGENTES
-    EXTRACTOS = {
-        "Investigación": {
-            "inicio": 0,
-            "fin": 3000  # Primeros 3000 caracteres
-        },
-        "Cierre y próximos pasos": {
-            "inicio": -2500,  # Últimos 2500 caracteres
-            "fin": None
-        }
-    }
-
-    # RAG
-    RAG_TOP_K = 5  # Top-5 fragmentos más relevantes
-    ACTIVAR_CACHE = True  # Cache de contextos RAG
-
-    # MODO DE EJECUCIÓN
-    MODO_BATCH = True  # True = Híbrido (PRODUCCIÓN)
-                       # False = Individual (PRUEBAS)</pre>
-
-        <h3>3.2. Estadísticas de Ahorro</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Métrica</th>
-                    <th>v2.0 (Baseline)</th>
-                    <th>v3.0 (Híbrido)</th>
-                    <th>Mejora</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Llamadas API</strong></td>
-                    <td>6 individuales</td>
-                    <td>4 individuales + 1 batch</td>
-                    <td>-17%</td>
-                </tr>
-                <tr>
-                    <td><strong>Tokens (Investigación)</strong></td>
-                    <td>~8000 tokens</td>
-                    <td>~3000 tokens (extracto)</td>
-                    <td>-62%</td>
-                </tr>
-                <tr>
-                    <td><strong>Tokens (Cierre)</strong></td>
-                    <td>~8000 tokens</td>
-                    <td>~2500 tokens (extracto)</td>
-                    <td>-69%</td>
-                </tr>
-                <tr>
-                    <td><strong>Precisión Sheriff</strong></td>
-                    <td>70%</td>
-                    <td>85%</td>
-                    <td>+21%</td>
-                </tr>
-                <tr>
-                    <td><strong>Costo total estimado</strong></td>
-                    <td>$0.12 por entrevista</td>
-                    <td>$0.066 por entrevista</td>
-                    <td>-45%</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
-
-    <section>
-        <h2>4. RAG Dinámico (rag_dynamic.py)</h2>
-
-        <h3>4.1. ¿Qué es RAG y para qué sirve?</h3>
-        <p><strong>RAG (Retrieval-Augmented Generation)</strong> es una técnica que combina:</p>
+        <h3>3.2 Flujo audio</h3>
         <ol>
-            <li><strong>Retrieval:</strong> Buscar información relevante en una base de conocimiento (manuales OBS)</li>
-            <li><strong>Augmentation:</strong> Inyectar esa información en el prompt del LLM</li>
-            <li><strong>Generation:</strong> El LLM genera la respuesta usando el conocimiento recuperado</li>
+            <li>Colocar mp3 en <code>inputs/audios</code>.</li>
+            <li>Ejecutar <code>python centauro/tools/whisper_transcribe.py</code>.</li>
+            <li>Salida en <code>inputs/transcripts/*_whisper.txt</code>.</li>
+            <li>Procesar luego con <code>main.py</code> o por Chainlit.</li>
+        </ol>
+        <div class="ok-box">
+            <strong>Detalle:</strong> la transcripción Whisper se guarda sin speaker tags para que la diarización posterior sea contextual por LLM.
+        </div>
+
+        <h3>3.3 Flujo video</h3>
+        <ol>
+            <li>Colocar videos en <code>inputs/videollamadas</code>.</li>
+            <li>Ejecutar <code>python centauro/tools/extract_audio.py</code> (requiere <code>C:\ffmpeg\bin\ffmpeg.exe</code>).</li>
+            <li>Se generan MP3 en <code>inputs/audios</code>.</li>
+            <li>Ejecutar Whisper para pasar a transcripción y continuar flujo normal.</li>
         </ol>
 
-        <p><strong>Ventaja clave:</strong> El modelo NO recibe TODO el manual (ineficiente y costoso), solo recibe los fragmentos más relevantes para cada bloque.</p>
-
-        <h3>4.2. ChromaDB: Base de Datos Vectorial</h3>
-        <p><strong>ChromaDB</strong> es una base de datos que almacena <strong>embeddings</strong> (representaciones vectoriales) de los textos.</p>
-
-        <p><strong>¿Qué es un embedding?</strong></p>
+        <h3>3.4 Privacidad y RGPD</h3>
+        <p>Antes de diarizar/evaluar, <code>redact_pii()</code> reemplaza PII por marcadores <code>[REDACTED_*]</code>:</p>
         <ul>
-            <li>Vector numérico que representa el <strong>significado semántico</strong> de un texto</li>
-            <li>Textos con significado similar tienen embeddings cercanos en el espacio vectorial</li>
-            <li>Modelo usado: <code>text-embedding-3-small</code> de OpenAI</li>
-        </ul>
-
-        <h3>4.3. Pipeline RAG en Centauro v3.0</h3>
-        <div class="mermaid">
-            flowchart LR
-            A[Manuales OBS *.txt] -->|Chunking| B[Fragmentos 1000 chars]
-            B -->|text-embedding-3-small| C[Embeddings vectoriales]
-            C -->|Almacenar| D[ChromaDB Local]
-
-            E[Transcripción diarizada] -->|Análisis temas| F[Query semántico]
-            F -->|Buscar similitud| D
-            D -->|Top-5 relevantes| G[Contexto RAG]
-            G -->|Inyectar en prompt| H[Agente evaluador]
-
-            style D fill:#3498db,color:white
-            style G fill:#28a745,color:white
-        </div>
-
-        <h3>4.4. Extracción de Temas (Clave del RAG Dinámico)</h3>
-        <p>Antes de buscar en ChromaDB, el sistema extrae automáticamente los <strong>temas principales</strong> de la llamada:</p>
-
-        <pre>
-def extraer_temas_llamada(transcripcion):
-    prompt = """
-    Analiza esta transcripción y extrae los TEMAS CLAVE que se discuten.
-
-    CATEGORÍAS:
-    - Académicas: programa, metodología, campus, profesores
-    - Económicas: precio, becas, financiación, descuentos
-    - Admisión: requisitos, validación perfil, documentos
-    - Comerciales: objeciones, dudas, cierre, compromiso
-
-    Devuelve lista JSON de temas.
-    """
-
-    temas = ["admisión", "financiación", "metodología online",
-             "cierre consultivo", "objeciones precio"]
-
-    query = " ".join(temas)  # "admisión financiación metodología online..."
-
-    return buscar_contexto_chromadb(query, top_k=5)</pre>
-
-        <h3>4.5. Parámetros RAG Configurados</h3>
-        <ul>
-            <li><strong>Tamaño de chunk:</strong> 1000 caracteres</li>
-            <li><strong>Solapamiento:</strong> 100 caracteres (para no cortar ideas)</li>
-            <li><strong>Top-K:</strong> 5 fragmentos por consulta (vs. 20 en v2.0)</li>
-            <li><strong>Modelo embeddings:</strong> text-embedding-3-small (512 dimensiones)</li>
-            <li><strong>Distancia:</strong> Cosine similarity</li>
+            <li>Email</li>
+            <li>Teléfono</li>
+            <li>DNI / NIE</li>
+            <li>IBAN español</li>
         </ul>
     </section>
 
     <section>
-        <h2>5. Sheriff Anti-Alucinaciones v3.0</h2>
+        <h2>4. Diarización: Cómo Separa ASESOR Y LEAD</h2>
+        <p><code>DiarizationAgent</code> resuelve múltiples formatos y aplica estrategia “contenido primero”.</p>
 
-        <h3>5.1. ¿Qué son las Alucinaciones?</h3>
-        <p><strong>Alucinación:</strong> Cuando el LLM inventa evidencias que NO existen en la transcripción.</p>
-
-        <div class="warning-box">
-            <p><strong>Ejemplo de alucinación:</strong></p>
-            <p><strong>Evidencia citada por LLM:</strong> "[ASESOR]: Tenemos una beca del 40% disponible hasta fin de mes"</p>
-            <p><strong>Realidad en transcripción:</strong> El asesor nunca mencionó becas</p>
-            <p><strong>Consecuencia:</strong> Nota inflada injustamente (podría poner 5/5 sin evidencia real)</p>
-        </div>
-
-        <h3>5.2. Algoritmo del Sheriff v3.0</h3>
-        <pre>
-def _sheriff_validar(evaluaciones, transcripcion):
-    for evaluacion in evaluaciones:
-        # 1. Extraer todas las evidencias
-        evidencia_principal = evaluacion["evidencia_principal"]
-        evidencias_extra = evaluacion["evidencias_extra"]
-
-        # 2. Validar cada evidencia con fuzzy matching
-        evidencias_validas = 0
-        total_evidencias = 1 + len(evidencias_extra)
-
-        if _validar_evidencia(evidencia_principal, transcripcion):
-            evidencias_validas += 1
-
-        for ev in evidencias_extra:
-            if _validar_evidencia(ev, transcripcion):
-                evidencias_validas += 1
-
-        # 3. Calcular porcentaje verificado
-        porcentaje = (evidencias_validas / total_evidencias) * 100
-
-        # 4. REGLA CRÍTICA: Si < 30% verificado → ALUCINACIÓN
-        if porcentaje < 30:
-            nota_original = evaluacion["puntuacion_1_5"]
-            nota_ajustada = max(1, nota_original - 2)
-
-            evaluacion["puntuacion_1_5"] = nota_ajustada
-            evaluacion["sheriff_ajuste"] = {
-                "nota_original": nota_original,
-                "nota_ajustada": nota_ajustada,
-                "razon": f"Evidencias no verificables ({porcentaje:.0f}%)"
-            }
-
-            print(f"🛡️ Sheriff ajustó: {nota_original} → {nota_ajustada}")
-
-    return evaluaciones</pre>
-
-        <h3>5.3. Fuzzy Matching (RapidFuzz)</h3>
-        <p>No busca coincidencia exacta, sino <strong>similitud semántica</strong> con tolerancia a:</p>
+        <h3>4.1 Detección automática de formato</h3>
         <ul>
-            <li>Variaciones de puntuación</li>
-            <li>Mayúsculas/minúsculas</li>
-            <li>Palabras ligeramente diferentes</li>
-            <li>Orden de palabras</li>
+            <li>Word pre-diarizado: <code>[NOMBRE]: texto</code>.</li>
+            <li>Formato Teams timestamp: <code>Nombre HH:MM texto</code>.</li>
+            <li>VTT con speakers: <code>&lt;v NOMBRE&gt;texto&lt;/v&gt;</code>.</li>
+            <li>VTT con UUIDs.</li>
+            <li>Texto plano sin estructura.</li>
         </ul>
 
-        <pre>
-def _validar_evidencia(evidencia, transcripcion):
-    from rapidfuzz import fuzz
-
-    # Limpiar etiquetas [ASESOR]/[LEAD]
-    evidencia_limpia = re.sub(r'\[([^\]]+)\]:\s*', '', evidencia)
-
-    # Buscar en ventanas móviles
-    ventana = len(evidencia_limpia) + 100
-    mejor_ratio = 0
-
-    for i in range(0, len(transcripcion) - ventana, 100):
-        fragmento = transcripcion[i:i+ventana]
-        ratio = fuzz.partial_ratio(evidencia_limpia, fragmento)
-
-        if ratio > mejor_ratio:
-            mejor_ratio = ratio
-
-        if ratio >= 85:  # Umbral de confianza
-            return True
-
-    # Fallback: Si ratio >= 75% también vale
-    return mejor_ratio >= 75</pre>
-
-        <h3>5.4. Estadísticas del Sheriff</h3>
-        <p>Al final de cada evaluación, el Sheriff reporta:</p>
+        <h3>4.2 Asignación de roles</h3>
         <ul>
-            <li><strong>alucinaciones_detectadas:</strong> Número de bloques con evidencias no verificables</li>
-            <li><strong>notas_ajustadas_sheriff:</strong> Número de notas corregidas</li>
-            <li><strong>porcentaje_verificado:</strong> % promedio de evidencias verificadas</li>
+            <li>Calcula score semántico de asesor/lead por anclas de contenido.</li>
+            <li>Usa coincidencia de nombre solo como respaldo, no como regla principal.</li>
+            <li>Fallback heurístico si el LLM falla o el formato no es concluyente.</li>
         </ul>
+
+        <h3>4.3 Caso especial VTT UUID</h3>
+        <ul>
+            <li>Si pocos UUID repetidos: trata UUID como speaker.</li>
+            <li>Si UUID secuencial masivo: diarización batch LLM por chunks con overlap.</li>
+        </ul>
+
+        <h3>4.4 Salida de diarización</h3>
+        <p>Formato normalizado:</p>
+        <pre><code>[ASESOR]: ...
+
+[LEAD]: ...</code></pre>
+        <p>Se guarda además copia debug en <code>outputs/Input_Debug/*_diarizada.txt</code>.</p>
     </section>
 
     <section>
-        <h2>6. Estructura de Archivos del Proyecto</h2>
-        <pre>
-CENTAURO_PROJECT/
-│
-├── chroma_db/              <-- [PERSISTENCIA] ChromaDB local
-│
-├── .env                    <-- [CONFIG] API Key OpenAI
-│
-├── inputs/
-│   ├── docs/               <-- Manuales OBS (.txt) para RAG
-│   └── transcripts/        <-- Entrevistas (.vtt, .txt, .docx)
-│
-├── outputs/
-│   ├── Input_Debug/        <-- Transcripciones diarizadas (debug)
-│   ├── Reportes_JSON/      <-- Reportes técnicos (.json)
-│   ├── Reportes_PDF/       <-- Reportes ejecutivos (.pdf)
-│   └── control_gastos.csv  <-- Log de costos OpenAI
-│
-├── centauro/
-│   ├── core/
-│   │   ├── orchestrator.py       <-- 🎯 Orquestador híbrido v3.0
-│   │   ├── config_agents.py      <-- ⚙️ Configuración bloques críticos/secundarios
-│   │   └── rag_dynamic.py        <-- 🧠 RAG con extracción de temas
-│   │
-│   ├── agents/
-│   │   ├── base_agent.py         <-- Clase base (con soporte buenas prácticas)
-│   │   ├── diarization_agent.py  <-- Separación ASESOR/LEAD
-│   │   ├── investigacion_agent.py      <-- Apertura + Detección necesidades
-│   │   ├── propuesta_valor_agent.py    <-- Presentación OBS/Programa
-│   │   ├── admision_economica_agent.py <-- Admisión + Propuesta económica
-│   │   ├── objeciones_agent.py         <-- Manejo de objeciones
-│   │   ├── cierre_agent.py             <-- Cierre y próximos pasos
-│   │   └── estilo_agent.py             <-- Estilo y comunicación
-│   │
-│   ├── tools/                     <-- 🛠️ NUEVO: Herramientas de procesamiento
-│   │   ├── procesar_buenas_practicas.py  <-- Procesador de ejemplos .vtt
-│   │   ├── procesar_dossiers.py          <-- Procesador de dossiers programas
-│   │   └── mapeo_secciones.py            <-- Mapeo carpetas→agentes
-│   │
-│   ├── utils/                     <-- 🔧 NUEVO: Utilidades del sistema
-│   │   ├── validaciones.py        <-- Validación nombres de archivo
-│   │   └── __init__.py
-│   │
-│   ├── llm_client.py       <-- Conexión OpenAI (Temp=0)
-│   ├── rag.py              <-- Indexación manuales (legacy, compatible)
-│   ├── privacy.py          <-- Redacción PII (email, teléfono, DNI, IBAN)
-│   ├── reports.py          <-- Generación PDF ejecutivo
-│   ├── schema.py           <-- Modelos Pydantic (reporte, bloques)
-│   └── config.py           <-- Configuración global
-│
-├── app.py                  <-- 🌐 Interfaz Chainlit (con validaciones)
-├── main.py                 <-- 🚀 Script de ejecución principal
-├── procesar_ejemplos.bat   <-- 📝 Script Windows para procesar ejemplos
-├── requirements.txt
-└── README.md
+        <h2>5. Evaluación Multi-Agente: Bloques, Lógica Y Criterios</h2>
 
-NUEVOS DOCUMENTOS:
-├── SISTEMA_BUENAS_PRACTICAS_v2.md         <-- Documentación sistema
-├── VALIDACION_NOMBRES_ARCHIVO.md          <-- Documentación validaciones
-├── INSTRUCCIONES_PROCESAR_EJEMPLOS.md     <-- Guía paso a paso
-└── ejemplo_buenas_practicas.md            <-- Ejemplo completo</pre>
-    </section>
+        <h3>5.1 Configuración híbrida vigente</h3>
+        <p>En <code>centauro/core/config_agents.py</code>, <code>MODO_BATCH=True</code>:</p>
+        <ul>
+            <li><strong>Críticos (individual):</strong> Investigación, Admisión/Económica, Objeciones, Cierre.</li>
+            <li><strong>Secundarios (batch 2x1):</strong> Propuesta de valor + Estilo.</li>
+        </ul>
 
-    <section>
-        <h2>7. Guía de Uso</h2>
-
-        <h3>7.1. Instalación</h3>
-        <pre>
-# 1. Clonar repositorio
-git clone https://github.com/tu-org/proyecto-centauro.git
-cd proyecto-centauro
-
-# 2. Crear entorno virtual
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. Instalar dependencias
-pip install -r requirements.txt
-
-# 4. Configurar API Key
-echo "OPENAI_API_KEY=sk-..." > .env</pre>
-
-        <h3>7.2. Preparar datos</h3>
-        <pre>
-# Colocar manuales OBS en:
-inputs/docs/*.txt
-
-# Colocar transcripciones en:
-inputs/transcripts/*.vtt
-inputs/transcripts/*.txt
-inputs/transcripts/*.docx
-
-# NUEVO v3.1: Colocar ejemplos de buenas prácticas (OPCIONAL)
-inputs/buenas_practicas/investigacion/*.vtt
-inputs/buenas_practicas/admision_economica/*.vtt
-inputs/buenas_practicas/objeciones/*.vtt
-inputs/buenas_practicas/cierre_proximos_pasos/*.vtt
-inputs/buenas_practicas/propuesta_valor/*.vtt
-inputs/buenas_practicas/estilo_comunicacion/*.vtt</pre>
-
-        <h3>7.2.1. Procesar ejemplos de buenas prácticas (OPCIONAL)</h3>
-        <pre>
-# Si tienes ejemplos de conversaciones exitosas:
-
-# 1. Colocar archivos .vtt en carpetas correspondientes
-#    (máx 100 caracteres de nombre)
-
-# 2. Procesar ejemplos (UNA SOLA VEZ)
-python -m centauro.tools.procesar_buenas_practicas
-
-# 3. Los ejemplos se indexarán automáticamente al ejecutar main.py</pre>
-
-        <h3>7.3. Ejecutar análisis</h3>
-        <pre>
-# Modo HÍBRIDO (producción)
-python main.py
-
-# Modo INDIVIDUAL (pruebas)
-# Editar centauro/core/config_agents.py:
-# MODO_BATCH = False
-python main.py</pre>
-
-        <h3>7.4. Revisar resultados</h3>
-        <pre>
-# Reportes JSON (técnicos)
-outputs/Reportes_JSON/entrevista_v3.json
-
-# Reportes PDF (ejecutivos)
-outputs/Reportes_PDF/Reporte_entrevista_v3.pdf
-
-# Control de gastos
-outputs/control_gastos.csv</pre>
-    </section>
-
-    <section>
-        <h2>8. Formato de Salida JSON v3.0</h2>
-        <pre>
-{
-  "asesor": "Juan_Perez",
-
-  "meta": {
-    "version_modelo": "Centauro_V3.0_Hibrido_Inteligente",
-    "flags_tecnicos": {
-      "modo_batch": true,
-      "modo_descripcion": "HÍBRIDO: 4 críticos individual + 2 secundarios batch",
-      "bloques_evaluados": 6,
-      "bloques_criticos": 4,
-      "bloques_secundarios": 2,
-      "sheriff_activo": true
-    },
-    "stats_optimizacion": {
-      "llamadas_api": 5,
-      "tokens_ahorrados": 12500,
-      "cache_hits": 3,
-      "alucinaciones_detectadas": 1,
-      "notas_ajustadas_sheriff": 1,
-      "modo_ejecucion": "HÍBRIDO (PRODUCCIÓN)"
-    }
-  },
-
-  "resumen_contextual": {
-    "perfil_lead": "Ingeniero con 5 años experiencia en logística...",
-    "fase_funnel": "CONSIDERATION",
-    "objetivo_del_lead": "Cambio de carrera hacia análisis de datos",
-    "barreras_principales": ["Precio elevado", "Falta de tiempo"],
-    "resultado_general": "POSITIVO_SIN_FECHA"
-  },
-
-  "evaluacion_por_bloques": [
-    {
-      "bloque": "Investigación",
-      "puntuacion_1_5": 4,
-      "observabilidad": "ALTA",
-      "confianza": 0.92,
-      "evidencia_principal": "[ASESOR]: Cuéntame, ¿qué te motivó a buscar...",
-      "evidencias_extra": [
-        "[ASESOR]: ¿Y cuál es tu principal objetivo profesional...",
-        "[ASESOR]: Entiendo, ¿has considerado otras opciones..."
-      ],
-      "razonamiento": "Preguntas profundas y escucha activa. Falta conectar...",
-      "recomendacion_accionable": "Hacer resumen de motivaciones antes de presentar programa",
-      "metadata": {
-        "sheriff_validacion": {
-          "evidencias_total": 3,
-          "evidencias_verificadas": 3,
-          "porcentaje_verificado": 100.0,
-          "estado": "OK"
-        }
-      }
-    },
-    {
-      "bloque": "Cierre y próximos pasos",
-      "puntuacion_1_5": 3,
-      "observabilidad": "ALTA",
-      "confianza": 0.85,
-      "evidencia_principal": "[ASESOR]: Te envío la documentación y hablamos...",
-      "evidencias_extra": [],
-      "razonamiento": "Propone siguiente paso pero sin fecha concreta...",
-      "recomendacion_accionable": "Usar técnica doble alternativa: '¿Te va mejor martes o jueves?'",
-      "sheriff_ajuste": {
-        "nota_original": 5,
-        "nota_ajustada": 3,
-        "razon": "Evidencias no verificables (20%)",
-        "evidencias_verificadas": "1/5"
-      },
-      "metadata": {
-        "sheriff_validacion": {
-          "evidencias_total": 5,
-          "evidencias_verificadas": 1,
-          "porcentaje_verificado": 20.0,
-          "estado": "ALUCINACION_DETECTADA"
-        }
-      }
-    }
-  ],
-
-  "puntuacion_global_1_5": 3.67,
-
-  "feedback_resumido": {
-    "fortalezas": [
-      "Investigación (4/5)",
-      "Manejo de objeciones (4/5)"
-    ],
-    "areas_mejora": [
-      "Cierre y próximos pasos: Usar técnica doble alternativa...",
-      "Propuesta de valor: Conectar beneficios con objetivo específico..."
-    ]
-  }
-}</pre>
-    </section>
-
-    <section>
-        <h2>9. Rúbrica de Evaluación 1-5</h2>
-
+        <h3>5.2 Agentes activos</h3>
         <table>
             <thead>
-                <tr>
-                    <th>Nota</th>
-                    <th>Categoría</th>
-                    <th>Descripción</th>
-                </tr>
+                <tr><th>Bloque</th><th>Agente</th><th>Notas relevantes</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>5</strong></td>
-                    <td>EXCELENCIA</td>
-                    <td>Liderazgo claro, conecta emocionalmente, técnica consultiva impecable</td>
-                </tr>
-                <tr>
-                    <td><strong>4</strong></td>
-                    <td>BUENO</td>
-                    <td>Sólido y profesional, con detalles pulibles</td>
-                </tr>
-                <tr>
-                    <td><strong>3</strong></td>
-                    <td>MEDIOCRE</td>
-                    <td>Cumple pero sin profundidad, "robot" que sigue guion sin alma</td>
-                </tr>
-                <tr>
-                    <td><strong>2</strong></td>
-                    <td>DEFICIENTE</td>
-                    <td>Pasivo, inseguro, sin técnica</td>
-                </tr>
-                <tr>
-                    <td><strong>1</strong></td>
-                    <td>NEGLIGENTE</td>
-                    <td>Error grave o ausencia total del elemento evaluado</td>
-                </tr>
+                <tr><td>Investigación</td><td><code>InvestigacionAgent</code></td><td>Apertura + discovery; extrae factor de compra y uso posterior de la info.</td></tr>
+                <tr><td>Propuesta de valor</td><td><code>PropuestaValorAgent</code></td><td>Evaluación de conexión beneficio-necesidad.</td></tr>
+                <tr><td>Admisión y propuesta económica</td><td><code>AdmisionEconomicaAgent</code></td><td>Secuencia valor→precio→descuento y manejo de comité/financiación.</td></tr>
+                <tr><td>Manejo de objeciones</td><td><code>ObjecionesAgent</code></td><td>Incluye detección de anticipación de objeciones.</td></tr>
+                <tr><td>Cierre y próximos pasos</td><td><code>CierreAgent</code></td><td>Analiza tramo final; detecta off-record y observabilidad no evaluable.</td></tr>
+                <tr><td>Estilo y comunicación</td><td><code>EstiloAgent</code></td><td>Tono, empatía, vocabulario, ritmo y profesionalismo.</td></tr>
             </tbody>
         </table>
 
-        <div class="highlight-box">
-            <h4>⚠️ REGLA IMPORTANTE: Diferencia entre "Robot" (3) y "Experto" (5)</h4>
-            <p><strong>3 = ROBOT:</strong> "Hola, soy Juan de OBS. ¿En qué te puedo ayudar?" (mecánico, sin conexión)</p>
-            <p><strong>5 = EXPERTO:</strong> "Hola María, vi que estás interesada en el Máster de Marketing. Cuéntame, ¿qué te motivó a buscar esta especialización ahora?" (cálido, personalizado, indaga motivación)</p>
-        </div>
+        <h3>5.3 Agentes legacy (compatibilidad)</h3>
+        <p>Existen en repositorio pero no forman parte del flujo principal actual del orquestador:</p>
+        <ul>
+            <li><code>PresentacionAgent</code></li>
+            <li><code>DeteccionNecesidadesAgent</code></li>
+        </ul>
+
+        <h3>5.4 Escala de salida de evaluación</h3>
+        <p>Escala ordinal vigente en agentes/base y síntesis:</p>
+        <ul>
+            <li><span class="pill p-green">BUENO</span></li>
+            <li><span class="pill p-orange">MEJORABLE</span></li>
+            <li><span class="pill p-gray">MALO</span></li>
+            <li><span class="pill p-gray">null</span> cuando no es observable en algunos casos.</li>
+        </ul>
+
+        <h3>5.5 Evidencia literal obligatoria</h3>
+        <p>Todos los prompts de agentes imponen evidencia copy-paste literal etiquetada por speaker para sostener auditabilidad y permitir validación Sheriff.</p>
     </section>
 
     <section>
-        <h2>10. Glosario Técnico</h2>
+        <h2>6. RAG: Teoría + Implementación En Centauro</h2>
+
+        <h3>6.1 Qué es RAG (contexto teórico)</h3>
+        <p><strong>RAG (Retrieval-Augmented Generation)</strong> combina:</p>
         <ul>
-            <li><strong>LLM:</strong> Large Language Model (Modelo de Lenguaje Grande). Aquí: GPT-4o-mini</li>
-            <li><strong>Prompt:</strong> Instrucciones que se envían al LLM para guiar su respuesta</li>
-            <li><strong>Token:</strong> Unidad de texto (aprox. 1 token = 0.75 palabras). Se usa para medir costo</li>
-            <li><strong>Embedding:</strong> Vector numérico que representa el significado de un texto</li>
-            <li><strong>ChromaDB:</strong> Base de datos vectorial local para RAG</li>
-            <li><strong>RAG:</strong> Retrieval-Augmented Generation. Combina búsqueda + generación LLM</li>
-            <li><strong>Chunking:</strong> Dividir documentos largos en fragmentos pequeños</li>
-            <li><strong>Top-K:</strong> Número de fragmentos más relevantes que se recuperan (aquí: 5)</li>
-            <li><strong>Temperatura:</strong> Controla creatividad del LLM (0.0 = determinista)</li>
-            <li><strong>Diarización:</strong> Separar quién dice qué en una conversación</li>
-            <li><strong>Fuzzy matching:</strong> Búsqueda con tolerancia a variaciones</li>
-            <li><strong>Batch processing:</strong> Procesar múltiples elementos en una sola llamada</li>
-            <li><strong>Sheriff:</strong> Componente que valida evidencias y corrige alucinaciones</li>
-            <li><strong>PII:</strong> Personally Identifiable Information (datos personales sensibles)</li>
+            <li><strong>Retrieval:</strong> recuperar conocimiento relevante de una base documental.</li>
+            <li><strong>Generation:</strong> usar ese contexto para guiar respuestas/evaluaciones del LLM.</li>
+        </ul>
+        <p>Beneficios clave en Centauro:</p>
+        <ul>
+            <li>Reduce respuestas genéricas.</li>
+            <li>Ancla recomendaciones en material interno (manuales, ejemplos, coaching).</li>
+            <li>Mejora consistencia y trazabilidad.</li>
+        </ul>
+
+        <h3>6.2 Base vectorial y colecciones</h3>
+        <p>RAG opera sobre ChromaDB persistente (<code>chroma_db/</code>) con embedding <code>text-embedding-3-small</code>.</p>
+        <table>
+            <thead>
+                <tr><th>Colección</th><th>Uso</th><th>Origen</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>manuales_generales</code></td><td>Guías base de venta</td><td><code>inputs/docs/*.txt</code></td></tr>
+                <tr><td><code>buenas_practicas</code></td><td>Ejemplos reales por bloque</td><td><code>inputs/docs/buenas_practicas/*</code></td></tr>
+                <tr><td><code>coaching_ventas</code></td><td>Técnicas de libros/mentores</td><td><code>inputs/docs/coaching_ventas/*.txt</code></td></tr>
+                <tr><td><code>evaluaciones_historicas</code></td><td>Aprendizaje desde llamadas buenas</td><td>Memoria continua</td></tr>
+                <tr><td><code>dossiers_programas</code></td><td>Contexto específico de programas</td><td><code>outputs/dossiers_procesados/*.txt</code></td></tr>
+            </tbody>
+        </table>
+
+        <h3>6.3 Indexación documental</h3>
+        <p>Función principal: <code>indexar_documentacion()</code>. Ejecuta:</p>
+        <ol>
+            <li>Manuales generales (chunking configurable).</li>
+            <li>Buenas prácticas por sección (indexación completa por ejemplo).</li>
+            <li>Coaching de ventas con chunking semántico.</li>
+            <li>Dossiers procesados.</li>
+        </ol>
+
+        <h3>6.4 RAG dinámico por bloque</h3>
+        <p><code>DynamicRAGAgent</code> hace:</p>
+        <ul>
+            <li>Extracción de temas de la llamada (muestreo inteligente en llamadas largas).</li>
+            <li>Construcción de query adaptativa según bloque.</li>
+            <li>Recuperación multicolección: manuales + coaching.</li>
+            <li>Filtrado de relevancia y cache de resultados.</li>
+        </ul>
+
+        <div class="mermaid">
+flowchart LR
+    A[Transcripción diarizada] --> B[extraer_temas_llamada]
+    B --> C[query dinámica por bloque]
+    C --> D[manuales_generales]
+    C --> E[coaching_ventas]
+    C --> F[buenas_practicas opcional]
+    D --> G[contexto final]
+    E --> G
+    F --> G
+    G --> H[Prompt del agente]
+        </div>
+
+        <h3>6.5 Parámetros clave (config central)</h3>
+        <ul>
+            <li><code>RAG_CHUNK_SIZE=1000</code></li>
+            <li><code>RAG_CHUNK_OVERLAP=250</code></li>
+            <li><code>RAG_TOP_K_GENERAL=5</code></li>
+            <li><code>RAG_TOP_K_BUENAS_PRACTICAS=3</code></li>
+            <li><code>RAG_TOP_K_COACHING=2</code></li>
         </ul>
     </section>
 
     <section>
-        <h2>11. Sistema de Buenas Prácticas (NUEVO v3.1)</h2>
+        <h2>7. Sheriff Anti-Alucinaciones</h2>
+        <p><code>_sheriff_validar()</code> valida evidencias citadas por cada bloque contra la transcripción completa.</p>
 
-        <h3>11.1. Objetivo</h3>
-        <p>Sistema que permite al Sheriff consultar <strong>ejemplos de conversaciones exitosas</strong> como <strong>guía de referencia</strong>, NO como reglas rígidas.</p>
+        <h3>7.1 Lógica de verificación</h3>
+        <ul>
+            <li>Valida evidencia principal + extras.</li>
+            <li>Usa fuzzy matching (RapidFuzz) con umbral alto.</li>
+            <li>Calcula porcentaje de evidencias verificables.</li>
+        </ul>
 
-        <div class="highlight-box">
-            <h4>🎯 Filosofía Clave: GUÍA vs. FRONTERA</h4>
-            <p><strong>Los ejemplos son INSPIRACIÓN</strong>, no plantillas obligatorias. El Sheriff debe:</p>
-            <ul>
-                <li>✅ Usarlos para identificar patrones de éxito</li>
-                <li>✅ Citar técnicas concretas en el feedback</li>
-                <li>✅ CELEBRAR técnicas diferentes pero efectivas</li>
-                <li>❌ NO penalizar si la conversación es diferente</li>
-                <li>❌ NO exigir que todo sea exactamente igual</li>
-            </ul>
-        </div>
+        <h3>7.2 Regla de ajuste de nota</h3>
+        <ul>
+            <li>Si evidencias verificables &lt; 30%: marca alucinación.</li>
+            <li>Penaliza un nivel de calificación (BUENO→MEJORABLE, MEJORABLE→MALO).</li>
+            <li>Registra metadatos de validación por bloque.</li>
+        </ul>
 
-        <h3>11.2. Estructura de Carpetas</h3>
-        <pre>
-inputs/buenas_practicas/
-├── investigacion/              → Ejemplos de apertura y detección
-├── admision_economica/         → Ejemplos de admisión y propuesta económica
-├── objeciones/                 → Ejemplos de manejo de objeciones
-├── cierre_proximos_pasos/      → Ejemplos de cierre y próximos pasos
-├── propuesta_valor/            → Ejemplos de propuesta de valor
-└── estilo_comunicacion/        → Ejemplos de comunicación efectiva</pre>
+        <h3>7.3 Telemetría operativa</h3>
+        <p>El orquestador acumula en stats:</p>
+        <ul>
+            <li><code>alucinaciones_detectadas</code></li>
+            <li><code>notas_ajustadas_sheriff</code></li>
+            <li><code>llamadas_api</code></li>
+            <li><code>modo_ejecucion</code></li>
+        </ul>
+    </section>
 
-        <h3>11.3. Mapeo Garantizado</h3>
-        <p>Archivo <code>centauro/tools/mapeo_secciones.py</code> define explícitamente:</p>
+    <section>
+        <h2>8. Perfil Del Lead Y Síntesis Final</h2>
+
+        <h3>8.1 Resumen contextual (FASE 2.5)</h3>
+        <p>El sistema extrae de la voz del lead:</p>
+        <ul>
+            <li><code>perfil_lead</code></li>
+            <li><code>fase_funnel</code> (AWARENESS, CONSIDERATION, DECISION, CIERRE_INMEDIATO)</li>
+            <li><code>objetivo_del_lead</code></li>
+            <li><code>barreras_principales</code></li>
+            <li><code>resultado_general</code></li>
+        </ul>
+
+        <h3>8.2 Síntesis del reporte</h3>
+        <p><code>_sintetizar_evaluaciones()</code> consolida:</p>
+        <ul>
+            <li>Calificación global por mayoría simple.</li>
+            <li>Feedback resumido con áreas de mejora.</li>
+            <li>Meta técnica (modo batch, distribución de calificaciones, etc.).</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>9. Chat Interactivo, Memoria Y Aprendizaje Continuo</h2>
+
+        <h3>9.1 Chat Handler (intención + búsqueda)</h3>
+        <p><code>ChatHandler</code> clasifica intención y enruta a contexto:</p>
+        <ul>
+            <li><code>manual</code> → manuales.</li>
+            <li><code>ejemplo</code> → buenas prácticas.</li>
+            <li><code>perfil</code> → perfil histórico de asesor.</li>
+            <li><code>estadisticas</code> → métricas globales.</li>
+            <li><code>general</code> → búsqueda multicolección.</li>
+        </ul>
+
+        <h3>9.2 Memoria por asesor</h3>
+        <p><code>MemoryManager</code> mantiene perfiles en <code>outputs/perfiles_asesores/*.json</code>:</p>
+        <ul>
+            <li>Histórico de evaluaciones.</li>
+            <li>Tendencia (mejorando / estable / empeorando).</li>
+            <li>Fortalezas y áreas de mejora consistentes.</li>
+            <li>Rolling window configurable (180 días).</li>
+        </ul>
+
+        <h3>9.3 Aprendizaje hacia RAG histórico</h3>
+        <p>Evaluaciones con nivel mínimo configurado se pueden indexar en <code>evaluaciones_historicas</code> para alimentar ejemplos futuros.</p>
+    </section>
+
+    <section>
+        <h2>10. Tools Del Proyecto (Catálogo Completo)</h2>
+
+        <h3>10.1 Tools operativas principales</h3>
         <table>
             <thead>
-                <tr>
-                    <th>Carpeta</th>
-                    <th>Agente Asignado</th>
-                </tr>
+                <tr><th>Tool</th><th>Archivo</th><th>Qué hace</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>investigacion</td>
-                    <td>Investigación</td>
-                </tr>
-                <tr>
-                    <td>admision_economica</td>
-                    <td>Admisión y propuesta económica</td>
-                </tr>
-                <tr>
-                    <td>objeciones</td>
-                    <td>Manejo de objeciones</td>
-                </tr>
-                <tr>
-                    <td>cierre_proximos_pasos</td>
-                    <td>Cierre y próximos pasos</td>
-                </tr>
-                <tr>
-                    <td>propuesta_valor</td>
-                    <td>Propuesta de valor</td>
-                </tr>
-                <tr>
-                    <td>estilo_comunicacion</td>
-                    <td>Estilo y comunicación</td>
-                </tr>
+                <tr><td>Extracción audio</td><td><code>centauro/tools/extract_audio.py</code></td><td>Pasa video a MP3 con ffmpeg.</td></tr>
+                <tr><td>Transcripción Whisper</td><td><code>centauro/tools/whisper_transcribe.py</code></td><td>Transcribe MP3 con Groq Whisper y registra coste.</td></tr>
+                <tr><td>Buenas prácticas</td><td><code>centauro/tools/procesar_buenas_practicas.py</code></td><td>Procesa VTT de ejemplos y exporta texto indexable.</td></tr>
+                <tr><td>Limpieza de BP</td><td><code>centauro/tools/limpiar_buenas_practicas.py</code></td><td>Normaliza nombres, deduplica y ordena ejemplos.</td></tr>
+                <tr><td>Mapeo de secciones</td><td><code>centauro/tools/mapeo_secciones.py</code></td><td>Mapea carpeta ↔ bloque/agente.</td></tr>
+                <tr><td>Dossiers</td><td><code>centauro/tools/procesar_dossiers.py</code></td><td>Extrae contenido diferencial de programas para RAG.</td></tr>
+                <tr><td>Rendimiento</td><td><code>centauro/tools/evaluar_rendimiento.py</code></td><td>Tests RAG, estado del sistema y benchmarking.</td></tr>
+                <tr><td>Inspector RAG</td><td><code>centauro/inspect_rag.py</code></td><td>Inspección rápida de base vectorial.</td></tr>
             </tbody>
         </table>
 
-        <h3>11.4. Flujo de Procesamiento</h3>
-        <div class="mermaid">
-            flowchart TB
-            A[Colocar .vtt en carpeta correcta] --> B[python -m centauro.tools.procesar_buenas_practicas]
-            B --> C[GPT analiza y extrae patrones]
-            C --> D[Genera .txt optimizado]
-            D --> E[Indexar en ChromaDB]
-            E --> F[Sheriff consulta ejemplos relevantes]
-            F --> G[Incluye en feedback como GUÍA]
+        <h3>10.2 Flujos de operación recomendados</h3>
+        <ol>
+            <li><strong>Si ya tienes transcripción:</strong> subir a Chainlit o colocar en <code>inputs/transcripts</code> y ejecutar <code>main.py</code>.</li>
+            <li><strong>Si tienes audio:</strong> <code>whisper_transcribe.py</code> → evaluación normal.</li>
+            <li><strong>Si tienes video:</strong> <code>extract_audio.py</code> → <code>whisper_transcribe.py</code> → evaluación normal.</li>
+            <li><strong>Si actualizas conocimiento:</strong> reindexar con <code>indexar_documentacion()</code>.</li>
+        </ol>
+    </section>
 
-            style B fill:#667eea,color:white
-            style E fill:#28a745,color:white
-            style G fill:#3498db,color:white
-        </div>
+    <section>
+        <h2>11. Salidas, Estructuras Y Trazabilidad</h2>
 
-        <h3>11.5. Advertencias en el Prompt</h3>
-        <p>Cada vez que el Sheriff usa ejemplos, recibe estas instrucciones:</p>
-        <pre>
-⚠️ ADVERTENCIA CRÍTICA SOBRE EL USO DE ESTOS EJEMPLOS:
+        <h3>11.1 Salida JSON</h3>
+        <p>Estructura base en <code>centauro/schema.py</code> y síntesis en orquestador:</p>
+        <pre><code>{
+  "asesor": "...",
+  "meta": { ... },
+  "resumen_contextual": { ... },
+  "evaluacion_por_bloques": [ ... ],
+  "calificacion_global": "BUENO|MEJORABLE|MALO|null",
+  "feedback_resumido": { "areas_mejora": [...] }
+}</code></pre>
 
-Estos ejemplos muestran UNA FORMA EXITOSA, NO LA ÚNICA.
-
-✅ SÍ ESTÁ PERMITIDO:
-  • Usar ejemplos como INSPIRACIÓN
-  • Citar técnicas específicas
-  • Reconocer técnicas DIFERENTES pero EFECTIVAS
-
-❌ NO ESTÁ PERMITIDO:
-  • Penalizar porque no es EXACTAMENTE como el ejemplo
-  • Bajar puntuación solo porque es diferente
-  • Tratar ejemplos como CHECKLIST obligatorio
-
-💡 REGLA DE ORO:
-   Si logra el objetivo con enfoque DIFERENTE pero EFECTIVO
-   → Puntúa alto y RECONÓCELO.</pre>
-
-        <h3>11.6. Costos y Optimización</h3>
+        <h3>11.2 Salida PDF</h3>
         <ul>
-            <li><strong>Procesamiento inicial:</strong> ~$0.03 por ejemplo (UNA SOLA VEZ)</li>
-            <li><strong>Consultas posteriores:</strong> $0 (búsqueda local en ChromaDB)</li>
-            <li><strong>Ahorro:</strong> ~80% de búsquedas irrelevantes gracias al mapeo explícito</li>
+            <li>Generado por <code>centauro/reports.py</code>.</li>
+            <li>Ruta: <code>outputs/Reportes_PDF/</code>.</li>
+            <li>Incluye score global, resumen contextual y detalle por bloques.</li>
+        </ul>
+
+        <h3>11.3 Artefactos de soporte</h3>
+        <ul>
+            <li><code>outputs/Input_Debug/*_diarizada.txt</code></li>
+            <li><code>outputs/control_gastos.csv</code></li>
+            <li><code>outputs/perfiles_asesores/*.json</code></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>12. Configuración Y Costes</h2>
+
+        <h3>12.1 Variables y settings</h3>
+        <ul>
+            <li><code>OPENAI_API_KEY</code> (obligatoria para evaluación/RAG).</li>
+            <li><code>GROQ_API_KEY</code> (obligatoria para Whisper tool).</li>
+        </ul>
+
+        <h3>12.2 Modelos observados en código</h3>
+        <ul>
+            <li>Chat/evaluación: <code>gpt-4o-mini</code>.</li>
+            <li>Embeddings: <code>text-embedding-3-small</code>.</li>
+            <li>Transcripción: <code>whisper-large-v3-turbo</code> (Groq).</li>
+        </ul>
+
+        <h3>12.3 Registro de gastos</h3>
+        <p>Todos los consumos se registran en <code>outputs/control_gastos.csv</code> (chat, embeddings y whisper).</p>
+    </section>
+
+    <section>
+        <h2>13. Ejecución Y Runbooks</h2>
+
+        <h3>13.1 Inicialización rápida (CLI)</h3>
+        <pre><code>pip install -r requirements.txt
+python main.py</code></pre>
+
+        <h3>13.2 Modo web (Chainlit)</h3>
+        <pre><code>chainlit run app.py -w</code></pre>
+        <p>También existe <code>start_chainlit.bat</code> para entorno Windows.</p>
+
+        <h3>13.3 Preparación de conocimiento</h3>
+        <ul>
+            <li>Manuales: <code>inputs/docs/*.txt</code></li>
+            <li>Buenas prácticas: <code>inputs/buenas_practicas/&lt;carpeta_seccion&gt;/*.vtt</code></li>
+            <li>Coaching: <code>inputs/docs/coaching_ventas/*.txt</code></li>
+            <li>Dossiers: <code>inputs/dossiers/*.pdf|.docx|.txt</code></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>14. Diferencias De Versionado Y Componentes Legacy</h2>
+        <p>En el repositorio conviven referencias de versión v3.x, v4.x y v5.x en comentarios y textos de interfaz. El comportamiento real actual observado corresponde a:</p>
+        <ul>
+            <li>Arquitectura híbrida + Sheriff + RAG multicolección.</li>
+            <li>Escala ordinal <code>MALO|MEJORABLE|BUENO</code>.</li>
+            <li>Chat interactivo y memoria continua.</li>
         </ul>
 
         <div class="warning-box">
-            <h4>⚠️ Límites de Nombres de Archivo</h4>
-            <p><strong>IMPORTANTE:</strong> Los nombres de archivo .vtt deben ser < 100 caracteres para evitar errores en Windows.</p>
-            <p><strong>Sistema de validación automática</strong> implementado en:</p>
-            <ul>
-                <li><code>centauro/utils/validaciones.py</code> - Módulo de validación</li>
-                <li><code>main.py</code> - Valida al analizar conversaciones</li>
-                <li><code>app.py</code> - Valida en Chainlit con mensajes claros al usuario</li>
-            </ul>
+            <strong>Nota técnica importante:</strong> esta documentación prioriza el estado funcional del código sobre etiquetas históricas de versión escritas en comentarios antiguos.
         </div>
     </section>
 
     <section>
-        <h2>12. Sistema de Validación de Archivos (NUEVO v3.1)</h2>
-
-        <h3>12.1. Problema Resuelto</h3>
-        <p>Windows tiene un límite de <strong>260 caracteres</strong> para paths completos. Archivos con nombres muy largos causan errores crípticos.</p>
-
-        <h3>12.2. Validaciones Implementadas</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Límite</th>
-                    <th>Ubicación</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Nombre de archivo</td>
-                    <td>100 caracteres</td>
-                    <td>Terminal + Chainlit</td>
-                </tr>
-                <tr>
-                    <td>Path completo</td>
-                    <td>240 caracteres</td>
-                    <td>Terminal + Chainlit</td>
-                </tr>
-                <tr>
-                    <td>Extensión</td>
-                    <td>.vtt, .txt, .docx</td>
-                    <td>Terminal + Chainlit</td>
-                </tr>
-                <tr>
-                    <td>Archivo vacío</td>
-                    <td>Rechazado</td>
-                    <td>Terminal + Chainlit</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h3>12.3. Mensajes de Error Claros</h3>
-        <p>Cuando un usuario sube un archivo con nombre muy largo en Chainlit, ve:</p>
-        <pre>
-⚠️ **Error en análisis de conversación**
-
-❌ ERROR: Nombre de archivo demasiado largo
-   Archivo: OBS Business School- Entrevista a Juan...
-   Longitud: 120 caracteres
-   Máximo permitido: 100 caracteres
-
-💡 Sugerencia: Renombra el archivo a algo más corto
-   Ejemplo: Juan_Adames_RRHH.vtt
-
----
-**¿Necesitas ayuda?**
-Contacta al equipo técnico si el problema persiste.</pre>
-
-        <h3>12.4. Archivos del Sistema</h3>
+        <h2>15. Glosario</h2>
         <ul>
-            <li><code>centauro/utils/validaciones.py</code> - Módulo centralizado de validación</li>
-            <li><code>centauro/utils/__init__.py</code> - Exports del módulo</li>
-            <li>Integrado en: <code>main.py</code>, <code>app.py</code>, <code>procesar_buenas_practicas.py</code></li>
+            <li><strong>RAG:</strong> Retrieval-Augmented Generation; recuperación de contexto documental + generación.</li>
+            <li><strong>Sheriff:</strong> validador de evidencias literales anti-alucinación.</li>
+            <li><strong>Diarización:</strong> separación de hablantes en roles ASESOR/LEAD.</li>
+            <li><strong>Chunk:</strong> fragmento de texto en el que se divide un documento para indexarlo o recuperarlo en RAG.</li>
+            <li><strong>Embedding:</strong> representación vectorial numérica del texto, usada para medir similitud semántica en la búsqueda.</li>
+            <li><strong>Observabilidad:</strong> grado en que un bloque puede evaluarse con evidencia disponible.</li>
+            <li><strong>Batch híbrido:</strong> parte de bloques individual, parte en llamada conjunta optimizada.</li>
+            <li><strong>Coaching:</strong> fragmentos de libros/técnicas comerciales para recomendaciones.</li>
         </ul>
     </section>
 
     <section>
-        <h2>13. Roadmap Futuro</h2>
+        <h2>16. Anexos Prácticos</h2>
 
-        <h3>v3.2 (Q2 2025)</h3>
-        <ul>
-            <li>✅ <strong>Sistema de buenas prácticas</strong> (COMPLETADO - Enero 2025)</li>
-            <li>✅ <strong>Validación de nombres de archivo</strong> (COMPLETADO - Enero 2025)</li>
-            <li>Integración con Azure Speech-to-Text (diarización nativa)</li>
-            <li>Dashboard web interactivo con filtros por asesor/periodo</li>
-        </ul>
+        <h3>16.1 Ejemplo de flujo completo desde video</h3>
+        <pre><code>python centauro/tools/extract_audio.py
+python centauro/tools/whisper_transcribe.py
+chainlit run app.py -w
+# subir el *_whisper.txt o evaluar desde main.py</code></pre>
 
-        <h3>v4.0 (Q3 2025)</h3>
-        <ul>
-            <li>Sistema de recomendaciones personalizadas por asesor basado en patrones de buenas prácticas</li>
-            <li>Análisis de sentimiento emocional (tono de voz)</li>
-            <li>Detección automática de técnicas exitosas no documentadas</li>
-            <li>API REST para integración con CRM</li>
-        </ul>
+        <h3>16.2 Ejemplo de flujo de buenas prácticas</h3>
+        <pre><code>python -m centauro.tools.procesar_buenas_practicas
+python main.py   # reindexa documentación y evalúa</code></pre>
+
+        <h3>16.3 Ejemplo de flujo de dossiers</h3>
+        <pre><code>python -m centauro.tools.procesar_dossiers --carpeta inputs/dossiers
+python main.py   # para reindexar y operar con nuevo contexto</code></pre>
     </section>
 
-    <footer style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #eee; text-align: center; color: #7f8c8d;">
-        <p><strong>Proyecto Centauro v3.1</strong> - Sistema Multi-Agente Híbrido + Sheriff + Buenas Prácticas + Validaciones</p>
-        <p>Documentación Interna | Última actualización: 23 Enero 2025</p>
-        <p style="font-size: 0.9em; margin-top: 10px;">
-            Nuevas funcionalidades v3.1: Sistema de Buenas Prácticas con mapeo explícito + Validación de nombres de archivo
-        </p>
+    <footer class="small" style="margin-top:40px; border-top:1px solid #e5edf8; padding-top:14px;">
+        Documento vivo de arquitectura y operación. Mantener sincronizado con cambios en <code>app.py</code>, <code>centauro/core/</code>, <code>centauro/agents/</code> y <code>centauro/tools/</code>.
     </footer>
-</div>
 
+</div>
 </body>
 </html>

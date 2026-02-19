@@ -24,6 +24,24 @@ class LoggingOpenAIEmbeddingFunction:
     def __init__(self, api_key: str, model_name: str):
         self.client = OpenAI(api_key=api_key)
         self.model_name = model_name
+        self.api_key = api_key
+
+    @staticmethod
+    def name() -> str:
+        return "logging_openai_embedding"
+
+    def get_config(self) -> Dict[str, str]:
+        return {
+            "api_key": self.api_key,
+            "model_name": self.model_name,
+        }
+
+    @staticmethod
+    def build_from_config(config: Dict[str, str]) -> "LoggingOpenAIEmbeddingFunction":
+        return LoggingOpenAIEmbeddingFunction(
+            api_key=config["api_key"],
+            model_name=config["model_name"],
+        )
 
     def __call__(self, input: List[str]) -> List[List[float]]:
         texts = [str(t) for t in input]
@@ -63,10 +81,16 @@ def get_collection(collection_name: str):
     Returns:
         Colección de ChromaDB
     """
-    return chroma_client.get_or_create_collection(
-        name=collection_name,
-        embedding_function=openai_ef
-    )
+    try:
+        return chroma_client.get_or_create_collection(
+            name=collection_name,
+            embedding_function=openai_ef
+        )
+    except ValueError as e:
+        # Compatibilidad con colecciones existentes creadas con otra EF persistida.
+        if "embedding function already exists" in str(e):
+            return chroma_client.get_collection(name=collection_name)
+        raise
 
 
 # Colecciones principales
