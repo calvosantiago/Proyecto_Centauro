@@ -62,7 +62,9 @@ def extraer_audio(video_path: Path) -> bool:
         "-i", str(video_path),   # input
         "-vn",                    # sin vídeo
         "-c:a", "libmp3lame",    # codec MP3
-        "-q:a", "2",             # calidad alta (0=mejor, 9=peor)
+        "-b:a", "32k",           # bitrate fijo 32 kbps (suficiente para voz, ~14 MB/hora)
+        "-ac", "1",              # mono (las llamadas son voz, no estéreo)
+        "-ar", "16000",          # 16 kHz (Whisper solo necesita hasta 16 kHz)
         "-y",                    # sobreescribir sin preguntar
         str(salida_mp3),
     ]

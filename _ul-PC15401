@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-    exec(open('tmp_costs.py').read())
-         ~~~~^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'tmp_costs.py'

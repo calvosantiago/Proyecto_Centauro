@@ -233,38 +233,63 @@ def validar_transcripcion(
 
 def activar_plan_b_whisper(nombre_asesor: str) -> Optional[str]:
     """
-    Busca el MP3 del asesor en inputs/audios/ y lo transcribe con Groq Whisper.
-    Devuelve el texto transcrito o None si no se pudo completar.
+    Plan B automático ante transcripción de baja calidad.
+
+    Prioridad de recuperación:
+      1. ¿Existe ya un _whisper.txt en transcripts/? → usarlo directamente (gratis, instantáneo)
+      2. ¿Existe MP3 en audios/?                     → transcribir con Groq Whisper
+      3. Nada disponible                              → avisar y continuar con la original
 
     Args:
-        nombre_asesor: Nombre del archivo sin extensión (e.g. "Esther Lopez")
+        nombre_asesor: Stem del archivo de transcripción (e.g. "Esther Lopez_whisper" o "Esther Lopez")
     """
     from centauro.config import settings
 
-    audios_dir = settings.INPUTS_DIR / "audios"
+    audios_dir    = settings.INPUTS_DIR / "audios"
     transcripts_dir = settings.INPUTS_DIR / "transcripts"
 
-    # Buscar el MP3 correspondiente (el nombre puede tener espacios o guiones bajos)
-    nombre_con_guion = nombre_asesor.replace(" ", "_")
-    nombre_con_espacio = nombre_asesor.replace("_", " ")
+    # Normalizar nombre base (sin sufijo _whisper si ya lo tiene)
+    nombre_base = nombre_asesor.replace("_whisper", "").strip()
+    nombre_con_guion  = nombre_base.replace(" ", "_")
+    nombre_con_espacio = nombre_base.replace("_", " ")
 
-    candidatos = [
+    # ------------------------------------------------------------------
+    # PASO 1: ¿Ya existe una transcripción Whisper válida en transcripts/?
+    # ------------------------------------------------------------------
+    candidatos_whisper = [
+        transcripts_dir / f"{nombre_con_espacio}_whisper.txt",
+        transcripts_dir / f"{nombre_con_guion}_whisper.txt",
+    ]
+    for candidato_txt in candidatos_whisper:
+        if candidato_txt.exists():
+            contenido = candidato_txt.read_text(encoding="utf-8").strip()
+            if contenido:
+                print(f"   ♻️  Plan B: Ya existe {candidato_txt.name}, reutilizando (sin coste)")
+                return contenido
+            else:
+                print(f"   ⚠️  Plan B: {candidato_txt.name} existe pero está vacío, continuando...")
+
+    # ------------------------------------------------------------------
+    # PASO 2: ¿Existe el MP3 en audios/?
+    # ------------------------------------------------------------------
+    candidatos_mp3 = [
         audios_dir / f"{nombre_con_guion}.mp3",
         audios_dir / f"{nombre_con_espacio}.mp3",
     ]
-
     audio_path = None
-    for candidato in candidatos:
+    for candidato in candidatos_mp3:
         if candidato.exists():
             audio_path = candidato
             break
 
     if not audio_path:
-        print(f"   ⚠️  Plan B: No se encontró MP3 para '{nombre_asesor}' en {audios_dir}")
-        print(f"   💡 Asegúrate de que el audio esté en inputs/audios/ con el mismo nombre")
+        print(f"   ⚠️  Plan B: No se encontró transcripción Whisper ni MP3 para '{nombre_base}'")
+        print(f"   💡 Opciones:")
+        print(f"      • Coloca el audio en inputs/audios/{nombre_con_guion}.mp3")
+        print(f"      • O coloca el video en inputs/videollamadas/ y ejecuta extract_audio.py")
         return None
 
-    print(f"   🔄 Plan B activado: transcribiendo {audio_path.name} con Groq Whisper...")
+    print(f"   🔄 Plan B: Transcribiendo {audio_path.name} con Groq Whisper...")
 
     try:
         import os

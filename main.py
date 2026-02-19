@@ -1,10 +1,15 @@
 """
-MAIN.PY - Sistema Multi-Agente v2.0
+MAIN.PY - Sistema Multi-Agente v3.0 - Pipeline Completo Automático
 
-
+Pipeline completo en un solo comando:
+  1. Vídeos nuevos en inputs/videollamadas/ → extrae audio con ffmpeg
+  2. MP3 sin transcripción en inputs/audios/ → transcribe con Groq Whisper
+  3. Transcripciones en inputs/transcripts/ → valida calidad (Plan B automático)
+  4. Analiza con sistema multi-agente
+  5. Genera PDF + JSON en outputs/
 """
 import os
-import re   
+import re
 import time
 import json
 from pathlib import Path
@@ -21,6 +26,92 @@ from centauro.reports import generar_pdf
 # ===== CAMBIO PRINCIPAL: Nuevo orquestador =====
 from centauro.core import CentauroOrchestrator
 # ================================================
+
+# ---------------------------------------------------------------------------
+# PIPELINE AUTOMÁTICO: Vídeo → Audio → Transcripción
+# ---------------------------------------------------------------------------
+
+def _paso_extraer_audios_de_videos():
+    """
+    Paso 1: Detecta vídeos en inputs/videollamadas/ que no tienen MP3 en inputs/audios/
+    y los convierte automáticamente con ffmpeg.
+    """
+    from centauro.tools.extract_audio import extraer_audio, _ffmpeg_disponible, VIDEO_EXTENSIONS
+
+    videos_dir = settings.INPUTS_DIR / "videollamadas"
+    audios_dir = settings.INPUTS_DIR / "audios"
+
+    if not videos_dir.exists():
+        return
+
+    # Buscar vídeos sin MP3 correspondiente
+    videos_pendientes = []
+    for ext in VIDEO_EXTENSIONS:
+        for video in videos_dir.glob(f"*{ext}"):
+            mp3_esperado = audios_dir / f"{video.stem}.mp3"
+            if not mp3_esperado.exists():
+                videos_pendientes.append(video)
+
+    if not videos_pendientes:
+        print("   ✓ No hay vídeos nuevos que procesar")
+        return
+
+    print(f"   🎬 {len(videos_pendientes)} vídeo(s) nuevo(s) detectado(s)")
+
+    if not _ffmpeg_disponible():
+        print("   ❌ ffmpeg no disponible, saltando extracción de audio")
+        return
+
+    audios_dir.mkdir(parents=True, exist_ok=True)
+    for video in sorted(videos_pendientes):
+        extraer_audio(video)
+
+
+def _paso_transcribir_audios():
+    """
+    Paso 2: Detecta MP3 en inputs/audios/ que no tienen transcripción en inputs/transcripts/
+    y los transcribe con Groq Whisper automáticamente.
+    """
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+
+    audios_dir = settings.INPUTS_DIR / "audios"
+    transcripts_dir = settings.INPUTS_DIR / "transcripts"
+
+    if not audios_dir.exists():
+        return
+
+    # Buscar MP3 sin transcripción correspondiente
+    mp3_pendientes = []
+    for mp3 in audios_dir.glob("*.mp3"):
+        nombre_limpio = mp3.stem.replace("_", " ")
+        txt_esperado = transcripts_dir / f"{nombre_limpio}_whisper.txt"
+        if not txt_esperado.exists():
+            mp3_pendientes.append(mp3)
+
+    if not mp3_pendientes:
+        print("   ✓ No hay audios nuevos que transcribir")
+        return
+
+    print(f"   🎙️  {len(mp3_pendientes)} audio(s) sin transcripción detectado(s)")
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        print("   ❌ GROQ_API_KEY no encontrada, saltando transcripción automática")
+        print("   💡 Añade GROQ_API_KEY a tu .env para transcripción automática")
+        return
+
+    try:
+        from groq import Groq
+        from centauro.tools.whisper_transcribe import transcribir_audio
+        client = Groq(api_key=api_key)
+        transcripts_dir.mkdir(parents=True, exist_ok=True)
+        for mp3 in sorted(mp3_pendientes):
+            transcribir_audio(client, mp3)
+    except Exception as e:
+        print(f"   ❌ Error en transcripción automática: {e}")
+
 
 # --- FUNCIONES DE LECTURA (SIN CAMBIOS) ---
 
@@ -135,11 +226,13 @@ def cargar_transcripcion(ruta_archivo):
 # --- MAIN (CON NUEVO ORQUESTADOR) ---
 
 def main():
-    print("🦄 INICIANDO PROYECTO CENTAURO v2.0 (Multi-Agente Optimizado)...")
+    print("🦄 INICIANDO PROYECTO CENTAURO v3.0 (Pipeline Completo Automático)...")
     print("="*70)
-    
+
     # 1. Asegurar directorios
     os.makedirs(settings.INPUTS_DIR / "docs", exist_ok=True)
+    os.makedirs(settings.INPUTS_DIR / "audios", exist_ok=True)
+    os.makedirs(settings.INPUTS_DIR / "videollamadas", exist_ok=True)
     os.makedirs(settings.INPUTS_DIR / "transcripts", exist_ok=True)
     os.makedirs(settings.OUTPUTS_DIR, exist_ok=True)
 
@@ -147,20 +240,31 @@ def main():
     print("\n📚 Paso 1: Indexando base de conocimiento...")
     indexar_documentacion()
 
-    # 3. Buscar entrevistas
+    # 3. Vídeos → Audio (ffmpeg)
+    print("\n🎬 Paso 2: Extracción de audio de vídeos nuevos...")
+    _paso_extraer_audios_de_videos()
+
+    # 4. Audio → Transcripción (Groq Whisper)
+    print("\n🎙️  Paso 3: Transcripción de audios nuevos...")
+    _paso_transcribir_audios()
+
+    # 5. Buscar todas las transcripciones disponibles
     carpeta = settings.INPUTS_DIR / "transcripts"
     archivos_transcripcion = (
-        list(carpeta.glob("*.txt")) + 
-        list(carpeta.glob("*.vtt")) + 
+        list(carpeta.glob("*.txt")) +
+        list(carpeta.glob("*.vtt")) +
         list(carpeta.glob("*.docx"))
     )
-    
+
     if not archivos_transcripcion:
-        print("\n⚠️ No hay transcripciones en 'inputs/transcripts/'")
-        print("   Formatos soportados: .txt, .vtt, .docx")
+        print("\n⚠️ No hay transcripciones disponibles para analizar.")
+        print("   Puedes añadir:")
+        print("   • Vídeos en:         inputs/videollamadas/")
+        print("   • Audios en:         inputs/audios/")
+        print("   • Transcripciones en: inputs/transcripts/")
         return
 
-    print(f"\n🚀 Paso 2: Procesando {len(archivos_transcripcion)} entrevista(s)...")
+    print(f"\n🚀 Paso 4: Analizando {len(archivos_transcripcion)} entrevista(s)...")
     print("="*70)
 
     # ===== CREAR ORQUESTADOR =====
