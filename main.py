@@ -20,12 +20,15 @@ except ImportError:
     Document = None
 
 from centauro.config import settings
-from centauro.rag import indexar_documentacion
+from centauro.rag import indexar_si_necesario
 from centauro.reports import generar_pdf
 
 # ===== CAMBIO PRINCIPAL: Nuevo orquestador =====
 from centauro.core import CentauroOrchestrator
 # ================================================
+
+from centauro.core.memoria import MemoryManager
+memory_manager = MemoryManager()
 
 # ---------------------------------------------------------------------------
 # PIPELINE AUTOMÁTICO: Vídeo → Audio → Transcripción
@@ -284,9 +287,9 @@ def main():
     os.makedirs(settings.INPUTS_DIR / "transcripts", exist_ok=True)
     os.makedirs(settings.OUTPUTS_DIR, exist_ok=True)
 
-    # 2. Indexar Manuales (RAG)
-    print("\n📚 Paso 1: Indexando base de conocimiento...")
-    indexar_documentacion()
+    # 2. Indexar Manuales (RAG) — solo si hay cambios
+    print("\n📚 Paso 1: Verificando base de conocimiento...")
+    indexar_si_necesario()
 
     # 3. Vídeos → Audio (ffmpeg)
     print("\n🎬 Paso 2: Extracción de audio de vídeos nuevos...")
@@ -412,7 +415,21 @@ def main():
             print("   🎨 Generando PDF...")
             nombre_pdf = f"Reporte_{archivo.stem}_v2.pdf"
             generar_pdf(reporte, nombre_pdf)
-            
+
+            # ===== GUARDAR PERFIL DEL ASESOR =====
+            try:
+                nombre_asesor = reporte.get("asesor") or archivo.stem
+                perfil = memory_manager.registrar_evaluacion(
+                    nombre_asesor=nombre_asesor,
+                    resultado_evaluacion=reporte,
+                    transcripcion_path=str(archivo)
+                )
+                print(f"   🧠 Perfil actualizado: {nombre_asesor} "
+                      f"({perfil.total_evaluaciones} evaluación(es) registradas)")
+            except Exception as e:
+                print(f"   ⚠️ No se pudo guardar perfil del asesor: {e}")
+            # =====================================
+
             # Estadísticas de optimización
             if "meta" in reporte and "stats_optimizacion" in reporte["meta"]:
                 stats = reporte["meta"]["stats_optimizacion"]

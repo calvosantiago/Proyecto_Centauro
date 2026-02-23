@@ -10,7 +10,11 @@
       "Bash(pip install:*)",
       "Bash(wmic computersystem get:*)",
       "Bash(wmic:*)",
-      "Bash(wmic path win32_VideoController get Name,AdapterRAM:*)"
+      "Bash(wmic path win32_VideoController get Name,AdapterRAM:*)",
+      "Bash(python3:*)",
+      "Bash(pip show:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ]
   }
 }

@@ -58,6 +58,10 @@ class LoggingOpenAIEmbeddingFunction:
             )
         return [item.embedding for item in response.data]
 
+    def embed_query(self, input: List[str]) -> List[List[float]]:
+        """Compatibilidad con ChromaDB 1.x (requiere embed_query además de __call__)."""
+        return self.__call__(input)
+
 
 # Función de embeddings compartida
 openai_ef = LoggingOpenAIEmbeddingFunction(
@@ -88,8 +92,13 @@ def get_collection(collection_name: str):
         )
     except ValueError as e:
         # Compatibilidad con colecciones existentes creadas con otra EF persistida.
+        # IMPORTANTE: get_collection sin embedding_function falla con UUID inexistente;
+        # hay que volver a pasar openai_ef para que ChromaDB resuelva correctamente.
         if "embedding function already exists" in str(e):
-            return chroma_client.get_collection(name=collection_name)
+            return chroma_client.get_or_create_collection(
+                name=collection_name,
+                embedding_function=openai_ef
+            )
         raise
 
 
@@ -402,9 +411,13 @@ def indexar_coaching_ventas():
                 autor = "desconocido"
 
             # CHUNKING SEMÁNTICO: Respetar secciones de técnicas
-            # Los libros usan "===" como delimitador de secciones
+            # Soporta dos formatos de separador:
+            #   - SPIN style:       ================ (10+ signos =) antes del header
+            #   - Influencia style: === TÉCNICA: ... (header directo sin separador largo)
+            # El lookahead (?=\n=== ) parte justo antes de cada nueva técnica
+            # sin consumir el header; los chunks vacíos se filtran por len < 50
             import re
-            secciones = re.split(r'={10,}', texto)  # Dividir por líneas de ====
+            secciones = re.split(r'={10,}|(?=\n=== )', texto)
 
             chunks = []
             for seccion in secciones:
@@ -484,6 +497,141 @@ def indexar_documentacion():
     print(f"   • Evaluaciones históricas: {collection_evaluaciones.count()} fragmentos")
     print(f"   • Dossiers programas: {collection_dossiers.count()} fragmentos")
     print("="*70 + "\n")
+
+
+# ==================== INDEXACIÓN INTELIGENTE CON HASH ====================
+
+def _calcular_hash_inputs() -> str:
+    """
+    Calcula un hash MD5 de todos los archivos de documentación.
+    Usa nombre + mtime + tamaño de cada archivo (sin leer contenido),
+    lo que lo hace muy rápido (~1ms para cientos de archivos).
+    """
+    import hashlib
+
+    hasher = hashlib.md5()
+
+    # Monitorizar todos los .txt bajo inputs/docs/ (manuales, buenas_practicas, coaching)
+    docs_dir = settings.INPUTS_DIR / "docs"
+    archivos = sorted(docs_dir.rglob("*.txt")) if docs_dir.exists() else []
+
+    for archivo in archivos:
+        stat = archivo.stat()
+        hasher.update(str(archivo).encode())
+        hasher.update(str(stat.st_mtime).encode())
+        hasher.update(str(stat.st_size).encode())
+
+    return hasher.hexdigest()
+
+
+def _leer_hash_guardado() -> str:
+    """Lee el hash guardado de la última indexación."""
+    hash_file = settings.CHROMA_PATH / ".index_hash"
+    if hash_file.exists():
+        return hash_file.read_text(encoding="utf-8").strip()
+    return ""
+
+
+def _guardar_hash(hash_value: str) -> None:
+    """Guarda el hash de la indexación actual."""
+    settings.CHROMA_PATH.mkdir(parents=True, exist_ok=True)
+    hash_file = settings.CHROMA_PATH / ".index_hash"
+    hash_file.write_text(hash_value, encoding="utf-8")
+
+
+def _limpiar_colecciones_documentacion() -> None:
+    """
+    Elimina y recrea las colecciones de documentación estática.
+    NO toca collection_evaluaciones (historial de evaluaciones del sistema).
+    """
+    global collection_manuales, collection_buenas_practicas, \
+           collection_coaching, collection_dossiers, collection
+
+    colecciones_a_limpiar = [
+        centauro_config.COLLECTION_MANUALES,
+        centauro_config.COLLECTION_BUENAS_PRACTICAS,
+        centauro_config.COLLECTION_COACHING,
+        centauro_config.COLLECTION_DOSSIERS,
+    ]
+
+    for nombre in colecciones_a_limpiar:
+        try:
+            chroma_client.delete_collection(nombre)
+            print(f"   🗑️  Colección '{nombre}' limpiada")
+        except Exception:
+            pass  # No existía, no hay problema
+
+    # Recrear referencias globales con colecciones vacías
+    collection_manuales = get_collection(centauro_config.COLLECTION_MANUALES)
+    collection_buenas_practicas = get_collection(centauro_config.COLLECTION_BUENAS_PRACTICAS)
+    collection_coaching = get_collection(centauro_config.COLLECTION_COACHING)
+    collection_dossiers = get_collection(centauro_config.COLLECTION_DOSSIERS)
+    collection = collection_manuales  # alias legacy
+
+
+def indexar_si_necesario() -> dict:
+    """
+    Indexa la documentación solo si los archivos han cambiado.
+
+    Compara un hash MD5 de todos los archivos de inputs/docs/ con el
+    guardado en chroma_db/.index_hash. Si son iguales y las colecciones
+    tienen datos, no hace nada. Si hay diferencias, re-indexa desde cero.
+
+    Ventajas frente al check 'total_docs == 0':
+    - Detecta archivos nuevos, modificados o eliminados automáticamente
+    - No requiere borrar chroma_db/ manualmente
+    - Cero coste en arranques normales (solo un stat() por archivo)
+
+    Returns:
+        dict con claves: re_indexado (bool), manuales, buenas_practicas,
+        coaching, motivo (str)
+    """
+    hash_actual = _calcular_hash_inputs()
+    hash_guardado = _leer_hash_guardado()
+
+    # Contar docs actuales en colecciones
+    try:
+        n_manuales = collection_manuales.count()
+        n_bp = collection_buenas_practicas.count()
+        n_coaching = collection_coaching.count()
+        total_actual = n_manuales + n_bp + n_coaching
+    except Exception:
+        total_actual = 0
+
+    # Condiciones para saltar indexación
+    if hash_actual == hash_guardado and total_actual > 0:
+        print(f"✅ Base de conocimiento sin cambios "
+              f"({n_manuales} manuales + {n_bp} buenas prácticas + {n_coaching} coaching)")
+        return {
+            "re_indexado": False,
+            "manuales": n_manuales,
+            "buenas_practicas": n_bp,
+            "coaching": n_coaching,
+            "motivo": "sin_cambios"
+        }
+
+    # Determinar motivo
+    if total_actual == 0:
+        motivo = "primera_vez"
+        print("📚 Primera indexación (base de conocimiento vacía)...")
+    else:
+        motivo = "archivos_cambiados"
+        print("🔄 Cambios detectados en documentación, re-indexando...")
+        _limpiar_colecciones_documentacion()
+
+    # Re-indexar todo
+    indexar_documentacion()
+
+    # Guardar nuevo hash
+    _guardar_hash(hash_actual)
+
+    return {
+        "re_indexado": True,
+        "manuales": collection_manuales.count(),
+        "buenas_practicas": collection_buenas_practicas.count(),
+        "coaching": collection_coaching.count(),
+        "motivo": motivo
+    }
 
 
 # ==================== BÚSQUEDA SIMPLIFICADA ====================

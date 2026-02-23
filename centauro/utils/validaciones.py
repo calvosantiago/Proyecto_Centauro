@@ -117,12 +117,12 @@ def validar_archivo_para_procesamiento(ruta: Path) -> ValidacionArchivo:
         )
 
     # Validar extensión
-    extensiones_validas = {'.vtt', '.txt', '.docx'}
+    extensiones_validas = {'.vtt', '.txt', '.docx', '.mp3', '.mp4'}
     if ruta.suffix.lower() not in extensiones_validas:
         return ValidacionArchivo(
             False,
             f"❌ ERROR: Extensión no soportada: {ruta.suffix}\n   Archivo: {ruta.name}",
-            f"💡 Extensiones válidas: {', '.join(extensiones_validas)}"
+            f"💡 Extensiones válidas: {', '.join(sorted(extensiones_validas))}"
         )
 
     # Validar que no esté vacío

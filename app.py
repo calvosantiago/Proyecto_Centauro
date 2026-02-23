@@ -12,13 +12,92 @@ from pathlib import Path
 from centauro.core import CentauroOrchestrator
 from centauro.core.chat_handler import ChatHandler
 from centauro.core.memoria import memory_manager
-from centauro.rag import indexar_documentacion
+from centauro.rag import indexar_si_necesario
 from centauro.privacy import redact_pii
 from centauro.reports import generar_pdf
 from centauro.config import settings
 import json
 # Importar funciones de lectura desde main.py (raíz del proyecto)
 from main import leer_word, limpiar_formato_vtt
+
+# ---------------------------------------------------------------------------
+# Transcripción de audio/vídeo (MP4 → ffmpeg → MP3 → Groq Whisper)
+# ---------------------------------------------------------------------------
+
+def _procesar_archivo_multimedia(file_path: Path) -> str:
+    """
+    Extrae texto de un archivo MP4 o MP3 usando Groq Whisper.
+    - MP4: extrae audio con ffmpeg (32kbps/mono/16kHz) y luego transcribe.
+    - MP3: transcribe directamente.
+    Función síncrona pensada para usar con cl.make_async().
+    """
+    import os
+    import subprocess
+    from groq import Groq
+    from centauro.tools.whisper_transcribe import texto_de_segmentos, WHISPER_MODEL
+
+    suffix = file_path.suffix.lower()
+    audio_path = file_path
+
+    # Si es vídeo MP4, extraer audio con ffmpeg primero
+    if suffix == '.mp4':
+        from centauro.tools.extract_audio import FFMPEG_PATH
+        if not FFMPEG_PATH.exists():
+            raise RuntimeError(
+                f"ffmpeg no encontrado en {FFMPEG_PATH}\n"
+                "Instálalo desde https://ffmpeg.org/download.html y colócalo en C:/ffmpeg/bin/"
+            )
+        mp3_tmp = file_path.with_suffix('.mp3')
+        comando = [
+            str(FFMPEG_PATH),
+            "-i", str(file_path),
+            "-vn",                    # sin vídeo
+            "-c:a", "libmp3lame",     # codec MP3
+            "-b:a", "32k",            # bitrate (suficiente para voz)
+            "-ac", "1",               # mono
+            "-ar", "16000",           # 16 kHz (Whisper solo necesita hasta 16 kHz)
+            "-y",                     # sobreescribir sin preguntar
+            str(mp3_tmp),
+        ]
+        resultado = subprocess.run(
+            comando,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if resultado.returncode != 0:
+            lineas_error = [l for l in resultado.stderr.splitlines() if l.strip()]
+            msg_error = "\n".join(lineas_error[-5:])
+            raise RuntimeError(f"Error extrayendo audio con ffmpeg:\n{msg_error}")
+        audio_path = mp3_tmp
+
+    # Transcribir con Groq Whisper
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "GROQ_API_KEY no encontrada en .env\n"
+            "Añade tu clave Groq para procesar archivos de audio/vídeo."
+        )
+
+    client = Groq(api_key=api_key)
+    with open(audio_path, "rb") as f:
+        response = client.audio.transcriptions.create(
+            model=WHISPER_MODEL,
+            file=f,
+            response_format="verbose_json",
+            language="es",
+        )
+
+    segmentos = getattr(response, "segments", [])
+    texto = texto_de_segmentos(segmentos)
+    if not texto:
+        texto = getattr(response, "text", "").strip()
+
+    return texto
+
+
 @cl.on_chat_start
 async def start():
     """Inicialización cuando el usuario conecta"""
@@ -40,7 +119,7 @@ Ahora puedes **preguntar directamente** a Centauro:
 ---
 ## 📤 **Modo Evaluación de Llamadas**
 1. **Usa el botón 📎 (clip)** o **arrastra tu archivo**
-2. Formatos: `.txt`, `.vtt` o `.docx`
+2. Formatos: `.txt`, `.vtt`, `.docx`, `.mp3`, `.mp4`
 3. **NUEVO:** Puedes escribir contexto junto al archivo (info del lead, programa, etc.)
 4. Espera 1-2 minutos
 5. Descarga reporte PDF completo
@@ -64,21 +143,23 @@ Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
         cl.user_session.set("chat_handler", chat_handler)
     # Solo ejecutar inicialización completa la primera vez
     if not already_welcomed:
-        # Indexar manuales en background (solo si está vacío)
+        # Indexar solo si hay cambios en los archivos (sistema de hash)
         async with cl.Step(name="📚 Inicializando base de conocimiento", type="tool") as step:
             try:
-                from centauro.rag import collection_manuales, collection_buenas_practicas
-                # Verificar si ya está indexado
-                total_manuales = collection_manuales.count()
-                total_buenas_practicas = collection_buenas_practicas.count()
-                total_docs = total_manuales + total_buenas_practicas
-                if total_docs == 0:
-                    # Primera vez, indexar todo
-                    indexar_documentacion()
-                    step.output = "✅ Base de conocimiento indexada correctamente"
+                stats = await cl.make_async(indexar_si_necesario)()
+                n_m = stats["manuales"]
+                n_bp = stats["buenas_practicas"]
+                n_c = stats["coaching"]
+                if stats["re_indexado"]:
+                    step.output = (
+                        f"✅ Base re-indexada: "
+                        f"{n_m} manuales + {n_bp} buenas prácticas + {n_c} coaching"
+                    )
                 else:
-                    # Ya está indexado, solo informar
-                    step.output = f"✅ Base de conocimiento lista ({total_manuales} manuales + {total_buenas_practicas} buenas prácticas)"
+                    step.output = (
+                        f"✅ Base lista sin cambios: "
+                        f"{n_m} manuales + {n_bp} buenas prácticas + {n_c} coaching"
+                    )
             except Exception as e:
                 step.output = f"⚠️ Error en indexación (continuará sin RAG): {e}"
         # Configurar settings para permitir archivos
@@ -87,7 +168,7 @@ Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
                 cl.input_widget.TextInput(
                     id="file_upload_info",
                     label="ℹ️ Usa el botón 📎 para adjuntar archivos",
-                    initial="Formatos: .txt, .vtt, .docx"
+                    initial="Formatos: .txt, .vtt, .docx, .mp3, .mp4"
                 )
             ]
         ).send()
@@ -134,7 +215,7 @@ async def main(message: cl.Message):
                     "- ¿Cómo hacer una buena investigación?\n"
                     "- Muéstrame ejemplos de cierre exitoso\n"
                     "- ¿Cuál es mi rendimiento?\n\n"
-                    "📎 O usa el botón de clip para adjuntar transcripción (.txt, .vtt, .docx)"
+                    "📎 O usa el botón de clip para adjuntar transcripción (.txt, .vtt, .docx) o audio/vídeo (.mp3, .mp4)"
         ).send()
         return
     # Obtener archivo
@@ -162,8 +243,10 @@ async def main(message: cl.Message):
         # Si no existe el módulo de validaciones, continuar sin validar
         pass
     # ===============================================================================
+    es_multimedia = file_path.suffix.lower() in ('.mp4', '.mp3')
+    tiempo_estimado = "5-10 minutos (transcripción + análisis)" if es_multimedia else "1-2 minutos"
     await cl.Message(
-        content=f"📁 Procesando: **{file.name}**\n\nEsto puede tardar 1-2 minutos..."
+        content=f"📁 Procesando: **{file.name}**\n\nEsto puede tardar {tiempo_estimado}..."
     ).send()
     # Leer contenido según extensión
     # NOTA: NO limpiamos VTT aquí - el agente de diarización necesita
@@ -171,6 +254,16 @@ async def main(message: cl.Message):
     try:
         if file_path.suffix.lower() == '.docx':
             texto_crudo = leer_word(file_path)
+        elif es_multimedia:
+            # MP4 o MP3: extraer audio (si MP4) y transcribir con Groq Whisper
+            async with cl.Step(name="🎙️ Transcribiendo audio con Groq Whisper", type="tool") as step:
+                if file_path.suffix.lower() == '.mp4':
+                    step.output = "⏳ Extrayendo audio con ffmpeg..."
+                else:
+                    step.output = "⏳ Enviando a Groq Whisper..."
+                texto_crudo = await cl.make_async(_procesar_archivo_multimedia)(file_path)
+                num_chars = len(texto_crudo) if texto_crudo else 0
+                step.output = f"✅ Transcripción completada ({num_chars} caracteres)"
         else:
             with open(file_path, 'r', encoding='utf-8') as f:
                 texto_crudo = f.read()

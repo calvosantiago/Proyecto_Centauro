@@ -165,7 +165,7 @@ Si hay menos de 8, devuelve solo los que existan.
             # DIVERSIDAD: Pedir más resultados y seleccionar 1 por libro
             total_docs_coaching = collection_coaching.count()
             if total_docs_coaching > 0:
-                n_coaching_query = min(6, total_docs_coaching)  # Pedir más para diversificar
+                n_coaching_query = min(12, total_docs_coaching)  # Margen para diversidad con 4+ libros
                 resultados_coaching = collection_coaching.query(
                     query_texts=[query],
                     n_results=n_coaching_query
