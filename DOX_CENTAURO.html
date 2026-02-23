@@ -200,6 +200,62 @@
     </header>
 
     <section>
+        <h2>0. Librerías Y Dependencias Requeridas</h2>
+        <p>Resumen operativo de dependencias para ejecutar Centauro en modo CLI, batch y web.</p>
+
+        <h3>0.1 Dependencias Python base (obligatorias)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Librería</th>
+                    <th>Uso en Centauro</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>openai</code></td><td>LLM, embeddings y costes de API.</td><td>Obligatoria</td></tr>
+                <tr><td><code>chromadb</code></td><td>Base vectorial RAG (colecciones persistentes).</td><td>Obligatoria</td></tr>
+                <tr><td><code>pydantic</code></td><td>Esquemas de salida y validación estructurada.</td><td>Obligatoria</td></tr>
+                <tr><td><code>pydantic-settings</code></td><td>Carga de configuración tipada desde entorno/settings.</td><td>Obligatoria</td></tr>
+                <tr><td><code>python-dotenv</code></td><td>Carga de variables desde <code>.env</code>.</td><td>Obligatoria</td></tr>
+                <tr><td><code>python-docx</code></td><td>Lectura de transcripciones Word (<code>.docx</code>).</td><td>Obligatoria</td></tr>
+                <tr><td><code>rapidfuzz</code></td><td>Matching y normalización de nombres/asesores.</td><td>Obligatoria</td></tr>
+                <tr><td><code>fpdf</code></td><td>Generación de reportes PDF.</td><td>Obligatoria</td></tr>
+                <tr><td><code>pandas</code></td><td>Procesamiento tabular auxiliar en tools.</td><td>Obligatoria</td></tr>
+                <tr><td><code>numpy</code></td><td>Soporte numérico general.</td><td>Obligatoria</td></tr>
+                <tr><td><code>scikit-learn</code></td><td>Utilidades de análisis/soporte ML.</td><td>Obligatoria</td></tr>
+                <tr><td><code>mutagen</code></td><td>Lectura de duración MP3 para cálculo de costes Whisper.</td><td>Obligatoria</td></tr>
+                <tr><td><code>groq</code></td><td>Transcripción Whisper vía API Groq (<code>whisper_transcribe.py</code>).</td><td>Obligatoria para Plan B de audio</td></tr>
+            </tbody>
+        </table>
+
+        <h3>0.2 Dependencias opcionales</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Librería</th>
+                    <th>Uso en Centauro</th>
+                    <th>Cuándo usarla</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>chainlit&gt;=1.0.0</code></td><td>Interfaz web/chat y carga de archivos.</td><td>Si vas a operar en modo web (<code>app.py</code>).</td></tr>
+                <tr><td><code>uvicorn[standard]</code></td><td>Servidor ASGI (mejor rendimiento/entorno web).</td><td>Recomendado para despliegue web.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>0.3 Requisitos del sistema (no Python)</h3>
+        <ul>
+            <li><code>ffmpeg</code>: obligatorio para extraer audio desde video (<code>centauro/tools/extract_audio.py</code>).</li>
+            <li>Variables de entorno: <code>OPENAI_API_KEY</code> y <code>GROQ_API_KEY</code> (esta última para transcripción Whisper).</li>
+        </ul>
+
+        <h3>0.4 Instalación recomendada</h3>
+        <pre><code>pip install -r requirements.txt
+pip install groq pydantic-settings</code></pre>
+    </section>
+
+    <section>
         <h2>1. Qué Es Centauro</h2>
         <p>Centauro es un sistema de evaluación automatizada de llamadas comerciales (educación) que analiza conversaciones, etiqueta interlocutores, evalúa bloques consultivos y genera feedback accionable con evidencia literal.</p>
 
@@ -326,6 +382,131 @@ flowchart TD
             <li>DNI / NIE</li>
             <li>IBAN español</li>
         </ul>
+
+        <h3>3.5 Flujos de ejecución por casuística (main.py v3.0)</h3>
+        <pre><code>╔══════════════════════════════════════════════════════════════════════════════════╗
+║              PROYECTO CENTAURO — FLUJOS DE EJECUCIÓN POR CASUÍSTICA             ║
+║                              main.py v3.0                                        ║
+╚══════════════════════════════════════════════════════════════════════════════════╝</code></pre>
+
+        <h4>PASO 2 · EXTRACCIÓN DE AUDIO (<code>inputs/videollamadas/</code>)</h4>
+        <pre><code>📹 MP4 encontrado
+      │
+      ├── ¿Ya existe MP3 en audios/?
+      │         │
+      │    SÍ ──┘→  ⏭️ SKIP (no doble trabajo)
+      │
+      └── NO ──→  🔧 ffmpeg  ──→  📦 MP3 en inputs/audios/
+                  32kbps · mono · 16kHz · ~10MB/45min</code></pre>
+
+        <h4>PASO 3 · TRANSCRIPCIÓN (<code>inputs/audios/</code>)</h4>
+        <pre><code>📦 MP3 encontrado
+      │
+      ├─ A ── ¿Existe _whisper.txt? ────────────────→  ⏭️ SKIP
+      │
+      ├─ B ── ¿Existe transcripción Teams/Word/VTT?
+      │              │
+      │         Validar calidad (6 señales)
+      │              │
+      │         BUENA (score ≥ 0.5) ───────────────→  ⏭️ SKIP (Groq no necesario)
+      │              │
+      │         MALA  (score < 0.5) ───────────────→  🎙️ Groq Whisper
+      │                                                      │
+      │                                               _whisper.txt ✅ (Plan B real)
+      │
+      └─ C ── Sin ninguna transcripción ──────────→  🎙️ Groq Whisper
+                                                            │
+                                                     _whisper.txt ✅ (audio nuevo)</code></pre>
+
+        <div class="warning-box">
+            <strong>Nota operativa:</strong> sin <code>GROQ_API_KEY</code> se muestra aviso en consola y el pipeline continúa sin transcribir.
+        </div>
+
+        <h4>PASO 4 · ANÁLISIS (<code>inputs/transcripts/</code>)</h4>
+        <pre><code>Para cada archivo en transcripts/ (*.txt · *.vtt · *.docx)
+      │
+      ├── 1. cargar_transcripcion()
+      │         │
+      │         ├── .docx  →  leer_word()     (extrae [Nombre HH:MM])
+      │         ├── .vtt   →  texto crudo VTT (UUIDs o speaker tags)
+      │         └── .txt   →  texto plano
+      │
+      ├── 2. validar_transcripcion()
+      │         │
+      │    BUENA ┘→ continuar con texto original
+      │         │
+      │    MALA ──→ activar_plan_b_whisper(nombre)
+      │                    │
+      │               ┌────┴────────────────────────────────────┐
+      │               │                                         │
+      │          ¿_whisper.txt existe?               ¿MP3 existe?
+      │               │                                         │
+      │              SÍ → reusar (gratis, instant)    SÍ → 🎙️ Groq
+      │                                               NO → ⚠️ continuar igual
+      │
+      ├── 3. DiarizationAgent (decide ruta por formato)
+      │         │
+      │         ├── VTT con UUID    →  diarización por UUID       (Teams nativo)
+      │         ├── VTT con nombre  →  diarización por speaker tag
+      │         ├── DOCX Teams      →  diarización por timestamps
+      │         └── TXT plano       →  🤖 LLM batch               (Whisper)
+      │
+      └── 4. 6 Agentes evaluadores → Orquestador
+                  │
+            📄 PDF + 🗃️ JSON en outputs/</code></pre>
+
+        <h4>Casuística completa (resumen)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>CASO</th>
+                    <th>ENTRADA</th>
+                    <th>PASO 2</th>
+                    <th>PASO 3</th>
+                    <th>PASO 4 DIARIZACIÓN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>MP4 sin MP3</td><td>ffmpeg</td><td>Groq</td><td>LLM batch</td></tr>
+                <tr><td>2</td><td>MP4 con MP3 ya hecho</td><td>SKIP</td><td>Groq</td><td>LLM batch</td></tr>
+                <tr><td>3</td><td>MP3 sin transcript</td><td>—</td><td>Groq</td><td>LLM batch</td></tr>
+                <tr><td>4</td><td>MP3 + Teams OK</td><td>—</td><td>SKIP</td><td>UUID / timestamp</td></tr>
+                <tr><td>5</td><td>MP3 + Teams MAL</td><td>—</td><td>Groq (Plan B)</td><td>LLM batch</td></tr>
+                <tr><td>6</td><td>MP3 + _whisper.txt</td><td>—</td><td>SKIP</td><td>LLM batch</td></tr>
+                <tr><td>7</td><td>Solo VTT Teams OK</td><td>—</td><td>—</td><td>UUID / speaker tag</td></tr>
+                <tr><td>8</td><td>Solo VTT Teams MAL</td><td>—</td><td>Plan B→_whisper</td><td>LLM batch</td></tr>
+                <tr><td>9</td><td>Solo DOCX Teams OK</td><td>—</td><td>—</td><td>timestamps</td></tr>
+                <tr><td>10</td><td>Solo DOCX Teams MAL</td><td>—</td><td>Plan B→_whisper</td><td>LLM batch</td></tr>
+                <tr><td>11</td><td>VTT MAL + _whisper.txt</td><td>—</td><td>—</td><td>LLM batch (Plan B auto)</td></tr>
+                <tr>
+                    <td>★</td>
+                    <td>Caso Esther Lopez (VTT basura Teams + _whisper.txt de Groq)</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>Caso 11 exacto: ambos reportes usan el mismo texto Whisper</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Señales de calidad (<code>transcript_validator.py</code>)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Señal</th>
+                    <th>Umbral</th>
+                    <th>Penalización</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Palabras totales</td><td>&lt; 150</td><td>-0.60</td></tr>
+                <tr><td>Velocidad (palabras/minuto)</td><td>&lt; 40 ppm</td><td>-0.40</td></tr>
+                <tr><td>Idioma detectado</td><td>No español</td><td>-0.40</td></tr>
+                <tr><td>Encoding roto</td><td>&gt; umbral</td><td>-0.35</td></tr>
+                <tr><td>Palabras ininteligibles</td><td>&gt; 8%</td><td>-0.30</td></tr>
+                <tr><td>Sin signos de puntuación</td><td>—</td><td>-0.10</td></tr>
+            </tbody>
+        </table>
+        <p><strong>Regla de decisión:</strong> score <strong>≥ 0.50</strong> → ✅ VÁLIDA · score <strong>&lt; 0.50</strong> → ❌ PLAN B.</p>
     </section>
 
     <section>

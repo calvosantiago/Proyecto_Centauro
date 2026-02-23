@@ -69,12 +69,18 @@ def _paso_extraer_audios_de_videos():
 
 def _paso_transcribir_audios():
     """
-    Paso 2: Detecta MP3 en inputs/audios/ que no tienen transcripción en inputs/transcripts/
-    y los transcribe con Groq Whisper automáticamente.
+    Paso 2: Para cada MP3 en inputs/audios/ decide si necesita transcripción Groq:
+
+    - Si ya existe _whisper.txt          → saltar (ya procesado)
+    - Si existe transcripción y es BUENA → saltar (Teams/Word suficiente)
+    - Si existe transcripción y es MALA  → transcribir con Groq (Plan B real)
+    - Si no existe ninguna transcripción → transcribir con Groq (audio nuevo)
     """
     import os
     from dotenv import load_dotenv
     load_dotenv(Path(__file__).resolve().parent / ".env")
+
+    from centauro.tools.transcript_validator import validar_transcripcion
 
     audios_dir = settings.INPUTS_DIR / "audios"
     transcripts_dir = settings.INPUTS_DIR / "transcripts"
@@ -82,19 +88,61 @@ def _paso_transcribir_audios():
     if not audios_dir.exists():
         return
 
-    # Buscar MP3 sin transcripción correspondiente
-    mp3_pendientes = []
-    for mp3 in audios_dir.glob("*.mp3"):
+    mp3_pendientes = []  # (path, motivo)
+
+    for mp3 in sorted(audios_dir.glob("*.mp3")):
         nombre_limpio = mp3.stem.replace("_", " ")
-        txt_esperado = transcripts_dir / f"{nombre_limpio}_whisper.txt"
-        if not txt_esperado.exists():
-            mp3_pendientes.append(mp3)
+
+        # 1. ¿Ya existe _whisper.txt? → saltar
+        whisper_txt = transcripts_dir / f"{nombre_limpio}_whisper.txt"
+        if whisper_txt.exists():
+            print(f"   ⏭️  {mp3.name}: ya tiene _whisper.txt, saltando")
+            continue
+
+        # 2. Buscar transcripción existente (Teams/Word/VTT)
+        transcript_existente = None
+        for ext in [".txt", ".vtt", ".docx"]:
+            candidato = transcripts_dir / f"{nombre_limpio}{ext}"
+            if candidato.exists():
+                transcript_existente = candidato
+                break
+            # También buscar con guiones bajos
+            candidato_guion = transcripts_dir / f"{mp3.stem}{ext}"
+            if candidato_guion.exists():
+                transcript_existente = candidato_guion
+                break
+
+        # 3. Sin transcripción → audio nuevo, transcribir
+        if not transcript_existente:
+            print(f"   🆕 {mp3.name}: sin transcripción, se transcribirá")
+            mp3_pendientes.append((mp3, "sin transcripción previa"))
+            continue
+
+        # 4. Transcripción existente → validar calidad
+        try:
+            if transcript_existente.suffix == ".docx":
+                texto = leer_word(transcript_existente) or ""
+            else:
+                texto = transcript_existente.read_text(encoding="utf-8")
+        except Exception:
+            texto = ""
+
+        resultado = validar_transcripcion(texto, nombre_archivo=transcript_existente.name)
+
+        if resultado.es_valida:
+            print(f"   ✅ {mp3.name}: transcripción existente válida (score: {resultado.score:.2f}), saltando Groq")
+        else:
+            problemas_str = " | ".join(resultado.problemas)
+            print(f"   ❌ {mp3.name}: transcripción de baja calidad (score: {resultado.score:.2f}) → {problemas_str}")
+            mp3_pendientes.append((mp3, "transcripción de baja calidad"))
 
     if not mp3_pendientes:
-        print("   ✓ No hay audios nuevos que transcribir")
+        print("   ✓ No hay audios que requieran transcripción con Groq Whisper")
         return
 
-    print(f"   🎙️  {len(mp3_pendientes)} audio(s) sin transcripción detectado(s)")
+    print(f"\n   🎙️  {len(mp3_pendientes)} audio(s) pendiente(s) de transcripción:")
+    for mp3, motivo in mp3_pendientes:
+        print(f"      • {mp3.name} ({motivo})")
 
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
@@ -107,7 +155,7 @@ def _paso_transcribir_audios():
         from centauro.tools.whisper_transcribe import transcribir_audio
         client = Groq(api_key=api_key)
         transcripts_dir.mkdir(parents=True, exist_ok=True)
-        for mp3 in sorted(mp3_pendientes):
+        for mp3, _ in mp3_pendientes:
             transcribir_audio(client, mp3)
     except Exception as e:
         print(f"   ❌ Error en transcripción automática: {e}")
