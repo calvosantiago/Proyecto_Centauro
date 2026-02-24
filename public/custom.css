@@ -1,42 +1,35 @@
-/* =====================================================
-   CENTAURO - Tema OBS: #1F2125 · #444444 · #FFDD00
-   ===================================================== */
+/* Centauro theme for Chainlit 2.x */
 
-/* --- 1. VARIABLES CSS (sobreescribe las de Chainlit) --- */
 :root,
 html,
 body,
 .dark,
 [data-theme] {
-  --background:         220 9% 13%;   /* #1F2125 */
-  --card:               220 9% 13%;
-  --popover:            220 9% 13%;
-  --muted:              0 0% 27%;     /* #444444 */
-  --input:              0 0% 27%;
-  --secondary:          0 0% 27%;
-  --border:             0 0% 33%;
-  --primary:            52 100% 50%;  /* #FFDD00 */
+  --background: 220 9% 13%;
+  --card: 220 9% 13%;
+  --popover: 220 9% 13%;
+  --muted: 0 0% 27%;
+  --input: 0 0% 27%;
+  --secondary: 0 0% 27%;
+  --border: 0 0% 33%;
+  --primary: 52 100% 50%;
   --primary-foreground: 220 9% 13%;
-  --ring:               52 100% 50%;
-  --accent:             52 100% 50%;
-  --accent-foreground:  220 9% 13%;
+  --ring: 52 100% 50%;
+  --accent: 52 100% 50%;
+  --accent-foreground: 220 9% 13%;
+  --radius: 12px;
 }
 
-/* --- 2. FONDO #1F2125 --- */
-html, body, #root,
-main, #main-container,
-[data-panel-group],
+html,
+body,
+#root,
+main,
+#main-container,
 [data-slot="sidebar"],
-[data-slot="card"],
-.cl-root, .cl-main,
-div[class*="bg-background"],
-div[class*="bg-card"] {
+[data-slot="card"] {
   background-color: #1f2125 !important;
 }
 
-/* --- 3. CAJA DE ESCRITURA #444444 --- */
-
-/* El textarea/input en sí */
 textarea,
 input[type="text"],
 [contenteditable="true"],
@@ -44,53 +37,43 @@ input[type="text"],
 [data-slot="input"] {
   background-color: #444444 !important;
   color: #ffffff !important;
+  border-color: #595959 !important;
 }
 
-/* Wrapper directo del composer (solo el borde exterior de la caja) */
-[class*="message-composer"],
-[class*="composer-container"],
-[id*="chat-input"],
-[id*="composer"] {
-  background-color: #444444 !important;
-  border-color: #555555 !important;
-}
-
-/* Placeholder text */
 textarea::placeholder,
-input::placeholder,
-[contenteditable="true"]:empty:before {
-  color: #aaaaaa !important;
+input::placeholder {
+  color: #b9b9b9 !important;
 }
 
-/* --- 4. BOTÓN ENVIAR #FFDD00 --- */
-/* Cubrir todas las variantes posibles de Chainlit */
+[class*="composer"],
+[id*="composer"],
+[id*="chat-input"] {
+  background-color: #2e3033 !important;
+  border-color: #4f4f4f !important;
+}
+
 button[type="submit"],
 button[aria-label*="Send"],
 button[aria-label*="send"],
 button[aria-label*="Enviar"],
 button[data-testid="send-button"],
-button[class*="send"],
-.bg-primary,
-button[class*="primary"]:not([variant="ghost"]):not([variant="outline"]) {
+.bg-primary {
   background-color: #ffdd00 !important;
-  border-color:     #ffdd00 !important;
-  color:            #1f2125 !important;
+  border-color: #ffdd00 !important;
+  color: #1f2125 !important;
 }
 
-/* SVG / icono dentro del botón */
 button[type="submit"] svg,
 button[aria-label*="Send"] svg,
 button[aria-label*="send"] svg,
 button[aria-label*="Enviar"] svg,
 button[data-testid="send-button"] svg,
-button[class*="send"] svg,
 .bg-primary svg {
   color: #1f2125 !important;
-  fill:  #1f2125 !important;
+  fill: #1f2125 !important;
   stroke: #1f2125 !important;
 }
 
-/* Hover ligeramente más oscuro */
 button[type="submit"]:hover,
 button[aria-label*="Send"]:hover,
 button[aria-label*="send"]:hover,
@@ -98,28 +81,23 @@ button[aria-label*="Enviar"]:hover,
 button[data-testid="send-button"]:hover,
 .bg-primary:hover {
   background-color: #e3c700 !important;
-  border-color:     #e3c700 !important;
+  border-color: #e3c700 !important;
 }
 
-/* --- 5. BURBUJA DEL USUARIO (mensajes que escribe el usuario) --- */
-/* Cambia #FFDD00 por el color que prefieras                        */
 [data-testid="user-message"],
 [class*="user-message"],
 [class*="UserMessage"],
-div[class*="message"][class*="user"],
 .cl-message-user {
-  background-color: #FFDD00 !important;  /* ← CAMBIA ESTE COLOR */
-  color:            #1f2125 !important;  /* ← texto oscuro sobre fondo amarillo */
-  border-radius:    12px !important;
+  background-color: #ffdd00 !important;
+  color: #1f2125 !important;
+  border-radius: 12px !important;
 }
 
-/* --- 6. BURBUJA DEL ASISTENTE (mensajes de Centauro) --- */
 [data-testid="assistant-message"],
 [class*="assistant-message"],
 [class*="AssistantMessage"],
-div[class*="message"][class*="assistant"],
 .cl-message-assistant {
-  background-color: #3A3C3E !important;  /* ← CAMBIA ESTE COLOR */
-  color:            #ffffff !important;
-  border-radius:    12px !important;
+  background-color: #3a3c3e !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
 }

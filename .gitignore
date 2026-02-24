@@ -28,3 +28,8 @@ outputs/
 chroma_db/
 __pycache__/
 
+#Audio y Video
+*.mp3
+*.wav
+*.mp4
+*.avi

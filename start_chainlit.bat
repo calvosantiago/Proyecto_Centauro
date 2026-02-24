@@ -1,54 +1,51 @@
 @echo off
-REM ================================================
-REM  CENTAURO v3.0 - Launcher Seguro (CORREGIDO)
-REM ================================================
+setlocal
 
-REM 1. Asegurar que estamos en la carpeta del proyecto
+REM Centauro Chainlit launcher (robust Windows batch)
 cd /d "%~dp0"
 
-echo.
-echo [INFO] Buscando entorno virtual...
+REM Force UTF-8 mode for Python I/O
+chcp 65001 >nul
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
 
-REM 2. Intentar activar el entorno virtual
-if exist ".venv\Scripts\activate.bat" (
-    call .venv\Scripts\activate.bat
-    echo [OK] Entorno virtual .venv ACTIVADO correctamente.
+echo.
+echo [INFO] Starting Centauro Chainlit...
+
+REM Prefer project virtual environment
+if exist ".venv\Scripts\python.exe" (
+  set "PYTHON_EXE=.venv\Scripts\python.exe"
+  echo [OK] Using .venv Python
 ) else (
-    echo [ALERTA] No se encontro la carpeta .venv
-    echo Intentando usar Python del sistema...
+  set "PYTHON_EXE=python"
+  echo [WARN] .venv not found, using system Python
 )
 
-echo.
-echo ================================================
-echo     CENTAURO v3.0 - Iniciando Chainlit
-echo ================================================
-echo.
-
-REM 3. Verificar si chainlit está instalado
-python -c "import chainlit" 2>nul
-if %errorlevel% neq 0 (
-    echo [AVISO] Chainlit no detectado.
-    echo Instalando dependencias...
-    
-    uv pip install -r requirements.txt 2>nul
-    if %errorlevel% neq 0 (
-        echo UV no encontrado, usando PIP estandar...
-        pip install -r requirements.txt
-    )
-    echo.
+REM Kill stale process on port 8000
+for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":8000" ^| findstr "LISTENING"') do (
+  echo [WARN] Port 8000 in use by PID %%P. Killing stale process...
+  taskkill /F /PID %%P >nul 2>nul
 )
 
-echo [OK] Lanzando aplicacion...
-echo Navegador: http://localhost:8000
-echo.
+REM Validate key dependencies in selected interpreter
+%PYTHON_EXE% -c "import chainlit, chromadb" >nul 2>nul
+if errorlevel 1 (
+  echo [ERROR] Missing dependencies in selected Python environment.
+  echo [ERROR] Install with:
+  echo         .venv\Scripts\python -m pip install -r requirements.txt
+  pause
+  exit /b 1
+)
 
-REM 4. Ejecutar la app
-python -m chainlit run app.py
+echo [OK] Launching app at http://localhost:8000
+echo [INFO] First startup can take 30-60 seconds...
 
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] La aplicacion se cerro.
-    echo Si ves un SyntaxError arriba, revisa tu archivo app.py.
+%PYTHON_EXE% -m chainlit run app.py --host 127.0.0.1 --port 8000
+
+if errorlevel 1 (
+  echo.
+  echo [ERROR] Chainlit stopped with an error.
 )
 
 pause
+endlocal

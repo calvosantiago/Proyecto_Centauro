@@ -4023,3 +4023,54 @@ Timestamp,Fecha,Hora,Archivo/Referencia,Operacion,Endpoint,Modelo,Prompt Tokens,
 2026-02-24T10:24:10,2026-02-24,10:24:10,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
 2026-02-24T10:24:11,2026-02-24,10:24:11,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,98,98,,,,0.000002,0.000002,
 2026-02-24T10:24:25,2026-02-24,10:24:25,Vicente Spina_batch_secundarios,chat_completion,v1/chat/completions,gpt-4o-mini,15438,4096,11342,778,,16216,0.001701,0.000307,0.000467,,0.002475,chatcmpl-DCiwFS9dBqousKJTOrIRq71RsdqfC
+2026-02-24T11:41:44,2026-02-24,11:41:44,rag_temas,chat_completion,v1/chat/completions,gpt-4o-mini,3546,0,3546,160,,3706,0.000532,0.000000,0.000096,,0.000628,chatcmpl-DCk9ECwsXnXJUNUMthdpGoqxa676q
+2026-02-24T11:41:47,2026-02-24,11:41:47,Ivan Canale.vtt_resumen_contextual,chat_completion,v1/chat/completions,gpt-4o-mini,1231,0,1231,97,,1328,0.000185,0.000000,0.000058,,0.000243,chatcmpl-DCk9I90ugY8PVpdRpKDXnp4w3ZyrJ
+2026-02-24T11:41:49,2026-02-24,11:41:49,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,16,16,,,,0.000000,0.000000,
+2026-02-24T11:41:49,2026-02-24,11:41:49,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,16,16,,,,0.000000,0.000000,
+2026-02-24T11:41:51,2026-02-24,11:41:51,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,138,138,,,,0.000003,0.000003,
+2026-02-24T11:42:05,2026-02-24,11:42:05,eval_investigacion,chat_completion,v1/chat/completions,gpt-4o-mini,5638,0,5638,755,,6393,0.000846,0.000000,0.000453,,0.001299,chatcmpl-DCk9QbYdcj4TMkeEG6fz6cLce7lvh
+2026-02-24T11:42:05,2026-02-24,11:42:05,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,17,17,,,,0.000000,0.000000,
+2026-02-24T11:42:06,2026-02-24,11:42:06,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,17,17,,,,0.000000,0.000000,
+2026-02-24T11:42:06,2026-02-24,11:42:06,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,138,138,,,,0.000003,0.000003,
+2026-02-24T11:42:32,2026-02-24,11:42:32,eval_admision_economica,chat_completion,v1/chat/completions,gpt-4o-mini,16980,0,16980,456,,17436,0.002547,0.000000,0.000274,,0.002821,chatcmpl-DCk9eK9e4LbI3SAob7Fp7IEfO3vwo
+2026-02-24T11:42:34,2026-02-24,11:42:34,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,12,12,,,,0.000000,0.000000,
+2026-02-24T11:42:34,2026-02-24,11:42:34,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,12,12,,,,0.000000,0.000000,
+2026-02-24T11:42:34,2026-02-24,11:42:34,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,138,138,,,,0.000003,0.000003,
+2026-02-24T11:42:59,2026-02-24,11:42:59,eval_objeciones,chat_completion,v1/chat/completions,gpt-4o-mini,16529,0,16529,455,,16984,0.002479,0.000000,0.000273,,0.002752,chatcmpl-DCkA76TVaQtxy2q4U80i9kxHRbftP
+2026-02-24T11:43:00,2026-02-24,11:43:00,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T11:43:00,2026-02-24,11:43:00,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T11:43:01,2026-02-24,11:43:01,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,138,138,,,,0.000003,0.000003,
+2026-02-24T11:43:19,2026-02-24,11:43:19,eval_cierre,chat_completion,v1/chat/completions,gpt-4o-mini,6027,0,6027,474,,6501,0.000904,0.000000,0.000284,,0.001188,chatcmpl-DCkAXtLWd9CCIsajh0gcGSI9Njw3R
+2026-02-24T11:43:19,2026-02-24,11:43:19,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T11:43:19,2026-02-24,11:43:19,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T11:43:19,2026-02-24,11:43:19,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
+2026-02-24T11:43:20,2026-02-24,11:43:20,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
+2026-02-24T11:43:20,2026-02-24,11:43:20,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,89,89,,,,0.000002,0.000002,
+2026-02-24T11:43:54,2026-02-24,11:43:54,Ivan Canale.vtt_batch_secundarios,chat_completion,v1/chat/completions,gpt-4o-mini,17000,0,17000,747,,17747,0.002550,0.000000,0.000448,,0.002998,chatcmpl-DCkAqzjtLLOOenhjdveD16d61xdpB
+2026-02-24T12:01:38,2026-02-24,12:01:38,rag_temas,chat_completion,v1/chat/completions,gpt-4o-mini,3690,0,3690,233,,3923,0.000553,0.000000,0.000140,,0.000693,chatcmpl-DCkSUOnnqWk74csn2UIqnRMWgzCrD
+2026-02-24T12:01:40,2026-02-24,12:01:40,Nicolas Uriburu.vtt_resumen_contextual,chat_completion,v1/chat/completions,gpt-4o-mini,1276,0,1276,114,,1390,0.000191,0.000000,0.000068,,0.000260,chatcmpl-DCkSYGAwjyUX5mRWIMK43YKcHm9N3
+2026-02-24T12:01:41,2026-02-24,12:01:41,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,16,16,,,,0.000000,0.000000,
+2026-02-24T12:01:42,2026-02-24,12:01:42,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,16,16,,,,0.000000,0.000000,
+2026-02-24T12:01:42,2026-02-24,12:01:42,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,163,163,,,,0.000003,0.000003,
+2026-02-24T12:01:56,2026-02-24,12:01:56,eval_investigacion,chat_completion,v1/chat/completions,gpt-4o-mini,5522,0,5522,736,,6258,0.000828,0.000000,0.000442,,0.001270,chatcmpl-DCkSd8fbaiUVuCPUyLFHSKvOqHxHB
+2026-02-24T12:01:58,2026-02-24,12:01:58,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,17,17,,,,0.000000,0.000000,
+2026-02-24T12:01:58,2026-02-24,12:01:58,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,17,17,,,,0.000000,0.000000,
+2026-02-24T12:01:58,2026-02-24,12:01:58,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,163,163,,,,0.000003,0.000003,
+2026-02-24T12:02:31,2026-02-24,12:02:31,eval_admision_economica,chat_completion,v1/chat/completions,gpt-4o-mini,15139,0,15139,561,,15700,0.002271,0.000000,0.000337,,0.002607,chatcmpl-DCkStkXMa68EG05BNp5h7uP2rBcGU
+2026-02-24T12:02:31,2026-02-24,12:02:31,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,25,25,,,,0.000000,0.000000,
+2026-02-24T12:02:31,2026-02-24,12:02:31,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,25,25,,,,0.000000,0.000000,
+2026-02-24T12:02:32,2026-02-24,12:02:32,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,163,163,,,,0.000003,0.000003,
+2026-02-24T12:02:55,2026-02-24,12:02:55,eval_objeciones,chat_completion,v1/chat/completions,gpt-4o-mini,14965,0,14965,431,,15396,0.002245,0.000000,0.000259,,0.002503,chatcmpl-DCkTQaN7m5NZPYwZCRiGNMggcHDe5
+2026-02-24T12:02:55,2026-02-24,12:02:55,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T12:02:55,2026-02-24,12:02:55,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T12:02:56,2026-02-24,12:02:56,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,163,163,,,,0.000003,0.000003,
+2026-02-24T12:03:17,2026-02-24,12:03:17,eval_cierre,chat_completion,v1/chat/completions,gpt-4o-mini,6035,0,6035,460,,6495,0.000905,0.000000,0.000276,,0.001181,chatcmpl-DCkToqbyquxlhsMv95eR7cbGM7t1y
+2026-02-24T12:03:18,2026-02-24,12:03:18,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T12:03:18,2026-02-24,12:03:18,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T12:03:18,2026-02-24,12:03:18,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
+2026-02-24T12:03:19,2026-02-24,12:03:19,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
+2026-02-24T12:03:19,2026-02-24,12:03:19,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,98,98,,,,0.000002,0.000002,
+2026-02-24T12:03:59,2026-02-24,12:03:59,Nicolas Uriburu.vtt_batch_secundarios,chat_completion,v1/chat/completions,gpt-4o-mini,15221,0,15221,733,,15954,0.002283,0.000000,0.000440,,0.002723,chatcmpl-DCkUCvnRW2UMdwECuhWfsaXatXi25
+2026-02-24T12:06:23,2026-02-24,12:06:23,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T12:06:23,2026-02-24,12:06:23,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-24T12:06:29,2026-02-24,12:06:29,chat_interactivo,chat_completion,v1/chat/completions,gpt-4o-mini,749,0,749,255,,1004,0.000112,0.000000,0.000153,,0.000265,chatcmpl-DCkXAl1ysGWF6UrW3U3fQicYe1sFH

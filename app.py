@@ -8,6 +8,7 @@ NUEVO en v4.0:
 Ejecutar con: chainlit run app.py -w
 """
 import chainlit as cl
+import asyncio
 from pathlib import Path
 from centauro.core import CentauroOrchestrator
 from centauro.core.chat_handler import ChatHandler
@@ -146,7 +147,10 @@ Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
         # Indexar solo si hay cambios en los archivos (sistema de hash)
         async with cl.Step(name="📚 Inicializando base de conocimiento", type="tool") as step:
             try:
-                stats = await cl.make_async(indexar_si_necesario)()
+                stats = await asyncio.wait_for(
+                    cl.make_async(indexar_si_necesario)(),
+                    timeout=120
+                )
                 n_m = stats["manuales"]
                 n_bp = stats["buenas_practicas"]
                 n_c = stats["coaching"]
@@ -160,6 +164,11 @@ Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
                         f"✅ Base lista sin cambios: "
                         f"{n_m} manuales + {n_bp} buenas prácticas + {n_c} coaching"
                     )
+            except asyncio.TimeoutError:
+                step.output = (
+                    "⚠️ La inicialización de la base tardó demasiado. "
+                    "Continuamos para que puedas usar el chat."
+                )
             except Exception as e:
                 step.output = f"⚠️ Error en indexación (continuará sin RAG): {e}"
         # Configurar settings para permitir archivos
