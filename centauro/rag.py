@@ -472,6 +472,80 @@ def indexar_coaching_ventas():
         print(f"✅ Coaching indexado: {collection_coaching.count()} fragmentos totales")
 
 
+# ==================== ESTADÍSTICAS DE TOKENS ====================
+
+def _contar_tokens_colecciones() -> dict:
+    """
+    Cuenta tokens aproximados en todas las colecciones de documentación.
+    Recupera los textos almacenados en ChromaDB y suma sus caracteres.
+    Aproximación: 4 chars = 1 token (válido para español/inglés con OpenAI).
+
+    Returns:
+        dict con stats por colección y totales. Ej:
+        {
+            "manuales":        {"fragmentos": 70, "tokens": 17000},
+            "buenas_practicas":{"fragmentos": 42, "tokens": 13500},
+            "coaching":        {"fragmentos": 90, "tokens": 89000},
+            "dossiers":        {"fragmentos":  0, "tokens":     0},
+            "_total":          {"fragmentos":202, "tokens":119500},
+        }
+    """
+    colecciones_map = {
+        "manuales":         collection_manuales,
+        "buenas_practicas": collection_buenas_practicas,
+        "coaching":         collection_coaching,
+        "dossiers":         collection_dossiers,
+    }
+
+    stats = {}
+    total_chars = 0
+    total_frags = 0
+
+    for nombre, col in colecciones_map.items():
+        n = col.count()
+        if n == 0:
+            stats[nombre] = {"fragmentos": 0, "tokens": 0}
+            continue
+
+        chars = 0
+        offset = 0
+        batch = 500
+        while offset < n:
+            resultado = col.get(limit=batch, offset=offset, include=["documents"])
+            for doc in resultado["documents"]:
+                if doc:
+                    chars += len(doc)
+            offset += batch
+
+        tokens = chars // 4
+        stats[nombre] = {"fragmentos": n, "tokens": tokens}
+        total_chars += chars
+        total_frags += n
+
+    stats["_total"] = {"fragmentos": total_frags, "tokens": total_chars // 4}
+    return stats
+
+
+def _imprimir_resumen_tokens(stats: dict) -> None:
+    """Imprime tabla de tokens por colección con coste estimado de re-indexación."""
+    total = stats.get("_total", {})
+    tokens_total = total.get("tokens", 0)
+    coste = (tokens_total / 1_000_000) * 0.02  # text-embedding-3-small: $0.02/1M tokens
+
+    print("\n   Tokens en base de conocimiento (aprox. 4 chars/token):")
+    for nombre, s in stats.items():
+        if nombre == "_total":
+            continue
+        frags = s["fragmentos"]
+        tok   = s["tokens"]
+        barra = "#" * min(tok // 2000, 20)
+        print(f"   • {nombre:<20} {frags:>4} frags   ~{tok:>7,} tokens  {barra}")
+
+    print(f"   {'─'*52}")
+    print(f"   {'TOTAL':<20} {total.get('fragmentos',0):>4} frags   ~{tokens_total:>7,} tokens")
+    print(f"   Coste re-indexar: ${coste:.4f} USD (text-embedding-3-small)")
+
+
 # ==================== FUNCIÓN PRINCIPAL ====================
 
 def indexar_documentacion():
@@ -496,6 +570,7 @@ def indexar_documentacion():
     print(f"   • Coaching/Libros: {collection_coaching.count()} fragmentos")
     print(f"   • Evaluaciones históricas: {collection_evaluaciones.count()} fragmentos")
     print(f"   • Dossiers programas: {collection_dossiers.count()} fragmentos")
+    _imprimir_resumen_tokens(_contar_tokens_colecciones())
     print("="*70 + "\n")
 
 
@@ -602,6 +677,7 @@ def indexar_si_necesario() -> dict:
     if hash_actual == hash_guardado and total_actual > 0:
         print(f"✅ Base de conocimiento sin cambios "
               f"({n_manuales} manuales + {n_bp} buenas prácticas + {n_coaching} coaching)")
+        _imprimir_resumen_tokens(_contar_tokens_colecciones())
         return {
             "re_indexado": False,
             "manuales": n_manuales,
