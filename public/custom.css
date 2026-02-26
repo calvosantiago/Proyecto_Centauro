@@ -84,13 +84,21 @@ button[data-testid="send-button"]:hover,
   border-color: #e3c700 !important;
 }
 
-[data-testid="user-message"],
-[class*="user-message"],
-[class*="UserMessage"],
-.cl-message-user {
-  background-color: #ffdd00 !important;
-  color: #1f2125 !important;
-  border-radius: 12px !important;
+/* Burbuja de mensaje del usuario — clase real en Chainlit 2.9.6 */
+/* flex-grow-0 está en la burbuja del usuario pero NO en el composer */
+.bg-accent.rounded-3xl.flex-grow-0,
+.bg-accent.rounded-3xl.flex-grow-0 * {
+  color: #000000 !important;
+  --tw-prose-body: #000000;
+  --tw-prose-headings: #000000;
+  --tw-prose-links: #000000;
+  --tw-prose-bold: #000000;
+  --tw-prose-code: #000000;
+}
+
+/* Asegurar texto blanco en el textarea del composer */
+textarea {
+  color: #ffffff !important;
 }
 
 [data-testid="assistant-message"],
@@ -100,4 +108,12 @@ button[data-testid="send-button"]:hover,
   background-color: #3a3c3e !important;
   color: #ffffff !important;
   border-radius: 12px !important;
+}
+
+.centauro-brand-logo {
+  display: block;
+  height: 36px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
 }

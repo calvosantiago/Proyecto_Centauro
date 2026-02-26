@@ -10,6 +10,8 @@ Ejecutar con: chainlit run app.py -w
 import chainlit as cl
 import asyncio
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env")
 from centauro.core import CentauroOrchestrator
 from centauro.core.chat_handler import ChatHandler
 from centauro.core.memoria import memory_manager
@@ -25,19 +27,25 @@ from main import leer_word, limpiar_formato_vtt
 # Transcripción de audio/vídeo (MP4 → ffmpeg → MP3 → Groq Whisper)
 # ---------------------------------------------------------------------------
 
-def _procesar_archivo_multimedia(file_path: Path) -> str:
+def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> str:
     """
     Extrae texto de un archivo MP4 o MP3 usando Groq Whisper.
     - MP4: extrae audio con ffmpeg (32kbps/mono/16kHz) y luego transcribe.
     - MP3: transcribe directamente.
     Función síncrona pensada para usar con cl.make_async().
+
+    original_name: nombre original del archivo subido (ej: "entrevista.mp3").
+    Se usa para que la API de Groq reconozca el formato correctamente,
+    ya que Chainlit puede guardar el fichero con un UUID como nombre.
     """
     import os
     import subprocess
+    import tempfile
     from groq import Groq
     from centauro.tools.whisper_transcribe import texto_de_segmentos, WHISPER_MODEL
 
-    suffix = file_path.suffix.lower()
+    # Determinar extensión usando el nombre original si está disponible
+    suffix = Path(original_name).suffix.lower() if original_name else file_path.suffix.lower()
     audio_path = file_path
 
     # Si es vídeo MP4, extraer audio con ffmpeg primero
@@ -48,7 +56,9 @@ def _procesar_archivo_multimedia(file_path: Path) -> str:
                 f"ffmpeg no encontrado en {FFMPEG_PATH}\n"
                 "Instálalo desde https://ffmpeg.org/download.html y colócalo en C:/ffmpeg/bin/"
             )
-        mp3_tmp = file_path.with_suffix('.mp3')
+        # Usar directorio temporal del sistema para evitar problemas con rutas
+        # con espacios (como el directorio de Chainlit en este entorno)
+        mp3_tmp = Path(tempfile.gettempdir()) / f"centauro_{file_path.stem}.mp3"
         comando = [
             str(FFMPEG_PATH),
             "-i", str(file_path),
@@ -83,10 +93,18 @@ def _procesar_archivo_multimedia(file_path: Path) -> str:
         )
 
     client = Groq(api_key=api_key)
+
+    # Nombre que se envía a la API: Groq necesita la extensión para reconocer el formato.
+    # Para MP4 ya convertido a MP3, ajustar extensión.
+    if suffix == '.mp4':
+        nombre_api = (Path(original_name).stem if original_name else file_path.stem) + ".mp3"
+    else:
+        nombre_api = original_name or audio_path.name
+
     with open(audio_path, "rb") as f:
         response = client.audio.transcriptions.create(
             model=WHISPER_MODEL,
-            file=f,
+            file=(nombre_api, f),   # Nombre explícito para que Groq reconozca el formato
             response_format="verbose_json",
             language="es",
         )
@@ -190,8 +208,13 @@ async def process_file_action(action: cl.Action):
 @cl.on_message
 async def main(message: cl.Message):
     """Procesar transcripciones subidas O responder consultas de chat"""
-    # Verificar si hay archivos adjuntos
-    files = [file for file in message.elements if isinstance(file, cl.File)] if message.elements else []
+    # Verificar si hay archivos adjuntos.
+    # IMPORTANTE: Chainlit crea cl.Audio para MP3 y cl.Video para MP4,
+    # NO cl.File. Hay que incluir los tres tipos para detectarlos correctamente.
+    files = (
+        [file for file in message.elements if isinstance(file, (cl.File, cl.Audio, cl.Video))]
+        if message.elements else []
+    )
     # ==================== MODO CHAT INTERACTIVO ====================
     if not files and message.content:
         # El usuario escribió texto sin adjuntar archivo → Modo chat
@@ -252,7 +275,8 @@ async def main(message: cl.Message):
         # Si no existe el módulo de validaciones, continuar sin validar
         pass
     # ===============================================================================
-    es_multimedia = file_path.suffix.lower() in ('.mp4', '.mp3')
+    # Usar el nombre original del archivo para detectar el tipo (file_path puede ser un UUID sin extensión)
+    es_multimedia = Path(file.name).suffix.lower() in ('.mp4', '.mp3')
     tiempo_estimado = "5-10 minutos (transcripción + análisis)" if es_multimedia else "1-2 minutos"
     await cl.Message(
         content=f"📁 Procesando: **{file.name}**\n\nEsto puede tardar {tiempo_estimado}..."
@@ -261,16 +285,17 @@ async def main(message: cl.Message):
     # NOTA: NO limpiamos VTT aquí - el agente de diarización necesita
     # el texto crudo para detectar UUIDs de speakers
     try:
-        if file_path.suffix.lower() == '.docx':
+        if Path(file.name).suffix.lower() == '.docx':
             texto_crudo = leer_word(file_path)
         elif es_multimedia:
             # MP4 o MP3: extraer audio (si MP4) y transcribir con Groq Whisper
             async with cl.Step(name="🎙️ Transcribiendo audio con Groq Whisper", type="tool") as step:
-                if file_path.suffix.lower() == '.mp4':
+                if Path(file.name).suffix.lower() == '.mp4':
                     step.output = "⏳ Extrayendo audio con ffmpeg..."
                 else:
                     step.output = "⏳ Enviando a Groq Whisper..."
-                texto_crudo = await cl.make_async(_procesar_archivo_multimedia)(file_path)
+                # Pasar file.name para que la API de Groq reconozca el formato correctamente
+                texto_crudo = await cl.make_async(_procesar_archivo_multimedia)(file_path, file.name)
                 num_chars = len(texto_crudo) if texto_crudo else 0
                 step.output = f"✅ Transcripción completada ({num_chars} caracteres)"
         else:

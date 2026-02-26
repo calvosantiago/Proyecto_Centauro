@@ -16,7 +16,8 @@
       "Bash(grep:*)",
       "Bash(find:*)",
       "Bash(.venv/Scripts/python.exe:*)",
-      "Bash(PYTHONIOENCODING=utf-8 \"/c/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/.venv/Scripts/python.exe\":*)"
+      "Bash(PYTHONIOENCODING=utf-8 \"/c/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/.venv/Scripts/python.exe\":*)",
+      "Bash(where:*)"
     ]
   }
 }

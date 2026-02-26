@@ -121,8 +121,58 @@ class ModernReport(FPDF):
             self.multi_cell(0, 5, to_latin1(f'"{evidencia}"'), border=0, fill=True)
             self.ln(2)
 
-        # 5. Hallazgos clave en Investigación
-        if str(nombre).strip().lower() == "investigación" or str(nombre).strip().lower() == "investigacion":
+        # 5a. Seguimiento de próximos pasos en Cierre
+        nombre_normalizado = str(nombre).strip().lower()
+        if nombre_normalizado in ("cierre y próximos pasos", "cierre y proximos pasos"):
+            seguimiento = bloque.get('seguimiento_proximos_pasos', {}) or bloque.get('metadata', {}).get('seguimiento_proximos_pasos', {})
+            acuerdo_textual = seguimiento.get("acuerdo_textual", "")
+            fecha_hora = seguimiento.get("fecha_hora", "")
+            accion_acordada = seguimiento.get("accion_acordada", "")
+            quien = seguimiento.get("quien_da_siguiente_paso", "")
+
+            if acuerdo_textual or fecha_hora or accion_acordada:
+                self.set_x(15)
+                self.set_fill_color(248, 248, 248)
+                self.set_draw_color(225, 225, 225)
+                self.set_x(18)
+                self.set_font('Helvetica', 'B', 9)
+                self.set_text_color(*COLOR_PRIMARY)
+                self.cell(0, 5, to_latin1("Seguimiento y próximos pasos"), 0, 1, fill=True)
+
+                self.set_x(18)
+                self.set_font('Helvetica', 'B', 9)
+                self.cell(38, 5, to_latin1("Lo acordado:"), 0, 0, fill=True)
+                self.set_font('Helvetica', 'I', 9)
+                self.set_text_color(60, 60, 60)
+                self.multi_cell(139, 5, to_latin1(acuerdo_textual or "No acordado"), fill=True)
+
+                self.set_x(18)
+                self.set_font('Helvetica', 'B', 9)
+                self.set_text_color(*COLOR_PRIMARY)
+                self.cell(38, 5, to_latin1("Fecha/hora:"), 0, 0, fill=True)
+                self.set_font('Helvetica', '', 9)
+                self.set_text_color(60, 60, 60)
+                self.multi_cell(139, 5, to_latin1(fecha_hora or "No especificada"), fill=True)
+
+                self.set_x(18)
+                self.set_font('Helvetica', 'B', 9)
+                self.set_text_color(*COLOR_PRIMARY)
+                self.cell(38, 5, to_latin1("Acción acordada:"), 0, 0, fill=True)
+                self.set_font('Helvetica', '', 9)
+                self.set_text_color(60, 60, 60)
+                self.multi_cell(139, 5, to_latin1(accion_acordada or "Ninguna"), fill=True)
+
+                self.set_x(18)
+                self.set_font('Helvetica', 'B', 9)
+                self.set_text_color(*COLOR_PRIMARY)
+                self.cell(38, 5, to_latin1("Siguiente paso de:"), 0, 0, fill=True)
+                self.set_font('Helvetica', '', 9)
+                self.set_text_color(60, 60, 60)
+                self.multi_cell(139, 5, to_latin1(quien or "No definido"), fill=True)
+                self.ln(2)
+
+        # 5b. Hallazgos clave en Investigación
+        if nombre_normalizado in ("investigación", "investigacion"):
             factor_compra = hallazgos.get("factor_de_compra", "")
             inversion_esperada = hallazgos.get("inversion_esperada", "")
             competidores = hallazgos.get("competidores", "")

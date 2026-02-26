@@ -80,7 +80,8 @@ class CierreAgent(BaseEvaluatorAgent):
                     "tecnica_cierre": resultado_raw.get("tecnica_cierre", "ninguna"),
                     "recepcion_cliente": resultado_raw.get("recepcion_cliente", {}),
                     "tecnicas_detectadas": tecnicas_detectadas,
-                    "feedback_personalizado": resultado_raw.get("feedback_personalizado", "")
+                    "feedback_personalizado": resultado_raw.get("feedback_personalizado", ""),
+                    "seguimiento_proximos_pasos": resultado_raw.get("seguimiento_proximos_pasos", {})
                 }
             )
 
@@ -198,7 +199,13 @@ FORMATO JSON OBLIGATORIO:
     "evidencia": "[LEAD]: Respuesta del lead... (COPY-PASTE LITERAL)"
   }},
   "tecnicas_detectadas": ["lista de técnicas que usó"],
-  "feedback_personalizado": "Mensaje DIRECTO al asesor: algo específico que hizo bien + UNA mejora concreta con ejemplo de frase. Máx 3-4 líneas."
+  "feedback_personalizado": "Mensaje DIRECTO al asesor: algo específico que hizo bien + UNA mejora concreta con ejemplo de frase. Máx 3-4 líneas.",
+  "seguimiento_proximos_pasos": {{
+    "acuerdo_textual": "COPY-PASTE LITERAL de la frase exacta donde quedan en algo (ej: '[ASESOR]: Te llamo el martes a las 8, ¿te va bien? [LEAD]: Perfecto.'). 'No acordado' si no hubo acuerdo.",
+    "fecha_hora": "Fecha y/o hora concreta acordada (ej: 'martes a las 8:00'). 'No especificada' si fue vago o no hubo.",
+    "accion_acordada": "Qué debe ocurrir: enviar documentación, llamada de seguimiento, entrevista de admisión, etc. 'Ninguna' si no se acordó nada.",
+    "quien_da_siguiente_paso": "ASESOR llama / LEAD envía docs / AMBOS / NINGUNO"
+  }}
 }}
 
 REGLAS DEL FEEDBACK PERSONALIZADO:
