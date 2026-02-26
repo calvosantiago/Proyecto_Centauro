@@ -1,11 +1,16 @@
 """
-Chat Handler v4.0 - Interfaz de consulta interactiva al RAG
+Chat Handler v4.1 - Interfaz de consulta interactiva al RAG
 
 Permite a los usuarios hacer preguntas sobre:
 - Manuales de venta (cómo hacer algo correctamente)
 - Ejemplos de buenas prácticas (mostrarme ejemplos)
 - Evaluaciones históricas (cómo lo han hecho otros asesores)
 - Perfiles de asesores (mi rendimiento, estadísticas)
+
+v4.1 - Mejoras:
+- Detección de bloque/sección en la pregunta para filtrar RAG
+- Historial de conversación incluido en el contexto del LLM
+- Manejo de "mi rendimiento" sin nombre de asesor en sesión
 """
 from typing import List, Dict, Optional
 from ..config import centauro_config
@@ -14,11 +19,47 @@ from ..llm_client import consultar_gpt
 from .memoria import memory_manager
 
 
+# Mapeo de palabras clave a seccion_key (debe coincidir con SECCION_TO_BLOQUE en rag.py)
+BLOQUE_KEYWORDS: Dict[str, List[str]] = {
+    "investigacion": [
+        "investigación", "investigacion", "investigar", "descubrir",
+        "necesidades", "preguntas abiertas", "spin", "rapport",
+        "diagnóstico", "diagnostico", "sondeo", "apertura",
+    ],
+    "propuesta_valor": [
+        "propuesta de valor", "propuesta valor", "institución", "programa",
+        "diferencial", "beneficios", "presentación", "presentacion",
+        "argumentario", "ventajas",
+    ],
+    "admision_economica": [
+        "admisión", "admision", "económico", "economico", "precio", "coste",
+        "coste", "pago", "financiación", "financiacion", "matrícula",
+        "matricula", "inversión", "inversion", "propuesta económica",
+    ],
+    "cierre": [
+        "cierre", "cerrar", "próximos pasos", "proximos pasos",
+        "compromiso", "siguiente paso", "acuerdo", "confirmar",
+        "formalizar",
+    ],
+    "objeciones": [
+        "objeción", "objeciones", "objecion", "resistencia",
+        "rechazo", "duda", "inconveniente", "pero", "aunque",
+        "manejo de objeciones", "rebatir",
+    ],
+    "estilo": [
+        "estilo", "comunicación", "comunicacion", "tono", "empatía",
+        "empatia", "escucha activa", "lenguaje", "actitud",
+        "profesionalismo", "confianza",
+    ],
+}
+
+
 class ChatHandler:
     """
     Maneja consultas de texto libre del usuario al sistema de conocimiento.
 
-    Identifica la intención y busca en la colección apropiada.
+    Identifica la intención, detecta el bloque temático y busca
+    en la colección apropiada con filtros de metadata precisos.
     """
 
     def __init__(self):
@@ -35,23 +76,33 @@ class ChatHandler:
         Returns:
             Respuesta generada por el LLM con contexto del RAG
         """
-        # Identificar intención
+        # Identificar intención y bloque temático
         intencion = self._clasificar_intencion(pregunta_usuario)
+        bloque_detectado = self._detectar_bloque(pregunta_usuario)
 
         # Buscar contexto relevante
-        contexto = self._buscar_contexto_relevante(pregunta_usuario, intencion, nombre_asesor)
+        contexto = self._buscar_contexto_relevante(
+            pregunta_usuario, intencion, bloque_detectado, nombre_asesor
+        )
 
-        # Generar respuesta
-        respuesta = self._generar_respuesta(pregunta_usuario, contexto, intencion)
+        # Generar respuesta (incluye historial)
+        respuesta = self._generar_respuesta(
+            pregunta_usuario, contexto, intencion, bloque_detectado
+        )
 
         # Guardar en historial
         self.historial_conversacion.append({
             "pregunta": pregunta_usuario,
             "respuesta": respuesta,
-            "intencion": intencion
+            "intencion": intencion,
+            "bloque": bloque_detectado,
         })
 
         return respuesta
+
+    # ------------------------------------------------------------------
+    # Clasificación de intención
+    # ------------------------------------------------------------------
 
     def _clasificar_intencion(self, pregunta: str) -> str:
         """
@@ -63,65 +114,161 @@ class ChatHandler:
         pregunta_lower = pregunta.lower()
 
         # Patrón: Perfil personal
-        if any(kw in pregunta_lower for kw in ["mi rendimiento", "mi perfil", "mis evaluaciones", "cómo he mejorado", "mi progreso"]):
+        if any(kw in pregunta_lower for kw in [
+            "mi rendimiento", "mi perfil", "mis evaluaciones",
+            "cómo he mejorado", "mi progreso", "cómo estoy",
+            "mis resultados",
+        ]):
             return "perfil"
 
-        # Patrón: Ejemplos
-        if any(kw in pregunta_lower for kw in ["ejemplo", "muestra", "cómo hacer", "cómo debería", "demostración", "referencia"]):
-            return "ejemplo"
-
         # Patrón: Estadísticas globales
-        if any(kw in pregunta_lower for kw in ["estadísticas", "cuántos asesores", "promedio general", "tendencias"]):
+        if any(kw in pregunta_lower for kw in [
+            "estadísticas", "cuántos asesores", "promedio general",
+            "tendencias", "el equipo", "estadisticas",
+        ]):
             return "estadisticas"
 
+        # Patrón: Ejemplos concretos
+        if any(kw in pregunta_lower for kw in [
+            "ejemplo", "ejemplos", "muéstrame", "muestrame", "muestra",
+            "cómo lo haría", "cómo se haría", "cómo se hace",
+            "demostración", "demostracion", "referencia", "caso",
+        ]):
+            return "ejemplo"
+
         # Patrón: Manual (cómo hacer algo)
-        if any(kw in pregunta_lower for kw in ["cómo", "cuál es el proceso", "qué debo", "procedimiento", "protocolo", "reglas"]):
+        if any(kw in pregunta_lower for kw in [
+            "cómo", "como", "qué debo", "que debo", "procedimiento",
+            "protocolo", "reglas", "pasos", "técnica", "tecnica",
+            "estrategia", "consejo", "consejos",
+        ]):
             return "manual"
 
-        # Default: General
         return "general"
 
-    def _buscar_contexto_relevante(self, pregunta: str, intencion: str, nombre_asesor: Optional[str]) -> str:
-        """Busca contexto en las colecciones apropiadas según la intención"""
+    # ------------------------------------------------------------------
+    # Detección de bloque temático
+    # ------------------------------------------------------------------
 
-        if intencion == "perfil" and nombre_asesor:
-            # Buscar perfil del asesor
-            return self._obtener_perfil_asesor(nombre_asesor)
+    def _detectar_bloque(self, pregunta: str) -> Optional[str]:
+        """
+        Detecta qué bloque/sección menciona la pregunta.
+
+        Returns:
+            seccion_key ("cierre", "investigacion", ...) o None si no se detecta
+        """
+        pregunta_lower = pregunta.lower()
+        for seccion_key, keywords in BLOQUE_KEYWORDS.items():
+            if any(kw in pregunta_lower for kw in keywords):
+                return seccion_key
+        return None
+
+    # ------------------------------------------------------------------
+    # Búsqueda de contexto
+    # ------------------------------------------------------------------
+
+    def _buscar_contexto_relevante(
+        self,
+        pregunta: str,
+        intencion: str,
+        bloque_detectado: Optional[str],
+        nombre_asesor: Optional[str],
+    ) -> str:
+        """Busca contexto en las colecciones apropiadas según intención y bloque."""
+
+        if intencion == "perfil":
+            return self._obtener_perfil_asesor(nombre_asesor, pregunta)
 
         elif intencion == "estadisticas":
-            # Obtener estadísticas globales
             return self._obtener_estadisticas_globales()
 
         elif intencion == "ejemplo":
-            # Buscar en buenas prácticas
+            return self._buscar_ejemplos(pregunta, bloque_detectado)
+
+        elif intencion == "manual":
+            return self._buscar_en_manual(pregunta, bloque_detectado)
+
+        else:
+            return self._busqueda_multicoleccion(pregunta)
+
+    def _buscar_ejemplos(self, pregunta: str, bloque: Optional[str]) -> str:
+        """Busca ejemplos en buenas prácticas, filtrando por sección si se detectó."""
+        filtro = {"seccion_key": bloque} if bloque else None
+
+        resultados = buscar_en_coleccion(
+            query=pregunta,
+            collection_name=centauro_config.COLLECTION_BUENAS_PRACTICAS,
+            k=centauro_config.CHAT_RAG_TOP_K,
+            filtro_metadata=filtro,
+        )
+
+        # Si con filtro no hay resultados, buscar sin filtro como fallback
+        if not resultados and bloque:
             resultados = buscar_en_coleccion(
                 query=pregunta,
                 collection_name=centauro_config.COLLECTION_BUENAS_PRACTICAS,
-                k=centauro_config.CHAT_RAG_TOP_K
+                k=centauro_config.CHAT_RAG_TOP_K,
             )
-            if resultados:
-                fragmentos = [r['text'] for r in resultados]
-                return "\n\n---\n\n".join(fragmentos)
-            return "No se encontraron ejemplos relevantes."
 
-        elif intencion == "manual":
-            # Buscar en manuales generales
-            resultados = buscar_en_coleccion(
-                query=pregunta,
-                collection_name=centauro_config.COLLECTION_MANUALES,
-                k=centauro_config.CHAT_RAG_TOP_K
-            )
-            if resultados:
-                fragmentos = [r['text'] for r in resultados]
-                return "\n\n---\n\n".join(fragmentos)
-            return "No se encontró información en los manuales."
+        if resultados:
+            fragmentos = [r['text'] for r in resultados]
+            return "\n\n---\n\n".join(fragmentos)
 
-        else:
-            # Búsqueda general en todas las colecciones
-            return self._busqueda_multicoleccion(pregunta)
+        return "No se encontraron ejemplos relevantes."
 
-    def _obtener_perfil_asesor(self, nombre_asesor: str) -> str:
-        """Obtiene y formatea el perfil de un asesor"""
+    def _buscar_en_manual(self, pregunta: str, bloque: Optional[str]) -> str:
+        """Busca en manuales. Si hay bloque detectado, lo incluye en la query."""
+        # Los manuales no tienen metadato de sección, pero enriquecer la query
+        # con el nombre del bloque mejora la búsqueda semántica
+        query_enriquecida = pregunta
+        if bloque:
+            nombre_bloque_display = {
+                "investigacion": "investigación y descubrimiento de necesidades",
+                "propuesta_valor": "propuesta de valor institución y programa",
+                "admision_economica": "admisión económica y propuesta de precio",
+                "cierre": "cierre y próximos pasos",
+                "objeciones": "manejo de objeciones",
+                "estilo": "estilo y comunicación",
+            }.get(bloque, bloque)
+            query_enriquecida = f"{pregunta} {nombre_bloque_display}"
+
+        resultados = buscar_en_coleccion(
+            query=query_enriquecida,
+            collection_name=centauro_config.COLLECTION_MANUALES,
+            k=centauro_config.CHAT_RAG_TOP_K,
+        )
+
+        if resultados:
+            fragmentos = [r['text'] for r in resultados]
+            return "\n\n---\n\n".join(fragmentos)
+
+        return "No se encontró información en los manuales."
+
+    def _obtener_perfil_asesor(self, nombre_asesor: Optional[str], pregunta: str) -> str:
+        """Obtiene y formatea el perfil de un asesor."""
+        if not nombre_asesor:
+            # Intentar extraer nombre de la propia pregunta
+            nombre_asesor = self._extraer_nombre_de_pregunta(pregunta)
+
+        if not nombre_asesor:
+            # Sin nombre, listar asesores disponibles
+            try:
+                archivos = list(memory_manager.perfiles_dir.glob("*.json"))
+                if not archivos:
+                    return "Aún no hay evaluaciones registradas en el sistema."
+                nombres = [f.stem.replace("_", " ").title() for f in archivos[:10]]
+                lista = "\n".join(f"- {n}" for n in nombres)
+                return (
+                    f"No sé de qué asesor quieres ver el rendimiento. "
+                    f"Hay {len(archivos)} asesor(es) evaluado(s):\n{lista}\n\n"
+                    f"Dime el nombre y te muestro su perfil."
+                )
+            except Exception:
+                return (
+                    "No sé de qué asesor quieres ver el rendimiento. "
+                    "Por favor indica el nombre del asesor."
+                )
+
         try:
             perfil = memory_manager.cargar_perfil(nombre_asesor)
 
@@ -134,13 +281,11 @@ PERFIL DE {perfil.nombre.upper()}
 
 📊 RESUMEN:
 - Total evaluaciones: {perfil.total_evaluaciones}
-- Promedio general: {perfil.puntuacion_promedio:.1f}/5
 - Primera evaluación: {perfil.fecha_primera_evaluacion}
 - Última evaluación: {perfil.fecha_ultima_evaluacion}
 
 📈 TENDENCIA:
 - Estado: {perfil.tendencia_global}
-- Cambio reciente: {perfil.cambio_reciente:+.1f} puntos
 
 ✅ FORTALEZAS CONSISTENTES:
 {', '.join(perfil.fortalezas_consistentes) if perfil.fortalezas_consistentes else 'No identificadas aún'}
@@ -151,10 +296,25 @@ PERFIL DE {perfil.nombre.upper()}
             return texto_perfil
 
         except Exception as e:
-            return f"Error obteniendo perfil: {e}"
+            return f"Error obteniendo perfil de {nombre_asesor}: {e}"
+
+    def _extraer_nombre_de_pregunta(self, pregunta: str) -> Optional[str]:
+        """
+        Intenta extraer un nombre de asesor mencionado en la pregunta.
+        Ejemplo: "¿Cuál es el rendimiento de Juan García?"
+        """
+        import re
+        # Patrones como "de Juan García", "rendimiento de Ana López"
+        match = re.search(
+            r'\bde\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){1,2})',
+            pregunta
+        )
+        if match:
+            return match.group(1).strip()
+        return None
 
     def _obtener_estadisticas_globales(self) -> str:
-        """Obtiene estadísticas del sistema completo"""
+        """Obtiene estadísticas del sistema completo."""
         try:
             stats = memory_manager.obtener_estadisticas_globales()
 
@@ -169,7 +329,6 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
 
 📊 EVALUACIONES:
 - Total evaluaciones: {stats.get('total_evaluaciones', 0)}
-- Promedio global: {stats.get('promedio_global', 0):.1f}/5
 
 📚 BASE DE CONOCIMIENTO:
 - Conversaciones excelentes en RAG: {stats.get('conversaciones_en_rag', 0)}
@@ -180,23 +339,21 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
             return f"Error obteniendo estadísticas: {e}"
 
     def _busqueda_multicoleccion(self, pregunta: str) -> str:
-        """Busca en múltiples colecciones y combina resultados"""
+        """Busca en múltiples colecciones y combina resultados."""
         resultados_todos = []
 
-        # Manuales
         res_manuales = buscar_en_coleccion(
             query=pregunta,
             collection_name=centauro_config.COLLECTION_MANUALES,
-            k=2
+            k=2,
         )
         if res_manuales:
             resultados_todos.append("## DESDE MANUALES:\n" + res_manuales[0]['text'])
 
-        # Buenas prácticas
         res_ejemplos = buscar_en_coleccion(
             query=pregunta,
             collection_name=centauro_config.COLLECTION_BUENAS_PRACTICAS,
-            k=2
+            k=2,
         )
         if res_ejemplos:
             resultados_todos.append("## DESDE EJEMPLOS:\n" + res_ejemplos[0]['text'])
@@ -206,78 +363,100 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
 
         return "No se encontró información relevante."
 
-    def _generar_respuesta(self, pregunta: str, contexto: str, intencion: str) -> str:
-        """Genera respuesta usando LLM con el contexto obtenido"""
+    # ------------------------------------------------------------------
+    # Generación de respuesta
+    # ------------------------------------------------------------------
 
-        # Prompt según intención
+    def _generar_respuesta(
+        self,
+        pregunta: str,
+        contexto: str,
+        intencion: str,
+        bloque: Optional[str],
+    ) -> str:
+        """Genera respuesta usando LLM con contexto del RAG e historial de conversación."""
+
+        nombre_bloque_display = {
+            "investigacion": "Investigación y descubrimiento de necesidades",
+            "propuesta_valor": "Propuesta de valor",
+            "admision_economica": "Admisión y propuesta económica",
+            "cierre": "Cierre y próximos pasos",
+            "objeciones": "Manejo de objeciones",
+            "estilo": "Estilo y comunicación",
+        }.get(bloque, "") if bloque else ""
+
+        bloque_instruccion = (
+            f"\nIMPORTANTE: La pregunta es específicamente sobre el bloque "
+            f"'{nombre_bloque_display}'. Centra tu respuesta exclusivamente "
+            f"en ese bloque. No menciones otros bloques de venta salvo que "
+            f"sea estrictamente necesario para dar contexto.\n"
+        ) if bloque else ""
+
         if intencion == "perfil":
-            prompt_sistema = """
-Eres un asistente especializado en análisis de rendimiento de asesores comerciales.
-
-El usuario pregunta por su perfil y tienes acceso a sus estadísticas históricas.
-
+            prompt_sistema = f"""Eres un asistente especializado en análisis de rendimiento de asesores comerciales.
+El usuario pregunta por un perfil y tienes acceso a sus estadísticas históricas.
 IMPORTANTE:
 - Sé directo y constructivo
 - Resalta fortalezas antes de mencionar áreas de mejora
 - Usa datos concretos del perfil
 - Sugiere acciones específicas si hay áreas de mejora
-"""
+{bloque_instruccion}"""
 
         elif intencion == "ejemplo":
-            prompt_sistema = """
-Eres un experto en ventas consultivas que proporciona ejemplos prácticos.
-
+            prompt_sistema = f"""Eres un experto en ventas consultivas que proporciona ejemplos prácticos de buenas prácticas.
 IMPORTANTE:
 - Los ejemplos son REFERENCIAS, no reglas absolutas
-- Explica el "por qué" detrás de cada técnica
-- Sugiere adaptaciones según el contexto
+- Explica el "por qué" detrás de cada técnica mostrada
+- Sugiere adaptaciones según el contexto del asesor
 - Mantén un tono inspirador, no prescriptivo
-"""
+{bloque_instruccion}"""
 
         elif intencion == "manual":
-            prompt_sistema = """
-Eres un instructor de ventas consultivas que explica procedimientos y mejores prácticas.
-
+            prompt_sistema = f"""Eres un instructor de ventas consultivas que explica procedimientos y mejores prácticas.
 IMPORTANTE:
 - Explica de forma clara y estructurada
-- Usa el contexto del manual pero explícalo con tus palabras
+- Usa el contexto del manual pero explícalo con tus propias palabras
 - Proporciona razones detrás de cada recomendación
 - Sé conciso pero completo
-"""
+{bloque_instruccion}"""
 
         elif intencion == "estadisticas":
-            prompt_sistema = """
-Eres un analista de datos que presenta estadísticas del sistema de forma comprensible.
-
+            prompt_sistema = """Eres un analista de datos que presenta estadísticas del sistema de forma comprensible.
 IMPORTANTE:
 - Presenta datos de forma clara
 - Identifica tendencias y patrones
 - Sugiere interpretaciones útiles
-- Mantén un tono objetivo
-"""
+- Mantén un tono objetivo"""
 
         else:
-            prompt_sistema = """
-Eres un asistente experto en ventas consultivas y evaluación de llamadas comerciales.
-
+            prompt_sistema = f"""Eres un asistente experto en ventas consultivas y evaluación de llamadas comerciales.
 Responde preguntas usando el contexto proporcionado de nuestra base de conocimiento.
-
 IMPORTANTE:
 - Sé conciso y directo
-- Cita ejemplos concretos del contexto
+- Cita ejemplos concretos del contexto cuando los haya
 - Si no hay información suficiente, dilo claramente
-"""
+{bloque_instruccion}"""
 
-        # Construir prompt de usuario
-        prompt_usuario = f"""
-PREGUNTA DEL USUARIO:
+        # Incluir historial reciente en el prompt (últimas 3 interacciones)
+        historial_texto = ""
+        ultimas = self.historial_conversacion[-3:]
+        if ultimas:
+            lineas = []
+            for h in ultimas:
+                lineas.append(f"[Usuario]: {h['pregunta']}")
+                # Truncar respuestas largas en el historial
+                resp_corta = h['respuesta'][:300] + "..." if len(h['respuesta']) > 300 else h['respuesta']
+                lineas.append(f"[Centauro]: {resp_corta}")
+            historial_texto = "HISTORIAL RECIENTE DE LA CONVERSACIÓN:\n" + "\n".join(lineas) + "\n\n"
+
+        prompt_usuario = f"""{historial_texto}PREGUNTA ACTUAL DEL USUARIO:
 {pregunta}
 
-CONTEXTO RELEVANTE:
+CONTEXTO RELEVANTE DE LA BASE DE CONOCIMIENTO:
 {contexto}
 
 Responde la pregunta del usuario basándote en el contexto proporcionado.
-Si el contexto no es suficiente para responder, indícalo claramente.
+Si el contexto no es suficiente para responder con precisión, indícalo claramente.
 """
 
         try:
@@ -285,17 +464,21 @@ Si el contexto no es suficiente para responder, indícalo claramente.
                 prompt_sistema,
                 prompt_usuario,
                 "chat_interactivo",
-                force_json=False  # Chat NO necesita JSON, solo texto
+                force_json=False,
             )
             return respuesta
 
         except Exception as e:
             return f"Error generando respuesta: {e}"
 
+    # ------------------------------------------------------------------
+    # Utilidades
+    # ------------------------------------------------------------------
+
     def obtener_historial(self, ultimas_n: int = 5) -> List[Dict]:
-        """Devuelve las últimas N interacciones del historial"""
+        """Devuelve las últimas N interacciones del historial."""
         return self.historial_conversacion[-ultimas_n:]
 
     def limpiar_historial(self):
-        """Limpia el historial de conversación"""
+        """Limpia el historial de conversación."""
         self.historial_conversacion.clear()
