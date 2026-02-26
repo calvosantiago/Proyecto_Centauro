@@ -16,5 +16,8 @@ chainlit>=1.0.0
 # Lectura de metadatos de audio (duración MP3 para cálculo de costes Whisper)
 mutagen
 
+# Transcripción de audio con Groq Whisper (API en la nube)
+groq
+
 # Optional (mejora performance)
 uvicorn[standard]

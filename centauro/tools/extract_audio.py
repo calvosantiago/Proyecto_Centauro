@@ -24,7 +24,12 @@ sys.path.insert(0, str(ROOT))
 # ---------------------------------------------------------------------------
 VIDEOS_DIR    = ROOT / "inputs" / "videollamadas"
 AUDIOS_DIR    = ROOT / "inputs" / "audios"
-FFMPEG_PATH   = Path(r"C:\ffmpeg\bin\ffmpeg.exe")
+
+# Buscar ffmpeg: en Windows en la ruta habitual, en Linux/Mac en el PATH del sistema
+import shutil as _shutil
+_ffmpeg_windows = Path(r"C:\ffmpeg\bin\ffmpeg.exe")
+_ffmpeg_system  = _shutil.which("ffmpeg")
+FFMPEG_PATH = _ffmpeg_windows if _ffmpeg_windows.exists() else Path(_ffmpeg_system or "ffmpeg")
 
 # Extensiones de vídeo soportadas
 VIDEO_EXTENSIONS = {".mp4", ".mkv", ".webm", ".mov"}
