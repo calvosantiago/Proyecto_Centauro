@@ -124,7 +124,7 @@ async def start():
     already_welcomed = cl.user_session.get("welcomed", False)
     # Mensaje de bienvenida (solo se muestra la primera vez)
     if not already_welcomed:
-        welcome_msg = """#  Bienvenido a **Centauro v4.0**
+        welcome_msg = """#  Bienvenido a **Centauro v4.0 (Fase BETA)**
 Sistema de evaluación automatizada + **Chat Interactivo** con IA Multi-Agente.
 ---
 ## 💬 **NUEVO: Modo Chat Interactivo**
@@ -132,15 +132,13 @@ Ahora puedes **preguntar directamente** a Centauro:
 **Ejemplos de preguntas:**
 - *"¿Cómo debería hacer una buena apertura?"*
 - *"Muéstrame ejemplos de cierre exitoso"*
-- *"¿Cuál es mi rendimiento histórico?"* (si has sido evaluado)
-- *"Dame estadísticas del equipo"*
 **Solo escribe tu pregunta abajo** 👇 y presiona Enter.
 ---
 ## 📤 **Modo Evaluación de Llamadas**
 1. **Usa el botón 📎 (clip)** o **arrastra tu archivo**
-2. Formatos: `.txt`, `.vtt`, `.docx`, `.mp3`, `.mp4`
+2. Formatos: `.txt`, `.vtt`, `.docx`
 3. **NUEVO:** Puedes escribir contexto junto al archivo (info del lead, programa, etc.)
-4. Espera 1-2 minutos
+4. Espera algunos minutos
 5. Descarga reporte PDF completo
 ---
 ## 🎯 **¿Qué evalúa Centauro?**
