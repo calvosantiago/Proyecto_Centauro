@@ -141,13 +141,6 @@ class ModernReport(FPDF):
 
                 self.set_x(18)
                 self.set_font('Helvetica', 'B', 9)
-                self.cell(38, 5, to_latin1("Lo acordado:"), 0, 0, fill=True)
-                self.set_font('Helvetica', 'I', 9)
-                self.set_text_color(60, 60, 60)
-                self.multi_cell(139, 5, to_latin1(acuerdo_textual or "No acordado"), fill=True)
-
-                self.set_x(18)
-                self.set_font('Helvetica', 'B', 9)
                 self.set_text_color(*COLOR_PRIMARY)
                 self.cell(38, 5, to_latin1("Fecha/hora:"), 0, 0, fill=True)
                 self.set_font('Helvetica', '', 9)
@@ -157,18 +150,18 @@ class ModernReport(FPDF):
                 self.set_x(18)
                 self.set_font('Helvetica', 'B', 9)
                 self.set_text_color(*COLOR_PRIMARY)
-                self.cell(38, 5, to_latin1("Acción acordada:"), 0, 0, fill=True)
+                self.cell(38, 5, to_latin1("Compromiso acordado:"), 0, 0, fill=True)
                 self.set_font('Helvetica', '', 9)
                 self.set_text_color(60, 60, 60)
-                self.multi_cell(139, 5, to_latin1(accion_acordada or "Ninguna"), fill=True)
+                self.multi_cell(139, 5, to_latin1(accion_acordada or "Ninguno"), fill=True)
 
                 self.set_x(18)
                 self.set_font('Helvetica', 'B', 9)
                 self.set_text_color(*COLOR_PRIMARY)
-                self.cell(38, 5, to_latin1("Siguiente paso de:"), 0, 0, fill=True)
+                self.cell(48, 5, to_latin1("Responsable del siguiente paso:"), 0, 0, fill=True)
                 self.set_font('Helvetica', '', 9)
                 self.set_text_color(60, 60, 60)
-                self.multi_cell(139, 5, to_latin1(quien or "No definido"), fill=True)
+                self.multi_cell(129, 5, to_latin1(quien or "No definido"), fill=True)
                 self.ln(2)
 
         # 5b. Hallazgos clave en Investigación

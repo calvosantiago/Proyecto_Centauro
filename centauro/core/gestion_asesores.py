@@ -35,7 +35,8 @@ class GestionAsesores:
         self._cargar_asesores_conocidos()
 
     def _cargar_asesores_conocidos(self):
-        """Carga lista de asesores desde perfiles existentes"""
+        """Carga lista de asesores desde perfiles existentes, leyendo el nombre del JSON"""
+        import json
         try:
             from .memoria import memory_manager
 
@@ -43,11 +44,16 @@ class GestionAsesores:
 
             if perfiles_dir.exists():
                 for archivo in perfiles_dir.glob("*.json"):
-                    # Nombre del archivo es: nombre_asesor.json
-                    nombre_archivo = archivo.stem
-                    # Convertir de nombre_archivo a "Nombre Archivo"
-                    nombre_legible = nombre_archivo.replace('_', ' ').title()
-                    self.asesores_conocidos.append(nombre_legible)
+                    try:
+                        with open(archivo, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        nombre = data.get('nombre', '').strip()
+                        if nombre and self._es_nombre_valido(nombre):
+                            self.asesores_conocidos.append(nombre)
+                    except Exception:
+                        # Fallback: reconstruir desde filename
+                        nombre_legible = archivo.stem.replace('_', ' ').title()
+                        self.asesores_conocidos.append(nombre_legible)
         except Exception as e:
             print(f"⚠️ No se pudieron cargar asesores conocidos: {e}")
 

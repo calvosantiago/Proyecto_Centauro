@@ -117,3 +117,38 @@ textarea {
   max-width: 200px;
   object-fit: contain;
 }
+
+/* ── Login page: imagen de fondo ──────────────────────────────────── */
+
+/* Imagen de login: portrait para llenar el panel sin recortes */
+img[src*="obs_back"] {
+  object-fit: cover !important;
+  object-position: center 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Login page: ocultar/sustituir marca Chainlit ───────────────────── */
+
+/* Watermark y enlaces a chainlit.io / github */
+a[href*="chainlit.io"],
+a[href*="github.com/Chainlit"] {
+  display: none !important;
+}
+
+
+/* Texto "Chainlit" en el header del login (span junto al logo) */
+header a > span,
+nav a > span {
+  font-size: 0 !important;   /* oculta el texto original */
+  line-height: 0 !important;
+}
+header a > span::after,
+nav a > span::after {
+  content: "Centauro";
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffdd00;            /* amarillo de marca Centauro */
+}

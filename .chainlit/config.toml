@@ -121,7 +121,7 @@ cot = "full"
 
 # Specify a CSS file that can be used to customize the user interface.
 # The CSS file can be served from the public directory or via an external link.
-custom_css = "/public/custom.css?v=20260225e"
+custom_css = "/public/custom.css?v=20260227n"
 
 # Specify additional attributes for a custom CSS file
 # custom_css_attributes = "media=\"print\""
@@ -137,11 +137,11 @@ alert_style = "classic"
 # custom_js_attributes = "async type = \"module\""
 
 # Custom login page image, relative to public directory or external URL
-# login_page_image = "/public/custom-background.jpg"
+login_page_image = "/public/obs_back.png"
 
 # Custom login page image filter (Tailwind internal filters, no dark/light variants)
-# login_page_image_filter = "brightness-50 grayscale"
-# login_page_image_dark_filter = "contrast-200 blur-sm"
+login_page_image_filter = "brightness-85"
+login_page_image_dark_filter = "brightness-85"
 
 # Specify a custom meta URL (used for meta tags like og:url)
 # custom_meta_url = "https://github.com/Chainlit/chainlit"

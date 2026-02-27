@@ -24,6 +24,9 @@ outputs/
 
 .env
 
+# Base de datos de usuarios (contiene hashes de contraseñas — nunca subir a Git)
+centauro_users.json
+
 .chroma_db/
 chroma_db/
 __pycache__/

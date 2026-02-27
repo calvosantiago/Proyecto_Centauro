@@ -136,8 +136,14 @@ CLAVES DE ESTE CIERRE
    / "Tu candidatura tiene que entrar esta semana para ser evaluada."
 
 3. PRÓXIMO PASO CONCRETO CON FECHA:
-   El siguiente paso debe ser específico y con fecha real. "Te llamo la semana que
-   viene" no es un cierre. "Te llamo el martes a las 11, ¿te va bien?" sí lo es.
+   El siguiente paso debe ser específico y con fecha real. Hay grados:
+   - SIN FECHA (→ MALO): "Piénsalo y me dices", "Ya hablaremos", ningún próximo paso.
+   - FECHA PARCIAL (→ MEJORABLE): "Te llamo mañana", "Esta semana te escribo", "El lunes
+     hablamos" — hay referencia temporal pero sin hora ni confirmación explícita del lead.
+   - FECHA CONCRETA (→ BUENO): "Te llamo el martes a las 11, ¿te va bien?" — día + hora
+     y el lead confirma.
+   IMPORTANTE: "mañana", "esta tarde", "el lunes" SÍ son referencias temporales reales y
+   deben recogerse en fecha_hora. NO los marques como "No especificada".
 
 4. TÉCNICA DE CIERRE:
    - Doble alternativa: "¿Prefieres que te llame martes o jueves?"
@@ -202,7 +208,7 @@ FORMATO JSON OBLIGATORIO:
   "feedback_personalizado": "Mensaje DIRECTO al asesor: algo específico que hizo bien + UNA mejora concreta con ejemplo de frase. Máx 3-4 líneas.",
   "seguimiento_proximos_pasos": {{
     "acuerdo_textual": "COPY-PASTE LITERAL de la frase exacta donde quedan en algo (ej: '[ASESOR]: Te llamo el martes a las 8, ¿te va bien? [LEAD]: Perfecto.'). 'No acordado' si no hubo acuerdo.",
-    "fecha_hora": "Fecha y/o hora concreta acordada (ej: 'martes a las 8:00'). 'No especificada' si fue vago o no hubo.",
+    "fecha_hora": "Referencia temporal acordada tal como se dijo (ej: 'martes a las 8:00', 'mañana', 'esta tarde', 'el lunes'). 'No especificada' SOLO si no se mencionó ninguna fecha ni plazo.",
     "accion_acordada": "Qué debe ocurrir: enviar documentación, llamada de seguimiento, entrevista de admisión, etc. 'Ninguna' si no se acordó nada.",
     "quien_da_siguiente_paso": "ASESOR llama / LEAD envía docs / AMBOS / NINGUNO"
   }}

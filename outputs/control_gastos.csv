@@ -4241,3 +4241,29 @@ Timestamp,Fecha,Hora,Archivo/Referencia,Operacion,Endpoint,Modelo,Prompt Tokens,
 2026-02-26T14:59:07,2026-02-26,14:59:07,chat_interactivo,chat_completion,v1/chat/completions,gpt-4o-mini,771,0,771,246,,1017,0.000116,0.000000,0.000148,,0.000263,chatcmpl-DDWBK02cFGMUlBfkq4dH7riI3KlBG
 2026-02-26T14:59:58,2026-02-26,14:59:58,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,12,12,,,,0.000000,0.000000,
 2026-02-26T15:00:11,2026-02-26,15:00:11,chat_interactivo,chat_completion,v1/chat/completions,gpt-4o-mini,1848,0,1848,670,,2518,0.000277,0.000000,0.000402,,0.000679,chatcmpl-DDWCFLBPGewUTjzpgKXKN6Q2HLAZN
+2026-02-27T11:48:16,2026-02-27,11:48:16,diar_batch,chat_completion,v1/chat/completions,gpt-4o-mini,4700,0,4700,4790,,9490,0.000705,0.000000,0.002874,,0.003579,chatcmpl-DDpeWMS3R4x5vFY3IfXvUReIwqgtX
+2026-02-27T11:49:47,2026-02-27,11:49:47,diar_batch,chat_completion,v1/chat/completions,gpt-4o-mini,4137,0,4137,3745,,7882,0.000621,0.000000,0.002247,,0.002868,chatcmpl-DDpgcouwpURl7fSx6oqYmGuOTZZ7b
+2026-02-27T11:50:08,2026-02-27,11:50:08,rag_temas,chat_completion,v1/chat/completions,gpt-4o-mini,3231,0,3231,201,,3432,0.000485,0.000000,0.000121,,0.000605,chatcmpl-DDpi0AEjVTi90ZrmWlumtMt2IESEP
+2026-02-27T11:50:11,2026-02-27,11:50:11,Esther Lopez_whisper.txt_resumen_contextual,chat_completion,v1/chat/completions,gpt-4o-mini,2843,0,2843,114,,2957,0.000426,0.000000,0.000068,,0.000495,chatcmpl-DDpi4wzE9InxYWs26NWKN4Rf6KPBJ
+2026-02-27T11:50:14,2026-02-27,11:50:14,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,16,16,,,,0.000000,0.000000,
+2026-02-27T11:50:14,2026-02-27,11:50:14,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,16,16,,,,0.000000,0.000000,
+2026-02-27T11:50:15,2026-02-27,11:50:15,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,147,147,,,,0.000003,0.000003,
+2026-02-27T11:50:31,2026-02-27,11:50:31,eval_investigacion,chat_completion,v1/chat/completions,gpt-4o-mini,5509,0,5509,688,,6197,0.000826,0.000000,0.000413,,0.001239,chatcmpl-DDpiCnLX5HrDmK6wol18q9rxTo1C0
+2026-02-27T11:50:33,2026-02-27,11:50:33,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,17,17,,,,0.000000,0.000000,
+2026-02-27T11:50:33,2026-02-27,11:50:33,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,17,17,,,,0.000000,0.000000,
+2026-02-27T11:50:34,2026-02-27,11:50:34,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,147,147,,,,0.000003,0.000003,
+2026-02-27T11:50:52,2026-02-27,11:50:52,eval_admision_economica,chat_completion,v1/chat/completions,gpt-4o-mini,13627,0,13627,782,,14409,0.002044,0.000000,0.000469,,0.002513,chatcmpl-DDpiWHbZUcaugmEBKC7Jg7ujlUG2O
+2026-02-27T11:50:53,2026-02-27,11:50:53,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,23,23,,,,0.000000,0.000000,
+2026-02-27T11:50:54,2026-02-27,11:50:54,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,23,23,,,,0.000000,0.000000,
+2026-02-27T11:50:54,2026-02-27,11:50:54,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,147,147,,,,0.000003,0.000003,
+2026-02-27T11:51:25,2026-02-27,11:51:25,eval_objeciones,chat_completion,v1/chat/completions,gpt-4o-mini,13217,0,13217,571,,13788,0.001983,0.000000,0.000343,,0.002325,chatcmpl-DDpiptyKKzFn9iQaMVBCJRWqqIDhZ
+2026-02-27T11:51:26,2026-02-27,11:51:26,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-27T11:51:27,2026-02-27,11:51:27,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-27T11:51:27,2026-02-27,11:51:27,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,147,147,,,,0.000003,0.000003,
+2026-02-27T11:51:39,2026-02-27,11:51:39,eval_cierre,chat_completion,v1/chat/completions,gpt-4o-mini,6077,0,6077,495,,6572,0.000912,0.000000,0.000297,,0.001209,chatcmpl-DDpjLDvMTizYggp00FFNjK80VVAyV
+2026-02-27T11:51:40,2026-02-27,11:51:40,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-27T11:51:40,2026-02-27,11:51:40,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,11,11,,,,0.000000,0.000000,
+2026-02-27T11:51:40,2026-02-27,11:51:40,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
+2026-02-27T11:51:41,2026-02-27,11:51:41,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,14,14,,,,0.000000,0.000000,
+2026-02-27T11:51:41,2026-02-27,11:51:41,chroma_embedding_batch_1,embedding,v1/embeddings,text-embedding-3-small,,,,,95,95,,,,0.000002,0.000002,
+2026-02-27T11:52:22,2026-02-27,11:52:22,Esther Lopez_whisper.txt_batch_secundarios,chat_completion,v1/chat/completions,gpt-4o-mini,13688,0,13688,765,,14453,0.002053,0.000000,0.000459,,0.002512,chatcmpl-DDpjaaF2kurS84C5Q4ZNk2dW16h1Z

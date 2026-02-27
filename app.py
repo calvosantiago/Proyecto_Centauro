@@ -19,9 +19,34 @@ from centauro.rag import indexar_si_necesario
 from centauro.privacy import redact_pii
 from centauro.reports import generar_pdf
 from centauro.config import settings
+from centauro.auth import autenticar
 import json
 # Importar funciones de lectura desde main.py (raíz del proyecto)
 from main import leer_word, limpiar_formato_vtt
+
+
+# ---------------------------------------------------------------------------
+# AUTENTICACIÓN — Chainlit invoca este callback en cada intento de login
+# ---------------------------------------------------------------------------
+
+@cl.password_auth_callback
+def auth_callback(username: str, password: str) -> cl.User | None:
+    """
+    Verifica credenciales contra centauro_users.json.
+    Devuelve cl.User si son válidas, None si fallan.
+    """
+    usuario = autenticar(username, password)
+    if usuario is None:
+        return None
+
+    return cl.User(
+        identifier=username.strip().lower(),
+        metadata={
+            "nombre_completo": usuario.get("nombre_completo", username),
+            "rol": usuario.get("rol", "asesor"),
+            "provider": "credentials",
+        }
+    )
 
 # ---------------------------------------------------------------------------
 # Transcripción de audio/vídeo (MP4 → ffmpeg → MP3 → Groq Whisper)
@@ -120,12 +145,35 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
 @cl.on_chat_start
 async def start():
     """Inicialización cuando el usuario conecta"""
+    # ── Identidad del usuario autenticado ──────────────────────────────────
+    app_user = cl.context.session.user
+    nombre_del_login = None
+    if app_user:
+        rol = app_user.metadata.get("rol", "asesor")
+        nombre_del_login = app_user.metadata.get("nombre_completo")
+
+        if rol == "asesor" and nombre_del_login:
+            # Asesor → su nombre se pre-carga: sus evaluaciones son siempre suyas
+            cl.user_session.set("nombre_asesor", nombre_del_login)
+            cl.user_session.set("nombre_asesor_login", nombre_del_login)
+        # admin/jefe → NO pre-cargar: evaluarán a cualquier asesor del equipo
+        cl.user_session.set("rol_usuario", rol)
+
     # Verificar si ya se mostró el mensaje de bienvenida en esta sesión
     already_welcomed = cl.user_session.get("welcomed", False)
     # Mensaje de bienvenida (solo se muestra la primera vez)
     if not already_welcomed:
-        welcome_msg = """#  Bienvenido a **Centauro v4.0 (Fase BETA)**
+        rol_actual = cl.user_session.get("rol_usuario", "asesor")
+        nombre_display = nombre_del_login or "usuario"
+
+        if rol_actual == "admin":
+            banner_rol = f"\n> 👑 **Modo Jefe de Equipo** — Conectado como `{nombre_display}`. Puedes evaluar a cualquier asesor del equipo.\n"
+        else:
+            banner_rol = f"\n> 👤 **Conectado como:** {nombre_display}. Tus evaluaciones se guardarán automáticamente en tu perfil.\n"
+
+        welcome_msg = f"""#  Bienvenido a **Centauro v4.0 (Fase BETA)**
 Sistema de evaluación automatizada + **Chat Interactivo** con IA Multi-Agente.
+{banner_rol}
 ---
 ## 💬 **NUEVO: Modo Chat Interactivo**
 Ahora puedes **preguntar directamente** a Centauro:
@@ -347,72 +395,82 @@ async def main(message: cl.Message):
         # ==================== CONFIRMACIÓN DE ASESOR ====================
         # Validar y normalizar nombre del asesor
         asesor_confirmado = None
-        # Intentar extraer nombre del contexto_usuario si no se detectó
-        if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
-            if contexto_usuario:
-                nombre_de_contexto = gestion_asesores.extraer_nombre_de_transcripcion(contexto_usuario)
-                if nombre_de_contexto:
-                    asesor_detectado_inicial = nombre_de_contexto
-        if asesor_detectado_inicial and gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
-            # Buscar si existe uno similar
-            resultado_validacion = gestion_asesores.validar_y_normalizar(asesor_detectado_inicial)
-            nombre_norm, nombre_existente, score = resultado_validacion
-            if nombre_existente and score >= 85:
-                # Existe uno muy similar, preguntar cuál usar (timeout corto)
+
+        # ── Prioridad 1: nombre conocido por login (autenticación) ─────────
+        nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
+        if nombre_asesor_login:
+            # El usuario está autenticado → sabemos quién es, no hace falta preguntar
+            asesor_confirmado = nombre_asesor_login
+
+        # ── Prioridad 2: detectado en la transcripción/contexto ───────────
+        if not asesor_confirmado:
+            # Intentar extraer nombre del contexto_usuario si no se detectó en transcripción
+            if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
+                if contexto_usuario:
+                    nombre_de_contexto = gestion_asesores.extraer_nombre_de_transcripcion(contexto_usuario)
+                    if nombre_de_contexto:
+                        asesor_detectado_inicial = nombre_de_contexto
+
+            if asesor_detectado_inicial and gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
+                # Buscar si existe uno similar
+                resultado_validacion = gestion_asesores.validar_y_normalizar(asesor_detectado_inicial)
+                nombre_norm, nombre_existente, score = resultado_validacion
+                if nombre_existente and score >= 85:
+                    # Existe uno muy similar, preguntar cuál usar (timeout corto)
+                    res = await cl.AskUserMessage(
+                        content=f"👤 **Confirmación de asesor**\n\n"
+                                f"Detectado: **{nombre_norm}**\n"
+                                f"Existe perfil similar: **{nombre_existente}** (similitud: {score}%)\n\n"
+                                f"¿Cuál es correcto?\n"
+                                f"1️⃣ Usar perfil existente: **{nombre_existente}**\n"
+                                f"2️⃣ Crear nuevo perfil: **{nombre_norm}**\n"
+                                f"O escribe el nombre correcto\n\n"
+                                f"_(Si no respondes en 30s, se usará el perfil existente)_",
+                        timeout=30
+                    ).send()
+                    if res and res.get("output"):
+                        respuesta = res["output"].strip()
+                        if respuesta == "1":
+                            asesor_confirmado = nombre_existente
+                        elif respuesta == "2":
+                            asesor_confirmado = nombre_norm
+                        else:
+                            try:
+                                asesor_confirmado = gestion_asesores.obtener_nombre_canonico(respuesta)
+                            except ValueError:
+                                await cl.Message(content=f"⚠️ Nombre inválido: '{respuesta}'. Usando detectado: {nombre_norm}").send()
+                                asesor_confirmado = nombre_norm
+                    else:
+                        # Timeout, usar existente automáticamente
+                        asesor_confirmado = nombre_existente
+                else:
+                    # No hay similar, usar detectado directamente sin preguntar
+                    asesor_confirmado = nombre_norm
+            else:
+                # No se detectó nombre válido — preguntar al usuario
+                sugerencias = gestion_asesores.asesores_conocidos[:5] if gestion_asesores.asesores_conocidos else []
+                sugerencias_texto = ""
+                if sugerencias:
+                    sugerencias_texto = "\n\n**Asesores conocidos:**\n" + "\n".join(f"• {s}" for s in sugerencias)
                 res = await cl.AskUserMessage(
-                    content=f"👤 **Confirmación de asesor**\n\n"
-                            f"Detectado: **{nombre_norm}**\n"
-                            f"Existe perfil similar: **{nombre_existente}** (similitud: {score}%)\n\n"
-                            f"¿Cuál es correcto?\n"
-                            f"1️⃣ Usar perfil existente: **{nombre_existente}**\n"
-                            f"2️⃣ Crear nuevo perfil: **{nombre_norm}**\n"
-                            f"O escribe el nombre correcto\n\n"
-                            f"_(Si no respondes en 30s, se usará el perfil existente)_",
-                    timeout=30
+                    content=f"👤 **¿Quién es el asesor de esta llamada?**\n\n"
+                            f"No se pudo detectar automáticamente.\n"
+                            f"Escribe el nombre (Nombre Apellido) o **skip** para continuar sin perfil:{sugerencias_texto}",
+                    timeout=60
                 ).send()
                 if res and res.get("output"):
-                    respuesta = res["output"].strip()
-                    if respuesta == "1":
-                        asesor_confirmado = nombre_existente
-                    elif respuesta == "2":
-                        asesor_confirmado = nombre_norm
+                    nombre_manual = res["output"].strip()
+                    if nombre_manual.lower() in ("skip", "omitir", "-", "n/a"):
+                        asesor_confirmado = "Asesor Desconocido"
                     else:
                         try:
-                            asesor_confirmado = gestion_asesores.obtener_nombre_canonico(respuesta)
-                        except ValueError:
-                            await cl.Message(content=f"⚠️ Nombre inválido: '{respuesta}'. Usando detectado: {nombre_norm}").send()
-                            asesor_confirmado = nombre_norm
+                            asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
+                        except ValueError as e:
+                            await cl.Message(content=f"⚠️ Nombre no reconocido: '{nombre_manual}'. Usando como está.").send()
+                            asesor_confirmado = nombre_manual.strip().title()
                 else:
-                    # Timeout, usar existente automáticamente
-                    asesor_confirmado = nombre_existente
-            else:
-                # No hay similar, usar detectado directamente sin preguntar
-                asesor_confirmado = nombre_norm
-        else:
-            # No se detectó nombre válido — preguntar solo si no hay asesores conocidos con sugerencias
-            sugerencias = gestion_asesores.asesores_conocidos[:5] if gestion_asesores.asesores_conocidos else []
-            sugerencias_texto = ""
-            if sugerencias:
-                sugerencias_texto = "\n\n**Asesores conocidos:**\n" + "\n".join(f"• {s}" for s in sugerencias)
-            res = await cl.AskUserMessage(
-                content=f"👤 **¿Quién es el asesor de esta llamada?**\n\n"
-                        f"No se pudo detectar automáticamente.\n"
-                        f"Escribe el nombre (Nombre Apellido) o **skip** para continuar sin perfil:{sugerencias_texto}",
-                timeout=60
-            ).send()
-            if res and res.get("output"):
-                nombre_manual = res["output"].strip()
-                if nombre_manual.lower() in ("skip", "omitir", "-", "n/a"):
+                    # Timeout → continuar sin bloquear
                     asesor_confirmado = "Asesor Desconocido"
-                else:
-                    try:
-                        asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
-                    except ValueError as e:
-                        await cl.Message(content=f"⚠️ Nombre no reconocido: '{nombre_manual}'. Usando como está.").send()
-                        asesor_confirmado = nombre_manual.strip().title()
-            else:
-                # Timeout → continuar sin bloquear
-                asesor_confirmado = "Asesor Desconocido"
         # Mostrar confirmación
         await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
         # Guardar en sesión
@@ -526,7 +584,7 @@ async def main(message: cl.Message):
 ---
 ## {emoji_nota} Calificación Global: **{cal_global}**
 **Asesor:** {reporte['asesor']}
-**Perfil Lead:** {reporte['resumen_contextual'].get('perfil_lead', 'N/A')[:80]}...
+**Perfil Lead:** {reporte['resumen_contextual'].get('perfil_lead', 'N/A')}
 ---
 ## 📈 Evaluación por Bloques
 """
@@ -542,9 +600,7 @@ async def main(message: cl.Message):
         areas_mejora = reporte['feedback_resumido']['areas_mejora'][:3]
         if areas_mejora:
             for i, area in enumerate(areas_mejora, 1):
-                # Limitar longitud para legibilidad
-                area_corta = area[:150] + "..." if len(area) > 150 else area
-                resultado_msg += f"{i}. {area_corta}\n\n"
+                resultado_msg += f"{i}. {area}\n\n"
         else:
             resultado_msg += "*No hay áreas de mejora críticas detectadas*\n"
         resultado_msg += """
@@ -583,14 +639,10 @@ async def main(message: cl.Message):
         # ==================== REGISTRAR EN MEMORIA (NUEVO v4.0) ====================
         async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
             try:
-                # Convertir evaluaciones a formato dict
-                evaluaciones_dict = {
-                    e['bloque']: e for e in evaluaciones_validadas
-                }
-                # Registrar evaluación
+                # Registrar evaluación usando el reporte completo (tiene evaluacion_por_bloques y calificacion_global)
                 perfil = memory_manager.registrar_evaluacion(
                     nombre_asesor=asesor_confirmado,
-                    resultado_evaluacion=evaluaciones_dict,
+                    resultado_evaluacion=reporte,
                     transcripcion_path=str(file_path)
                 )
                 # Obtener feedback personalizado
