@@ -185,7 +185,9 @@ Ahora puedes **preguntar directamente** a Centauro:
 ## 📤 **Modo Evaluación de Llamadas**
 1. **Usa el botón 📎 (clip)** o **arrastra tu archivo**
 2. Formatos: `.txt`, `.vtt`, `.docx`
-3. **NUEVO:** Puedes escribir contexto junto al archivo (info del lead, programa, etc.)
+3. Puedes escribir texto junto al archivo con:
+   - **`Asesor: Nombre Apellido`** para indicar el asesor directamente
+   - Cualquier contexto adicional (info del lead, programa, etc.)
 4. Espera algunos minutos
 5. Descarga reporte PDF completo
 ---
@@ -299,12 +301,39 @@ async def main(message: cl.Message):
     # Obtener archivo
     file = files[0]
     file_path = Path(file.path)
-    # NUEVO: Capturar texto del usuario como contexto adicional
+    # Capturar texto del usuario como contexto adicional
     # Si el usuario escribe texto junto con el archivo, se usa como contexto
     contexto_usuario = message.content.strip() if message.content and message.content.strip() else None
+
+    # Detectar si el usuario especificó el nombre del asesor explícitamente en el mensaje
+    # Formato: "Asesor: Nombre Apellido" (en cualquier parte del texto)
+    nombre_especificado_en_mensaje = None
     if contexto_usuario:
+        import re
+        patron_nombre = re.search(
+            r'(?:asesor|nombre\s+asesor?|advisor)\s*[:=]\s*'
+            r'([A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+(?:\s+[A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+)+)',
+            contexto_usuario,
+            re.IGNORECASE
+        )
+        if patron_nombre:
+            nombre_especificado_en_mensaje = patron_nombre.group(1).strip().title()
+            # Limpiar esa parte del contexto para no contaminar los prompts de los agentes
+            contexto_usuario = re.sub(
+                r'(?:asesor|nombre\s+asesor?|advisor)\s*[:=]\s*[^\n,;]+[,;\n]?\s*',
+                '',
+                contexto_usuario,
+                flags=re.IGNORECASE
+            ).strip() or None
+
+    if nombre_especificado_en_mensaje or contexto_usuario:
+        partes = []
+        if nombre_especificado_en_mensaje:
+            partes.append(f"👤 Asesor especificado: **{nombre_especificado_en_mensaje}**")
+        if contexto_usuario:
+            partes.append("📝 Contexto adicional capturado")
         await cl.Message(
-            content=f"📝 **Contexto del usuario capturado:** Se tendrá en cuenta durante la evaluación."
+            content=" · ".join(partes) + " — Se tendrá en cuenta durante la evaluación."
         ).send()
     # ==================== VALIDACIÓN CRÍTICA: NOMBRE DE ARCHIVO ====================
     try:
@@ -401,6 +430,13 @@ async def main(message: cl.Message):
         if nombre_asesor_login:
             # El usuario está autenticado → sabemos quién es, no hace falta preguntar
             asesor_confirmado = nombre_asesor_login
+
+        # ── Prioridad 1.5: nombre especificado explícitamente en el mensaje ─
+        if not asesor_confirmado and nombre_especificado_en_mensaje:
+            try:
+                asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_especificado_en_mensaje)
+            except ValueError:
+                asesor_confirmado = nombre_especificado_en_mensaje
 
         # ── Prioridad 2: detectado en la transcripción/contexto ───────────
         if not asesor_confirmado:

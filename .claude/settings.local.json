@@ -18,7 +18,10 @@
       "Bash(.venv/Scripts/python.exe:*)",
       "Bash(PYTHONIOENCODING=utf-8 \"/c/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/.venv/Scripts/python.exe\":*)",
       "Bash(where:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(cat \"C:/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/_ul/\"*)",
+      "Bash(start \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\Centauro_Progreso_Marzo2026.pptx\")",
+      "Bash(start \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\centauro_slides.html\")"
     ]
   }
 }
