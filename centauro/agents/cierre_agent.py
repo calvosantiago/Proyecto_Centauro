@@ -112,6 +112,35 @@ Lo que evalúas es si se sale de los límites (cierre pasivo, sin próximo paso,
 o si conduce bien dentro de ellos.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CIRCUNSTANCIAS ATÍPICAS DE LA CONVERSACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Antes de evaluar el cierre, detecta si el lead declaró alguna restricción que
+condicionó el ritmo de la conversación. En particular:
+
+⚠️ RESTRICCIÓN DE TIEMPO: Si el lead indicó en algún momento anterior de la
+llamada que tenía poco tiempo ("no tengo mucho tiempo", "tengo que cortar pronto",
+"voy con prisa", "solo tengo unos minutos") → un cierre más rápido o condensado
+puede ser la respuesta adecuada del asesor, no una falta de técnica. El asesor
+que ajusta la velocidad del cierre a la disponibilidad declarada del lead está
+leyendo bien la situación. Detecta y menciona esta circunstancia en el razonamiento.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ALCANCE: EVALÚA TODA LA CONVERSACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El cierre no empieza cuando el asesor "pasa al bloque de cierre". La construcción
+del compromiso y los siguientes pasos puede comenzar desde los primeros minutos
+de la conversación.
+
+Busca en TODA la transcripción:
+  ✓ Momentos en que el asesor orientó la conversación hacia un siguiente paso
+  ✓ Señales de compromiso del lead en cualquier punto (no solo al final)
+  ✓ Cómo el asesor gestionó la urgencia y el timing a lo largo de la llamada
+  ✓ Vinculación al comité de admisión o ayudas económicas mencionadas en cualquier tramo
+
+Evalúa el CONJUNTO de cómo el asesor construyó el camino hacia el compromiso
+durante toda la conversación, no solo el tramo final.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SOBRE EL CIERRE EN VENTA CONSULTIVA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 El "cierre exitoso" NO es necesariamente que el lead diga "SÍ, lo compro ahora".
@@ -186,6 +215,15 @@ CRITERIOS DE CALIFICACIÓN
    - CRÍTICO: si no se definen próximos pasos Y tampoco se establece ningún seguimiento
      (ni fecha de llamada, ni acción del lead, ni nada) → es MALO sin excepción.
      La ausencia total de estructura de cierre es una negligencia comercial.
+   - TAMBIÉN MALO — próximo paso vacío sin compromiso real: si el asesor propuso algo
+     (ej: "te envío la información") pero el lead respondió con resistencia o negativamente,
+     Y el asesor no validó las dudas, Y no generó ningún compromiso real → la conversación
+     terminó sin avance real. Proponer enviar información sin que el lead lo acepte con
+     compromiso NO cuenta como cierre. Si además no se validaron las dudas del lead →
+     MALO, no MEJORABLE.
+   ⚠️ REGLA DE ACUMULACIÓN: Si detectas simultaneamente (1) sin validación de dudas,
+     (2) sin compromiso real del lead, (3) respuesta negativa o evasiva del lead →
+     la calificación debe ser MALO. El feedback debe enumerar estos fallos.
 
 🟡 MEJORABLE — hay un cierre mínimo pero sin estructura ni liderazgo real:
    - Propone algo concreto (enviar documentación, llamar) pero sin técnica ni fecha específica

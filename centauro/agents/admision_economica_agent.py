@@ -87,6 +87,23 @@ Lo que evalúas es si se sale de los límites (dar precio sin contexto, omitir c
 o si conduce bien dentro de ellos.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ALCANCE: EVALÚA TODA LA CONVERSACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Los bloques de la entrevista son una guía organizativa, no límites de evaluación.
+Busca activamente en TODA la transcripción:
+
+  ✓ Señales del perfil financiero del lead (quién paga, capacidad económica, expectativas)
+    → Pueden surgir durante la investigación, no solo cuando se presenta el precio
+  ✓ Momentos de construcción de valor (beneficios, diferenciadores, ROI)
+    → El asesor puede haber construido valor desde el inicio de la llamada
+  ✓ Reacciones del lead al precio en cualquier momento de la conversación
+  ✓ Storytelling o casos de alumni mencionados en cualquier sección
+
+Si encuentras alguno de estos elementos en cualquier parte de la conversación,
+tenlos en cuenta para la evaluación. El análisis financiero puede haberse hecho
+en la investigación y el valor puede haberse construido antes del bloque económico.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CLAVES DE ESTA FASE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -240,6 +257,18 @@ REGLAS CRÍTICAS:
 - Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión
   con sentido y el asesor cerró sobre una propuesta concreta? Si sí → BUENO.
 - Si el lead mostró resistencia a la fecha y el asesor no usó ayudas ni consecuencias → MALO.
+
+REGLA DE ACUMULACIÓN — MALO POR SUMA DE FALLOS:
+Si en tu razonamiento has detectado 3 o más de los siguientes fallos, la calificación
+DEBE ser MALO, independientemente de que haya habido algún elemento positivo aislado:
+  ✗ Sin análisis financiero previo al precio
+  ✗ Comité de admisión mencionado de forma mecánica o sin emoción
+  ✗ Valor construido insuficientemente antes del precio
+  ✗ Sin validación de la reacción del lead tras el precio
+  ✗ Sin argumentos de urgencia cuando el lead mostró resistencia (sin ayudas, sin
+    consecuencias de no formarse ahora, sin ventajas de decidir hoy)
+Un asesor que deja al lead ir sin activar NINGUNO de estos argumentos ante resistencia
+ha fallado en lo esencial de esta fase. El feedback debe enumerar los fallos detectados.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 

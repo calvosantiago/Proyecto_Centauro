@@ -80,12 +80,25 @@ class BaseEvaluatorAgent(ABC):
             return ""
 
         return f"""
-CONTEXTO ADICIONAL DEL USUARIO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONTEXTO ESPECÍFICO DE ESTA EVALUACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {contexto_usuario.strip()}
 
-INSTRUCCIÓN: Ten en cuenta este contexto al evaluar. Puede incluir información sobre el lead,
-el programa vendido, circunstancias especiales u otras indicaciones relevantes para la evaluación.
-No ignores esta información, intégrala en tu análisis.
+⚠️ INSTRUCCIÓN OBLIGATORIA: Este contexto tiene PRIORIDAD sobre las asunciones
+generales del prompt. Úsalo para calibrar tu evaluación de forma específica.
+Ejemplos de cómo aplicarlo:
+- Edad del lead (ej: "22 años", "recién graduado") → ajusta la exigencia de estilo,
+  los argumentos esperados y el lenguaje apropiado. Un lead joven necesita un pitch
+  diferente (aspiracional, empleabilidad) que uno de 45+ años (ROI, ascenso directivo).
+- Quién financia (ej: "los padres pagan", "empresa lo cubre") → no penalices por
+  referencias a financiación familiar ni por ausencia de análisis financiero propio.
+- Perfil profesional (ej: "directivo con 20 años de experiencia", "estudiante sin experiencia")
+  → ajusta qué estilo comunicativo, argumentos y técnicas son apropiados para ese perfil.
+- Circunstancias especiales (ej: "llamada corta", "lead ya comparó opciones") → úsalas
+  como atenuantes o contexto relevante en la evaluación.
+Refleja explícitamente el uso de este contexto en el campo "razonamiento".
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     
     def _extract_json_safe(self, raw_response: str) -> Dict:

@@ -167,11 +167,12 @@ class ModernReport(FPDF):
         # 5b. Hallazgos clave en Investigación
         if nombre_normalizado in ("investigación", "investigacion"):
             factor_compra = hallazgos.get("factor_de_compra", "")
-            inversion_esperada = hallazgos.get("inversion_esperada", "")
+            # Compatibilidad: lee 'perfil_financiero' (nuevo) o 'inversion_esperada' (legacy)
+            perfil_financiero = hallazgos.get("perfil_financiero", "") or hallazgos.get("inversion_esperada", "")
             competidores = hallazgos.get("competidores", "")
             motivacion_principal = hallazgos.get("motivacion_principal", "")
 
-            if factor_compra or inversion_esperada or competidores or motivacion_principal:
+            if factor_compra or perfil_financiero or competidores or motivacion_principal:
                 self.set_x(15)
                 self.set_fill_color(248, 248, 248)
                 self.set_draw_color(225, 225, 225)
@@ -188,9 +189,9 @@ class ModernReport(FPDF):
 
                 self.set_x(18)
                 self.set_font('Helvetica', 'B', 9)
-                self.cell(38, 5, to_latin1("Inversión esperada:"), 0, 0, fill=True)
+                self.cell(38, 5, to_latin1("Perfil financiero:"), 0, 0, fill=True)
                 self.set_font('Helvetica', '', 9)
-                self.multi_cell(139, 5, to_latin1(inversion_esperada or "No explorada"), fill=True)
+                self.multi_cell(139, 5, to_latin1(perfil_financiero or "No explorado"), fill=True)
 
                 self.set_x(18)
                 self.set_font('Helvetica', 'B', 9)

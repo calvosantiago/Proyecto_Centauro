@@ -486,15 +486,27 @@ IMPORTANTE:
 - El [LEAD] es el cliente potencial que está considerando estudiar en OBS
 - El [ASESOR] es quien vende el programa
 
-Analiza SOLO lo que dice el [LEAD] para extraer su perfil.
+Analiza lo que dice el [LEAD] para extraer su perfil, pero también observa
+si el asesor recondujo al lead hacia un programa diferente al que llegó inicialmente.
+
+⚠️ RECONDUCCIÓN: Si el lead llegó a la llamada con un programa o especialización
+en mente (o con una idea vaga) y el asesor lo redirigió hacia un programa diferente
+más adecuado a su perfil → esto es un mérito del asesor, NO el objetivo original
+del lead. En ese caso:
+- "objetivo_del_lead" debe reflejar el OBJETIVO REAL del lead (qué quiere conseguir
+  profesionalmente), NO el nombre del programa al que fue redirigido.
+- "reconduccion_asesor" debe ser true, con nota del programa original y el programa
+  al que fue redirigido.
 
 FORMATO JSON OBLIGATORIO:
 {
   "perfil_lead": "Descripción breve: profesión, experiencia, situación actual. Ej: 'Ingeniero con 5 años de experiencia en logística, busca especialización para ascender'",
   "fase_funnel": "AWARENESS | CONSIDERATION | DECISION | CIERRE_INMEDIATO",
-  "objetivo_del_lead": "Qué busca conseguir con el máster. Ej: 'Cambio de carrera hacia análisis de datos'",
+  "objetivo_del_lead": "El objetivo PROFESIONAL del lead (qué quiere conseguir), no el nombre del programa. Ej: 'Cambio de carrera hacia análisis de datos'",
   "barreras_principales": ["Barrera 1", "Barrera 2"],
-  "resultado_general": "POSITIVO_CON_COMPROMISO | POSITIVO_SIN_FECHA | NEUTRO_PENDIENTE | NEGATIVO_OBJECCION_FUERTE"
+  "resultado_general": "POSITIVO_CON_COMPROMISO | POSITIVO_SIN_FECHA | NEUTRO_PENDIENTE | NEGATIVO_OBJECCION_FUERTE",
+  "reconduccion_asesor": false,
+  "nota_reconduccion": "Si reconduccion_asesor=true: describe brevemente el programa inicial del lead y hacia cuál lo recondujo el asesor. Ej: 'Lead llegó interesado en MBA, asesor recondujo hacia Máster en Marketing Digital por mejor encaje con su perfil'. Si false: dejar vacío."
 }
 
 GUÍA PARA FASE_FUNNEL:
@@ -533,6 +545,12 @@ Genera el JSON con la información del lead.
             for campo in campos_requeridos:
                 if campo not in data:
                     data[campo] = "No identificado" if campo != "barreras_principales" else []
+
+            # Campos de reconducción con defaults seguros
+            if "reconduccion_asesor" not in data:
+                data["reconduccion_asesor"] = False
+            if "nota_reconduccion" not in data:
+                data["nota_reconduccion"] = ""
 
             print(f"      ✓ Perfil: {data.get('perfil_lead', 'N/A')[:50]}...")
             print(f"      ✓ Fase: {data.get('fase_funnel', 'N/A')}")

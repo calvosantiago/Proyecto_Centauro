@@ -499,11 +499,25 @@ async def main(message: cl.Message):
                     if nombre_manual.lower() in ("skip", "omitir", "-", "n/a"):
                         asesor_confirmado = "Asesor Desconocido"
                     else:
-                        try:
-                            asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
-                        except ValueError as e:
-                            await cl.Message(content=f"⚠️ Nombre no reconocido: '{nombre_manual}'. Usando como está.").send()
-                            asesor_confirmado = nombre_manual.strip().title()
+                        # Si solo escribió el nombre de pila, pedir apellido
+                        if len(nombre_manual.split()) < 2:
+                            res_apellido = await cl.AskUserMessage(
+                                content=f"👤 Solo has escrito el nombre de pila: **{nombre_manual}**\n\n"
+                                        f"¿Cuál es su apellido?\n\n"
+                                        f"_(Si no respondes en 30s, se guardará como Asesor Desconocido)_",
+                                timeout=30
+                            ).send()
+                            if res_apellido and res_apellido.get("output"):
+                                apellido = res_apellido["output"].strip()
+                                nombre_manual = f"{nombre_manual} {apellido}".title()
+                            else:
+                                asesor_confirmado = "Asesor Desconocido"
+                        if asesor_confirmado is None:
+                            try:
+                                asesor_confirmado = gestion_asesores.obtener_nombre_canonico(nombre_manual)
+                            except ValueError:
+                                await cl.Message(content=f"⚠️ Nombre no reconocido: '{nombre_manual}'. Usando como está.").send()
+                                asesor_confirmado = nombre_manual.strip().title()
                 else:
                     # Timeout → continuar sin bloquear
                     asesor_confirmado = "Asesor Desconocido"

@@ -88,14 +88,29 @@ Lo que evalúas es si se sale de los límites (presentación genérica sin perso
 no conecta con lo descubierto en investigación) o si conduce bien dentro de ellos.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ALCANCE: EVALÚA TODA LA CONVERSACIÓN
+ALCANCE: EVALÚA TODA LA CONVERSACIÓN — INSTRUCCIÓN CRÍTICA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-La propuesta de valor NO tiene por qué concentrarse en un único bloque de la llamada.
-El asesor puede presentar el posicionamiento de la institución, la metodología, el
-ecosistema del programa y los beneficios a lo largo de TODA la conversación.
-Si el asesor construyó valor desde el inicio y lo mantuvo durante la entrevista,
-evalúa el CONJUNTO, no solo el momento en que "debería" haberlo dicho.
-Un asesor que distribuye bien la propuesta de valor en toda la conversación = BUENO.
+ANTES DE CALIFICAR: Lee la transcripción COMPLETA de inicio a fin buscando
+activamente los siguientes elementos en CUALQUIER momento de la conversación:
+
+  ✓ Posicionamiento de marca / reputación de OBS
+  ✓ Metodología del programa (cómo se estudia, formato, carga)
+  ✓ Ecosistema del programa (red de contactos, alumni, claustro)
+  ✓ Diferenciación institución presencial vs. online
+  ✓ Ajuste del perfil del lead con el programa
+  ✓ Comparación de perfiles de alumnos
+  ✓ Beneficios concretos conectados al lead
+
+Si encuentras ALGUNO de estos elementos en CUALQUIER parte de la conversación
+(inicio, mitad o final), cuenta como propuesta de valor presente.
+
+⚠️ SEÑAL DE EXCELENCIA: Si el asesor trabajó el posicionamiento de marca, la
+metodología, el ecosistema o el ajuste de perfil desde el INICIO de la conversación
+(antes del bloque específico), esto es una estrategia avanzada, no una irregularidad.
+Un asesor que construye valor a lo largo de toda la entrevista = BUENO.
+
+NO limites la búsqueda a un bloque o sección específica de la transcripción.
+Si los elementos están distribuidos, evalúa el CONJUNTO de la conversación.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CIRCUNSTANCIAS ATÍPICAS
@@ -159,14 +174,15 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Conexión con necesidad del lead... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Responde cada punto: ¿Presentó OBS y el programa con claridad? ¿La propuesta de valor se distribuyó a lo largo de la conversación o solo en un bloque? ¿Hubo presión de tiempo del lead que condicionó la presentación (circunstancia atípica)? ¿El lead es junior/joven — se enfatizaron bolsas de trabajo y empleabilidad? ¿Personalizó conectando con algo que el lead dijo, o fue catálogo puro? ¿Beneficios o características? ¿El lead mostró interés o comprensión? ¿Por qué esa calificación?",
+  "razonamiento": "Responde CADA punto: (1) ¿Encontraste elementos de propuesta de valor (marca, metodología, ecosistema, perfil, diferenciación) en el INICIO de la conversación o solo en un bloque? ¿Dónde exactamente? (2) ¿La propuesta se distribuyó a lo largo de toda la entrevista? (3) ¿Presentó OBS y el programa con claridad? (4) ¿Hubo presión de tiempo del lead (circunstancia atípica)? (5) ¿El lead es junior/joven — se enfatizaron bolsas de trabajo y empleabilidad? (6) ¿Personalizó conectando con algo que el lead dijo, o fue catálogo puro? (7) ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto",
   "perfil_lead": "JUNIOR" | "SENIOR" | "NO_DETERMINADO",
   "bolsas_trabajo_mencionadas": true/false,
-  "circunstancia_atipica": "Describe si el lead expresó presión de tiempo u otra condición que limitó la presentación. 'Ninguna' si no ocurrió."
+  "circunstancia_atipica": "Describe si el lead expresó presión de tiempo u otra condición que limitó la presentación. 'Ninguna' si no ocurrió.",
+  "distribucion_propuesta_valor": "DESDE_INICIO" | "DISTRIBUIDA_TODA_ENTREVISTA" | "SOLO_BLOQUE_ESPECIFICO" | "AUSENTE"
 }}
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
@@ -194,6 +210,9 @@ REGLAS CRÍTICAS:
 - MALO cuando la presentación es confusa, desorganizada o el lead no entiende qué se le ofrece.
 - Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo del perfil o las palabras del lead?
   Si sí → BUENO. Si la presentación es buena pero sin ningún anclaje personal → MEJORABLE.
+- Si el asesor trabajó elementos de propuesta de valor (marca, metodología, ecosistema, encaje
+  de perfil) desde el INICIO de la conversación y los mantuvo a lo largo de la entrevista
+  → BUENO sin excepción, independientemente de si repitió todos los elementos en el bloque.
 - Si hubo presión de tiempo del lead, ajusta la exigencia de profundidad pero no la de claridad.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """

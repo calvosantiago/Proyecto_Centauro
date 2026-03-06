@@ -90,21 +90,36 @@ ADAPTACIÓN AL PERFIL DEL LEAD
 El estilo "correcto" NO es el mismo para todos los leads. El asesor debe adaptar
 su comunicación al perfil de quien tiene delante:
 
-- PERFIL MARKETING / VENTAS / CREATIVO: estos leads valoran la conversación
-  cercana, la empatía, el tono humano y hablar "de tú a tú". Un estilo más
-  espontáneo, cercano e informal con este perfil es BUENO, no MEJORABLE.
-  Lo que se penaliza aquí es el tono robótico o demasiado comercial, no la
-  informalidad calculada que genera conexión real.
+El perfil del lead tiene DOS dimensiones que el asesor debe leer y a las que
+debes atender para evaluar si el estilo fue apropiado:
 
-- PERFIL CORPORATIVO / DIRECTIVO / TÉCNICO: estos leads esperan más estructura,
-  precisión y un tono más formal. El asesor que adapta su registro a esto = BUENO.
+DIMENSIÓN 1 — INDUSTRIA / ROL:
+- PERFIL MARKETING / VENTAS / CREATIVO: valoran conversación cercana, empatía,
+  tono humano, hablar "de tú a tú". Un estilo espontáneo e informal con este
+  perfil es BUENO, no MEJORABLE. Lo que se penaliza es el tono robótico o
+  demasiado comercial, no la informalidad que genera conexión real.
+- PERFIL CORPORATIVO / DIRECTIVO / TÉCNICO: esperan más estructura, precisión
+  y un tono más formal. El asesor que adapta su registro a esto = BUENO.
+
+DIMENSIÓN 2 — EDAD / SENIORITY:
+Tómala como contexto, no como regla rígida. Un lead joven puede perfectamente
+desenvolverse en un entorno directivo, y un asesor de perfil similar puede adaptar
+su tono de forma más cercana o entre iguales. Eso no es un error, es lectura del contexto.
+
+Lo que sí evalúa esta dimensión:
+- Si el asesor detectó el nivel del lead (junior, senior, etc.) y adaptó su
+  registro natural a eso → señal positiva, aunque la adaptación sea sutil.
+- Si el asesor habla de forma condescendiente con alguien de amplia trayectoria
+  (sobre-explicando cosas básicas, ignorando su experiencia) → señal negativa.
+- Si el asesor y el lead son de perfil similar o edad parecida y el asesor adapta
+  el tono a algo más entre iguales → es apropiado, no penalices.
 
 ⚠️ PARA LA RECOMENDACIÓN DE COACHING:
-Adapta SIEMPRE las frases de ejemplo al perfil detectado del lead.
-Si el lead es de marketing, ventas o un perfil creativo, NO sugieras frases muy
-formales o con argot comercial clásico. Usa un tono cercano, conversacional
-y con el lenguaje propio del lead. Las técnicas de los libros son válidas, pero
-los ejemplos concretos deben sonar naturales para ese perfil específico.
+Adapta SIEMPRE las frases de ejemplo a AMBAS dimensiones del perfil del lead.
+Si el lead es joven y de marketing, usa un tono cercano y aspiracional. Si es
+senior y directivo, usa un tono peer-to-peer y orientado al ROI profesional.
+Las técnicas de los libros son válidas, pero los ejemplos concretos deben sonar
+naturales para ese perfil específico.
 
 ASPECTOS A EVALUAR:
 
@@ -144,11 +159,35 @@ ASPECTOS A EVALUAR:
    - Lenguaje profesional vs coloquial en exceso
    - Sin muletillas excesivas ("ehhh", "bueno", "vale vale")
    - Seguro vs dubitativo
+   ⚠️ JERGA TÉCNICA: si el asesor usa terminología especializada que el lead no domina
+   (tecnicismos del sector, siglas, conceptos académicos sin explicar) y esto genera
+   distancia o falta de comprensión → señal negativa específica. Menciónalo explícitamente
+   en el razonamiento y en las evidencias. Es diferente de "informal": la jerga técnica
+   sin adaptar aleja al lead en vez de acercarlo.
+
+⚠️ ANTES DE CALIFICAR — CHECKLIST SISTEMÁTICO:
+Revisa en orden estos 5 aspectos y anota tu diagnóstico de cada uno ANTES de decidir
+la calificación final. Esto evita que una impresión general anule detalles concretos:
+  1. TONO: ¿profesional_cercano / mecánico / inapropiado?
+  2. VOCABULARIO: ¿adaptado al lead / genérico / jerga técnica inadecuada?
+  3. EMPATÍA: ¿hubo algún momento de conexión real (incluye empatía inversa)?
+  4. RITMO: ¿el lead participó / el asesor monopolizó / lead silencioso?
+  5. PROFESIONALISMO: ¿muletillas? ¿jerga técnica? ¿seguro o dubitativo?
+Solo después de responder los 5 puntos, elige la calificación que mejor representa el conjunto.
 
 CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
+⚠️ DISTINCIÓN CRÍTICA — INFORMAL vs. DESORGANIZADO:
+Son dos cosas completamente diferentes. NO las confundas:
+- INFORMAL: tono conversacional, cercano, sin rigidez. Para perfiles de marketing,
+  ventas o creativos, esto es POSITIVO. Un asesor informal que conecta bien = BUENO.
+- DESORGANIZADO: no tiene hilo conductor, salta de tema sin estructura, el lead no
+  sabe dónde está la conversación. Esto sí es negativo e impacta la calificación.
+Un asesor puede ser informal Y estructurado a la vez. NO marques MEJORABLE o MALO
+solo porque el tono es informal si la conversación tiene coherencia y orden.
+
 🔴 MALO — el estilo comunicativo genera rechazo, incomodidad o rompe la confianza:
-   - Tono grosero, condescendiente, o excesivamente informal para el contexto
+   - Tono grosero, condescendiente, o tan desorganizado que el lead no entiende la conversación
    - Muletillas constantes que restan credibilidad o dificultan la comprensión
    - Cero empatía: el asesor habla sin considerar cómo se siente el lead
    - Genera incomodidad, distancia o rechazo visible en el lead
@@ -191,7 +230,8 @@ FORMATO JSON OBLIGATORIO:
     "profesionalismo": "alto" | "medio" | "bajo"
   }},
   "fortaleza_principal": "El aspecto comunicativo más destacable del asesor",
-  "perfil_comunicacion_lead": "MARKETING_VENTAS_CREATIVO" | "CORPORATIVO_DIRECTIVO" | "NO_DETERMINADO",
+  "perfil_industria_lead": "MARKETING_VENTAS_CREATIVO" | "CORPORATIVO_DIRECTIVO" | "NO_DETERMINADO",
+  "perfil_seniority_lead": "JOVEN_JUNIOR" | "SEMI_SENIOR" | "SENIOR_CONSOLIDADO" | "NO_DETERMINADO",
   "lead_participa_activamente": true/false
 }}
 
@@ -207,10 +247,26 @@ FORMATO JSON OBLIGATORIO:
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
 En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
-DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
-- Elige la técnica MÁS relevante para mejorar el ESTILO comunicativo
-- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
-- Da 2 frases concretas que podría haber usado
+DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA, pero con
+una regla crítica: la técnica elegida DEBE ser coherente con el patrón detectado.
+
+CONEXIÓN OBLIGATORIA PATRÓN → TÉCNICA:
+- Si detectaste MULETILLAS o problemas de RITMO → elige una técnica sobre
+  comunicación, pausa, ritmo o presencia vocal. NO elijas una técnica de ventas
+  genérica (SPIN, cierre, prospección) si el problema es comunicativo.
+- Si detectaste falta de EMPATÍA → elige una técnica sobre conexión emocional,
+  escucha activa o rapport. NO elijas una técnica de argumentación.
+- Si detectaste TONO MECÁNICO → elige una técnica sobre naturalidad, espontaneidad
+  o conversación consultiva.
+- Si el asesor lo hizo todo bien (BUENO) → elige la técnica más avanzada que
+  podría elevar aún más su nivel, conectada con su fortaleza principal.
+
+Si el contexto tiene variedad de libros disponibles, evita recomendar siempre
+el mismo. Elige el que tenga la técnica MÁS relevante para el patrón concreto
+de esta llamada, aunque sea de un libro menos prominente en el contexto.
+
+- Explica POR QUÉ esa técnica concreta le ayudaría (conecta con la situación real)
+- Da 2 frases concretas que podría haber usado, adaptadas al perfil del lead
 - NO copies texto literal del libro, adapta con tus palabras
 
 REGLAS CRÍTICAS:

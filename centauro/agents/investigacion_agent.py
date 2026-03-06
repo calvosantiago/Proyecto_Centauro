@@ -183,20 +183,32 @@ CRITERIOS DE CALIFICACIÓN
    EJEMPLO: "[ASESOR]: ¿Qué significa crecer para ti? [LEAD]: [se abre]... [ASESOR]: Suena a que..."
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-USO POSTERIOR DE LA INFORMACIÓN
+USO POSTERIOR DE LA INFORMACIÓN — AFECTA LA CALIFICACIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Analiza también el RESTO de la transcripción (no solo la fase inicial):
 ¿El asesor usó después la información que recopiló? ¿Personalizó la propuesta con
 los datos del lead? ¿O dejó la información sin aprovechar y siguió con el discurso genérico?
 
-Pon especial atención al Factor de Compra: si el asesor lo identificó en la investigación
-y lo recuperó más adelante para argumentar, rebatir objeciones o cerrar ("como me dijiste
-que necesitas X, este programa es ideal porque..."), esto es un indicador de calidad
-consultiva de primer nivel y debe reflejarse en `info_aprovechada_despues: true` y en
-un razonamiento que lo valore positivamente.
+Pon especial atención al Factor de Compra:
 
-Si el asesor obtuvo información pero no la usó en absoluto → señal de oportunidad perdida,
-menciónalo en `nota_aprovechamiento`.
+✅ Si el asesor lo identificó Y lo recuperó más adelante para argumentar, rebatir
+   objeciones o cerrar ("como me comentabas que necesitas X, este programa es ideal
+   porque...") → indicador de calidad consultiva de primer nivel → refuerza BUENO.
+
+⚠️ Si el asesor identificó el Factor de Compra pero NO lo usó en NINGÚN momento
+   posterior de la conversación (ni en propuesta de valor, ni en objeciones, ni en cierre,
+   ni de ninguna forma) → la investigación fue mecánica, no consultiva.
+   CONDICIÓN ESTRICTA: solo aplica si de verdad no hay ni una sola referencia posterior
+   al Factor de Compra. Si lo usó aunque sea una vez, aunque sea brevemente → no baja nota.
+   IMPACTO EN CALIFICACIÓN cuando SÍ aplica:
+   - Si la investigación era BUENO por calidad de preguntas, pero el Factor de Compra
+     no se usó en absoluto → baja a MEJORABLE.
+   - Si además la investigación fue superficial Y no se usó el Factor de Compra →
+     refuerza MALO o MEJORABLE según el caso.
+   OBLIGATORIO: si bajas la nota por este motivo, debes escribir explícitamente en el
+   razonamiento: "Bajo la calificación de [X] a [Y] porque el Factor de Compra identificado
+   no fue utilizado en ningún momento posterior de la conversación." Sin esta declaración
+   explícita, no apliques la bajada de nota.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EVIDENCIA REQUERIDA
@@ -223,8 +235,8 @@ FORMATO JSON OBLIGATORIO
   ],
   "hallazgos_del_lead": {{
     "factor_de_compra": "Descripción del dolor/necesidad real del lead. 'No detectado' si no se exploró.",
-    "inversion_esperada": "Perfil financiero del lead: ¿inversión propia, de empresa, o apoyo familiar? ¿Tiene presupuesto destinado? NO se requiere que haya hablado de precios — basta con que el asesor haya calificado quién y cómo paga. 'No explorado' SOLO si no se tocó en ningún momento de toda la llamada.",
-    "competidores": "Otras opciones que el lead mencionó estar evaluando. Marca como explorado si el lead mencionó espontáneamente otras instituciones/programas, aunque el asesor no preguntara. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
+    "perfil_financiero": "Perfil financiero del lead: ¿quién paga y cómo? NO hace falta que se haya hablado de importes ni de precio. Basta con que el lead haya indicado su situación financiera de cualquier forma. Ejemplos que SIEMPRE cuentan como 'explorado': 'lo asumo por cuenta propia', 'lo pago yo mismo', 'mi empresa me lo cubre', 'mis padres me ayudan', 'estoy buscando financiación'. Escribe el perfil detectado. 'No explorado' SOLO si no hubo absolutamente ninguna referencia a quién paga ni cómo en toda la llamada.",
+    "competidores": "Otras opciones que el lead mencionó estar evaluando. SIEMPRE cuenta como explorado si: (a) el lead lo mencionó espontáneamente, O (b) el asesor preguntó y el lead respondió nombrando instituciones o países donde ha consultado. Escribe las instituciones o referencias mencionadas. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
     "reconduccion": "Si el asesor detectó que el lead venía interesado en un programa/formato diferente y lo recondujo exitosamente, describe cómo lo gestionó. 'No aplica' si no ocurrió.",
     "motivacion_principal": "Por qué quiere el máster y por qué ahora.",
     "fortalezas_debilidades": "Lo que el lead dijo sobre sí mismo. 'No explorado' si no se preguntó.",
@@ -262,10 +274,13 @@ REGLAS CRÍTICAS:
 - Evalúa TANTO la apertura COMO la investigación
 - NO penalices si el lead es cerrado, penaliza si el asesor no intentó abrir
 - Sé técnico, no motivacional
-- COMPETIDORES: Marca como "explorado" si el lead menciona espontáneamente otras instituciones
-  o programas que está comparando, aunque el asesor no lo preguntara directamente
-- PERFIL FINANCIERO: Marca como "explorado" si se obtuvo cualquier calificador económico
-  (propio / empresa / familia), aunque no se haya hablado de importes o precios
+- COMPETIDORES: Marca como "explorado" si (a) el lead mencionó espontáneamente otras
+  instituciones, O (b) el asesor preguntó y el lead respondió nombrando instituciones,
+  países o programas que consultó. Si el asesor preguntó y el lead respondió → SIEMPRE explorado.
+- PERFIL FINANCIERO: Marca como "explorado" si en cualquier punto de la conversación
+  el lead indicó quién paga o cómo. Ejemplos que SIEMPRE cuentan: "lo asumo por cuenta
+  propia", "lo pago yo", "mi empresa me lo cubre", "mis padres me ayudan", "busco financiación".
+  NO se necesita que se haya hablado de importes o precios concretos.
 - NEVER marques 'No explorado' si hay cualquier indicio de que el tema se tocó, aunque
   haya sido brevemente o en cualquier momento de la conversación
 

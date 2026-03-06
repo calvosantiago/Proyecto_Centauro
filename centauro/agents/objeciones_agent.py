@@ -89,6 +89,35 @@ IMPORTANTE: Si NO hay objeciones claras del [LEAD] NI anticipación del asesor, 
 Si el asesor anticipa objeciones proactivamente (aunque el lead no las plantee explícitamente), sí es evaluable.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CIRCUNSTANCIAS ATÍPICAS DE LA CONVERSACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Antes de evaluar, detecta si el lead declaró alguna restricción que condicionó
+la conversación. En particular:
+
+⚠️ RESTRICCIÓN DE TIEMPO: Si el lead indicó en cualquier punto anterior de la
+llamada que tenía poco tiempo ("no tengo mucho tiempo", "tengo que cortar pronto",
+"voy con prisa", "solo tengo unos minutos") → la evaluación debe tenerlo en cuenta.
+Un asesor que maneja una objeción de forma más directa y concisa bajo presión de
+tiempo está adaptándose a la situación, no siendo superficial. Detecta y menciona
+esta circunstancia en el razonamiento si ocurrió.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ALCANCE: EVALÚA TODA LA CONVERSACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Las objeciones NO aparecen solo en un bloque específico de la entrevista.
+Una resistencia puede surgir durante la investigación, durante la propuesta
+de valor, durante la presentación económica o en el cierre.
+
+Busca en TODA la transcripción:
+  ✓ Cualquier resistencia o duda del lead que frene el avance
+  ✓ Cómo respondió el asesor a cada resistencia en el momento en que ocurrió
+  ✓ Objeciones que el asesor anticipó antes de que el lead las expresara
+  ✓ Señales de resolución o persistencia de la objeción a lo largo de la llamada
+
+Evalúa el CONJUNTO de cómo el asesor manejó las resistencias durante toda la
+conversación, no solo lo que ocurrió en el tramo final o en un bloque específico.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PREGUNTA INFORMATIVA vs. OBJECIÓN REAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NO toda duda o pregunta del lead es una objeción. Distingue:
@@ -178,7 +207,8 @@ FORMATO JSON OBLIGATORIO:
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "anticipo_objeciones": true/false,
-  "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "anticipacion" | "ninguna"
+  "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "anticipacion" | "ninguna",
+  "restriccion_tiempo_detectada": true/false
 }}
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
