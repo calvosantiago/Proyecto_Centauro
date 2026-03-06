@@ -165,15 +165,28 @@ ASPECTOS A EVALUAR:
    en el razonamiento y en las evidencias. Es diferente de "informal": la jerga técnica
    sin adaptar aleja al lead en vez de acercarlo.
 
-⚠️ ANTES DE CALIFICAR — CHECKLIST SISTEMÁTICO:
-Revisa en orden estos 5 aspectos y anota tu diagnóstico de cada uno ANTES de decidir
-la calificación final. Esto evita que una impresión general anule detalles concretos:
-  1. TONO: ¿profesional_cercano / mecánico / inapropiado?
-  2. VOCABULARIO: ¿adaptado al lead / genérico / jerga técnica inadecuada?
-  3. EMPATÍA: ¿hubo algún momento de conexión real (incluye empatía inversa)?
-  4. RITMO: ¿el lead participó / el asesor monopolizó / lead silencioso?
-  5. PROFESIONALISMO: ¿muletillas? ¿jerga técnica? ¿seguro o dubitativo?
-Solo después de responder los 5 puntos, elige la calificación que mejor representa el conjunto.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
+de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+
+  1. ¿El tono fue profesional y cercano (no mecánico ni inapropiado)?              → SÍ / NO
+  2. ¿El vocabulario estuvo adaptado al lead (sin jerga técnica inadecuada)?       → SÍ / NO
+  3. ¿Hubo al menos un momento de empatía real (incluye empatía inversa)?          → SÍ / NO
+  4. ¿El lead participó activamente (no lead silencioso ni asesor monopolizando)?   → SÍ / NO
+  5. ¿El profesionalismo fue alto (sin muletillas excesivas, seguro)?              → SÍ / NO
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+
+🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
+   Analiza el peso real de cada fallo. Los 5 criterios comunicativos son todos relevantes
+   para que el lead se sienta cómodo y confíe en el asesor. Tono inapropiado, vocabulario
+   inadaptado, ausencia de empatía, lead silencioso y profesionalismo bajo son señales que
+   acumuladas dañan la conversación. Si la mayoría fallaron, la calificación debe ser MALO.
+   No por un umbral mecánico, sino porque múltiples fallos comunicativos crean distancia y
+   erosionan la confianza. No detectes múltiples fallos graves en el estilo y concluyas
+   MEJORABLE: sería incoherente con tu propio análisis.
 
 CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
@@ -212,6 +225,7 @@ solo porque el tono es informal si la conversación tiene coherencia y orden.
 
 FORMATO JSON OBLIGATORIO:
 {{
+  "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA",
   "evidencia_principal": "[ASESOR]: Ejemplo representativo del tono/estilo... (COPY-PASTE LITERAL)",
@@ -220,7 +234,7 @@ FORMATO JSON OBLIGATORIO:
     "Ejemplo de vocabulario adaptado: [ASESOR]: ... (COPY-PASTE LITERAL)",
     "Muletilla o problema detectado: [ASESOR]: ... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Responde cada punto: ¿Cuál es el perfil del lead (marketing/ventas/creativo vs. corporativo/directivo)? ¿El asesor adaptó su estilo a ese perfil? ¿Hubo algún momento de empatía real (incluye empatía inversa/experiencia propia)? ¿El lead participó activamente o apenas habló? ¿El asesor generó diálogo o monopolizó la conversación? ¿Hubo tono mecánico o robótico? ¿Por qué esa calificación?",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo fue el estilo comunicativo del asesor, qué tono usó, si conectó con el lead emocionalmente, qué funcionó y qué no. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
@@ -235,13 +249,12 @@ FORMATO JSON OBLIGATORIO:
   "lead_participa_activamente": true/false
 }}
 
-⚠️ REGLAS PARA CALIFICAR:
-- Sé decisivo: elige UNA etiqueta.
-- BUENO cuando el estilo suma a la conversación: el lead se siente cómodo y hay al menos un momento de conexión real.
-- MEJORABLE cuando el estilo es correcto pero mecánico: educado pero sin calidez, sin momentos de empatía.
-- MALO cuando el estilo daña la conversación: genera distancia, incomodidad o desconfianza.
+⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+- MALO: contador_fallos_criticos >= 3, O el estilo genera rechazo/incomodidad/desconfianza.
+- MEJORABLE: contador_fallos_criticos = 1-2. Correcto pero mecánico, educado pero sin calidez.
+- BUENO: contador_fallos_criticos = 0. El estilo suma, el lead se siente cómodo, hay conexión real.
 - Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
-- Si el asesor compartió una experiencia propia para conectar con el lead (empatía inversa) → cuenta como momento de empatía real → inclínate por BUENO.
+- Si el asesor compartió una experiencia propia (empatía inversa) → cuenta como empatía real → inclínate por BUENO.
 - Evidencias LITERALES (COPY-PASTE exacto).
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 

@@ -452,33 +452,39 @@ async def main(message: cl.Message):
                 resultado_validacion = gestion_asesores.validar_y_normalizar(asesor_detectado_inicial)
                 nombre_norm, nombre_existente, score = resultado_validacion
                 if nombre_existente and score >= 85:
-                    # Existe uno muy similar, preguntar cuál usar (timeout corto)
-                    res = await cl.AskUserMessage(
-                        content=f"👤 **Confirmación de asesor**\n\n"
-                                f"Detectado: **{nombre_norm}**\n"
-                                f"Existe perfil similar: **{nombre_existente}** (similitud: {score}%)\n\n"
-                                f"¿Cuál es correcto?\n"
-                                f"1️⃣ Usar perfil existente: **{nombre_existente}**\n"
-                                f"2️⃣ Crear nuevo perfil: **{nombre_norm}**\n"
-                                f"O escribe el nombre correcto\n\n"
-                                f"_(Si no respondes en 30s, se usará el perfil existente)_",
-                        timeout=30
-                    ).send()
-                    if res and res.get("output"):
-                        respuesta = res["output"].strip()
-                        if respuesta == "1":
-                            asesor_confirmado = nombre_existente
-                        elif respuesta == "2":
-                            asesor_confirmado = nombre_norm
-                        else:
-                            try:
-                                asesor_confirmado = gestion_asesores.obtener_nombre_canonico(respuesta)
-                            except ValueError:
-                                await cl.Message(content=f"⚠️ Nombre inválido: '{respuesta}'. Usando detectado: {nombre_norm}").send()
-                                asesor_confirmado = nombre_norm
-                    else:
-                        # Timeout, usar existente automáticamente
+                    if score >= 99:
+                        # Coincidencia exacta → usar perfil existente sin preguntar
                         asesor_confirmado = nombre_existente
+                    else:
+                        # Coincidencia parcial → pedir confirmación
+                        res = await cl.AskUserMessage(
+                            content=f"👤 **Confirmación de asesor**\n\n"
+                                    f"Detectado: **{nombre_norm}**\n"
+                                    f"Existe perfil similar: **{nombre_existente}** (similitud: {score}%)\n\n"
+                                    f"¿Cuál es correcto?\n"
+                                    f"1️⃣ Usar perfil existente: **{nombre_existente}**\n"
+                                    f"2️⃣ Crear nuevo perfil: **{nombre_norm}**\n"
+                                    f"O escribe el nombre correcto\n\n"
+                                    f"_(Si no respondes en 30s, se usará el perfil existente)_",
+                            timeout=30
+                        ).send()
+                        if res and res.get("output"):
+                            respuesta = res["output"].strip()
+                            usar_existente = {"1", "1️⃣", "uno", "usar", "usa", "el que hay", "existente", "si", "sí"}
+                            crear_nuevo = {"2", "2️⃣", "dos", "nuevo", "crear"}
+                            if respuesta.lower() in usar_existente:
+                                asesor_confirmado = nombre_existente
+                            elif respuesta.lower() in crear_nuevo:
+                                asesor_confirmado = nombre_norm
+                            elif gestion_asesores._es_nombre_valido(respuesta):
+                                # Escribió un nombre nuevo → crear perfil con ese nombre directamente
+                                asesor_confirmado = respuesta.strip().title()
+                            else:
+                                await cl.Message(content=f"⚠️ Respuesta no reconocida: '{respuesta}'. Usando perfil existente.").send()
+                                asesor_confirmado = nombre_existente
+                        else:
+                            # Timeout, usar existente automáticamente
+                            asesor_confirmado = nombre_existente
                 else:
                     # No hay similar, usar detectado directamente sin preguntar
                     asesor_confirmado = nombre_norm

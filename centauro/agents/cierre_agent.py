@@ -252,6 +252,7 @@ EVIDENCIA REQUERIDA
 
 FORMATO JSON OBLIGATORIO:
 {{
+  "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
   "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso... (COPY-PASTE LITERAL)",
@@ -260,7 +261,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Responde cada punto: ¿Validó antes de cerrar? ¿Hizo pregunta directa de compromiso aunque el lead ya hubiera expresado intención? ¿Vinculó el cierre a la fecha del comité y/o ayudas económicas? ¿Usó técnica de cierre? ¿Generó compromiso real o lo dejó abierto? ¿Próximo paso con fecha concreta? ¿Creó complejidad innecesaria posponiendo pasos al día siguiente? ¿Hay seguimiento definido? ¿Por qué esa calificación?",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo condujo el asesor el cierre, qué hizo bien y en qué aspectos falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente al final de la conversación.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "proximo_paso_concreto": "Descripción del próximo paso acordado (o 'ninguno' si no lo hubo)",
   "compromiso_fecha": true/false,
@@ -300,16 +301,35 @@ REGLAS CRÍTICAS:
 - Un lead que dice "Lo pensaré" después de un buen cierre = BUENO si usó técnica
 - EVIDENCIAS LITERALES OBLIGATORIAS: copia exacta, NUNCA parafrasees
 
-⚠️ REGLAS PARA CALIFICAR:
-- Sé decisivo: elige UNA etiqueta.
-- BUENO cuando el asesor lidera el cierre, genera compromiso claro y vincula el siguiente
-  paso a urgencias reales (comité, ayudas), aunque no use todas las técnicas.
-- MEJORABLE cuando hay cierre mínimo pero el lead no queda comprometido de verdad,
-  o cuando crea complejidad innecesaria posponiendo pasos al día siguiente.
-- MALO cuando no hay cierre real, es completamente pasivo, o no se definen ni próximos
-  pasos ni seguimiento de ningún tipo.
-- Si dudas entre BUENO y MEJORABLE: ¿el asesor lideró el proceso o fue el lead quien
-  tomó la iniciativa? Si el asesor lideró → BUENO.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
+de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+
+  1. ¿Validó dudas del lead antes de cerrar?                            → SÍ / NO
+  2. ¿Propuso un próximo paso concreto con fecha/plazo?                  → SÍ / NO
+  3. ¿El lead aceptó con compromiso real (no pasivo ni evasivo)?         → SÍ / NO
+  4. ¿Vinculó el cierre a urgencia real (comité, ayudas, plazos)?        → SÍ / NO
+  5. ¿Usó alguna técnica de cierre (doble alternativa, asuntivo, resumen)? → SÍ / NO
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+
+🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
+   Analiza el peso real de cada fallo. Los 5 criterios son todos relevantes para que el
+   lead avance con un compromiso real. No validar dudas, no fijar próximo paso, que el lead
+   no se comprometa, no generar urgencia y no usar técnica de cierre son fallos que acumulados
+   dejan la conversación sin avance. Si la mayoría fallaron, la calificación debe ser MALO.
+   No por un umbral mecánico, sino porque múltiples fallos en el cierre significan que el
+   proceso quedó sin avance real. No puedes detectar múltiples fallos graves en el cierre
+   y concluir MEJORABLE: sería incoherente con tu propio análisis.
+
+⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+- MALO: múltiples fallos críticos acumulados, O cierre completamente pasivo, O sin próximos
+  pasos ni seguimiento de ningún tipo, O el lead respondió negativamente y el asesor no reaccionó.
+- MEJORABLE: 1-2 fallos. Cierre mínimo pero sin liderazgo real del asesor.
+- BUENO: ningún fallo o fallos menores. Lidera el cierre, genera compromiso claro, vincula a urgencia.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor lideró el proceso o fue el lead? Si lideró → BUENO.
 - Si no hay próximos pasos Y tampoco seguimiento → MALO sin excepción.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """

@@ -223,6 +223,7 @@ Debes identificar MÍNIMO:
 FORMATO JSON OBLIGATORIO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {{
+  "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
   "evidencia_principal": "[ASESOR]: Pregunta o momento clave de apertura...",
@@ -244,7 +245,7 @@ FORMATO JSON OBLIGATORIO
   }},
   "info_aprovechada_despues": true | false,
   "nota_aprovechamiento": "Explica brevemente si el asesor usó (o no) la info recopilada más adelante en la llamada. Cita un ejemplo específico si lo hay.",
-  "razonamiento": "Análisis técnico: ¿Qué hizo bien en apertura? ¿Calidad de preguntas? ¿Logró extraer el Factor de Compra? ¿Por qué merece esa calificación?",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué logró el asesor en la investigación, qué calidad tuvo la apertura y las preguntas, qué información obtuvo del lead y por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO que aplique, con 2 frases que el asesor podría haber usado en ESTA conversación. Máximo 6-8 líneas. No copies texto literal, adapta con tus palabras.",
   "calidad_apertura": "EXCELENTE | BUENA | CORRECTA | DEFICIENTE",
   "indicios_escucha_activa": true | false,
@@ -284,13 +285,35 @@ REGLAS CRÍTICAS:
 - NEVER marques 'No explorado' si hay cualquier indicio de que el tema se tocó, aunque
   haya sido brevemente o en cualquier momento de la conversación
 
-⚠️ REGLAS PARA CALIFICAR:
-- Sé decisivo: elige UNA etiqueta. No existe el término medio.
-- BUENO cuando el asesor obtiene información real y aprovechable del lead, aunque no sea perfecto.
-- MEJORABLE cuando hay intento de investigar pero el resultado es tan escaso que no sirve para personalizar.
-- MALO cuando el asesor directamente no investiga o las preguntas son puro trámite sin ningún valor.
-- Si dudas entre BUENO y MEJORABLE, pregúntate: ¿el asesor sabe algo útil del lead después de esta fase? Si sí → BUENO.
-- Si dudas entre MEJORABLE y BUENO y el asesor usó el Factor de Compra más adelante en la venta → inclínate por BUENO.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
+de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+
+  1. ¿Exploró el Factor de Compra (dolor/necesidad real, no solo "quiero crecer")? → SÍ / NO
+  2. ¿Exploró el perfil financiero (quién paga, cómo)?                            → SÍ / NO
+  3. ¿Hizo preguntas de profundización (repreguntó, no se quedó en la superficie)?  → SÍ / NO
+  4. ¿El lead tuvo espacio real para hablar y abrirse?                             → SÍ / NO
+  5. ¿Obtuvo información aprovechable para personalizar la propuesta después?       → SÍ / NO
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+
+🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
+   Analiza el peso real de cada fallo. Los 5 criterios son esenciales para que la
+   investigación sea útil. Sin Factor de Compra, sin perfil financiero del lead, sin
+   preguntas de profundización, sin espacio real para que el lead se abra y sin
+   información aprovechable, la investigación fue superficial. Si la mayoría fallaron,
+   la calificación debe ser MALO. No por un umbral mecánico, sino porque sin información
+   real del lead, nada de lo que sigue puede personalizarse. No detectes múltiples fallos
+   graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
+
+⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+- MALO: múltiples fallos críticos acumulados, O no investiga, O preguntas puro trámite sin ningún valor.
+- MEJORABLE: 1-2 fallos. Hay intento pero el resultado es escaso para personalizar.
+- BUENO: ningún fallo o fallos menores. Obtiene información real y aprovechable del lead.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor sabe algo útil del lead después de esta fase? Si sí → BUENO.
+- Si dudas entre MEJORABLE y BUENO y el asesor usó el Factor de Compra más adelante → inclínate por BUENO.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar.
 """
 

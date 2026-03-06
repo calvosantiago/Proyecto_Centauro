@@ -196,6 +196,7 @@ OBJECIÓN DE AUTORIDAD CON PADRES:
 
 FORMATO JSON OBLIGATORIO:
 {{
+  "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO" | null,
   "observabilidad": "ALTA" | "NO_OBSERVABLE",
   "evidencia_principal": "[LEAD]: Objeción principal... [ASESOR]: Respuesta... (COPY-PASTE LITERAL). Si hubo anticipación, pon la frase del asesor anticipándose.",
@@ -203,7 +204,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Validación de la objeción o anticipación... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción posterior... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Responde cada punto: ¿Las resistencias detectadas son objeciones reales o preguntas informativas? ¿Anticipó objeciones? ¿Validó la preocupación del lead antes de responder? ¿Profundizó en el porqué real? ¿Usó técnica estructurada o evidencia concreta (brochure, datos, ejemplos)? ¿El tipo de objeción era fundamental o logística/timing? ¿Resolvió o generó más resistencia? ¿El lead confirmó explícitamente que sus dudas quedaron resueltas? ¿Generó compromiso concreto y/o urgencia después de resolver? ¿Por qué esa calificación?",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué objeciones surgieron, cómo las gestionó el asesor, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "anticipo_objeciones": true/false,
@@ -225,12 +226,35 @@ REGLAS CRÍTICAS:
 - Si no hay objeciones → observabilidad "NO_OBSERVABLE" y calificacion: null
 - NO evalúes si el lead compró, evalúa si el ASESOR manejó bien la resistencia
 - Una objeción bien manejada puede dejar al lead pensando (eso es OK)
-⚠️ REGLAS PARA CALIFICAR:
-- Sé decisivo: elige UNA etiqueta (o null si no hay objeciones ni anticipación).
-- BUENO cuando el asesor resuelve o reduce la resistencia, o la anticipa proactivamente.
-- MEJORABLE cuando hay intento de responder pero la objeción queda sin resolver realmente,
-  o cuando resuelve la objeción pero no genera compromiso ni urgencia post-resolución.
-- MALO cuando el asesor agrava la situación, ignora la objeción o huye del tema.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Si hay objeciones detectadas, DETENTE. Antes de elegir la calificación, DEBES
+responder SÍ o NO a cada uno de estos 5 puntos. Cuenta cuántos tienen respuesta
+NEGATIVA (= fallo):
+
+  1. ¿Validó la preocupación del lead antes de responder (no la ignoró ni minimizó)? → SÍ / NO
+  2. ¿Profundizó en el porqué real de la objeción (no se quedó en la superficie)?    → SÍ / NO
+  3. ¿Usó técnica estructurada o evidencia concreta para resolver?                   → SÍ / NO
+  4. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
+  5. ¿Generó compromiso o urgencia después de resolver la objeción?                   → SÍ / NO
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+(Si observabilidad es NO_OBSERVABLE, pon contador_fallos_criticos = 0.)
+
+🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
+   Analiza el peso real de cada fallo. Los 5 criterios son todos relevantes para gestionar
+   las resistencias del lead. No validar la preocupación, no profundizar, no usar técnica,
+   que el lead no suavice su postura y no generar compromiso post-resolución son fallos que
+   acumulados dejan la objeción sin resolver o la agravan. Si la mayoría fallaron, la
+   calificación debe ser MALO. No por un umbral mecánico, sino porque múltiples fallos en
+   el manejo de objeciones dejan al lead igualmente o más resistente. No detectes múltiples
+   fallos graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
+
+⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+- MALO: múltiples fallos críticos acumulados, O ignora/agrava objeciones, O huye del tema.
+- MEJORABLE: 1-2 fallos. Intenta responder pero la objeción queda sin resolver realmente.
+- BUENO: ningún fallo o fallos menores. Resuelve o reduce la resistencia con técnica.
 - Si dudas entre BUENO y MEJORABLE: ¿el lead quedó menos resistente después? Si sí → BUENO.
 - Si el lead confirma explícitamente que sus dudas se resolvieron → BUENO sin excepción.
 - Si la objeción era logística (timing/viaje) y se acordó pago parcial o alternativa → BUENO.

@@ -166,6 +166,7 @@ Debes identificar MÍNIMO:
 
 FORMATO JSON OBLIGATORIO:
 {{
+  "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
   "evidencia_principal": "[ASESOR]: Presentación de OBS o programa... (COPY-PASTE LITERAL)",
@@ -174,7 +175,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Conexión con necesidad del lead... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Responde CADA punto: (1) ¿Encontraste elementos de propuesta de valor (marca, metodología, ecosistema, perfil, diferenciación) en el INICIO de la conversación o solo en un bloque? ¿Dónde exactamente? (2) ¿La propuesta se distribuyó a lo largo de toda la entrevista? (3) ¿Presentó OBS y el programa con claridad? (4) ¿Hubo presión de tiempo del lead (circunstancia atípica)? (5) ¿El lead es junior/joven — se enfatizaron bolsas de trabajo y empleabilidad? (6) ¿Personalizó conectando con algo que el lead dijo, o fue catálogo puro? (7) ¿Por qué esa calificación?",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo presentó el asesor la institución y el programa, si conectó con el lead, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
@@ -199,19 +200,36 @@ REGLAS CRÍTICAS:
 - Incluye SIEMPRE [ASESOR] o [LEAD]
 - Personalización = Adaptar la explicación a LO QUE EL LEAD DIJO que necesitaba
 - Diferencia: Características ("12 meses") vs Beneficios ("En 1 año estarás certificado")
-⚠️ REGLAS PARA CALIFICAR:
-- Sé decisivo: elige UNA etiqueta.
-- BUENO cuando el asesor presenta el programa con claridad y conecta con el lead en al menos
-  un punto clave, aunque no personalice absolutamente todo. Una buena presentación estructurada
-  con beneficios y algún anclaje al perfil del lead = BUENO.
-- MEJORABLE cuando la presentación es correcta pero es 100% catálogo sin NINGÚN punto de
-  contacto con lo que este lead específico dijo o necesita. La ausencia total de conexión
-  es el criterio, no la imperfección en la personalización.
-- MALO cuando la presentación es confusa, desorganizada o el lead no entiende qué se le ofrece.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
+de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+
+  1. ¿Presentó la institución (OBS) con claridad?                                 → SÍ / NO
+  2. ¿Explicó el programa con beneficios (no solo características)?                → SÍ / NO
+  3. ¿Conectó al menos un punto con el perfil o necesidades del lead?              → SÍ / NO
+  4. ¿El lead mostró interés o comprensión genuina?                                → SÍ / NO
+  5. ¿Adaptó argumentos al perfil del lead (junior→empleabilidad, senior→ROI)?     → SÍ / NO
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+
+🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
+   Analiza el peso real de cada fallo. Los 5 criterios son todos relevantes para que el
+   lead entienda y valore el programa. No presentar la institución con claridad, no
+   enfatizar beneficios, no conectar con el lead, que el lead no muestre interés y no
+   adaptar los argumentos al perfil son fallos que acumulados dejan la propuesta sin impacto.
+   Si la mayoría fallaron, la calificación debe ser MALO. No por un umbral mecánico, sino
+   porque una propuesta que no conecta con el lead ni genera interés no cumple su función.
+   No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
+
+⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+- MALO: múltiples fallos críticos acumulados, O presentación confusa/desorganizada, O el lead no entiende qué se le ofrece.
+- MEJORABLE: 1-2 fallos. Presentación correcta pero catálogo sin conexión con el lead.
+- BUENO: ningún fallo o fallos menores. Clara, estructurada y conecta con lo que importa a este lead.
 - Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo del perfil o las palabras del lead?
   Si sí → BUENO. Si la presentación es buena pero sin ningún anclaje personal → MEJORABLE.
-- Si el asesor trabajó elementos de propuesta de valor (marca, metodología, ecosistema, encaje
-  de perfil) desde el INICIO de la conversación y los mantuvo a lo largo de la entrevista
+- Si el asesor trabajó elementos de propuesta de valor desde el INICIO de la conversación
   → BUENO sin excepción, independientemente de si repitió todos los elementos en el bloque.
 - Si hubo presión de tiempo del lead, ajusta la exigencia de profundidad pero no la de claridad.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.

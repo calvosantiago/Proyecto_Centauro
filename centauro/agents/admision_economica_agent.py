@@ -208,6 +208,7 @@ Debes identificar MÍNIMO:
 
 FORMATO JSON OBLIGATORIO:
 {{
+  "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO",
   "observabilidad": "ALTA" | "MEDIA" | "BAJA",
   "evidencia_principal": "[ASESOR]: Momento clave de la propuesta económica o comité... (COPY-PASTE LITERAL)",
@@ -217,7 +218,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Mención de precio/descuento... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción o pregunta sobre precio/admisión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Responde cada punto: ¿Hizo análisis financiero antes de hablar de precio? ¿Ofreció alternativas sin haber preguntado la situación financiera (patrón negativo)? ¿Presentó comité con emoción o fue mecánico? ¿Valor antes que precio? ¿Validó la reacción del lead tras el precio? ¿Usó storytelling o ejemplo real? ¿Ante resistencia del lead, activó argumentos de urgencia económica? ¿Fue firme con el precio o dejó todo abierto? ¿Por qué esa calificación?",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué hizo bien el asesor y en qué aspectos falló en la admisión y propuesta económica. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "menciona_precio": true/false,
   "explica_financiacion": true/false,
@@ -246,29 +247,38 @@ REGLAS CRÍTICAS:
 - NO penalices si el tema no surgió naturalmente (puede ser llamada inicial)
 - SÍ penaliza con MALO si evitó el tema cuando el lead preguntó directamente
 
-⚠️ REGLAS PARA CALIFICAR:
-- Sé decisivo: elige UNA etiqueta.
-- BUENO cuando el asesor construye valor antes del precio, valida la reacción del lead y
-  maneja la conversación económica con firmeza y criterio consultivo.
-- MEJORABLE cuando hay estructura mínima pero el impacto es plano: el lead no entiende
-  por qué vale lo que vale, o el asesor no valida ni gestiona bien las resistencias.
-- MALO cuando el precio aparece sin contexto, el comité se omite, el asesor es evasivo
-  con el precio, o deja ir al lead sin activar ningún argumento económico de urgencia.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
+de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+
+  1. ¿Hizo análisis financiero ANTES de hablar de precio?              → SÍ / NO
+  2. ¿Presentó el comité de admisión con emoción y convicción (no mecánico)? → SÍ / NO
+  3. ¿Construyó valor SUFICIENTE antes de presentar el precio?          → SÍ / NO
+  4. ¿Validó la reacción del lead DESPUÉS de presentar el precio?       → SÍ / NO
+  5. ¿Activó argumentos de urgencia cuando el lead mostró resistencia?   → SÍ / NO
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+
+🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
+   Analiza el peso real de cada fallo. Los 5 criterios son todos relevantes para el
+   resultado de esta dimensión. Fallos en análisis financiero, comité sin emoción,
+   precio sin valor previo, no validar la reacción del lead y no activar urgencia son
+   aspectos críticos que comprometen directamente el avance. Si la mayoría fallaron,
+   la calificación debe reflejar esa realidad: MALO. No porque exista un umbral mecánico,
+   sino porque es lo que corresponde al impacto real en la conversación. No puedes detectar
+   múltiples fallos graves y concluir MEJORABLE: sería incoherente con tu propio análisis.
+
+⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+- MALO: múltiples fallos críticos acumulados que comprometieron el avance del lead, O precio
+  sin contexto, O comité omitido, O evasivo con precio, O deja ir al lead sin activar ningún
+  argumento ante resistencia.
+- MEJORABLE: 1-2 fallos. Hay estructura mínima pero el impacto es plano.
+- BUENO: ningún fallo o fallos menores. Construye valor, valida reacción, maneja con firmeza consultiva.
 - Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión
   con sentido y el asesor cerró sobre una propuesta concreta? Si sí → BUENO.
 - Si el lead mostró resistencia a la fecha y el asesor no usó ayudas ni consecuencias → MALO.
-
-REGLA DE ACUMULACIÓN — MALO POR SUMA DE FALLOS:
-Si en tu razonamiento has detectado 3 o más de los siguientes fallos, la calificación
-DEBE ser MALO, independientemente de que haya habido algún elemento positivo aislado:
-  ✗ Sin análisis financiero previo al precio
-  ✗ Comité de admisión mencionado de forma mecánica o sin emoción
-  ✗ Valor construido insuficientemente antes del precio
-  ✗ Sin validación de la reacción del lead tras el precio
-  ✗ Sin argumentos de urgencia cuando el lead mostró resistencia (sin ayudas, sin
-    consecuencias de no formarse ahora, sin ventajas de decidir hoy)
-Un asesor que deja al lead ir sin activar NINGUNO de estos argumentos ante resistencia
-ha fallado en lo esencial de esta fase. El feedback debe enumerar los fallos detectados.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 
