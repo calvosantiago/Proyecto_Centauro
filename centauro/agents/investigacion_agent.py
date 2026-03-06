@@ -119,8 +119,13 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
    Preguntas típicas: "¿Para qué buscas el máster, qué necesitas?" / "¿Qué cambiarías
    de tu situación actual?"
 
-2. INVERSIÓN ESPERADA: ¿Qué presupuesto o expectativa económica tiene el lead?
-   ¿Menciona precio, financiación, cuánto puede pagar? ¿Preguntó el asesor?
+2. PERFIL FINANCIERO: ¿El asesor exploró el contexto económico del lead?
+   NO busques discusiones de precio — lo que importa es calificar quién y cómo paga:
+   ¿Es inversión propia o la financia la empresa? ¿Si es perfil junior, cuenta con apoyo familiar?
+   ¿Lleva tiempo buscando y tiene un presupuesto destinado a su formación?
+   Este perfil permite al asesor abordar la parte económica de forma personalizada más adelante.
+   Preguntas típicas: "¿La formación la asumes tú o tienes apoyo de empresa?" / "¿Es una
+   inversión que harías tú mismo o tienes respaldo familiar?"
 
 3. COMPETIDORES EXPLORADOS: ¿Está comparando con otras instituciones o programas?
    ¿Qué otras opciones está evaluando?
@@ -134,6 +139,16 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
 6. INFORMACIÓN APROVECHABLE: ¿Hay datos personales, profesionales o emocionales
    que el asesor podría usar más adelante para personalizar el discurso?
 
+7. RECONDUCCIÓN (si aplica): ¿El lead llegó interesado en un programa o formato diferente
+   al que finalmente se le ofreció? Si el asesor detectó esto durante la investigación y
+   recondujo al lead hacia la opción adecuada, es un indicador de calidad consultiva alta.
+
+⚠️ ALCANCE DE LOS HALLAZGOS:
+Los "hallazgos_del_lead" reflejan lo que se aprendió en TODA la conversación, no solo
+en los primeros minutos. Si el asesor exploró competidores o el perfil financiero más
+adelante en la llamada, igualmente cuenta como "explorado".
+La CALIFICACIÓN, en cambio, evalúa principalmente la FASE INICIAL de investigación.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CRITERIOS DE CALIFICACIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -144,6 +159,8 @@ CRITERIOS DE CALIFICACIÓN
    - No descubre el Factor de Compra ni ninguna motivación relevante
    - El lead no tuvo espacio real para abrirse
    - También: hace preguntas pero ignora las respuestas o no las aprovecha en absoluto
+   - Si faltan MÚLTIPLES elementos clave (factor de compra, perfil financiero, puntos de dolor
+     o de ilusión, objetivos concretos) y lo que hay es genérico y vago → es MALO, no MEJORABLE
    EJEMPLO: "[ASESOR]: Hola, te cuento del máster. Cuesta 10mil..." (sin preguntar nada)
 
 🟡 MEJORABLE — investiga pero sin lograr profundidad ni información aprovechable:
@@ -159,6 +176,10 @@ CRITERIOS DE CALIFICACIÓN
    - El lead comparte información personal, profesional o emocional de valor
    - La apertura genera confianza y el lead habla con comodidad
    - No es necesario cubrir TODOS los puntos: basta con que la investigación sea real y aprovechable
+   - Si el asesor detecta que el lead viene por un programa/formato diferente y lo reconduce
+     exitosamente, valóralo como investigación consultiva de alta calidad → contribuye a BUENO
+   - Si el asesor recupera el Factor de Compra más adelante para personalizar la propuesta
+     o el cierre ("como me comentabas antes que..."), esto confirma y refuerza el BUENO
    EJEMPLO: "[ASESOR]: ¿Qué significa crecer para ti? [LEAD]: [se abre]... [ASESOR]: Suena a que..."
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -167,7 +188,15 @@ USO POSTERIOR DE LA INFORMACIÓN
 Analiza también el RESTO de la transcripción (no solo la fase inicial):
 ¿El asesor usó después la información que recopiló? ¿Personalizó la propuesta con
 los datos del lead? ¿O dejó la información sin aprovechar y siguió con el discurso genérico?
-Esto es un indicador clave de calidad consultiva.
+
+Pon especial atención al Factor de Compra: si el asesor lo identificó en la investigación
+y lo recuperó más adelante para argumentar, rebatir objeciones o cerrar ("como me dijiste
+que necesitas X, este programa es ideal porque..."), esto es un indicador de calidad
+consultiva de primer nivel y debe reflejarse en `info_aprovechada_despues: true` y en
+un razonamiento que lo valore positivamente.
+
+Si el asesor obtuvo información pero no la usó en absoluto → señal de oportunidad perdida,
+menciónalo en `nota_aprovechamiento`.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EVIDENCIA REQUERIDA
@@ -194,8 +223,9 @@ FORMATO JSON OBLIGATORIO
   ],
   "hallazgos_del_lead": {{
     "factor_de_compra": "Descripción del dolor/necesidad real del lead. 'No detectado' si no se exploró.",
-    "inversion_esperada": "Qué mencionó el lead sobre precio/presupuesto. 'No explorado' si no se tocó.",
-    "competidores": "Otras opciones que el lead mencionó estar evaluando. 'No explorado' si no se tocó.",
+    "inversion_esperada": "Perfil financiero del lead: ¿inversión propia, de empresa, o apoyo familiar? ¿Tiene presupuesto destinado? NO se requiere que haya hablado de precios — basta con que el asesor haya calificado quién y cómo paga. 'No explorado' SOLO si no se tocó en ningún momento de toda la llamada.",
+    "competidores": "Otras opciones que el lead mencionó estar evaluando. Marca como explorado si el lead mencionó espontáneamente otras instituciones/programas, aunque el asesor no preguntara. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
+    "reconduccion": "Si el asesor detectó que el lead venía interesado en un programa/formato diferente y lo recondujo exitosamente, describe cómo lo gestionó. 'No aplica' si no ocurrió.",
     "motivacion_principal": "Por qué quiere el máster y por qué ahora.",
     "fortalezas_debilidades": "Lo que el lead dijo sobre sí mismo. 'No explorado' si no se preguntó.",
     "datos_aprovechables": "Resumen en 2-3 frases de la info clave que el asesor podría usar para personalizar."
@@ -232,6 +262,12 @@ REGLAS CRÍTICAS:
 - Evalúa TANTO la apertura COMO la investigación
 - NO penalices si el lead es cerrado, penaliza si el asesor no intentó abrir
 - Sé técnico, no motivacional
+- COMPETIDORES: Marca como "explorado" si el lead menciona espontáneamente otras instituciones
+  o programas que está comparando, aunque el asesor no lo preguntara directamente
+- PERFIL FINANCIERO: Marca como "explorado" si se obtuvo cualquier calificador económico
+  (propio / empresa / familia), aunque no se haya hablado de importes o precios
+- NEVER marques 'No explorado' si hay cualquier indicio de que el tema se tocó, aunque
+  haya sido brevemente o en cualquier momento de la conversación
 
 ⚠️ REGLAS PARA CALIFICAR:
 - Sé decisivo: elige UNA etiqueta. No existe el término medio.
@@ -239,6 +275,7 @@ REGLAS CRÍTICAS:
 - MEJORABLE cuando hay intento de investigar pero el resultado es tan escaso que no sirve para personalizar.
 - MALO cuando el asesor directamente no investiga o las preguntas son puro trámite sin ningún valor.
 - Si dudas entre BUENO y MEJORABLE, pregúntate: ¿el asesor sabe algo útil del lead después de esta fase? Si sí → BUENO.
+- Si dudas entre MEJORABLE y BUENO y el asesor usó el Factor de Compra más adelante en la venta → inclínate por BUENO.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar.
 """
 

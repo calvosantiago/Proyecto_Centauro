@@ -84,6 +84,28 @@ y efectivo que conecta con el lead → BUENO, aunque no suene al speech de refer
 Lo que evalúas es si el estilo DAÑA la conversación (tono inapropiado, muletillas
 excesivas, falta de empatía) o si conduce bien dentro de los límites del profesionalismo.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ADAPTACIÓN AL PERFIL DEL LEAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El estilo "correcto" NO es el mismo para todos los leads. El asesor debe adaptar
+su comunicación al perfil de quien tiene delante:
+
+- PERFIL MARKETING / VENTAS / CREATIVO: estos leads valoran la conversación
+  cercana, la empatía, el tono humano y hablar "de tú a tú". Un estilo más
+  espontáneo, cercano e informal con este perfil es BUENO, no MEJORABLE.
+  Lo que se penaliza aquí es el tono robótico o demasiado comercial, no la
+  informalidad calculada que genera conexión real.
+
+- PERFIL CORPORATIVO / DIRECTIVO / TÉCNICO: estos leads esperan más estructura,
+  precisión y un tono más formal. El asesor que adapta su registro a esto = BUENO.
+
+⚠️ PARA LA RECOMENDACIÓN DE COACHING:
+Adapta SIEMPRE las frases de ejemplo al perfil detectado del lead.
+Si el lead es de marketing, ventas o un perfil creativo, NO sugieras frases muy
+formales o con argot comercial clásico. Usa un tono cercano, conversacional
+y con el lenguaje propio del lead. Las técnicas de los libros son válidas, pero
+los ejemplos concretos deben sonar naturales para ese perfil específico.
+
 ASPECTOS A EVALUAR:
 
 1. **TONO**: ¿Cómo suena el asesor?
@@ -102,11 +124,21 @@ ASPECTOS A EVALUAR:
    - Valida emociones del lead
    - Usa frases empáticas ("Entiendo...", "Tiene sentido...")
    - Personaliza el lenguaje (usa el nombre del lead)
+   - Comparte experiencia propia o analogía personal para generar conexión
+   ⚠️ EMPATÍA INVERSA: cuando el asesor comparte su propia historia o experiencia
+   para ponerse en el lugar del lead ("A mí también me pasó algo similar...",
+   "Conozco a alguien que estaba en tu misma situación..."), esto ES una señal
+   de empatía genuina. No requiere frases tipo "Entiendo...": contar algo propio
+   que conecta con la situación del lead CUENTA como momento de empatía real.
 
 4. **RITMO**: ¿Cómo gestiona el tiempo?
    - Deja hablar al lead vs monopoliza
    - Pausas adecuadas vs atropella
    - Verifica comprensión vs asume
+   ⚠️ SEÑAL DE ALERTA — LEAD SILENCIOSO: si el lead apenas habla a lo largo de
+   toda la conversación (respuestas muy cortas, monosílabos, largas intervenciones
+   del asesor sin invitar al lead a participar) → el asesor no está generando
+   diálogo real. Esto debe mencionarse en el razonamiento y contribuye a MEJORABLE.
 
 5. **PROFESIONALISMO**: ¿Genera confianza?
    - Lenguaje profesional vs coloquial en exceso
@@ -127,9 +159,14 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
    - Sin momentos de empatía o cercanía genuina a lo largo de la conversación
    - El lead responde pero no hay señales de que se sienta cómodo o escuchado
    - Profesional pero impersonal: correcto, pero no conecta
+   - TONO MECÁNICO: patrón específico a detectar — el asesor encadena bloques de
+     información sin pausas ni preguntas, el lead apenas tiene espacio para hablar
+     y la conversación suena más a monólogo que a diálogo
 
 🟢 BUENO — el estilo genera confianza y el lead se siente cómodo participando:
-   - Hay al menos un momento de empatía real o cercanía genuina
+   - Hay al menos un momento de empatía real o cercanía genuina (incluye: frases
+     empáticas directas, uso del nombre del lead, compartir una experiencia propia
+     relevante, generar un momento de humor o complicidad, o empatía inversa)
    - El tono es profesional sin ser rígido
    - El lead participa activamente y no parece incómodo
    - No es necesario que sea perfecto: basta con que el estilo sume a la conversación en vez de restarle
@@ -144,7 +181,7 @@ FORMATO JSON OBLIGATORIO:
     "Ejemplo de vocabulario adaptado: [ASESOR]: ... (COPY-PASTE LITERAL)",
     "Muletilla o problema detectado: [ASESOR]: ... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "Análisis del tono general, vocabulario, empatía, ritmo y profesionalismo. ¿Por qué esa calificación?",
+  "razonamiento": "Responde cada punto: ¿Cuál es el perfil del lead (marketing/ventas/creativo vs. corporativo/directivo)? ¿El asesor adaptó su estilo a ese perfil? ¿Hubo algún momento de empatía real (incluye empatía inversa/experiencia propia)? ¿El lead participó activamente o apenas habló? ¿El asesor generó diálogo o monopolizó la conversación? ¿Hubo tono mecánico o robótico? ¿Por qué esa calificación?",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
@@ -153,7 +190,9 @@ FORMATO JSON OBLIGATORIO:
     "ritmo": "equilibrado" | "monopoliza" | "pasivo",
     "profesionalismo": "alto" | "medio" | "bajo"
   }},
-  "fortaleza_principal": "El aspecto comunicativo más destacable del asesor"
+  "fortaleza_principal": "El aspecto comunicativo más destacable del asesor",
+  "perfil_comunicacion_lead": "MARKETING_VENTAS_CREATIVO" | "CORPORATIVO_DIRECTIVO" | "NO_DETERMINADO",
+  "lead_participa_activamente": true/false
 }}
 
 ⚠️ REGLAS PARA CALIFICAR:
@@ -162,6 +201,7 @@ FORMATO JSON OBLIGATORIO:
 - MEJORABLE cuando el estilo es correcto pero mecánico: educado pero sin calidez, sin momentos de empatía.
 - MALO cuando el estilo daña la conversación: genera distancia, incomodidad o desconfianza.
 - Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
+- Si el asesor compartió una experiencia propia para conectar con el lead (empatía inversa) → cuenta como momento de empatía real → inclínate por BUENO.
 - Evidencias LITERALES (COPY-PASTE exacto).
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 

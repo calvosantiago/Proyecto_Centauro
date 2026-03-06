@@ -21,7 +21,11 @@
       "Bash(wc:*)",
       "Bash(cat \"C:/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/_ul/\"*)",
       "Bash(start \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\Centauro_Progreso_Marzo2026.pptx\")",
-      "Bash(start \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\centauro_slides.html\")"
+      "Bash(start \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\\\\centauro_slides.html\")",
+      "Bash(git commit -m \"feat: especificar asesor al enviar transcripción:*)",
+      "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh 2>&1\")",
+      "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh\")",
+      "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh 2>&1 && echo FIN\")"
     ]
   }
 }

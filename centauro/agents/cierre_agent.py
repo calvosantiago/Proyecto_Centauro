@@ -130,10 +130,21 @@ CLAVES DE ESTE CIERRE
    antes de pedir el compromiso: "¿Cómo lo ves hasta aquí?" / "¿Tienes alguna duda
    antes de avanzar?" No asumir, preguntar.
 
-2. GENERAR IMPORTANCIA DEL COMITÉ:
-   Si en este punto se vuelve a mencionar el comité de admisión, debe hacerse con
-   sentido de urgencia y exclusividad: "Las plazas del comité se van cubriendo"
-   / "Tu candidatura tiene que entrar esta semana para ser evaluada."
+2. PREGUNTA DIRECTA DE COMPROMISO (señal positiva, no penaliza si no se hace):
+   Aunque el lead haya verbalizado durante la conversación que quiere avanzar, hacer
+   una pregunta directa al cerrar es la mejor práctica para formalizar ese compromiso:
+   "¿Entonces lo damos por hecho y te meto en el próximo comité?" /
+   "¿Puedo contar con que me mandas la documentación hoy?"
+   Si el asesor la hace → suma. Si no la hace pero el lead sí avanzó → no penaliza.
+   NO reduzcas la calificación por ausencia de esta pregunta.
+
+3. GENERAR URGENCIA CON COMITÉ Y AYUDAS ECONÓMICAS:
+   Al cerrar, el asesor debe vincular el siguiente paso a la fecha del comité
+   y/o a las ayudas económicas disponibles para crear urgencia real:
+   "El próximo comité es el [fecha] — si me mandas la documentación esta semana
+   puedo incluirte" / "La bonificación que hemos hablado es válida hasta el comité,
+   si lo dejamos para más adelante perdería ese descuento."
+   Ausencia de estas palancas al cerrar = oportunidad perdida (contribuye a MEJORABLE).
 
 3. PRÓXIMO PASO CONCRETO CON FECHA:
    El siguiente paso debe ser específico y con fecha real. Hay grados:
@@ -154,6 +165,15 @@ CLAVES DE ESTE CIERRE
    "Piénsalo y me dices" sin fecha ni compromiso = MALO. El asesor lidera el proceso,
    no espera que el lead tome la iniciativa.
 
+6. SIMPLICIDAD EN EL PROCESO:
+   El asesor debe cerrar con el mínimo de pasos necesarios. Crear complejidad
+   innecesaria debilita el cierre:
+   ⚠️ PATRÓN A PENALIZAR: "Mañana te mando otra propuesta con los números" /
+   "Déjame que lo reviso y te escribo" cuando ese paso podría haberse resuelto
+   en la misma llamada. Posponer al día siguiente lo que podría cerrar ahora =
+   MEJORABLE. El asesor debe llegar al cierre con la propuesta lista, no construirla
+   después de la llamada.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CRITERIOS DE CALIFICACIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -163,18 +183,26 @@ CRITERIOS DE CALIFICACIÓN
    - No propone ni fecha, ni acción, ni compromiso de ningún tipo
    - No genera ningún avance en el proceso de admisión
    - También: el lead pregunta por el siguiente paso y el asesor no lo define
+   - CRÍTICO: si no se definen próximos pasos Y tampoco se establece ningún seguimiento
+     (ni fecha de llamada, ni acción del lead, ni nada) → es MALO sin excepción.
+     La ausencia total de estructura de cierre es una negligencia comercial.
 
 🟡 MEJORABLE — hay un cierre mínimo pero sin estructura ni liderazgo real:
    - Propone algo concreto (enviar documentación, llamar) pero sin técnica ni fecha específica
    - No valida si el lead tiene dudas antes de cerrar
    - El lead acepta de forma pasiva, sin convicción real
    - El asesor no conecta el cierre con el objetivo del lead ni resume lo acordado
+   - No vincula el cierre a la fecha del comité ni a las ayudas económicas disponibles
+   - Crea complejidad innecesaria: pospone al día siguiente algo que podría haberse
+     cerrado en la llamada ("mañana te mando la propuesta", "lo reviso y te escribo")
 
 🟢 BUENO — el asesor lidera el cierre y genera un compromiso claro:
    - Propone el siguiente paso de forma clara con fecha o plazo concreto
    - Valida si el lead tiene dudas antes de cerrar, o resume lo acordado
    - Usa alguna técnica de cierre (doble alternativa, asuntivo, resumen-acción)
    - El lead confirma su compromiso con claridad
+   - Hace una pregunta directa de compromiso, aunque el lead ya hubiera expresado intención
+   - Vincula el cierre a la fecha del comité y/o a las ayudas económicas para generar urgencia
    - No es necesario que use todas las técnicas: basta con que lidere el proceso y el lead avance
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -194,7 +222,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Validó antes de cerrar? ¿Usó técnica? ¿Generó compromiso real? ¿Próximo paso con fecha? ¿Por qué esa calificación?",
+  "razonamiento": "Responde cada punto: ¿Validó antes de cerrar? ¿Hizo pregunta directa de compromiso aunque el lead ya hubiera expresado intención? ¿Vinculó el cierre a la fecha del comité y/o ayudas económicas? ¿Usó técnica de cierre? ¿Generó compromiso real o lo dejó abierto? ¿Próximo paso con fecha concreta? ¿Creó complejidad innecesaria posponiendo pasos al día siguiente? ¿Hay seguimiento definido? ¿Por qué esa calificación?",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "proximo_paso_concreto": "Descripción del próximo paso acordado (o 'ninguno' si no lo hubo)",
   "compromiso_fecha": true/false,
@@ -236,10 +264,15 @@ REGLAS CRÍTICAS:
 
 ⚠️ REGLAS PARA CALIFICAR:
 - Sé decisivo: elige UNA etiqueta.
-- BUENO cuando el asesor lidera el cierre y el lead avanza con compromiso, aunque no use todas las técnicas.
-- MEJORABLE cuando hay cierre mínimo pero el lead no queda comprometido de verdad.
-- MALO cuando no hay cierre real o es completamente pasivo.
-- Si dudas entre BUENO y MEJORABLE: ¿el asesor lideró el proceso o fue el lead quien tomó la iniciativa? Si el asesor lideró → BUENO.
+- BUENO cuando el asesor lidera el cierre, genera compromiso claro y vincula el siguiente
+  paso a urgencias reales (comité, ayudas), aunque no use todas las técnicas.
+- MEJORABLE cuando hay cierre mínimo pero el lead no queda comprometido de verdad,
+  o cuando crea complejidad innecesaria posponiendo pasos al día siguiente.
+- MALO cuando no hay cierre real, es completamente pasivo, o no se definen ni próximos
+  pasos ni seguimiento de ningún tipo.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor lideró el proceso o fue el lead quien
+  tomó la iniciativa? Si el asesor lideró → BUENO.
+- Si no hay próximos pasos Y tampoco seguimiento → MALO sin excepción.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
         

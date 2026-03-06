@@ -91,9 +91,15 @@ CLAVES DE ESTA FASE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. ANÁLISIS FINANCIERO DEL LEAD:
-   El asesor debe explorar la situación económica del lead ANTES de hablar de precio.
-   No se trata de interrogar, sino de entender su capacidad y expectativas para adaptar
-   la presentación. ¿Preguntó si tiene financiación en mente? ¿Validó el rango que maneja?
+   El asesor debe explorar la situación económica del lead ANTES de hablar de precio
+   y ANTES de ofrecer alternativas de pago (cuotas, menor inscripción, financiación).
+   No se trata de interrogar, sino de entender su capacidad y expectativas.
+   Perfiles válidos de pago: inversión propia, empresa, familia/padres. No penalices
+   porque sean los padres quienes paguen — es un perfil legítimo que el asesor debe
+   conocer para adaptar su discurso.
+   ⚠️ PATRÓN A DETECTAR: si el asesor ofrece cuotas adicionales o reduce la inscripción
+   SIN haber preguntado antes la situación financiera del lead, está quemando herramientas
+   de negociación. Menciónalo en el razonamiento como oportunidad perdida.
 
 2. COMITÉ DE ADMISIÓN:
    El comité de admisión genera importancia, exclusividad y emoción en el lead.
@@ -117,10 +123,21 @@ CLAVES DE ESTA FASE
    En este momento contamos con una bonificación especial que lo deja en X€."
    Un asesor que abre con el precio rebajado o lo da sin contexto = MEJORABLE o MALO.
 
-5. VALIDACIÓN, NO SUPUESTOS:
-   El asesor debe verificar que el lead entiende y procesa cada elemento antes de avanzar.
-   No da por supuesto que el lead entendió el valor, el proceso o la financiación.
-   Usa preguntas de comprobación: "¿Esto tiene sentido para ti?" / "¿Cómo lo ves?"
+5. VALIDACIÓN TRAS LA PROPUESTA:
+   Después de presentar el precio, el asesor debe verificar que el lead lo ha procesado
+   y saber cuál es su reacción antes de avanzar. No da por supuesto que el lead aceptó.
+   Preguntas de comprobación: "¿Cómo lo ves?" / "¿Qué te parece?" / "¿Esto encaja con
+   lo que tenías en mente?"
+   Ausencia de esta validación = oportunidad perdida de detectar objeciones a tiempo.
+
+5b. SEGURIDAD EN EL PRECIO:
+   Cuando el lead pide más descuento, el asesor debe mantener una posición firme pero
+   consultiva: presentar la propuesta completa (lo que sí puede ofrecer), preguntar si
+   le va bien, y ENTONCES comprometerse a pedir aprobación para esa tarifa concreta.
+   ⚠️ PATRÓN A PENALIZAR: respuestas evasivas como "voy a revisar si hay alguna ayuda
+   adicional que te pueda aprobar" generan inseguridad en el lead e impiden cerrar
+   cualquier compromiso económico en la entrevista. El asesor debe presentar UNA
+   propuesta concreta y cerrar sobre ella, no dejar todo abierto.
 
 6. STORYTELLING:
    Se valora que el asesor use historias, ejemplos de otros alumnos o situaciones
@@ -137,6 +154,10 @@ CRITERIOS DE CALIFICACIÓN
    - Es evasivo o defensivo ante preguntas del lead sobre precio
    - Genera confusión, desconfianza o presión innecesaria
    - También: el lead pregunta directamente por el precio o el proceso y el asesor lo esquiva o lo gestiona mal
+   - CRÍTICO: si el lead muestra resistencia a la fecha de inicio o a decidir ahora, y el asesor
+     NO usa las ayudas económicas disponibles, NO expone las consecuencias de no formarse ahora,
+     y NO argumenta las ventajas de hacerlo → es MALO. Dejar ir al lead sin activar ningún
+     argumento económico de urgencia es una negligencia comercial.
 
 🟡 MEJORABLE — funcional pero mecánico, sin impacto emocional real:
    - Menciona el comité de forma mecánica, sin darle peso ni emoción
@@ -144,13 +165,19 @@ CRITERIOS DE CALIFICACIÓN
    - La secuencia valor→precio existe pero es superficial
    - No valida ni explora la situación financiera del lead
    - No usa storytelling ni ejemplos que hagan tangible el valor del programa
+   - No valida la reacción del lead tras presentar el precio ("¿Cómo lo ves?")
+   - Ofrece alternativas de pago sin haber preguntado la situación financiera antes
 
 🟢 BUENO — presentación estructurada que construye valor y genera confianza antes del precio:
    - Construye valor del programa antes de mencionar el precio
    - Presenta el comité de admisión con convicción, no como trámite
    - Introduce el precio después del valor, con contexto claro
-   - Valida la comprensión del lead en al menos un punto clave
-   - No es necesario que use todas las técnicas: basta con que el lead sienta que la inversión tiene sentido
+   - Valida la reacción del lead tras presentar el precio ("¿Cómo lo ves?")
+   - Si el lead muestra resistencia a la fecha, activa argumentos de urgencia económica
+     (ayudas, consecuencias de no formarse ahora, ventajas de decidir hoy)
+   - Usa storytelling o ejemplos reales que hagan tangible el valor del programa
+   - Ante petición de descuento, presenta una propuesta concreta y cierra sobre ella
+   - No es necesario que use todas las técnicas: basta con que la propuesta sea firme y el lead sienta que la inversión tiene sentido
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EVIDENCIA REQUERIDA
@@ -173,7 +200,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Mención de precio/descuento... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción o pregunta sobre precio/admisión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "¿Hizo análisis financiero? ¿Presentó comité con emoción? ¿Valor antes que precio? ¿Secuencia correcta? ¿Storytelling? ¿Por qué esa calificación?",
+  "razonamiento": "Responde cada punto: ¿Hizo análisis financiero antes de hablar de precio? ¿Ofreció alternativas sin haber preguntado la situación financiera (patrón negativo)? ¿Presentó comité con emoción o fue mecánico? ¿Valor antes que precio? ¿Validó la reacción del lead tras el precio? ¿Usó storytelling o ejemplo real? ¿Ante resistencia del lead, activó argumentos de urgencia económica? ¿Fue firme con el precio o dejó todo abierto? ¿Por qué esa calificación?",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "menciona_precio": true/false,
   "explica_financiacion": true/false,
@@ -204,10 +231,15 @@ REGLAS CRÍTICAS:
 
 ⚠️ REGLAS PARA CALIFICAR:
 - Sé decisivo: elige UNA etiqueta.
-- BUENO cuando el asesor construye valor antes del precio y el lead procesa la inversión con calma, aunque no use todas las técnicas.
-- MEJORABLE cuando hay estructura mínima pero el impacto es plano: el lead no entiende por qué vale lo que vale.
-- MALO cuando el precio aparece sin contexto, el comité se omite, o el asesor genera confusión o desconfianza.
-- Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión con sentido? Si sí → BUENO.
+- BUENO cuando el asesor construye valor antes del precio, valida la reacción del lead y
+  maneja la conversación económica con firmeza y criterio consultivo.
+- MEJORABLE cuando hay estructura mínima pero el impacto es plano: el lead no entiende
+  por qué vale lo que vale, o el asesor no valida ni gestiona bien las resistencias.
+- MALO cuando el precio aparece sin contexto, el comité se omite, el asesor es evasivo
+  con el precio, o deja ir al lead sin activar ningún argumento económico de urgencia.
+- Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión
+  con sentido y el asesor cerró sobre una propuesta concreta? Si sí → BUENO.
+- Si el lead mostró resistencia a la fecha y el asesor no usó ayudas ni consecuencias → MALO.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 
