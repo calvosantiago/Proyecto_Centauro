@@ -98,6 +98,16 @@ Busca activamente en TODA la transcripción:
     → El asesor puede haber construido valor desde el inicio de la llamada
   ✓ Reacciones del lead al precio en cualquier momento de la conversación
   ✓ Storytelling o casos de alumni mencionados en cualquier sección
+  ✓ SEÑAL CRÍTICA — Declaraciones de no-intención de compra en la convocatoria actual:
+    Frases como "mi plan no era ingresar en ningún programa académico", "no lo tenía
+    pensado para esta convocatoria", "no tengo intención de matricularme ahora" son
+    la señal más importante que debes detectar en toda la transcripción. Cuando la
+    encuentres, busca activamente si el asesor activó en algún momento posterior
+    argumentos de urgencia: ayudas económicas disponibles, consecuencias de no
+    formarse ahora, ventajas de decidir en esta convocatoria. Si no los activó → MALO,
+    independientemente de si el lead "parecía poco interesado". Que el lead no tenga
+    intención de comprar ahora es exactamente el momento en que el asesor debe usar
+    estas herramientas, no una excusa para omitirlas.
 
 Si encuentras alguno de estos elementos en cualquier parte de la conversación,
 tenlos en cuenta para la evaluación. El análisis financiero puede haberse hecho
@@ -171,10 +181,21 @@ CRITERIOS DE CALIFICACIÓN
    - Es evasivo o defensivo ante preguntas del lead sobre precio
    - Genera confusión, desconfianza o presión innecesaria
    - También: el lead pregunta directamente por el precio o el proceso y el asesor lo esquiva o lo gestiona mal
-   - CRÍTICO: si el lead muestra resistencia a la fecha de inicio o a decidir ahora, y el asesor
-     NO usa las ayudas económicas disponibles, NO expone las consecuencias de no formarse ahora,
-     y NO argumenta las ventajas de hacerlo → es MALO. Dejar ir al lead sin activar ningún
-     argumento económico de urgencia es una negligencia comercial.
+   - CRÍTICO — LEAD SIN INTENCIÓN DE COMPRA EN LA CONVOCATORIA ACTUAL:
+     Si el lead declara explícitamente que no tenía intención de inscribirse ahora
+     ("mi plan no era ingresar en ningún programa académico", "no lo tenía pensado para
+     esta convocatoria", "no es algo que me plantee para ahora") Y el asesor NO usa las
+     ayudas económicas disponibles, NO expone las consecuencias de no formarse ahora, y
+     NO argumenta las ventajas de decidir en esta convocatoria → es MALO sin excepción.
+     Esta declaración del lead es la señal más importante para activar urgencia. No usarla
+     es la negligencia comercial más grave. El hecho de que el lead "no tuviera intención"
+     NO es una excusa para que el asesor omita los argumentos de urgencia: es exactamente
+     la situación para la que existen esas herramientas.
+   - CRÍTICO — RESISTENCIA A LA FECHA O A DECIDIR AHORA: si el lead muestra resistencia
+     a la fecha de inicio o a comprometerse en esta llamada, y el asesor NO usa las ayudas
+     económicas disponibles, NO expone las consecuencias de no formarse ahora, y NO argumenta
+     las ventajas de hacerlo → es MALO. Dejar ir al lead sin activar ningún argumento
+     económico de urgencia es una negligencia comercial.
 
 🟡 MEJORABLE — funcional pero mecánico, sin impacto emocional real:
    - Menciona el comité de forma mecánica, sin darle peso ni emoción
@@ -257,7 +278,9 @@ de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
   2. ¿Presentó el comité de admisión con emoción y convicción (no mecánico)? → SÍ / NO
   3. ¿Construyó valor SUFICIENTE antes de presentar el precio?          → SÍ / NO
   4. ¿Validó la reacción del lead DESPUÉS de presentar el precio?       → SÍ / NO
-  5. ¿Activó argumentos de urgencia cuando el lead mostró resistencia?   → SÍ / NO
+  5. ¿Activó argumentos de urgencia cuando el lead mostró resistencia O declaró no-intención
+     de inscribirse en la convocatoria actual?                            → SÍ / NO
+     (Si el lead no mostró resistencia ni declaró no-intención → marca SÍ por defecto)
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 
@@ -279,6 +302,10 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 - Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión
   con sentido y el asesor cerró sobre una propuesta concreta? Si sí → BUENO.
 - Si el lead mostró resistencia a la fecha y el asesor no usó ayudas ni consecuencias → MALO.
+- Si el lead declaró explícitamente no-intención de compra en esta convocatoria ("mi plan
+  no era ingresar en ningún programa académico" o equivalente) Y el asesor no activó ningún
+  argumento de urgencia en ningún momento posterior de la conversación → MALO sin excepción,
+  independientemente de cuántas cosas hiciera bien en otros aspectos.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 

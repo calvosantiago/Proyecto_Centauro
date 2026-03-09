@@ -140,6 +140,23 @@ Busca en TODA la transcripción:
 Evalúa el CONJUNTO de cómo el asesor construyó el camino hacia el compromiso
 durante toda la conversación, no solo el tramo final.
 
+⚠️ SEÑAL CRÍTICA — Conversación sin ningún próximo paso ni seguimiento:
+Al leer el tramo final de la conversación, comprueba si se acordó ALGO concreto:
+  - Una fecha de llamada, aunque sea vaga ("mañana", "el lunes", "esta semana")
+  - Un envío de documentación que el lead aceptó explícitamente
+  - Una acción concreta comprometida por alguna de las dos partes
+  - Un siguiente paso en el proceso de admisión mencionado y aceptado
+
+Si NO encuentras NINGUNO de estos elementos, estás ante una AUSENCIA TOTAL DE CIERRE.
+En ese caso, la calificación es MALO sin excepción, independientemente de lo bien que
+haya transcurrido el resto de la conversación.
+
+⚠️ OJO CON ESTE PATRÓN FRECUENTE — "despedida pasiva sin acuerdo":
+"Te mando la información" / "Ya te escribo" / "Nos hablamos" sin que el lead lo
+acepte explícitamente Y sin que quede definida ninguna acción o fecha concreta
+→ NO cuenta como cierre. Es un fin de llamada pasivo sin estructura.
+Si el asesor termina así y el lead no confirma nada, la conversación terminó sin avance.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SOBRE EL CIERRE EN VENTA CONSULTIVA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
