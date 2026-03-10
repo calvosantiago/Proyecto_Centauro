@@ -175,7 +175,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Conexión con necesidad del lead... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción mostrando interés o comprensión... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo presentó el asesor la institución y el programa, si conectó con el lead, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo presentó el asesor la institución y el programa, si conectó con el lead, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
@@ -194,6 +194,10 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 - Da 2 frases concretas que podría haber usado en ESTA conversación
 - NO copies texto literal del libro, adapta con tus palabras
 - Menciona de qué libro/autor viene
+⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
+el comportamiento que vas a recomendar. Si ya lo hizo, NO lo recomiendes — elige otro
+aspecto donde haya margen real de mejora. Recomendar algo que el asesor ya hizo invalida
+el coaching.
 
 REGLAS CRÍTICAS:
 - Todas las evidencias DEBEN ser copy-paste LITERAL (COPY-PASTE exacto)
@@ -203,6 +207,16 @@ REGLAS CRÍTICAS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 CALIBRA con los ejemplos del CONTEXTO:
+Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
+del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
+Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
+palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
+⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
+completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
+el estándar para el nivel general, no para un fragmento aislado.
+Tenlo presente al interpretar los fallos del checklist.
+
 DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
 de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
@@ -225,8 +239,8 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
 - MALO: múltiples fallos críticos acumulados, O presentación confusa/desorganizada, O el lead no entiende qué se le ofrece.
-- MEJORABLE: 1-2 fallos. Presentación correcta pero catálogo sin conexión con el lead.
-- BUENO: ningún fallo o fallos menores. Clara, estructurada y conecta con lo que importa a este lead.
+- MEJORABLE: presentación correcta pero genérica, sin conexión real con la situación del lead. El lead escucha pero no se reconoce en lo que le cuentan. Catálogo sin anclaje personal.
+- BUENO: clara, estructurada y conecta con lo que importa a este lead. No es necesario usar todas las técnicas: si la propuesta resonó con el lead y lo movió a avanzar → es BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo del perfil o las palabras del lead?
   Si sí → BUENO. Si la presentación es buena pero sin ningún anclaje personal → MEJORABLE.
 - Si el asesor trabajó elementos de propuesta de valor desde el INICIO de la conversación
@@ -238,6 +252,12 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
+ANTES DE EVALUAR: Lee la transcripción completa de principio a fin. El asesor puede
+construir la propuesta de valor a lo largo de toda la conversación — datos, estadísticas,
+beneficios y anclajes al perfil del lead pueden aparecer en cualquier momento. Identifica
+TODOS los momentos en que presentó beneficios o conectó el programa con el lead antes
+de decidir la calificación. Evalúa el CONJUNTO, no solo el bloque central de presentación.
+
 Analiza cómo presentó la institución y el programa en esta conversación:
 
 {transcripcion}

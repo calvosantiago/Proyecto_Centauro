@@ -248,6 +248,32 @@ def obtener_embedding(texto):
         )
     return resp.data[0].embedding
 
+def _log_prompt_debug(referencia_log: str, prompt_sistema: str, prompt_usuario: str, respuesta: str = None):
+    """Guarda prompts y respuestas en archivo de debug si CENTAURO_DEBUG_PROMPTS está activo."""
+    if not os.environ.get("CENTAURO_DEBUG_PROMPTS"):
+        return
+    try:
+        debug_dir = Path("debug_prompts")
+        debug_dir.mkdir(exist_ok=True)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = debug_dir / f"{timestamp}_{referencia_log}.txt"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(f"{'='*80}\n")
+            f.write(f"REFERENCIA: {referencia_log}\n")
+            f.write(f"TIMESTAMP: {timestamp}\n")
+            f.write(f"{'='*80}\n\n")
+            f.write(f"--- PROMPT SISTEMA ({len(prompt_sistema)} chars) ---\n")
+            f.write(prompt_sistema)
+            f.write(f"\n\n--- PROMPT USUARIO ({len(prompt_usuario)} chars) ---\n")
+            f.write(prompt_usuario)
+            if respuesta:
+                f.write(f"\n\n--- RESPUESTA ({len(respuesta)} chars) ---\n")
+                f.write(respuesta)
+        print(f"  [DEBUG] Prompt guardado: {filename}")
+    except Exception as e:
+        print(f"  [DEBUG] Error guardando prompt: {e}")
+
+
 def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", force_json=None):
     """
     Envía la consulta a OpenAI y registra el gasto asociado al archivo 'referencia_log'.
@@ -320,4 +346,9 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
         )
     # -------------------------------------
 
-    return response.choices[0].message.content
+    resultado = response.choices[0].message.content
+
+    # Log de debug con respuesta incluida
+    _log_prompt_debug(referencia_log, prompt_sistema, prompt_usuario, resultado)
+
+    return resultado

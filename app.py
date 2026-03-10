@@ -274,7 +274,38 @@ async def main(message: cl.Message):
         if not chat_handler:
             chat_handler = ChatHandler()
             cl.user_session.set("chat_handler", chat_handler)
-        # Procesar pregunta
+        # ── Detectar petición de transcripción ──────────────────────────────
+        keywords_transcripcion = [
+            "transcripción", "transcripcion", "transcript",
+            "texto de la llamada", "texto de la entrevista",
+            "transcripción diarizada", "dame la transcripcion",
+            "pásame la transcripción", "pasame la transcripcion"
+        ]
+        if any(kw in pregunta.lower() for kw in keywords_transcripcion):
+            ultima_transcripcion = cl.user_session.get("ultima_transcripcion")
+            if ultima_transcripcion:
+                nombre_archivo = cl.user_session.get("nombre_archivo_evaluado", "evaluacion")
+                txt_filename = f"Transcripcion_{nombre_archivo.replace('.', '_')}.txt"
+                txt_path = settings.OUTPUTS_DIR / "Transcripciones" / txt_filename
+                txt_path.parent.mkdir(exist_ok=True, parents=True)
+                txt_path.write_text(ultima_transcripcion, encoding="utf-8")
+                await cl.Message(
+                    content="📄 **Transcripción lista para descargar:**",
+                    elements=[
+                        cl.File(
+                            name=txt_filename,
+                            path=str(txt_path),
+                            display="inline"
+                        )
+                    ]
+                ).send()
+            else:
+                await cl.Message(
+                    content="⚠️ No hay ninguna transcripción disponible en esta sesión. "
+                            "Adjunta primero un archivo de audio o texto para evaluarlo."
+                ).send()
+            return
+        # ── Procesar pregunta con RAG ────────────────────────────────────────
         await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
         try:
             # TODO: Detectar nombre de asesor si pregunta por su perfil
@@ -418,6 +449,9 @@ async def main(message: cl.Message):
                     asesor_detectado_inicial = nombre_de_transcripcion
             num_lineas = len([l for l in transcripcion_diarizada.split('\n') if l.strip()])
             step.output = f"✅ Transcripción diarizada\n\n📊 {num_lineas} líneas procesadas"
+            # Guardar transcripción en sesión para descarga bajo demanda
+            cl.user_session.set("ultima_transcripcion", transcripcion_diarizada)
+            cl.user_session.set("nombre_archivo_evaluado", file.name)
             # Si aún no tenemos un nombre válido, preguntar al usuario
             if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
                 step.output += "\n\n⚠️ No se pudo detectar el nombre del asesor automáticamente"
@@ -559,7 +593,8 @@ async def main(message: cl.Message):
 **Fase Funnel:** {fase}
 **Resultado:** {resultado}"""
             except Exception as e:
-                step.output = f"⚠️ Error extrayendo perfil: {e}"
+                resumen_contextual = {"perfil_lead": "N/A", "fase_funnel": "N/A", "resultado_general": "N/A"}
+                step.output = f"⚠️ Error extrayendo perfil: {e} (usando fallback)"
         # ==================== FASE 3: EVALUACIÓN MULTI-AGENTE ====================
         evaluaciones = []
         async with cl.Step(name="🤖 FASE 3: Evaluación Multi-Agente Híbrida", type="tool") as fase3:

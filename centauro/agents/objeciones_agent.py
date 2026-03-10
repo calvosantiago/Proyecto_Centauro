@@ -143,6 +143,15 @@ Trabajar sin miedo a la objeción y anticiparse a ella es una señal clara de BU
 También evalúa si el asesor retoma el tema económico o temporal de forma proactiva,
 o si solo reacciona cuando el lead protesta.
 
+⚠️ SENSIBILIDAD CONTEXTUAL — REGLA ANTES DE CALIFICAR:
+Cuando el lead revela una circunstancia personal (viaje, compromiso familiar, trabajo,
+situación médica), preguntar por qué esa circunstancia existe o cuándo cambiará es
+INTRUSIVO e INAPROPIADO. Un asesor sensible NO interroga la circunstancia: ofrece
+una salida (fecha alternativa, reserva, aplazamiento). Penalizar al asesor por "no
+explorar la urgencia del viaje" o "no preguntar cuándo vuelve" es un ERROR: eso
+sería presionar al lead, que es criterio de MALO, no de BUENO.
+La sensibilidad y la lectura del contexto son parte de una venta consultiva de calidad.
+
 CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
 🔴 MALO — el asesor maneja la objeción de forma contraproducente o la evita activamente:
@@ -155,7 +164,10 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 🟡 MEJORABLE — el asesor responde pero de forma reactiva y sin lograr resolución real:
    - Solo reacciona a objeciones explícitas, nunca anticipa
    - Responde con información correcta pero mecánica, sin validar la preocupación del lead
-   - No profundiza en el porqué real de la objeción
+   - No profundiza en el porqué real de la objeción FUNDAMENTAL (precio, necesidad, valor)
+     ⚠️ Para objeciones LOGÍSTICAS: "no profundizar en los detalles" NO es fallo — ver regla
+     de sensibilidad contextual arriba. MEJORABLE solo si el asesor no ofreció ninguna
+     alternativa logística, no si no interrogó la circunstancia personal del lead.
    - El lead queda igual de dudoso o inseguro tras la respuesta
    - Intenta resolver pero no usa ninguna técnica estructurada
    - Resuelve la objeción pero no genera compromiso concreto ni urgencia después
@@ -194,6 +206,21 @@ OBJECIÓN DE AUTORIDAD CON PADRES:
 - Técnica adecuada: ofrecer una sesión con los padres para resolver sus dudas directamente.
 - Si el asesor solo pregunta "¿te ayudan los padres?" sin explorar más → oportunidad perdida.
 
+OBJECIONES ADMINISTRATIVAS/DOCUMENTACIÓN:
+- El lead menciona dificultades para obtener su título, expediente académico o certificaciones previas.
+- El lead tiene pendiente trámites burocráticos con su universidad o institución anterior.
+- Estas son objeciones operativas que el asesor debe gestionar activamente:
+  → Ofrecer orientación o alternativas para conseguir la documentación = técnica válida.
+  → Decir "nosotros te ayudamos con ese trámite" o "eso es algo que podemos resolver juntos" = BUENO.
+- Pueden aparecer en cualquier momento de la llamada (no solo al cierre).
+- NO las ignores por ser "administrativas" — si el lead las menciona, son una barrera real al avance.
+
+⚠️ PATRÓN RESERVA/SEÑAL DE COMPROMISO:
+Si el asesor ofrece al lead reservar su plaza con un pago simbólico o parcial (ej: "puedes reservar
+con solo 100 euros ahora y el resto cuando vuelvas") Y el lead reacciona positivamente (acepta la
+idea, muestra interés, no la rechaza) → cuenta como RESOLUCIÓN EXITOSA de la objeción logística.
+Busca activamente este patrón en la transcripción. Si ocurrió → BUENO sin excepción.
+
 FORMATO JSON OBLIGATORIO:
 {{
   "contador_fallos_criticos": 0,
@@ -204,7 +231,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Validación de la objeción o anticipación... (COPY-PASTE LITERAL)",
     "[LEAD]: Reacción posterior... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué objeciones surgieron, cómo las gestionó el asesor, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué objeciones surgieron, cómo las gestionó el asesor, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "anticipo_objeciones": true/false,
@@ -220,6 +247,10 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 - Da 2 frases concretas que podría haber usado en ESTA conversación
 - NO copies texto literal del libro, adapta con tus palabras
 - Menciona de qué libro/autor viene
+⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
+el comportamiento que vas a recomendar. Si ya lo hizo, NO lo recomiendes — elige otro
+aspecto donde haya margen real de mejora. Recomendar algo que el asesor ya hizo invalida
+el coaching.
 
 REGLAS CRÍTICAS:
 - Evidencias LITERALES de la transcripción (COPY-PASTE exacto)
@@ -229,12 +260,29 @@ REGLAS CRÍTICAS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 CALIBRA con los ejemplos del CONTEXTO:
+Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
+del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
+Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
+palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
+⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
+completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
+el estándar para el nivel general, no para un fragmento aislado.
+Tenlo presente al interpretar los fallos del checklist.
+
 Si hay objeciones detectadas, DETENTE. Antes de elegir la calificación, DEBES
 responder SÍ o NO a cada uno de estos 5 puntos. Cuenta cuántos tienen respuesta
 NEGATIVA (= fallo):
 
   1. ¿Validó la preocupación del lead antes de responder (no la ignoró ni minimizó)? → SÍ / NO
   2. ¿Profundizó en el porqué real de la objeción (no se quedó en la superficie)?    → SÍ / NO
+     ⚠️ EXCEPCIÓN LOGÍSTICA: Para objeciones de timing/viaje/circunstancia puntual,
+     "profundizar" NO significa interrogar los detalles logísticos del lead (cuándo
+     vuelve, por qué el viaje es urgente, etc.) — eso sería intrusivo e inapropiado.
+     Para estas objeciones, responde SÍ si el asesor: (a) reconoció la circunstancia,
+     y (b) buscó activamente un camino alternativo (fecha anterior, reserva, pago
+     parcial). El asesor que no presiona y ofrece una salida está manejando bien la
+     objeción logística. Marca este ítem como SÍ en ese caso.
   3. ¿Usó técnica estructurada o evidencia concreta para resolver?                   → SÍ / NO
   4. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
   5. ¿Generó compromiso o urgencia después de resolver la objeción?                   → SÍ / NO
@@ -253,8 +301,8 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
 - MALO: múltiples fallos críticos acumulados, O ignora/agrava objeciones, O huye del tema.
-- MEJORABLE: 1-2 fallos. Intenta responder pero la objeción queda sin resolver realmente.
-- BUENO: ningún fallo o fallos menores. Resuelve o reduce la resistencia con técnica.
+- MEJORABLE: intenta responder pero la objeción queda sin resolver realmente, o la resuelve de forma superficial sin técnica consultiva. El lead sigue resistente o simplemente no la presiona más.
+- BUENO: resuelve o reduce la resistencia con técnica real. No es necesario que el lead quede convencido al 100%: si el asesor aplicó un proceso consultivo y el lead avanzó → es BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿el lead quedó menos resistente después? Si sí → BUENO.
 - Si el lead confirma explícitamente que sus dudas se resolvieron → BUENO sin excepción.
 - Si la objeción era logística (timing/viaje) y se acordó pago parcial o alternativa → BUENO.
@@ -265,6 +313,13 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
+ANTES DE EVALUAR: Lee la transcripción completa de principio a fin. Las objeciones pueden
+surgir en CUALQUIER momento — al inicio, en el medio o al final de la llamada. Presta
+especial atención a: (1) resistencias logísticas tipo "me voy de viaje" y si el asesor
+ofreció reserva/pago parcial, (2) problemas administrativos con títulos o documentación
+y si el asesor ofreció ayuda, (3) cualquier momento donde el lead expresó una barrera y
+el asesor respondió. Identifica TODAS las objeciones antes de decidir la calificación.
+
 Identifica y evalúa el manejo de objeciones en esta conversación:
 
 {transcripcion}

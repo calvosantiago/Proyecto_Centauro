@@ -143,11 +143,21 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
    al que finalmente se le ofreció? Si el asesor detectó esto durante la investigación y
    recondujo al lead hacia la opción adecuada, es un indicador de calidad consultiva alta.
 
-⚠️ ALCANCE DE LOS HALLAZGOS:
-Los "hallazgos_del_lead" reflejan lo que se aprendió en TODA la conversación, no solo
-en los primeros minutos. Si el asesor exploró competidores o el perfil financiero más
-adelante en la llamada, igualmente cuenta como "explorado".
-La CALIFICACIÓN, en cambio, evalúa principalmente la FASE INICIAL de investigación.
+⚠️ LEE TODA LA TRANSCRIPCIÓN — instrucción crítica:
+El asesor puede hacer preguntas de investigación en CUALQUIER momento de la llamada,
+no solo al inicio. Antes de evaluar, escanea la transcripción completa de principio
+a fin para identificar TODOS los momentos de exploración (preguntas, repreguntas,
+profundizaciones), no solo los que aparecen al principio.
+Los "hallazgos_del_lead" reflejan lo que se aprendió en TODA la conversación.
+Si el asesor exploró competidores o el perfil financiero más adelante, igualmente cuenta.
+
+⚠️ UNA SOLA PREGUNTA NO HACE UNA INVESTIGACIÓN:
+La investigación en venta consultiva requiere un conjunto de preguntas sobre distintos
+aspectos. Para ser BUENO, el asesor necesita haber explorado varios temas (motivaciones,
+situación profesional, perfil financiero, objetivos) con al menos una repregunta o
+profundización real. Una sola buena pregunta, por excelente que sea, NO convierte la
+fase en BUENO si el resto fue escaso o superficial. Evalúa la amplitud y profundidad
+del CONJUNTO, no el mejor instante aislado.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CRITERIOS DE CALIFICACIÓN
@@ -245,7 +255,7 @@ FORMATO JSON OBLIGATORIO
   }},
   "info_aprovechada_despues": true | false,
   "nota_aprovechamiento": "Explica brevemente si el asesor usó (o no) la info recopilada más adelante en la llamada. Cita un ejemplo específico si lo hay.",
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué logró el asesor en la investigación, qué calidad tuvo la apertura y las preguntas, qué información obtuvo del lead y por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué logró el asesor en la investigación, qué calidad tuvo la apertura y las preguntas, qué información obtuvo del lead y por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO que aplique, con 2 frases que el asesor podría haber usado en ESTA conversación. Máximo 6-8 líneas. No copies texto literal, adapta con tus palabras.",
   "calidad_apertura": "EXCELENTE | BUENA | CORRECTA | DEFICIENTE",
   "indicios_escucha_activa": true | false,
@@ -268,6 +278,10 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 - Da 2 frases concretas que podría haber usado en ESTA conversación
 - NO copies texto literal del libro, adapta con tus palabras
 - Menciona de qué libro/autor viene la técnica (ej: "Como sugiere Rackham en SPIN Selling...")
+⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
+el comportamiento que vas a recomendar. Si ya lo hizo, NO lo recomiendes — elige otro
+aspecto donde haya margen real de mejora. Recomendar algo que el asesor ya hizo invalida
+el coaching.
 
 REGLAS CRÍTICAS:
 - Todas las evidencias DEBEN ser copy-paste LITERAL de la transcripción
@@ -288,6 +302,16 @@ REGLAS CRÍTICAS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 CALIBRA con los ejemplos del CONTEXTO:
+Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
+del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
+Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
+palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
+⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
+completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
+el estándar para el nivel general, no para un fragmento aislado.
+Tenlo presente al interpretar los fallos del checklist.
+
 DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
 de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
@@ -309,9 +333,9 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
    graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
-- MALO: múltiples fallos críticos acumulados, O no investiga, O preguntas puro trámite sin ningún valor.
-- MEJORABLE: 1-2 fallos. Hay intento pero el resultado es escaso para personalizar.
-- BUENO: ningún fallo o fallos menores. Obtiene información real y aprovechable del lead.
+- MALO: la investigación no aportó nada útil: el asesor no investigó, fue directo a presentar, o hizo preguntas de puro trámite sin ningún valor real para entender al lead.
+- MEJORABLE: hubo intento de investigación pero el resultado es escaso o demasiado vago para personalizar la propuesta. El asesor preguntó pero no logró profundidad ni información realmente aprovechable.
+- BUENO: la investigación fue genuinamente útil. El asesor tiene información concreta del lead que puede usar para personalizar. No es necesario cubrir todos los puntos del checklist: si el resultado es aprovechable → es BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿el asesor sabe algo útil del lead después de esta fase? Si sí → BUENO.
 - Si dudas entre MEJORABLE y BUENO y el asesor usó el Factor de Compra más adelante → inclínate por BUENO.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar.
@@ -320,6 +344,11 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
+ANTES DE EVALUAR: Lee la transcripción completa de principio a fin. El asesor puede
+hacer preguntas de investigación en cualquier momento, no solo al inicio. Identifica
+TODOS los momentos de exploración (preguntas, repreguntas, profundizaciones) antes de
+decidir la calificación. Evalúa el CONJUNTO, no el mejor momento aislado.
+
 Analiza la fase de INVESTIGACIÓN (apertura + descubrimiento) en esta conversación.
 Extrae los hallazgos del lead de forma estructurada y evalúa si el asesor los aprovechó
 más adelante en la llamada.

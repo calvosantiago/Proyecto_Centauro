@@ -36,7 +36,7 @@ class CierreAgent(BaseEvaluatorAgent):
 
     def __init__(self):
         super().__init__(nombre_bloque="Cierre y próximos pasos")
-        self.longitud_analisis = 2500  # Últimos 2500 caracteres
+        self.longitud_analisis = 8000  # v5.1: Ampliado de 6000→8000 para capturar compromisos del medio-final
 
     def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa el cierre usando principalmente el final de la conversación"""
@@ -278,7 +278,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo condujo el asesor el cierre, qué hizo bien y en qué aspectos falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente al final de la conversación.",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo condujo el asesor el cierre, qué hizo bien y en qué aspectos falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente al final de la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "proximo_paso_concreto": "Descripción del próximo paso acordado (o 'ninguno' si no lo hubo)",
   "compromiso_fecha": true/false,
@@ -312,6 +312,10 @@ DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
 - Da 2 frases concretas que podría haber usado en ESTA conversación
 - NO copies texto literal del libro, adapta con tus palabras
 - Menciona de qué libro/autor viene
+⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
+el comportamiento que vas a recomendar. Si ya lo hizo, NO lo recomiendes — elige otro
+aspecto donde haya margen real de mejora. Recomendar algo que el asesor ya hizo invalida
+el coaching.
 
 REGLAS CRÍTICAS:
 - NO evalúes si el lead dijo "SÍ" a comprar — evalúa TÉCNICA del asesor
@@ -321,6 +325,16 @@ REGLAS CRÍTICAS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 CALIBRA con los ejemplos del CONTEXTO:
+Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
+del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
+Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
+palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
+⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
+completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
+el estándar para el nivel general, no para un fragmento aislado.
+Tenlo presente al interpretar los fallos del checklist.
+
 DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
 de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
@@ -342,10 +356,9 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
    y concluir MEJORABLE: sería incoherente con tu propio análisis.
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
-- MALO: múltiples fallos críticos acumulados, O cierre completamente pasivo, O sin próximos
-  pasos ni seguimiento de ningún tipo, O el lead respondió negativamente y el asesor no reaccionó.
-- MEJORABLE: 1-2 fallos. Cierre mínimo pero sin liderazgo real del asesor.
-- BUENO: ningún fallo o fallos menores. Lidera el cierre, genera compromiso claro, vincula a urgencia.
+- MALO: cierre completamente pasivo, O sin próximos pasos ni seguimiento de ningún tipo, O el lead respondió negativamente y el asesor no reaccionó, O múltiples fallos que dejaron la conversación sin avance real.
+- MEJORABLE: hay un cierre pero sin liderazgo real: el asesor propone algo pero sin técnica, sin fecha específica, o sin validar las dudas del lead. El proceso avanzó algo pero de forma débil y sin compromiso claro.
+- BUENO: el asesor lideró el cierre y generó un compromiso real. No es necesario usar todas las técnicas: si condujo el proceso y el lead avanzó con un siguiente paso claro → es BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿el asesor lideró el proceso o fue el lead? Si lideró → BUENO.
 - Si no hay próximos pasos Y tampoco seguimiento → MALO sin excepción.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
@@ -354,8 +367,8 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
-Contexto completo (para entender el flujo):
-{transcripcion_completa[:1000]}
+Contexto completo (para entender el flujo y capturar compromisos del lead):
+{transcripcion_completa[:8000]}
 [...]
 
 FINAL DE LA CONVERSACIÓN (enfócate aquí):

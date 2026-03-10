@@ -200,11 +200,11 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         """
         Evalúa bloques críticos con agentes individuales especializados
 
-        Bloques críticos:
-        1. Investigación (extracto primeros 3000 chars)
+        Bloques críticos (v5.1):
+        1. Investigación (transcripción completa — necesita evaluar aprovechamiento posterior)
         2. Proceso de Admisión y Propuesta Económica (transcripción completa)
         3. Manejo de objeciones (transcripción completa)
-        4. Cierre y próximos pasos (extracto últimos 2500 chars)
+        4. Cierre y próximos pasos (inicio + final via CierreAgent interno)
         """
         evaluaciones = []
 
@@ -286,11 +286,19 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
                 filtro_seccion="Propuesta de valor Institución y Programa"
             )
             if ejemplos_pv:
-                ejemplos_bp_texto = "\n\nEJEMPLOS DE BUENAS PRÁCTICAS (usar como INSPIRACIÓN, no como checklist):\n"
+                ejemplos_bp_texto = "\n\n" + "="*80 + "\n"
+                ejemplos_bp_texto += "ANCLAS DE CALIBRACION - EJEMPLOS REALES PUNTUADOS\n"
+                ejemplos_bp_texto += "="*80 + "\n\n"
+                ejemplos_bp_texto += "Los siguientes son extractos de entrevistas REALES evaluadas manualmente.\n"
+                ejemplos_bp_texto += "USALOS PARA CALIBRAR tu evaluacion:\n"
+                ejemplos_bp_texto += "1. Lee los ejemplos para entender el NIVEL DE CALIDAD de cada calificacion\n"
+                ejemplos_bp_texto += "2. Evalua la conversacion por SUS PROPIOS MERITOS primero\n"
+                ejemplos_bp_texto += "3. NO exijas que se parezca al ejemplo para calificar como BUENO\n\n"
                 for i, ej in enumerate(ejemplos_pv, 1):
                     texto = ej.get('text', '') if isinstance(ej, dict) else str(ej)
                     if texto:
-                        ejemplos_bp_texto += f"\n--- Ejemplo {i} ---\n{texto[:800]}\n"
+                        ejemplos_bp_texto += f"\n--- EJEMPLO DE REFERENCIA {i} ---\n{texto[:centauro_config.MAX_EJEMPLO_LENGTH_IN_PROMPT]}\n"
+                ejemplos_bp_texto += "\n" + "="*80 + "\n"
                 print(f"      Buenas prácticas incluidas: {len(ejemplos_pv)} ejemplos")
         except Exception as e:
             print(f"      Info: No se pudieron cargar buenas prácticas para batch: {e}")
@@ -463,10 +471,10 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
         lineas = transcripcion.split('\n')
         total_lineas = len(lineas)
 
-        # Muestras distribuidas
-        inicio = '\n'.join(lineas[:min(30, total_lineas)])
-        medio = '\n'.join(lineas[total_lineas//3 : total_lineas//3 + 20]) if total_lineas > 60 else ""
-        final = '\n'.join(lineas[-min(30, total_lineas):])
+        # v5.1: Muestras ampliadas para mejor extracción del perfil del lead
+        inicio = '\n'.join(lineas[:min(50, total_lineas)])
+        medio = '\n'.join(lineas[total_lineas//3 : total_lineas//3 + 40]) if total_lineas > 90 else ""
+        final = '\n'.join(lineas[-min(50, total_lineas):])
 
         muestra = f"""
 === INICIO DE LA LLAMADA ===

@@ -44,13 +44,11 @@ class OptimizacionConfig:
     )
     
     # Extractos para bloques que no necesitan transcripción completa
+    # v5.1: Investigación ahora recibe transcripción completa (necesita evaluar
+    # aprovechamiento posterior de la info). Solo Cierre usa extracto.
     EXTRACTOS = {
-        "Investigación": {
-            "inicio": 0,
-            "fin": 3000,  # Primeros 3000 caracteres (apertura + inicio detección)
-        },
         "Cierre y próximos pasos": {
-            "inicio": -2500,  # Últimos 2500 caracteres
+            "inicio": -2500,  # Últimos 2500 caracteres (fallback, CierreAgent tiene su propia lógica)
             "fin": None,
         }
     }

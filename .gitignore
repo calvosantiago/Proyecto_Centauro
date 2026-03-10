@@ -38,3 +38,6 @@ __pycache__/
 *.avi
 
 .csv
+
+# Debug prompts (nunca subir)
+debug_prompts/

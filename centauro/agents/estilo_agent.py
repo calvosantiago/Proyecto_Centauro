@@ -168,6 +168,16 @@ ASPECTOS A EVALUAR:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 CALIBRA con los ejemplos del CONTEXTO:
+Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
+del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
+Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
+palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
+⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
+completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
+el estándar para el nivel general, no para un fragmento aislado.
+Tenlo presente al interpretar los fallos del checklist.
+
 DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
 de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
@@ -234,7 +244,7 @@ FORMATO JSON OBLIGATORIO:
     "Ejemplo de vocabulario adaptado: [ASESOR]: ... (COPY-PASTE LITERAL)",
     "Muletilla o problema detectado: [ASESOR]: ... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo fue el estilo comunicativo del asesor, qué tono usó, si conectó con el lead emocionalmente, qué funcionó y qué no. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación.",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo fue el estilo comunicativo del asesor, qué tono usó, si conectó con el lead emocionalmente, qué funcionó y qué no. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
@@ -250,9 +260,9 @@ FORMATO JSON OBLIGATORIO:
 }}
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
-- MALO: contador_fallos_criticos >= 3, O el estilo genera rechazo/incomodidad/desconfianza.
-- MEJORABLE: contador_fallos_criticos = 1-2. Correcto pero mecánico, educado pero sin calidez.
-- BUENO: contador_fallos_criticos = 0. El estilo suma, el lead se siente cómodo, hay conexión real.
+- MALO: el estilo genera rechazo, incomodidad o desconfianza activa, O es tan mecánico y frío que bloquea la apertura del lead y dificulta el avance de la conversación.
+- MEJORABLE: el estilo es correcto pero mecánico, educado pero sin calidez real. El lead responde pero no se abre con confianza ni se percibe conexión personal.
+- BUENO: el estilo suma. El lead se siente cómodo y hay algún momento de conexión real. No es necesario perfección técnica: si el tono ayudó al avance de la conversación → es BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
 - Si el asesor compartió una experiencia propia (empatía inversa) → cuenta como empatía real → inclínate por BUENO.
 - Evidencias LITERALES (COPY-PASTE exacto).
@@ -281,6 +291,10 @@ de esta llamada, aunque sea de un libro menos prominente en el contexto.
 - Explica POR QUÉ esa técnica concreta le ayudaría (conecta con la situación real)
 - Da 2 frases concretas que podría haber usado, adaptadas al perfil del lead
 - NO copies texto literal del libro, adapta con tus palabras
+⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
+el comportamiento que vas a recomendar. Si ya lo hizo (ej: si dijo "voy a ser ágil porque
+estás en el trabajo"), NO lo recomiendes — elige otro aspecto donde haya margen real de
+mejora. Recomendar algo que el asesor ya hizo invalida el coaching.
 
 REGLAS CRÍTICAS:
 - Evalúa TODA la conversación, no solo un momento
@@ -293,6 +307,12 @@ REGLAS CRÍTICAS:
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
+ANTES DE EVALUAR: Lee la transcripción completa de principio a fin. El estilo comunicativo
+se manifiesta a lo largo de toda la conversación. Presta especial atención a: (1) si el
+asesor declaró que adaptaría su ritmo o profundidad a las circunstancias del lead (ej:
+"voy a ser ágil porque estás en el trabajo"), y (2) momentos de empatía, conexión o
+adaptación de tono que pueden estar repartidos por toda la llamada. Evalúa el CONJUNTO.
+
 Evalúa el estilo comunicativo del [ASESOR] en esta conversación completa:
 
 {transcripcion}
