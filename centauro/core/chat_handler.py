@@ -458,19 +458,34 @@ class ChatHandler:
     def _resolver_nombre_en_perfiles(self, nombre_fragmento: str) -> Optional[str]:
         """
         Busca el nombre_fragmento en los perfiles guardados.
-        Acepta coincidencia parcial (solo nombre de pila, parte del apellido, etc.)
+        Prioriza coincidencia por prefijo de tokens para evitar devolver un perfil
+        corto ("Aleix Ribas") cuando existe uno más completo ("Aleix Ribas Canadell").
         """
         try:
             archivos = list(memory_manager.perfiles_dir.glob("*.json"))
-            fragmento_lower = nombre_fragmento.lower()
+            tokens_fragmento = nombre_fragmento.lower().split()
+            n_frag = len(tokens_fragmento)
+
+            candidatos = []  # (nombre_perfil, longitud_tokens) — preferir el más largo
             for f in archivos:
-                # El nombre del archivo es "nombre_apellido.json"
-                nombre_perfil = f.stem.replace("_", " ")  # "aleix_ribas" → "aleix ribas"
-                if fragmento_lower in nombre_perfil.lower():
-                    return nombre_perfil.title()
-            # Segunda pasada: comprobar si algún token del fragmento coincide con
-            # algún token del nombre del perfil (ej: "Aleix" matchea "Aleix Ribas")
-            tokens_fragmento = fragmento_lower.split()
+                nombre_perfil = f.stem.replace("_", " ")
+                tokens_perfil = nombre_perfil.lower().split()
+                n_perfil = len(tokens_perfil)
+
+                # Coincidencia exacta de prefijo:
+                # "aleix ribas" matchea "aleix ribas canadell" (frag es prefijo del perfil)
+                # "aleix ribas canadell" matchea "aleix ribas" (perfil es prefijo del frag)
+                if n_frag >= 2 and n_perfil >= 2:
+                    n_min = min(n_frag, n_perfil)
+                    if tokens_fragmento[:n_min] == tokens_perfil[:n_min]:
+                        candidatos.append((nombre_perfil.title(), n_perfil))
+
+            if candidatos:
+                # Devolver el perfil con más tokens (el nombre más completo)
+                candidatos.sort(key=lambda x: x[1], reverse=True)
+                return candidatos[0][0]
+
+            # Fallback: algún token significativo en común
             for f in archivos:
                 nombre_perfil = f.stem.replace("_", " ")
                 tokens_perfil = nombre_perfil.lower().split()

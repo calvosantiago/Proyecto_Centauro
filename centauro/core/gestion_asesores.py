@@ -165,22 +165,34 @@ class GestionAsesores:
         if not self.asesores_conocidos:
             return None
 
-        # Normalizar nombre de entrada
         nombre_norm = self.normalizar_nombre(nombre)
+        norms_conocidos = [self.normalizar_nombre(a) for a in self.asesores_conocidos]
 
-        # Buscar el más similar
+        # ── Búsqueda 1: fuzzy ratio estándar (acentos, typos) ────────────────
         mejor_match = process.extractOne(
             nombre_norm,
-            [self.normalizar_nombre(a) for a in self.asesores_conocidos],
+            norms_conocidos,
             scorer=fuzz.ratio
         )
-
         if mejor_match and mejor_match[1] >= self.umbral_similitud:
-            # Encontrar el nombre original (no normalizado)
-            idx = [self.normalizar_nombre(a) for a in self.asesores_conocidos].index(mejor_match[0])
-            nombre_original = self.asesores_conocidos[idx]
+            idx = norms_conocidos.index(mejor_match[0])
+            return (self.asesores_conocidos[idx], mejor_match[1])
 
-            return (nombre_original, mejor_match[1])
+        # ── Búsqueda 2: prefijo de tokens ────────────────────────────────────
+        # Detecta que "Aleix Ribas" es el mismo que "Aleix Ribas Canadell"
+        # porque los primeros N tokens coinciden en orden.
+        # NO confunde "Juan García" con "Juan Pérez García" (token 2 difiere).
+        tokens_entrada = nombre_norm.split()
+        n_entrada = len(tokens_entrada)
+        for idx, norm_conocido in enumerate(norms_conocidos):
+            tokens_conocido = norm_conocido.split()
+            n_conocido = len(tokens_conocido)
+            # El nombre de entrada es prefijo del conocido (sin segundo apellido)
+            if n_conocido > n_entrada >= 2 and tokens_conocido[:n_entrada] == tokens_entrada:
+                return (self.asesores_conocidos[idx], 95)
+            # El conocido es prefijo del nombre de entrada (nombre completo nuevo)
+            if n_entrada > n_conocido >= 2 and tokens_entrada[:n_conocido] == tokens_conocido:
+                return (self.asesores_conocidos[idx], 95)
 
         return None
 
