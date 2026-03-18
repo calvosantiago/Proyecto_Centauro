@@ -398,6 +398,7 @@ async def main(message: cl.Message):
 
     # ── Pregunta anticipada de asesor (solo multimedia sin nombre ya conocido) ──
     # Se hace ANTES de transcribir para no tener al usuario esperando sin actividad
+    nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
     if es_multimedia and not nombre_asesor_login and not nombre_especificado_en_mensaje:
         from centauro.core.gestion_asesores import gestion_asesores as _ga_pre
         sugerencias_pre = _ga_pre.asesores_conocidos[:5] if _ga_pre.asesores_conocidos else []
