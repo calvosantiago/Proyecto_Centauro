@@ -223,21 +223,39 @@ class ModernReport(FPDF):
                 segs = int(dur % 60)
                 ratio_e = af.get("ratio_energia_final_vs_inicio", 1.0)
                 if ratio_e < 0.75:
-                    energia_txt = f"{ratio_e}x — caida notable de energia al final"
+                    energia_txt = f"{ratio_e}x — hablo con menos volumen al final que al inicio (posible cansancio o desenganche)"
                 elif ratio_e > 1.10:
-                    energia_txt = f"{ratio_e}x — energia sube al final"
+                    energia_txt = f"{ratio_e}x — gano mas energia al cerrar que al abrir (sennal positiva de conviccion)"
                 else:
-                    energia_txt = f"{ratio_e}x — energia estable"
+                    energia_txt = f"{ratio_e}x — volumen constante de principio a fin"
                 silencio_pct = round(af.get("ratio_silencio", 0) * 100, 1)
-                n_pausas = af.get("n_silencios_largos_3seg", 0)
+                if silencio_pct < 10:
+                    silencio_txt = f"{silencio_pct}% — bajo (puede estar hablando sin dejar espacio al lead)"
+                elif silencio_pct <= 25:
+                    silencio_txt = f"{silencio_pct}% — dentro del rango habitual (10-25%)"
+                else:
+                    silencio_txt = f"{silencio_pct}% — alto para una llamada comercial (rango habitual: 10-25%)"
+                n_pausas = af.get("n_silencios_largos_4seg", af.get("n_silencios_largos_3seg", 0))
+                if n_pausas == 0:
+                    pausas_txt = "ninguna"
+                elif n_pausas == 1:
+                    pausas_txt = "1 (posible momento de reflexion o espera)"
+                else:
+                    pausas_txt = f"{n_pausas} (pueden indicar incomodidad, espera o reflexion prolongada)"
                 tempo = af.get("tempo_bpm", 0)
+                if tempo < 80:
+                    tempo_txt = "Pausado — habla de forma deliberada y lenta"
+                elif tempo < 130:
+                    tempo_txt = "Moderado — ritmo conversacional normal"
+                else:
+                    tempo_txt = "Rapido — riesgo de no dejar espacio al lead"
 
                 filas = [
                     ("Duracion:", f"{mins} min {segs} seg"),
-                    ("Energia final vs inicio:", energia_txt),
-                    ("Ratio de silencio:", f"{silencio_pct}%"),
-                    ("Pausas largas (>3 seg):", str(n_pausas)),
-                    ("Velocidad estimada:", f"{tempo} BPM"),
+                    ("Energia vocal (final vs inicio):", energia_txt),
+                    ("Silencios totales:", silencio_txt),
+                    ("Pausas largas (>4 seg):", pausas_txt),
+                    ("Ritmo conversacional:", tempo_txt),
                 ]
             else:
                 motivo = (af.get("motivo", "") if af else "") or "input de texto (sin archivo de audio)"

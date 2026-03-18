@@ -803,9 +803,76 @@ flowchart LR
             <li><code>GROQ_API_KEY</code> (obligatoria para Whisper tool).</li>
         </ul>
 
-        <h3>12.2 Modelos observados en código</h3>
+        <h3>12.2 Modelos observados en código (enrutado real)</h3>
+        <p>
+            El modelo de chat no es único: se resuelve por <code>referencia_log</code> en
+            <code>centauro/llm_client.py</code>. Para agentes evaluadores principales, el enrutado actual es:
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Agente / Flujo</th>
+                    <th>Referencia de log</th>
+                    <th>Modelo resuelto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>InvestigacionAgent</td>
+                    <td><code>eval_investigacion</code></td>
+                    <td><code>gpt-5-mini</code></td>
+                </tr>
+                <tr>
+                    <td>PropuestaValorAgent</td>
+                    <td><code>eval_propuesta_valor</code></td>
+                    <td><code>gpt-5-mini</code></td>
+                </tr>
+                <tr>
+                    <td>AdmisionEconomicaAgent</td>
+                    <td><code>eval_admision_economica</code></td>
+                    <td><code>gpt-5-mini</code></td>
+                </tr>
+                <tr>
+                    <td>ObjecionesAgent</td>
+                    <td><code>eval_objeciones</code></td>
+                    <td><code>gpt-5-mini</code></td>
+                </tr>
+                <tr>
+                    <td>CierreAgent</td>
+                    <td><code>eval_cierre</code></td>
+                    <td><code>gpt-5-mini</code></td>
+                </tr>
+                <tr>
+                    <td>EstiloAgent</td>
+                    <td><code>eval_estilo</code></td>
+                    <td><code>gpt-5-mini</code></td>
+                </tr>
+                <tr>
+                    <td>DeteccionAgent (legacy)</td>
+                    <td><code>eval_deteccion</code></td>
+                    <td><code>gpt-4o-mini</code></td>
+                </tr>
+                <tr>
+                    <td>DiarizationAgent (batch/clasificación)</td>
+                    <td><code>diar_batch</code> / <code>diar_classify</code></td>
+                    <td><code>gpt-4o-mini</code></td>
+                </tr>
+                <tr>
+                    <td>Chat interactivo (Chainlit)</td>
+                    <td><code>chat_interactivo</code></td>
+                    <td><code>gpt-4o-mini</code></td>
+                </tr>
+                <tr>
+                    <td>RAG temático</td>
+                    <td><code>rag_temas</code></td>
+                    <td><code>gpt-4o-mini</code></td>
+                </tr>
+            </tbody>
+        </table>
         <ul>
-            <li>Chat/evaluación: <code>gpt-4o-mini</code>.</li>
+            <li>Batch de bloques secundarios (<code>*_batch_secundarios</code>): <code>gpt-5-mini</code>.</li>
+            <li>Resumen contextual (<code>*_resumen_contextual</code>): <code>gpt-4o-mini</code>.</li>
+            <li>Fallback por defecto (<code>settings.MODEL_NAME</code>): <code>gpt-4o-mini</code>.</li>
             <li>Embeddings: <code>text-embedding-3-small</code>.</li>
             <li>Transcripción: <code>whisper-large-v3-turbo</code> (Groq).</li>
         </ul>

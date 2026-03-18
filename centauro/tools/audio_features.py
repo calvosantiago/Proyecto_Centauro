@@ -32,7 +32,7 @@ def extraer_metricas_audio(audio_path: Path) -> Dict[str, Any]:
           > 1.10 → sube la energía al final
       - tempo_bpm (float): pulsos por minuto estimados (proxy de velocidad de habla)
       - ratio_silencio (float): fracción del audio que es silencio (0.0-1.0)
-      - n_silencios_largos_3seg (int): número de pausas continuas de más de 3 segundos
+      - n_silencios_largos_4seg (int): número de pausas continuas de más de 4 segundos
     """
     try:
         import librosa
@@ -72,9 +72,9 @@ def extraer_metricas_audio(audio_path: Path) -> Dict[str, Any]:
         silencio_mask = rms < umbral_silencio
         ratio_silencio = float(np.mean(silencio_mask))
 
-        # Contar bloques continuos de silencio >= 3 segundos
+        # Contar bloques continuos de silencio >= 4 segundos
         frame_dur_seg = hop_length / sr
-        min_frames = max(1, int(3.0 / frame_dur_seg))
+        min_frames = max(1, int(4.0 / frame_dur_seg))
         n_silencios_largos = 0
         conteo = 0
         for es_silencio in silencio_mask:
@@ -92,7 +92,7 @@ def extraer_metricas_audio(audio_path: Path) -> Dict[str, Any]:
             "ratio_energia_final_vs_inicio": ratio_energia,
             "tempo_bpm": round(tempo_bpm, 1),
             "ratio_silencio": round(ratio_silencio, 3),
-            "n_silencios_largos_3seg": n_silencios_largos,
+            "n_silencios_largos_4seg": n_silencios_largos,
         }
 
     except Exception as e:
@@ -126,28 +126,44 @@ def formatear_metricas_para_prompt(metricas: Dict[str, Any]) -> str:
 
     ratio_e = metricas["ratio_energia_final_vs_inicio"]
     if ratio_e < 0.75:
-        energia_desc = f"{ratio_e}× — caída notable de energía/voz al final de la llamada"
+        energia_desc = (
+            f"{ratio_e}× — el asesor habló con menos volumen/energía al final que al inicio. "
+            f"Posible señal de cansancio o desenganche durante el cierre."
+        )
     elif ratio_e > 1.10:
-        energia_desc = f"{ratio_e}× — la energía sube al final (asesor gana impulso al cerrar)"
+        energia_desc = (
+            f"{ratio_e}× — el asesor ganó volumen/energía al final de la llamada. "
+            f"Señal positiva: más impulso y convicción al cerrar que al abrir."
+        )
     else:
-        energia_desc = f"{ratio_e}× — energía estable durante toda la llamada"
+        energia_desc = (
+            f"{ratio_e}× — volumen y energía constantes de principio a fin. "
+            f"El asesor mantuvo el mismo nivel de presencia vocal durante toda la llamada."
+        )
 
     silencio_pct = round(metricas["ratio_silencio"] * 100, 1)
-    n_pausas = metricas["n_silencios_largos_3seg"]
-    if n_pausas == 0:
-        pausas_desc = "ninguna pausa larga detectada"
-    elif n_pausas == 1:
-        pausas_desc = "1 pausa larga detectada (>3 seg)"
+    if silencio_pct < 10:
+        silencio_ctx = "por debajo del rango habitual — el asesor puede estar hablando sin dejar espacio al lead"
+    elif silencio_pct <= 25:
+        silencio_ctx = "dentro del rango habitual en llamadas comerciales (10-25%)"
     else:
-        pausas_desc = f"{n_pausas} pausas largas detectadas (>3 seg cada una)"
+        silencio_ctx = "por encima del rango habitual — puede haber muchas pausas o silencios del lead"
+
+    n_pausas = metricas["n_silencios_largos_4seg"]
+    if n_pausas == 0:
+        pausas_desc = "ninguna detectada"
+    elif n_pausas == 1:
+        pausas_desc = "1 pausa larga (>4 seg) — puede ser un momento de reflexión o espera"
+    else:
+        pausas_desc = f"{n_pausas} pausas largas (>4 seg cada una) — pueden indicar momentos de incomodidad, espera o reflexión prolongada"
 
     tempo = metricas["tempo_bpm"]
     if tempo < 80:
-        tempo_desc = f"{tempo} BPM — ritmo lento"
+        tempo_desc = "cadencia lenta — el asesor habla de forma pausada y deliberada"
     elif tempo < 130:
-        tempo_desc = f"{tempo} BPM — ritmo moderado"
+        tempo_desc = "cadencia moderada — ritmo conversacional normal, equilibrado"
     else:
-        tempo_desc = f"{tempo} BPM — ritmo rápido"
+        tempo_desc = "cadencia rápida — el asesor habla acelerado, riesgo de no dejar espacio al lead"
 
     return f"""━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 DATOS OBJETIVOS DEL AUDIO (medición acústica)
@@ -156,13 +172,13 @@ Estos datos son señales objetivas medidas sobre la onda de audio.
 Úsalos para COMPLEMENTAR tu análisis del texto, no para sustituirlo.
 
 • Duración de la llamada: {minutos} min {segundos} seg
-• Energía vocal final vs inicio: {energia_desc}
-• Silencios totales: {silencio_pct}% del audio
-• Pausas largas (>3 seg): {pausas_desc}
-• Velocidad estimada del habla: {tempo_desc}
+• Energía vocal (final vs inicio): {energia_desc}
+• Silencios totales: {silencio_pct}% del audio — {silencio_ctx}
+• Pausas largas (>4 seg): {pausas_desc}
+• Ritmo conversacional: {tempo_desc}
 
 ⚠️ Interpretación orientativa:
 - Caída de energía al final → posible desenganche o cansancio del asesor
 - Múltiples pausas largas → pueden indicar incomodidad, espera o momentos de reflexión
-- Ritmo muy rápido → riesgo de atropellar al lead sin dejarle espacio
+- Cadencia muy rápida → riesgo de atropellar al lead sin dejarle espacio
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""

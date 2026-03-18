@@ -395,6 +395,30 @@ async def main(message: cl.Message):
     # ===============================================================================
     # Usar el nombre original del archivo para detectar el tipo (file_path puede ser un UUID sin extensión)
     es_multimedia = Path(file.name).suffix.lower() in ('.mp4', '.mp3')
+
+    # ── Pregunta anticipada de asesor (solo multimedia sin nombre ya conocido) ──
+    # Se hace ANTES de transcribir para no tener al usuario esperando sin actividad
+    if es_multimedia and not nombre_asesor_login and not nombre_especificado_en_mensaje:
+        from centauro.core.gestion_asesores import gestion_asesores as _ga_pre
+        sugerencias_pre = _ga_pre.asesores_conocidos[:5] if _ga_pre.asesores_conocidos else []
+        sugerencias_pre_txt = (
+            "\n\n**Asesores conocidos:** " + " · ".join(f"`{s}`" for s in sugerencias_pre)
+        ) if sugerencias_pre else ""
+        res_nombre_previo = await cl.AskUserMessage(
+            content=(
+                f"👤 **¿Quién es el asesor de esta llamada?**{sugerencias_pre_txt}\n\n"
+                f"Escribe el nombre (Nombre Apellido) o **skip** para detectarlo de la transcripción."
+            ),
+            timeout=30
+        ).send()
+        if res_nombre_previo and res_nombre_previo.get("output"):
+            respuesta_pre = res_nombre_previo["output"].strip()
+            if respuesta_pre.lower() not in ("skip", "omitir", "-", "n/a"):
+                nombre_especificado_en_mensaje = respuesta_pre.strip().title()
+
+    import time as _time
+    _tiempo_inicio = _time.time()
+
     tiempo_estimado = "5-10 minutos (transcripción + análisis)" if es_multimedia else "1-2 minutos"
     await cl.Message(
         content=f"📁 Procesando: **{file.name}**\n\nEsto puede tardar {tiempo_estimado}..."
@@ -760,9 +784,19 @@ async def main(message: cl.Message):
                 # cl.user_session.set("nombre_asesor", asesor_confirmado)
             except Exception as e:
                 step.output = f"⚠️ Error actualizando perfil: {e}"
+        # Calcular tiempo total del análisis
+        _segundos_totales = int(_time.time() - _tiempo_inicio)
+        _mins_analisis = _segundos_totales // 60
+        _segs_analisis = _segundos_totales % 60
+        if _mins_analisis > 0:
+            _duracion_str = f"{_mins_analisis} min {_segs_analisis} seg"
+        else:
+            _duracion_str = f"{_segs_analisis} seg"
+
         # Mensaje final
         await cl.Message(
             content=f"""✅ **Análisis completado**
+⏱️ **Tu análisis demoró: {_duracion_str}**
 📊 Estadísticas de esta evaluación:
 - Llamadas API: {orchestrator.stats['llamadas_api']}
 - Sheriff: {orchestrator.stats['alucinaciones_detectadas']} alucinaciones detectadas

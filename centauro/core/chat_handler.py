@@ -113,22 +113,50 @@ class ChatHandler:
         """
         pregunta_lower = pregunta.lower()
 
-        # Patrón: Perfil personal
+        # ── Perfil de asesor concreto (PRIORIDAD ALTA) ──────────────────────
+        # Preguntas sobre un asesor específico por nombre o sobre el propio asesor
         if any(kw in pregunta_lower for kw in [
             "mi rendimiento", "mi perfil", "mis evaluaciones",
             "cómo he mejorado", "mi progreso", "cómo estoy",
             "mis resultados",
+            # Preguntas sobre otro asesor concreto
+            "cuántas entrevistas", "cuantas entrevistas",
+            "cuántas llamadas", "cuantas llamadas",
+            "cuántas evaluaciones", "cuantas evaluaciones",
+            "entrevistas de", "entrevistas tiene", "entrevistas tienes",
+            "evaluaciones de", "evaluaciones tiene",
+            "cómo le fue", "como le fue",
+            "cómo lo hizo", "como lo hizo",
+            "cómo ha ido", "como ha ido",
+            "cómo va ", "como va ",
+            "rendimiento de", "perfil de",
+            "nota de", "resultado de",
+            "qué nota", "que nota",
+            "cómo está ", "como esta ",
         ]):
             return "perfil"
 
-        # Patrón: Estadísticas globales
+        # Si la pregunta menciona un nombre propio Y un bloque de evaluación
+        # → casi seguro es una consulta sobre el rendimiento de un asesor concreto
+        import re as _re
+        tiene_nombre_propio = bool(_re.search(r'\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b', pregunta))
+        if tiene_nombre_propio:
+            bloques_en_pregunta = [
+                "investigación", "investigacion", "cierre", "propuesta",
+                "objeciones", "estilo", "admisión", "admision",
+                "bloque", "calificación", "calificacion",
+            ]
+            if any(b in pregunta_lower for b in bloques_en_pregunta):
+                return "perfil"
+
+        # ── Estadísticas globales ────────────────────────────────────────────
         if any(kw in pregunta_lower for kw in [
             "estadísticas", "cuántos asesores", "promedio general",
             "tendencias", "el equipo", "estadisticas",
         ]):
             return "estadisticas"
 
-        # Patrón: Ejemplos concretos
+        # ── Ejemplos concretos ───────────────────────────────────────────────
         if any(kw in pregunta_lower for kw in [
             "ejemplo", "ejemplos", "muéstrame", "muestrame", "muestra",
             "cómo lo haría", "cómo se haría", "cómo se hace",
@@ -136,7 +164,7 @@ class ChatHandler:
         ]):
             return "ejemplo"
 
-        # Patrón: Manual (cómo hacer algo)
+        # ── Manual (cómo hacer algo) ─────────────────────────────────────────
         if any(kw in pregunta_lower for kw in [
             "cómo", "como", "qué debo", "que debo", "procedimiento",
             "protocolo", "reglas", "pasos", "técnica", "tecnica",
@@ -177,7 +205,7 @@ class ChatHandler:
         """Busca contexto en las colecciones apropiadas según intención y bloque."""
 
         if intencion == "perfil":
-            return self._obtener_perfil_asesor(nombre_asesor, pregunta)
+            return self._obtener_perfil_asesor(nombre_asesor, pregunta, bloque_detectado)
 
         elif intencion == "estadisticas":
             return self._obtener_estadisticas_globales()
@@ -244,14 +272,17 @@ class ChatHandler:
 
         return "No se encontró información en los manuales."
 
-    def _obtener_perfil_asesor(self, nombre_asesor: Optional[str], pregunta: str) -> str:
-        """Obtiene y formatea el perfil de un asesor."""
+    def _obtener_perfil_asesor(
+        self,
+        nombre_asesor: Optional[str],
+        pregunta: str,
+        bloque_filtro: Optional[str] = None,
+    ) -> str:
+        """Obtiene y formatea el perfil de un asesor, con detalle por bloque si se pide."""
         if not nombre_asesor:
-            # Intentar extraer nombre de la propia pregunta
             nombre_asesor = self._extraer_nombre_de_pregunta(pregunta)
 
         if not nombre_asesor:
-            # Sin nombre, listar asesores disponibles
             try:
                 archivos = list(memory_manager.perfiles_dir.glob("*.json"))
                 if not archivos:
@@ -275,42 +306,178 @@ class ChatHandler:
             if perfil.total_evaluaciones == 0:
                 return f"No hay evaluaciones registradas para {nombre_asesor}."
 
-            texto_perfil = f"""
-PERFIL DE {perfil.nombre.upper()}
+            # ── Si se pregunta por un bloque concreto, mostrar historial de ese bloque ──
+            if bloque_filtro:
+                return self._detalle_bloque_asesor(perfil, bloque_filtro)
+
+            # ── Perfil completo ──────────────────────────────────────────────
+            # Estadísticas por bloque (todas las evaluaciones)
+            from collections import Counter
+            stats_bloque: dict = {}
+            for ev in perfil.evaluaciones:
+                for bloque, cal in ev.calificaciones_por_bloque.items():
+                    if cal:
+                        stats_bloque.setdefault(bloque, []).append(cal)
+
+            lineas_bloques = []
+            EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+            for bloque, cals in stats_bloque.items():
+                conteo = Counter(cals)
+                ultima = cals[-1] if cals else "N/A"
+                mayoria = conteo.most_common(1)[0][0]
+                lineas_bloques.append(
+                    f"  {EMOJI.get(ultima, '⚪')} {bloque}: {ultima} "
+                    f"(última) | mayoría histórica: {mayoria} "
+                    f"({conteo[mayoria]}/{len(cals)} veces)"
+                )
+
+            bloques_txt = "\n".join(lineas_bloques) if lineas_bloques else "  Sin datos de bloques"
+
+            texto_perfil = f"""PERFIL DE {perfil.nombre.upper()}
 {'='*50}
 
 📊 RESUMEN:
 - Total evaluaciones: {perfil.total_evaluaciones}
-- Primera evaluación: {perfil.fecha_primera_evaluacion}
-- Última evaluación: {perfil.fecha_ultima_evaluacion}
+- Primera evaluación: {perfil.fecha_primera_evaluacion[:10] if perfil.fecha_primera_evaluacion else 'N/A'}
+- Última evaluación: {perfil.fecha_ultima_evaluacion[:10] if perfil.fecha_ultima_evaluacion else 'N/A'}
 
-📈 TENDENCIA:
-- Estado: {perfil.tendencia_global}
+📈 TENDENCIA GLOBAL: {perfil.tendencia_global}
+
+📋 RENDIMIENTO POR BLOQUE (última evaluación | mayoría histórica):
+{bloques_txt}
 
 ✅ FORTALEZAS CONSISTENTES:
-{', '.join(perfil.fortalezas_consistentes) if perfil.fortalezas_consistentes else 'No identificadas aún'}
+{', '.join(perfil.fortalezas_consistentes) if perfil.fortalezas_consistentes else 'No identificadas aún (mín. 3 evaluaciones)'}
 
 🎯 ÁREAS DE MEJORA CONSISTENTES:
-{', '.join(perfil.areas_mejora_consistentes) if perfil.areas_mejora_consistentes else 'Ninguna crítica'}
+{', '.join(perfil.areas_mejora_consistentes) if perfil.areas_mejora_consistentes else 'Ninguna crítica detectada'}
 """
             return texto_perfil
 
         except Exception as e:
             return f"Error obteniendo perfil de {nombre_asesor}: {e}"
 
+    def _detalle_bloque_asesor(self, perfil, bloque_key: str) -> str:
+        """Devuelve el historial detallado de un asesor en un bloque concreto."""
+        from collections import Counter
+
+        # Mapeo de clave de bloque (ej: "investigacion") a nombre real en el perfil
+        NOMBRE_BLOQUE = {
+            "investigacion": "Investigación",
+            "propuesta_valor": "Propuesta de Valor",
+            "admision_economica": "Admisión",
+            "cierre": "Cierre",
+            "objeciones": "Objeciones",
+            "estilo": "Estilo",
+        }
+        nombre_display = NOMBRE_BLOQUE.get(bloque_key, bloque_key)
+
+        # Buscar evaluaciones que contengan ese bloque (coincidencia parcial)
+        registros = []
+        for ev in perfil.evaluaciones:
+            for bloque_nombre, cal in ev.calificaciones_por_bloque.items():
+                if nombre_display.lower() in bloque_nombre.lower() and cal:
+                    registros.append({
+                        "fecha": ev.fecha[:10],
+                        "cal": cal,
+                        "global": ev.calificacion_global,
+                    })
+                    break
+
+        if not registros:
+            return (
+                f"No hay datos de '{nombre_display}' para {perfil.nombre}.\n"
+                f"(Total evaluaciones del asesor: {perfil.total_evaluaciones})"
+            )
+
+        conteo = Counter(r["cal"] for r in registros)
+        EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+
+        historial_lineas = []
+        for r in registros[-10:]:  # Últimas 10
+            historial_lineas.append(
+                f"  {r['fecha']}  {EMOJI.get(r['cal'], '⚪')} {r['cal']}"
+                f"  (global: {r['global'] or 'N/A'})"
+            )
+
+        return f"""BLOQUE '{nombre_display.upper()}' — {perfil.nombre.upper()}
+{'='*50}
+
+📊 Total evaluaciones en este bloque: {len(registros)}
+🟢 BUENO: {conteo.get('BUENO', 0)} veces
+🟡 MEJORABLE: {conteo.get('MEJORABLE', 0)} veces
+🔴 MALO: {conteo.get('MALO', 0)} veces
+📌 Última calificación: {registros[-1]['cal']}
+
+📋 Historial (últimas {min(10, len(registros))}):
+{chr(10).join(historial_lineas)}
+"""
+
     def _extraer_nombre_de_pregunta(self, pregunta: str) -> Optional[str]:
         """
         Intenta extraer un nombre de asesor mencionado en la pregunta.
-        Ejemplo: "¿Cuál es el rendimiento de Juan García?"
+        Admite varios patrones y hace fuzzy match contra perfiles existentes.
         """
         import re
-        # Patrones como "de Juan García", "rendimiento de Ana López"
-        match = re.search(
-            r'\bde\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){1,2})',
+
+        candidatos = []
+
+        # Patrón 1: "de Nombre Apellido" o "de Nombre"
+        for m in re.finditer(
+            r'\bde\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){0,2})',
             pregunta
-        )
-        if match:
-            return match.group(1).strip()
+        ):
+            candidatos.append(m.group(1).strip())
+
+        # Patrón 2: "a Nombre Apellido" o "a Nombre" (ej: "a Aleix", "a Juan García")
+        for m in re.finditer(
+            r'\ba\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){0,2})',
+            pregunta
+        ):
+            candidatos.append(m.group(1).strip())
+
+        # Patrón 3: nombre propio al inicio o aislado (ej: "Aleix Ribas, cuántas...")
+        for m in re.finditer(
+            r'\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)\b',
+            pregunta
+        ):
+            candidatos.append(m.group(1).strip())
+
+        if not candidatos:
+            return None
+
+        # Resolver candidatos contra perfiles existentes (fuzzy match)
+        for candidato in candidatos:
+            resuelto = self._resolver_nombre_en_perfiles(candidato)
+            if resuelto:
+                return resuelto
+
+        # Si ninguno matchea un perfil existente, devolver el primero como candidato
+        return candidatos[0] if candidatos else None
+
+    def _resolver_nombre_en_perfiles(self, nombre_fragmento: str) -> Optional[str]:
+        """
+        Busca el nombre_fragmento en los perfiles guardados.
+        Acepta coincidencia parcial (solo nombre de pila, parte del apellido, etc.)
+        """
+        try:
+            archivos = list(memory_manager.perfiles_dir.glob("*.json"))
+            fragmento_lower = nombre_fragmento.lower()
+            for f in archivos:
+                # El nombre del archivo es "nombre_apellido.json"
+                nombre_perfil = f.stem.replace("_", " ")  # "aleix_ribas" → "aleix ribas"
+                if fragmento_lower in nombre_perfil.lower():
+                    return nombre_perfil.title()
+            # Segunda pasada: comprobar si algún token del fragmento coincide con
+            # algún token del nombre del perfil (ej: "Aleix" matchea "Aleix Ribas")
+            tokens_fragmento = fragmento_lower.split()
+            for f in archivos:
+                nombre_perfil = f.stem.replace("_", " ")
+                tokens_perfil = nombre_perfil.lower().split()
+                if any(t in tokens_perfil for t in tokens_fragmento if len(t) > 3):
+                    return nombre_perfil.title()
+        except Exception:
+            pass
         return None
 
     def _obtener_estadisticas_globales(self) -> str:
@@ -394,12 +561,12 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
 
         if intencion == "perfil":
             prompt_sistema = f"""Eres un asistente especializado en análisis de rendimiento de asesores comerciales.
-El usuario pregunta por un perfil y tienes acceso a sus estadísticas históricas.
+El usuario pregunta por un perfil y tienes acceso a sus estadísticas históricas REALES en el contexto.
 IMPORTANTE:
-- Sé directo y constructivo
-- Resalta fortalezas antes de mencionar áreas de mejora
-- Usa datos concretos del perfil
-- Sugiere acciones específicas si hay áreas de mejora
+- Responde SOLO con los datos que aparecen en el contexto. NO inventes evaluaciones, notas ni fechas.
+- Si el contexto contiene el dato exacto que pide el usuario (ej: número de evaluaciones, nota en un bloque), cítalo directamente.
+- Sé directo: responde la pregunta concreta primero, luego añade contexto si aporta valor.
+- Si el contexto dice "No hay datos", dilo claramente sin adornar.
 {bloque_instruccion}"""
 
         elif intencion == "ejemplo":
