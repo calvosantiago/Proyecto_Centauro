@@ -48,7 +48,7 @@ class CentauroOrchestrator:
             "modo_ejecucion": self.config.get_modo_descripcion()
         }
 
-    def analizar_entrevista_completa(self, nombre_archivo: str, texto_crudo: str, contexto_usuario: str = None) -> Dict:
+    def analizar_entrevista_completa(self, nombre_archivo: str, texto_crudo: str, contexto_usuario: str = None, audio_features: dict = None) -> Dict:
         # Reset stats por cada evaluación (evita acumulación entre asesores en la misma sesión)
         self.stats = {
             "llamadas_api": 0,
@@ -117,14 +117,14 @@ class CentauroOrchestrator:
             self.stats["llamadas_api"] += len(self.config.BLOQUES_CRITICOS)
 
             print("\n   📦 BLOQUES SECUNDARIOS (batch optimizado):")
-            evaluaciones_secundarias = self._evaluar_bloques_secundarios(transcripcion_diarizada, cache_key, contexto_usuario)
+            evaluaciones_secundarias = self._evaluar_bloques_secundarios(transcripcion_diarizada, cache_key, contexto_usuario, audio_features)
             evaluaciones.extend(evaluaciones_secundarias)
             self.stats["llamadas_api"] += 1
 
         else:
             # MODO INDIVIDUAL: Cada agente una llamada
             print("\n   🔬 MODO PRUEBAS: Todos los agentes individual")
-            evaluaciones = self._evaluar_todos_individual(transcripcion_diarizada, cache_key, contexto_usuario)
+            evaluaciones = self._evaluar_todos_individual(transcripcion_diarizada, cache_key, contexto_usuario, audio_features)
             self.stats["llamadas_api"] += 6  # 6 agentes
 
         # --- FASE 3.5: SHERIFF ---
@@ -251,7 +251,7 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
 
     # ========== EVALUACIÓN: BLOQUES SECUNDARIOS (Batch) ==========
 
-    def _evaluar_bloques_secundarios(self, transcripcion: str, cache_key: str, contexto_usuario: str = None) -> List[Dict]:
+    def _evaluar_bloques_secundarios(self, transcripcion: str, cache_key: str, contexto_usuario: str = None, audio_features: dict = None) -> List[Dict]:
         """
         Evalúa bloques secundarios en batch (1 llamada para 2 bloques)
 
@@ -303,6 +303,13 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         except Exception as e:
             print(f"      Info: No se pudieron cargar buenas prácticas para batch: {e}")
 
+        # Bloque de métricas de audio para el prompt de estilo (siempre presente)
+        from ..tools.audio_features import formatear_metricas_para_prompt, formatear_sin_audio_para_prompt
+        if audio_features and audio_features.get("disponible"):
+            bloque_audio_estilo = f"\n{formatear_metricas_para_prompt(audio_features)}\n"
+        else:
+            bloque_audio_estilo = f"\n{formatear_sin_audio_para_prompt()}\n"
+
         prompt_sistema = f"""
 Eres un auditor CRÍTICO que evalúa DOS bloques secundarios simultáneamente.
 
@@ -316,7 +323,7 @@ MANUAL - PROPUESTA DE VALOR:
 
 MANUAL - ESTILO:
 {ctx_estilo}
-{ejemplos_bp_texto}
+{bloque_audio_estilo}{ejemplos_bp_texto}
 
 ⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
 TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
@@ -394,6 +401,7 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
                 eval_estilo = data["estilo"]
                 eval_estilo["bloque"] = "Estilo y comunicación"
                 eval_estilo["confianza"] = 0.85
+                eval_estilo.setdefault("metadata", {})["audio_features"] = audio_features
                 evaluaciones.append(eval_estilo)
 
             print(f"      ✓ 2 bloques secundarios en 1 llamada batch")
@@ -405,7 +413,7 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
 
     # ========== EVALUACIÓN: TODO INDIVIDUAL (Modo Pruebas) ==========
 
-    def _evaluar_todos_individual(self, transcripcion: str, cache_key: str, contexto_usuario: str = None) -> List[Dict]:
+    def _evaluar_todos_individual(self, transcripcion: str, cache_key: str, contexto_usuario: str = None, audio_features: dict = None) -> List[Dict]:
         """
         Evalúa TODOS los bloques con agentes individuales
         Solo se usa cuando MODO_BATCH = False (pruebas)
@@ -447,7 +455,7 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
         print("      6️⃣ Estilo y comunicación")
         ctx_estilo = self.rag_agent.buscar_contexto_para_bloque("Estilo y comunicación", transcripcion, cache_key)
         agente = EstiloAgent()
-        evaluaciones.append(agente.evaluate(transcripcion, ctx_estilo, contexto_usuario).to_dict())
+        evaluaciones.append(agente.evaluate(transcripcion, ctx_estilo, contexto_usuario, audio_features).to_dict())
 
         print(f"      ✓ {len(evaluaciones)} agentes ejecutados individualmente")
         return evaluaciones

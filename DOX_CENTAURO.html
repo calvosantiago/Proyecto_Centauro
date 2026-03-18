@@ -880,6 +880,48 @@ python main.py   # reindexa documentación y evalúa</code></pre>
 python main.py   # para reindexar y operar con nuevo contexto</code></pre>
     </section>
 
+    <section>
+        <h2>17. Posibles Mejoras Y Roadmap</h2>
+        <p>Esta sección recoge mejoras identificadas durante el desarrollo, no implementadas por coste, complejidad o prioridad. Se documenta aquí para referencia futura.</p>
+
+        <h3>17.1 Análisis de emoción y tono desde audio (AssemblyAI)</h3>
+        <p>
+            Actualmente Centauro analiza el estilo comunicativo del asesor a partir del texto transcrito. Una mejora significativa sería obtener
+            señales emocionales directamente del audio (tono de voz, velocidad de habla, energía), independientemente de lo que se diga.
+        </p>
+        <p>
+            <strong>Servicio evaluado: <a href="https://www.assemblyai.com" target="_blank">AssemblyAI</a></strong><br>
+            Ofrece transcripción + sentiment analysis por utterance nativo. Devuelve etiqueta emocional
+            (<code>POSITIVE</code> / <code>NEUTRAL</code> / <code>NEGATIVE</code>) con score de confianza para cada intervención,
+            diferenciando asesor y lead si se usa diarización.
+        </p>
+        <p><strong>Por qué no se implementó:</strong> coste ~$0.37/hora de audio, frente a ~$0.01/hora de Groq Whisper (≈35× más caro). No viable con el presupuesto actual.</p>
+
+        <h3>17.2 Métricas de audio con librosa (alternativa open source)</h3>
+        <p>
+            Alternativa de coste cero usando la librería <code>librosa</code> (análisis de audio local, sin API). En lugar de clasificar emociones,
+            extrae métricas objetivas y robustas del audio antes de que sea descartado tras la transcripción:
+        </p>
+        <ul>
+            <li><strong>Ratio de habla asesor/lead</strong> — quién domina la conversación en tiempo (requiere timestamps de Whisper).</li>
+            <li><strong>Velocidad de habla</strong> — palabras por minuto por segmento; velocidad alta puede indicar nerviosismo o presión.</li>
+            <li><strong>Energía/volumen medio</strong> — decaimiento de energía al final de la llamada como señal de desenganche.</li>
+            <li><strong>Silencios prolongados</strong> — pausas >2-3 s que pueden indicar incomodidad, reflexión o falta de respuesta.</li>
+        </ul>
+        <p>
+            Estas métricas se pasarían como bloque de contexto adicional al prompt de <code>EstiloAgent</code>, enriqueciendo la evaluación sin
+            añadir coste de API. La implementación requeriría procesar el audio antes del paso de transcripción y guardar las métricas en un dict
+            que el orquestador transmitiría al agente.
+        </p>
+        <p><strong>Dependencia a añadir:</strong> <code>librosa</code> (ya disponible en PyPI, sin requisitos de GPU).</p>
+
+        <h3>17.3 Otras mejoras identificadas</h3>
+        <ul>
+            <li><strong>Reset de <code>stats["llamadas_api"]</code> entre asesores:</strong> el contador se inicializa en <code>__init__</code> del orquestador y no se resetea entre evaluaciones consecutivas en la misma sesión, produciendo acumulación (14, 28, 42…). Mover la inicialización dentro de <code>evaluar()</code> lo resolvería.</li>
+            <li><strong>Modelos de emoción HuggingFace:</strong> existen modelos <code>wav2vec2</code> fine-tuned para reconocimiento de emoción en audio. La calidad para español de llamadas comerciales (con ruido y variaciones de calidad) es inferior a AssemblyAI, pero podrían ser válidos como señal de apoyo si se validan con datos propios.</li>
+        </ul>
+    </section>
+
     <footer class="small" style="margin-top:40px; border-top:1px solid #e5edf8; padding-top:14px;">
         Documento vivo de arquitectura y operación. Mantener sincronizado con cambios en <code>app.py</code>, <code>centauro/core/</code>, <code>centauro/agents/</code> y <code>centauro/tools/</code>.
     </footer>

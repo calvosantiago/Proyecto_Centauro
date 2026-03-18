@@ -22,11 +22,11 @@ class EstiloAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Estilo y comunicación")
     
-    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
+    def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None, audio_features: dict = None) -> EvaluationResult:
         """Evalúa el estilo comunicativo en toda la conversación"""
 
         try:
-            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
+            resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario, audio_features)
             confianza = self._calcular_confianza(resultado_raw)
             
             # Validar aspectos críticos
@@ -53,7 +53,8 @@ class EstiloAgent(BaseEvaluatorAgent):
                 metadata={
                     "aspectos_evaluados": aspectos,
                     "problemas_graves": problemas_graves,
-                    "fortaleza_principal": resultado_raw.get("fortaleza_principal", "")
+                    "fortaleza_principal": resultado_raw.get("fortaleza_principal", ""),
+                    "audio_features": audio_features
                 }
             )
             
@@ -61,16 +62,25 @@ class EstiloAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Estilo: {e}")
             return self._create_fallback_result(str(e))
     
-    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None) -> dict:
+    def _evaluar_con_llm(self, transcripcion: str, manual: str, contexto_usuario: str = None, audio_features: dict = None) -> dict:
         """Llama al LLM con prompt especializado"""
 
         # Enriquecer contexto con ejemplos de buenas prácticas
         manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
 
+        # Bloque de métricas de audio (siempre presente)
+        from ..tools.audio_features import formatear_metricas_para_prompt, formatear_sin_audio_para_prompt
+        if audio_features and audio_features.get("disponible"):
+            bloque_audio = f"\n{formatear_metricas_para_prompt(audio_features)}\n"
+        else:
+            bloque_audio = f"\n{formatear_sin_audio_para_prompt()}\n"
+
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de ESTILO, TONO Y VOCABULARIO en comunicación comercial.
 
 TU ÚNICA TAREA: Evaluar la CALIDAD COMUNICATIVA del [ASESOR] a lo largo de toda la conversación.
+
+TONO DE REDACCIÓN: Escribe SIEMPRE en TERCERA PERSONA al referirte al asesor ("el asesor hizo...", "el asesor podría..."). NUNCA uses segunda persona ("hiciste...", "podrías...", "tu objetivo...").
 
 CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
 {manual_enriquecido}
@@ -120,7 +130,7 @@ Si el lead es joven y de marketing, usa un tono cercano y aspiracional. Si es
 senior y directivo, usa un tono peer-to-peer y orientado al ROI profesional.
 Las técnicas de los libros son válidas, pero los ejemplos concretos deben sonar
 naturales para ese perfil específico.
-
+{bloque_audio}
 ASPECTOS A EVALUAR:
 
 1. **TONO**: ¿Cómo suena el asesor?

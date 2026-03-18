@@ -52,9 +52,10 @@ def auth_callback(username: str, password: str) -> cl.User | None:
 # Transcripción de audio/vídeo (MP4 → ffmpeg → MP3 → Groq Whisper)
 # ---------------------------------------------------------------------------
 
-def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> str:
+def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> tuple:
     """
     Extrae texto de un archivo MP4 o MP3 usando Groq Whisper.
+    También extrae métricas acústicas con librosa si está instalado.
     - MP4: extrae audio con ffmpeg (32kbps/mono/16kHz) y luego transcribe.
     - MP3: transcribe directamente.
     Función síncrona pensada para usar con cl.make_async().
@@ -62,6 +63,9 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
     original_name: nombre original del archivo subido (ej: "entrevista.mp3").
     Se usa para que la API de Groq reconozca el formato correctamente,
     ya que Chainlit puede guardar el fichero con un UUID como nombre.
+
+    Returns:
+        (texto: str, audio_features: dict)
     """
     import os
     import subprocess
@@ -139,7 +143,15 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
     if not texto:
         texto = getattr(response, "text", "").strip()
 
-    return texto
+    # Extraer métricas acústicas del audio (siempre sobre audio_path ya resuelto)
+    audio_features = None
+    try:
+        from centauro.tools.audio_features import extraer_metricas_audio
+        audio_features = extraer_metricas_audio(audio_path)
+    except Exception:
+        pass
+
+    return texto, audio_features
 
 
 @cl.on_chat_start
@@ -390,6 +402,7 @@ async def main(message: cl.Message):
     # Leer contenido según extensión
     # NOTA: NO limpiamos VTT aquí - el agente de diarización necesita
     # el texto crudo para detectar UUIDs de speakers
+    audio_features_sesion = None  # Solo disponible para archivos de audio
     try:
         if Path(file.name).suffix.lower() == '.docx':
             texto_crudo = leer_word(file_path)
@@ -401,9 +414,13 @@ async def main(message: cl.Message):
                 else:
                     step.output = "⏳ Enviando a Groq Whisper..."
                 # Pasar file.name para que la API de Groq reconozca el formato correctamente
-                texto_crudo = await cl.make_async(_procesar_archivo_multimedia)(file_path, file.name)
+                texto_crudo, audio_features_sesion = await cl.make_async(_procesar_archivo_multimedia)(file_path, file.name)
+                cl.user_session.set("audio_features", audio_features_sesion)
                 num_chars = len(texto_crudo) if texto_crudo else 0
-                step.output = f"✅ Transcripción completada ({num_chars} caracteres)"
+                metricas_ok = audio_features_sesion and audio_features_sesion.get("disponible")
+                step.output = f"✅ Transcripción completada ({num_chars} caracteres)" + (
+                    f"\n📊 Métricas de audio extraídas" if metricas_ok else ""
+                )
         else:
             with open(file_path, 'r', encoding='utf-8') as f:
                 texto_crudo = f.read()
@@ -637,7 +654,7 @@ async def main(message: cl.Message):
             # BLOQUES SECUNDARIOS (Batch)
             async with cl.Step(name="📦 Propuesta Valor + Estilo (Batch)", type="run") as sub_step:
                 try:
-                    evals_secundarias = await cl.make_async(orchestrator._evaluar_bloques_secundarios)(transcripcion_diarizada, file.name, contexto_usuario)
+                    evals_secundarias = await cl.make_async(orchestrator._evaluar_bloques_secundarios)(transcripcion_diarizada, file.name, contexto_usuario, audio_features_sesion)
                     evaluaciones.extend(evals_secundarias)
                     sub_step.output = f"✅ 2 bloques evaluados en batch"
                 except Exception as e:

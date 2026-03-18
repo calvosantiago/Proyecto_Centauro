@@ -13,13 +13,67 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 GPT_TIMEOUT_SECONDS = 180  # Aumentado para transcripciones largas (diarización batch)
 GPT_MAX_RETRIES = 2
 
-# --- TARIFAS OPENAI (Standard API, Feb 2026) ---
+# --- TARIFAS OPENAI (Standard API, Mar 2026) ---
 # gpt-4o-mini: input $0.15/M, cached input $0.075/M, output $0.60/M
+# gpt-5-mini: input $0.25/M, cached input $0.025/M, output $2.00/M
 # text-embedding-3-small: $0.02/M
-COST_PER_INPUT_TOKEN = 0.15 / 1_000_000
-COST_PER_CACHED_INPUT_TOKEN = 0.075 / 1_000_000
-COST_PER_OUTPUT_TOKEN = 0.60 / 1_000_000
+MODEL_PRICING_USD_PER_1M = {
+    "gpt-4o-mini": {
+        "input": 0.15,
+        "cached_input": 0.075,
+        "output": 0.60,
+    },
+    "gpt-5-mini": {
+        "input": 0.25,
+        "cached_input": 0.025,
+        "output": 2.00,
+    },
+}
 COST_PER_EMBEDDING_TOKEN = 0.02 / 1_000_000
+
+# Modelo por defecto para rutas no mapeadas
+DEFAULT_CHAT_MODEL = settings.MODEL_NAME
+
+# Enrutado por referencia_log: referencias críticas en gpt-5-mini
+MODEL_BY_REFERENCE_EXACT = {
+    "eval_investigacion": "gpt-5-mini",
+    "eval_admision_economica": "gpt-5-mini",
+    "eval_objeciones": "gpt-5-mini",
+    "eval_cierre": "gpt-5-mini",
+    "eval_propuesta_valor": "gpt-5-mini",
+    "eval_estilo": "gpt-5-mini",
+    "diar_batch": "gpt-4o-mini",
+    "diar_classify": "gpt-4o-mini",
+    "eval_deteccion": "gpt-4o-mini",
+    "chat_interactivo": "gpt-4o-mini",
+    "rag_temas": "gpt-4o-mini",
+}
+
+
+def _get_model_for_reference(referencia_log: str) -> str:
+    """Resuelve el modelo de chat según la referencia del flujo."""
+    ref = (referencia_log or "").strip()
+
+    if ref in MODEL_BY_REFERENCE_EXACT:
+        return MODEL_BY_REFERENCE_EXACT[ref]
+
+    if ref.endswith("_batch_secundarios"):
+        return "gpt-5-mini"
+
+    if ref.endswith("_resumen_contextual"):
+        return "gpt-4o-mini"
+
+    return DEFAULT_CHAT_MODEL
+
+
+def _get_token_costs_for_model(model_name: str):
+    """Devuelve coste por token (input, cached_input, output) para el modelo."""
+    pricing = MODEL_PRICING_USD_PER_1M.get(model_name) or MODEL_PRICING_USD_PER_1M.get(DEFAULT_CHAT_MODEL)
+    return (
+        pricing["input"] / 1_000_000,
+        pricing["cached_input"] / 1_000_000,
+        pricing["output"] / 1_000_000,
+    )
 
 CSV_COLUMNS = [
     "Timestamp",
@@ -161,9 +215,10 @@ def registrar_gasto_chat(
     cached_tokens = _safe_int(getattr(prompt_details, "cached_tokens", 0))
     non_cached_prompt_tokens = max(prompt_tokens - cached_tokens, 0)
 
-    cost_input = non_cached_prompt_tokens * COST_PER_INPUT_TOKEN
-    cost_input_cached = cached_tokens * COST_PER_CACHED_INPUT_TOKEN
-    cost_output = completion_tokens * COST_PER_OUTPUT_TOKEN
+    cost_per_input, cost_per_cached_input, cost_per_output = _get_token_costs_for_model(model_name)
+    cost_input = non_cached_prompt_tokens * cost_per_input
+    cost_input_cached = cached_tokens * cost_per_cached_input
+    cost_output = completion_tokens * cost_per_output
     cost_total = cost_input + cost_input_cached + cost_output
 
     now = datetime.datetime.now()
@@ -290,16 +345,24 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
         prompt_completo = (prompt_sistema + " " + prompt_usuario).lower()
         force_json = "json" in prompt_completo
 
+    model_name = _get_model_for_reference(referencia_log)
+
+    # Modelos de razonamiento no soportan temperature ni seed
+    REASONING_MODELS = {"o1", "o1-mini", "o1-preview", "o3", "o3-mini", "gpt-5-mini"}
+
     # Configuración base
     kwargs = {
-        "model": settings.MODEL_NAME,
+        "model": model_name,
         "messages": [
             {"role": "system", "content": prompt_sistema},
             {"role": "user", "content": prompt_usuario}
         ],
-        "temperature": 0.0,
-        "seed": 42
     }
+
+    # Solo añadir temperature y seed para modelos que los soporten
+    if model_name not in REASONING_MODELS:
+        kwargs["temperature"] = 0.0
+        kwargs["seed"] = 42
 
     # Agregar response_format solo si se necesita JSON
     if force_json:
@@ -341,7 +404,7 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
         registrar_gasto_chat(
             referencia=referencia_log,
             uso=response.usage,
-            model_name=settings.MODEL_NAME,
+            model_name=model_name,
             request_id=getattr(response, "id", ""),
         )
     # -------------------------------------

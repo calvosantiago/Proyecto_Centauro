@@ -206,6 +206,53 @@ class ModernReport(FPDF):
                 self.multi_cell(139, 5, to_latin1(motivacion_principal or "No detectada"), fill=True)
                 self.ln(2)
 
+        # 5c. Métricas de audio (solo en Estilo y comunicación)
+        if nombre_normalizado in ("estilo y comunicación", "estilo y comunicacion"):
+            metadata = bloque.get("metadata", {}) or {}
+            af = metadata.get("audio_features")
+            self.set_x(15)
+            self.set_fill_color(248, 248, 255)
+            self.set_draw_color(200, 210, 240)
+            self.set_font('Helvetica', 'B', 9)
+            self.set_text_color(*COLOR_PRIMARY)
+            self.cell(0, 5, to_latin1("Datos objetivos del audio"), 0, 1, fill=True)
+
+            if af and af.get("disponible"):
+                dur = af.get("duracion_seg", 0)
+                mins = int(dur // 60)
+                segs = int(dur % 60)
+                ratio_e = af.get("ratio_energia_final_vs_inicio", 1.0)
+                if ratio_e < 0.75:
+                    energia_txt = f"{ratio_e}x — caida notable de energia al final"
+                elif ratio_e > 1.10:
+                    energia_txt = f"{ratio_e}x — energia sube al final"
+                else:
+                    energia_txt = f"{ratio_e}x — energia estable"
+                silencio_pct = round(af.get("ratio_silencio", 0) * 100, 1)
+                n_pausas = af.get("n_silencios_largos_3seg", 0)
+                tempo = af.get("tempo_bpm", 0)
+
+                filas = [
+                    ("Duracion:", f"{mins} min {segs} seg"),
+                    ("Energia final vs inicio:", energia_txt),
+                    ("Ratio de silencio:", f"{silencio_pct}%"),
+                    ("Pausas largas (>3 seg):", str(n_pausas)),
+                    ("Velocidad estimada:", f"{tempo} BPM"),
+                ]
+            else:
+                motivo = (af.get("motivo", "") if af else "") or "input de texto (sin archivo de audio)"
+                filas = [("Sin datos de audio:", to_latin1(motivo))]
+
+            for label, valor in filas:
+                self.set_x(18)
+                self.set_font('Helvetica', 'B', 9)
+                self.set_text_color(*COLOR_PRIMARY)
+                self.cell(58, 5, to_latin1(label), 0, 0, fill=True)
+                self.set_font('Helvetica', '', 9)
+                self.set_text_color(60, 60, 60)
+                self.multi_cell(119, 5, to_latin1(valor), fill=True)
+            self.ln(2)
+
         # 6. Recomendación (Acción) - Si calificación es MALO, MEJORABLE o N/A
         if accion and calificacion in ("MALO", "MEJORABLE", None):
             self.set_x(15)

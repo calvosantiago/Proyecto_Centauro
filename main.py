@@ -156,10 +156,24 @@ def _paso_transcribir_audios():
     try:
         from groq import Groq
         from centauro.tools.whisper_transcribe import transcribir_audio
+        from centauro.tools.audio_features import extraer_metricas_audio
         client = Groq(api_key=api_key)
         transcripts_dir.mkdir(parents=True, exist_ok=True)
         for mp3, _ in mp3_pendientes:
             transcribir_audio(client, mp3)
+            # Extraer y guardar métricas de audio como sidecar JSON
+            try:
+                metricas = extraer_metricas_audio(mp3)
+                nombre_limpio = mp3.stem.replace("_", " ")
+                sidecar = transcripts_dir / f"{nombre_limpio}_audio_features.json"
+                import json as _json
+                sidecar.write_text(_json.dumps(metricas, ensure_ascii=False), encoding="utf-8")
+                if metricas.get("disponible"):
+                    print(f"  📊 Métricas de audio guardadas: {sidecar.name}")
+                else:
+                    print(f"  ⚠️  Métricas de audio no disponibles: {metricas.get('motivo', '')}")
+            except Exception as e_af:
+                print(f"  ⚠️  No se pudieron extraer métricas de audio: {e_af}")
     except Exception as e:
         print(f"   ❌ Error en transcripción automática: {e}")
 
@@ -381,12 +395,25 @@ def main():
             except Exception as e:
                 print(f"   ⚠️ Error leyendo contexto {archivo_ctx.name}: {e}")
 
+        # ===== CARGAR MÉTRICAS DE AUDIO (si existen) =====
+        audio_features = None
+        sidecar_af = archivo.with_name(archivo.stem + "_audio_features.json")
+        if sidecar_af.exists():
+            try:
+                with open(sidecar_af, "r", encoding="utf-8") as f_af:
+                    audio_features = json.load(f_af)
+                if audio_features.get("disponible"):
+                    print(f"   📊 Métricas de audio cargadas ({audio_features.get('duracion_seg', '?')} seg)")
+            except Exception as e_af:
+                print(f"   ⚠️ No se pudieron leer métricas de audio: {e_af}")
+
         # ===== EJECUTAR ANÁLISIS CON ORQUESTADOR =====
         try:
             reporte = orchestrator.analizar_entrevista_completa(
                 nombre_archivo=archivo.stem,
                 texto_crudo=texto,
-                contexto_usuario=contexto_usuario
+                contexto_usuario=contexto_usuario,
+                audio_features=audio_features
             )
         except Exception as e:
             print(f"\n   ❌ ERROR en análisis: {e}")
