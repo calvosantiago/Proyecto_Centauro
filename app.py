@@ -49,20 +49,90 @@ def auth_callback(username: str, password: str) -> cl.User | None:
     )
 
 # ---------------------------------------------------------------------------
-# Transcripción de audio/vídeo (MP4 → ffmpeg → MP3 → Groq Whisper)
+# Transcripción de audio/vídeo (AssemblyAI con diarización nativa, o Groq Whisper como fallback)
 # ---------------------------------------------------------------------------
+
+ASSEMBLYAI_COST_PER_SECOND = 0.0002  # $0.012/min = $0.72/hora (transcripción $0.0001 + diarización $0.0001)
+
+
+def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
+    """Registra el coste de una transcripción AssemblyAI en control_gastos.csv."""
+    import datetime
+    from centauro.llm_client import _append_cost_row
+    coste = duracion_seg * ASSEMBLYAI_COST_PER_SECOND
+    now = datetime.datetime.now()
+    row = {
+        "Timestamp": now.isoformat(timespec="seconds"),
+        "Fecha": now.strftime("%Y-%m-%d"),
+        "Hora": now.strftime("%H:%M:%S"),
+        "Archivo/Referencia": referencia,
+        "Operacion": "transcripcion_assemblyai",
+        "Endpoint": "assemblyai/v2/transcript",
+        "Modelo": "assemblyai-best",
+        "Prompt Tokens": "",
+        "Prompt Tokens Cacheados": "",
+        "Prompt Tokens No Cacheados": "",
+        "Completion Tokens": "",
+        "Embedding Tokens": "",
+        "Total Tokens": "",
+        "Coste Input (USD)": "",
+        "Coste Input Cacheado (USD)": "",
+        "Coste Output (USD)": "",
+        "Coste Embedding (USD)": "",
+        "Coste Total (USD)": f"{coste:.6f}",
+        "Request ID": "",
+    }
+    try:
+        _append_cost_row(row)
+        print(f"  💰 AssemblyAI: {duracion_seg/60:.1f} min × ${ASSEMBLYAI_COST_PER_SECOND*60:.4f}/min = ${coste:.4f}")
+    except Exception as e:
+        print(f"  ⚠️ No se pudo registrar gasto AssemblyAI: {e}")
+
+
+def _transcribir_con_assemblyai(audio_path: Path, api_key: str, referencia: str = "") -> str:
+    """
+    Transcribe y diariza el audio usando AssemblyAI.
+    Devuelve texto en formato [Speaker_A]: texto / [Speaker_B]: texto
+    que el DiarizationAgent reconoce y mapea a ASESOR/LEAD por contenido.
+    """
+    import assemblyai as aai
+
+    aai.settings.api_key = api_key
+    config = aai.TranscriptionConfig(
+        speaker_labels=True,
+        language_code="es",
+        speech_models=["universal-3-pro"],
+    )
+    transcriber = aai.Transcriber()
+    print("   📡 Enviando a AssemblyAI (transcripción + diarización)...")
+    transcript = transcriber.transcribe(str(audio_path), config=config)
+
+    if transcript.status == aai.TranscriptStatus.error:
+        raise RuntimeError(f"AssemblyAI error: {transcript.error}")
+
+    if not transcript.utterances:
+        print("   ⚠️ AssemblyAI no devolvió utterances, usando texto plano")
+        return transcript.text or ""
+
+    # Registrar coste (end de la última utterance está en milisegundos)
+    duracion_seg = transcript.utterances[-1].end / 1000
+    _registrar_gasto_assemblyai(referencia or audio_path.name, duracion_seg)
+
+    # Formatear como [Speaker_A]: texto para que DiarizationAgent lo procese
+    lineas = []
+    for utt in transcript.utterances:
+        lineas.append(f"[Speaker_{utt.speaker}]: {utt.text}")
+    resultado = "\n\n".join(lineas)
+    print(f"   ✅ AssemblyAI: {len(transcript.utterances)} utterances, {duracion_seg/60:.1f} min")
+    return resultado
+
 
 def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> tuple:
     """
-    Extrae texto de un archivo MP4 o MP3 usando Groq Whisper.
-    También extrae métricas acústicas con librosa si está instalado.
-    - MP4: extrae audio con ffmpeg (32kbps/mono/16kHz) y luego transcribe.
-    - MP3: transcribe directamente.
+    Extrae texto de un archivo MP4 o MP3.
+    Usa AssemblyAI (transcripción + diarización nativa) si ASSEMBLYAI_API_KEY está disponible.
+    Si no, usa Groq Whisper + diarización por timestamps como fallback.
     Función síncrona pensada para usar con cl.make_async().
-
-    original_name: nombre original del archivo subido (ej: "entrevista.mp3").
-    Se usa para que la API de Groq reconozca el formato correctamente,
-    ya que Chainlit puede guardar el fichero con un UUID como nombre.
 
     Returns:
         (texto: str, audio_features: dict)
@@ -70,8 +140,6 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
     import os
     import subprocess
     import tempfile
-    from groq import Groq
-    from centauro.tools.whisper_transcribe import texto_de_segmentos, WHISPER_MODEL
 
     # Determinar extensión usando el nombre original si está disponible
     suffix = Path(original_name).suffix.lower() if original_name else file_path.suffix.lower()
@@ -85,18 +153,16 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
                 f"ffmpeg no encontrado en {FFMPEG_PATH}\n"
                 "Instálalo desde https://ffmpeg.org/download.html y colócalo en C:/ffmpeg/bin/"
             )
-        # Usar directorio temporal del sistema para evitar problemas con rutas
-        # con espacios (como el directorio de Chainlit en este entorno)
         mp3_tmp = Path(tempfile.gettempdir()) / f"centauro_{file_path.stem}.mp3"
         comando = [
             str(FFMPEG_PATH),
             "-i", str(file_path),
-            "-vn",                    # sin vídeo
-            "-c:a", "libmp3lame",     # codec MP3
-            "-b:a", "32k",            # bitrate (suficiente para voz)
-            "-ac", "1",               # mono
-            "-ar", "16000",           # 16 kHz (Whisper solo necesita hasta 16 kHz)
-            "-y",                     # sobreescribir sin preguntar
+            "-vn",
+            "-c:a", "libmp3lame",
+            "-b:a", "32k",
+            "-ac", "1",
+            "-ar", "16000",
+            "-y",
             str(mp3_tmp),
         ]
         resultado = subprocess.run(
@@ -113,37 +179,7 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
             raise RuntimeError(f"Error extrayendo audio con ffmpeg:\n{msg_error}")
         audio_path = mp3_tmp
 
-    # Transcribir con Groq Whisper
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "GROQ_API_KEY no encontrada en .env\n"
-            "Añade tu clave Groq para procesar archivos de audio/vídeo."
-        )
-
-    client = Groq(api_key=api_key)
-
-    # Nombre que se envía a la API: Groq necesita la extensión para reconocer el formato.
-    # Para MP4 ya convertido a MP3, ajustar extensión.
-    if suffix == '.mp4':
-        nombre_api = (Path(original_name).stem if original_name else file_path.stem) + ".mp3"
-    else:
-        nombre_api = original_name or audio_path.name
-
-    with open(audio_path, "rb") as f:
-        response = client.audio.transcriptions.create(
-            model=WHISPER_MODEL,
-            file=(nombre_api, f),   # Nombre explícito para que Groq reconozca el formato
-            response_format="verbose_json",
-            language="es",
-        )
-
-    segmentos = getattr(response, "segments", [])
-    texto = texto_de_segmentos(segmentos)
-    if not texto:
-        texto = getattr(response, "text", "").strip()
-
-    # Extraer métricas acústicas del audio (siempre sobre audio_path ya resuelto)
+    # Extraer métricas acústicas (independiente de la transcripción)
     audio_features = None
     try:
         from centauro.tools.audio_features import extraer_metricas_audio
@@ -151,7 +187,37 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
     except Exception:
         pass
 
+    # --- AssemblyAI (transcripción + diarización nativa) ---
+    assemblyai_key = os.getenv("ASSEMBLYAI_API_KEY")
+    if not assemblyai_key:
+        raise RuntimeError(
+            "ASSEMBLYAI_API_KEY no encontrada en .env\n"
+            "Añade tu clave de AssemblyAI para procesar archivos de audio/vídeo."
+        )
+    texto = _transcribir_con_assemblyai(audio_path, assemblyai_key, original_name or file_path.name)
     return texto, audio_features
+
+    # ---------------------------------------------------------------------------
+    # PIPELINE GROQ WHISPER (desactivado — mantener para re-activar si hace falta)
+    # ---------------------------------------------------------------------------
+    # from groq import Groq
+    # from centauro.tools.whisper_transcribe import texto_de_segmentos, segmentos_a_texto_timbrado, WHISPER_MODEL
+    # api_key = os.getenv("GROQ_API_KEY")
+    # client = Groq(api_key=api_key)
+    # if suffix == '.mp4':
+    #     nombre_api = (Path(original_name).stem if original_name else file_path.stem) + ".mp3"
+    # else:
+    #     nombre_api = original_name or audio_path.name
+    # with open(audio_path, "rb") as f:
+    #     response = client.audio.transcriptions.create(
+    #         model=WHISPER_MODEL, file=(nombre_api, f),
+    #         response_format="verbose_json", language="es",
+    #     )
+    # segmentos = getattr(response, "segments", [])
+    # texto = segmentos_a_texto_timbrado(segmentos)
+    # if not texto:
+    #     texto = texto_de_segmentos(segmentos) or getattr(response, "text", "").strip()
+    # return texto, audio_features
 
 
 @cl.on_chat_start
@@ -183,7 +249,7 @@ async def start():
         else:
             banner_rol = f"\n> 👤 **Conectado como:** {nombre_display}. Tus evaluaciones se guardarán automáticamente en tu perfil.\n"
 
-        welcome_msg = f"""#  Bienvenido a **Centauro v4.0 (Fase BETA)**
+        welcome_msg = f"""#  Bienvenido a **Centauro v5.0 (Fase BETA)**
 Sistema de evaluación automatizada + **Chat Interactivo** con IA Multi-Agente.
 {banner_rol}
 ---
@@ -198,8 +264,8 @@ Ahora puedes **preguntar directamente** a Centauro:
 1. **Usa el botón 📎 (clip)** o **arrastra tu archivo**
 2. Formatos: `.txt`, `.vtt`, `.docx`
 3. Puedes escribir texto junto al archivo con:
-   - **`Asesor: Nombre Apellido`** para indicar el asesor directamente
-   - Cualquier contexto adicional (info del lead, programa, etc.)
+   - El **nombre del asesor** directamente (ej: *"Llamada de Juan Pérez"* o *"Juan Pérez, lead interesado en..."*)
+   - Cualquier contexto adicional (info del lead, programa, objeciones previas, etc.)
 4. Espera algunos minutos
 5. Descarga reporte PDF completo
 ---
@@ -210,7 +276,7 @@ Ahora puedes **preguntar directamente** a Centauro:
 - 🎬 Cierre • 🎭 Estilo
 **🆕 Sistema de Memoria:** Cada evaluación mejora a Centauro y trackea tu progreso.
 ---
-**🤖 Tecnología v4.0:**
+**🤖 Tecnología v5.0:**
 Multi-Agente + Sheriff + RAG Multi-Colección + Memoria Continua
 👇 **Escribe tu pregunta o adjunta un archivo** 👇
 """
@@ -349,10 +415,10 @@ async def main(message: cl.Message):
     contexto_usuario = message.content.strip() if message.content and message.content.strip() else None
 
     # Detectar si el usuario especificó el nombre del asesor explícitamente en el mensaje
-    # Formato: "Asesor: Nombre Apellido" (en cualquier parte del texto)
     nombre_especificado_en_mensaje = None
     if contexto_usuario:
         import re
+        # ── Patrón 1: formato explícito "Asesor: Nombre Apellido" ──────────
         patron_nombre = re.search(
             r'(?:asesor|nombre\s+asesor?|advisor)\s*[:=]\s*'
             r'([A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+(?:\s+[A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+)+)',
@@ -368,6 +434,39 @@ async def main(message: cl.Message):
                 contexto_usuario,
                 flags=re.IGNORECASE
             ).strip() or None
+
+        # ── Patrón 2 (fallback): nombre natural en el mensaje ──────────────
+        # Cubre: "se llama Yanet de la Torre", "llamada de Juan Pérez",
+        # "es de María García", "evalúa a Juan Pérez", "Pedro Martínez,", etc.
+        # Soporta apellidos compuestos: "de la Torre", "del Valle", "van der Berg"
+        if not nombre_especificado_en_mensaje and contexto_usuario:
+            from centauro.core.gestion_asesores import gestion_asesores as _ga_msg
+            # Núcleo de nombre: PrimeraPalabra + opcionalmente partícula + más palabras
+            _NOM = (
+                r'[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+'                             # Nombre/apellido (mayúscula)
+                r'(?:\s+(?:de\s+(?:la\s+|los\s+|las\s+|el\s+)?'        # partícula "de [la/los...]"
+                r'|del\s+|la\s+|van\s+|von\s+)?'                        # o "del/la/van/von"
+                r'[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){1,3}'                       # + siguiente palabra
+            )
+            patrones_naturales = [
+                # "se llama / llama Nombre [de la] Apellido" (NUEVO)
+                r'\bllama\s+(' + _NOM + r')',
+                # "de Nombre [de la] Apellido"
+                r'\bde\s+(' + _NOM + r')',
+                # "a Nombre Apellido" (evalúa a Juan Pérez)
+                r'\ba\s+(' + _NOM + r')',
+                # "es Nombre Apellido"
+                r'\bes\s+(' + _NOM + r')',
+                # Nombre Apellido al inicio del mensaje (sin preposición)
+                r'^(' + _NOM + r')[,\s]',
+            ]
+            for pat in patrones_naturales:
+                m = re.search(pat, contexto_usuario, re.IGNORECASE)
+                if m:
+                    candidato = m.group(1).strip()
+                    if _ga_msg._es_nombre_valido(candidato):
+                        nombre_especificado_en_mensaje = candidato.title()
+                        break
 
     if nombre_especificado_en_mensaje or contexto_usuario:
         partes = []
@@ -432,10 +531,15 @@ async def main(message: cl.Message):
         if Path(file.name).suffix.lower() == '.docx':
             texto_crudo = leer_word(file_path)
         elif es_multimedia:
-            # MP4 o MP3: extraer audio (si MP4) y transcribir con Groq Whisper
-            async with cl.Step(name="🎙️ Transcribiendo audio con Groq Whisper", type="tool") as step:
+            # MP4 o MP3: extraer audio (si MP4) y transcribir
+            import os as _os
+            _usar_assemblyai = bool(_os.getenv("ASSEMBLYAI_API_KEY"))
+            _step_name = "🎙️ Transcribiendo con AssemblyAI (diarización nativa)" if _usar_assemblyai else "🎙️ Transcribiendo audio con Groq Whisper"
+            async with cl.Step(name=_step_name, type="tool") as step:
                 if Path(file.name).suffix.lower() == '.mp4':
                     step.output = "⏳ Extrayendo audio con ffmpeg..."
+                elif _usar_assemblyai:
+                    step.output = "⏳ Subiendo a AssemblyAI..."
                 else:
                     step.output = "⏳ Enviando a Groq Whisper..."
                 # Pasar file.name para que la API de Groq reconozca el formato correctamente

@@ -17,7 +17,24 @@ COLOR_NEUTRAL = (108, 117, 125)# Gris (Off Record)
 def to_latin1(text):
     if text is None: return ""
     text = str(text)
-    text = text.replace("€", "EUR").replace("“", '"').replace("”", '"').replace("’", "'")
+    # Reemplazos de caracteres Unicode frecuentes en output de LLMs que Latin-1 no soporta
+    text = (text
+        .replace("€", "EUR")
+        .replace("“", '"').replace("”", '"')   # comillas tipograficas dobles
+        .replace("‘", "'").replace("’", "'")   # comillas tipograficas simples
+        .replace("—", " - ")                        # em-dash
+        .replace("–", "-")                          # en-dash
+        .replace("‑", "-")                          # guion no separable
+        .replace("­", "-")                              # guion suave
+        .replace("‒", "-")                          # figure dash
+        .replace("‐", "-")                          # hyphen especial
+        .replace("…", "...")                        # puntos suspensivos
+        .replace("→", "->")                         # flecha derecha
+        .replace("•", "-")                          # vineta bullet
+        .replace("–", "-")                          # en-dash alternativo
+        .replace("·", ".")                              # punto medio
+        .replace("−", "-")                          # signo menos unicode
+    )
     return text.encode("latin-1", "replace").decode("latin-1")
 
 class ModernReport(FPDF):

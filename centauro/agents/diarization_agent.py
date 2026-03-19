@@ -119,7 +119,12 @@ class DiarizationAgent:
             print("   🎯 VTT con UUID detectado (speaker por ID)")
             return self._extraer_vtt_con_uuid(texto_crudo)
         
-        # 5. Texto plano - usar clasificación contextual con LLM
+        # 5. Texto timbrado de Groq Whisper ([0.0s-4.2s] texto)
+        if self._es_texto_timbrado(texto_crudo):
+            print("   🎯 Texto con timestamps de Whisper detectado ([Xs-Ys])")
+            return self._diarizar_texto_timbrado(texto_crudo)
+
+        # 6. Texto plano - usar clasificación contextual con LLM
         print(f"   📝 Texto sin formato específico, usando clasificación contextual")
         return self._diarizar_texto_plano(texto_crudo, log_id)
     
@@ -730,6 +735,153 @@ Formato de salida:
         fusionado = self._fusionar_texto_consecutivo(dialogo)
         print(f"   ✅ Heurística: {len(fusionado)} turnos")
         return "\n\n".join(fusionado)
+
+    # ==========================================================================
+    # TEXTO TIMBRADO DE GROQ WHISPER ([0.0s-4.2s] texto)
+    # ==========================================================================
+
+    def _es_texto_timbrado(self, texto: str) -> bool:
+        """Detecta formato [0.0s-4.2s] texto generado por segmentos_a_texto_timbrado."""
+        patron = r'^\[\d+\.\d+s-\d+\.\d+s\]'
+        lineas = texto.strip().split('\n')[:10]
+        matches = sum(1 for l in lineas if re.match(patron, l.strip()))
+        return matches >= 3
+
+    def _diarizar_texto_timbrado(self, texto: str) -> str:
+        """
+        Diariza texto con timestamps de Groq Whisper.
+
+        Estrategia:
+        1. Parsear segmentos [inicio-fin] texto
+        2. Agrupar en "turnos candidatos" separados por pausas >= PAUSA_CAMBIO
+        3. Pasar los turnos pre-agrupados al LLM con indicadores de pausa
+        4. El LLM solo tiene que etiquetar cada turno como ASESOR o LEAD
+        """
+        PAUSA_CAMBIO = 1.5  # segundos → pausa probable entre hablantes
+
+        patron = r'\[(\d+\.\d+)s-(\d+\.\d+)s\]\s*(.+)'
+        segmentos = []
+        for linea in texto.strip().split('\n'):
+            m = re.match(patron, linea.strip())
+            if m:
+                segmentos.append({
+                    'inicio': float(m.group(1)),
+                    'fin': float(m.group(2)),
+                    'texto': m.group(3).strip()
+                })
+
+        if not segmentos:
+            print("   ⚠️ No se pudieron parsear timestamps, fallback a texto plano")
+            texto_limpio = re.sub(r'\[\d+\.\d+s-\d+\.\d+s\]\s*', '', texto)
+            return self._diarizar_texto_plano(texto_limpio.strip(), "fallback_timbrado")
+
+        # Agrupar segmentos en turnos candidatos según pausas
+        turnos = []
+        turno_actual = {
+            'inicio': segmentos[0]['inicio'],
+            'fin': segmentos[0]['fin'],
+            'textos': [segmentos[0]['texto']],
+            'pausa_despues': 0.0
+        }
+
+        for i in range(1, len(segmentos)):
+            seg_prev = segmentos[i - 1]
+            seg_curr = segmentos[i]
+            pausa = seg_curr['inicio'] - seg_prev['fin']
+
+            if pausa >= PAUSA_CAMBIO:
+                turno_actual['pausa_despues'] = pausa
+                turnos.append(turno_actual)
+                turno_actual = {
+                    'inicio': seg_curr['inicio'],
+                    'fin': seg_curr['fin'],
+                    'textos': [seg_curr['texto']],
+                    'pausa_despues': 0.0
+                }
+            else:
+                turno_actual['textos'].append(seg_curr['texto'])
+                turno_actual['fin'] = seg_curr['fin']
+
+        turnos.append(turno_actual)
+
+        print(f"   📊 {len(segmentos)} segmentos → {len(turnos)} turnos candidatos "
+              f"(pausa mínima {PAUSA_CAMBIO}s)")
+
+        if len(turnos) <= 1:
+            # Todo en un turno → no hay pausas → fallback
+            texto_plano = ' '.join(seg['texto'] for seg in segmentos)
+            print("   ⚠️ Sin pausas detectadas, fallback a texto plano")
+            return self._diarizar_texto_plano(texto_plano, "fallback_sinpausas")
+
+        # Construir texto estructurado para el LLM
+        texto_estructurado = self._formatear_turnos_para_llm(turnos)
+        return self._diarizar_batch_timbrado(texto_estructurado, len(turnos))
+
+    def _formatear_turnos_para_llm(self, turnos: list) -> str:
+        """Formatea turnos candidatos con indicadores de pausa para el LLM."""
+        lineas = []
+        for i, turno in enumerate(turnos):
+            texto_turno = ' '.join(turno['textos'])
+            duracion = turno['fin'] - turno['inicio']
+            lineas.append(
+                f"[TURNO {i + 1} | {turno['inicio']:.1f}s-{turno['fin']:.1f}s | {duracion:.1f}s]"
+            )
+            lineas.append(texto_turno)
+            pausa = turno.get('pausa_despues', 0.0)
+            if pausa > 0:
+                lineas.append(f"⏸ Pausa: {pausa:.1f}s")
+            lineas.append("")
+        return '\n'.join(lineas)
+
+    def _diarizar_batch_timbrado(self, texto_estructurado: str, num_turnos: int) -> str:
+        """Llama al LLM para etiquetar turnos pre-agrupados por pausas."""
+        prompt_sistema = """Eres un experto en diarización de conversaciones de ventas de OBS Business School.
+
+El texto ya está pre-agrupado en TURNOS separados por pausas acústicas.
+Una pausa ⏸ indica que hubo silencio antes del siguiente turno: cuanto mayor, más probable que cambie el hablante.
+
+ROLES:
+- ASESOR: El consultor/asesor de OBS. Habla de programas, precios, admisión, OBS, Universidad de Barcelona, metodología, becas, financiación. Hace preguntas sobre el perfil del candidato.
+- LEAD: El candidato/cliente. Habla de su trabajo, experiencia, dudas propias, su situación. Pregunta sobre costes o detalles del programa.
+
+INSTRUCCIONES:
+1. Analiza el CONTENIDO de cada turno para decidir si es ASESOR o LEAD.
+2. Las pausas largas (≥1.5s) indican cambio de hablante; las cortas probablemente no.
+3. Mantén coherencia entre turnos: si un turno largo es del ASESOR, la respuesta corta siguiente suele ser del LEAD.
+4. Ignora las líneas [TURNO ...] y ⏸ Pausa: son solo metadatos de ayuda.
+
+FORMATO DE SALIDA OBLIGATORIO (un bloque por turno, separados por línea vacía):
+[ASESOR]: texto completo del turno
+
+[LEAD]: texto completo del turno
+
+[ASESOR]: texto completo del turno"""
+
+        try:
+            resultado = consultar_gpt(
+                prompt_sistema,
+                f"Diariza estos {num_turnos} turnos:\n\n{texto_estructurado}",
+                "diar_timbrado"
+            )
+
+            if "[ASESOR]" in resultado or "[LEAD]" in resultado:
+                resultado = re.sub(r'\[ASESOR\]:', '\n\n[ASESOR]:', resultado)
+                resultado = re.sub(r'\[LEAD\]:', '\n\n[LEAD]:', resultado)
+                resultado = resultado.strip()
+                turnos_out = [t.strip() for t in resultado.split("\n\n") if t.strip()]
+                # Fusionar consecutivos del mismo speaker por si el LLM los repitió
+                turnos_fusionados = self._fusionar_texto_consecutivo(turnos_out)
+                print(f"   ✅ Diarización con timestamps: {len(turnos_fusionados)} turnos finales")
+                return "\n\n".join(turnos_fusionados)
+            else:
+                print("   ⚠️ LLM no devolvió formato esperado, usando heurística")
+                texto_limpio = re.sub(r'\[TURNO[^\]]*\]|⏸[^\n]*', '', texto_estructurado)
+                return self._diarizar_heuristica_texto(texto_limpio)
+
+        except Exception as e:
+            print(f"   ⚠️ Error LLM timbrado: {e}, usando heurística")
+            texto_limpio = re.sub(r'\[TURNO[^\]]*\]|⏸[^\n]*', '', texto_estructurado)
+            return self._diarizar_heuristica_texto(texto_limpio)
 
     # ==========================================================================
     # TEXTO PLANO (usa LLM + heurística)

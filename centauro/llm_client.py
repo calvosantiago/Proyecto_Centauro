@@ -17,6 +17,11 @@ GPT_MAX_RETRIES = 2
 # gpt-4o-mini: input $0.15/M, cached input $0.075/M, output $0.60/M
 # gpt-5-mini: input $0.25/M, cached input $0.025/M, output $2.00/M
 # text-embedding-3-small: $0.02/M
+#
+# --- TARIFAS ASSEMBLYAI (Mar 2026) ---
+# Universal-3 Pro (transcripción): $0.0001/seg
+# Speaker Diarization (añadido):   $0.0001/seg
+# Total con diarización:           $0.0002/seg = $0.012/min = $0.72/hora
 MODEL_PRICING_USD_PER_1M = {
     "gpt-4o-mini": {
         "input": 0.15,
@@ -44,6 +49,7 @@ MODEL_BY_REFERENCE_EXACT = {
     "eval_estilo": "gpt-5-mini",
     "diar_batch": "gpt-4o-mini",
     "diar_classify": "gpt-4o-mini",
+    "diar_timbrado": "gpt-4o-mini",
     "eval_deteccion": "gpt-4o-mini",
     "chat_interactivo": "gpt-4o-mini",
     "rag_temas": "gpt-4o-mini",

@@ -141,7 +141,10 @@ class GestionAsesores:
             return False
 
         # Primera letra mayúscula en cada palabra
-        if not all(p[0].isupper() for p in palabras if p):
+        # Excepción: partículas de apellidos compuestos pueden ir en minúscula
+        # Ejemplos: "de la Torre", "del Valle", "van der Berg"
+        PARTICULAS = {'de', 'del', 'la', 'los', 'las', 'el', 'van', 'von', 'y'}
+        if not all(p[0].isupper() for p in palabras if p and p.lower() not in PARTICULAS):
             return False
 
         # No palabras sospechosas

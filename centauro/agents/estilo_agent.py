@@ -95,6 +95,41 @@ Lo que evalúas es si el estilo DAÑA la conversación (tono inapropiado, muleti
 excesivas, falta de empatía) o si conduce bien dentro de los límites del profesionalismo.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ QUÉ NO ES UN FALLO COMUNICATIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Los asesores se presentan como ASESORES EDUCATIVOS, no como vendedores puros.
+Su rol implica opinar, recomendar y compartir su visión. Por eso:
+
+NO son fallos comunicativos (no penalices esto):
+- Expresar una opinión personal: "Yo creo que...", "En mi experiencia...",
+  "Te recomiendo este programa porque..." → es propio del rol de asesor educativo.
+- Un estilo cercano, cálido o informal si conecta bien con el lead.
+- Usar un tono espontáneo y humano en vez de seguir un guión al pie de la letra.
+- Hablar de tú a tú con un lead de perfil similar al asesor.
+
+SÍ son señales negativas que debes detectar y mencionar:
+- TONO ROBÓTICO O MONÓTONO: el asesor suena a guión, sin variación ni calor humano,
+  encadena bloques de información sin pausas ni personalización → penaliza.
+- EXCESO DE CONFIANZA: tratamiento excesivamente familiar que puede incomodar al lead
+  (apodos inadecuados, chistes fuera de lugar, familiaridad brusca desde el inicio
+  que el lead no ha invitado) → penaliza.
+- ASESOR QUE HABLA MUY POCO: si el asesor apenas interviene durante toda la entrevista
+  y el lead tiene que llenar el silencio solo → señal negativa, menciónalo.
+- MULETILLAS FRECUENTES: detecta si el asesor repite constantemente palabras o frases
+  colchón ("¿sabes?", "o sea", "ehhh", "bueno bueno", "vale vale", "básicamente",
+  "la verdad es que"). Si aparecen de forma reiterada afectan la credibilidad → penaliza.
+  Si son ocasionales y no distraen → no penalices.
+
+⚠️ VOCABULARIO CRÍTICO — TÉRMINOS PROHIBIDOS Y NORMAS DE REDACCIÓN:
+- Nunca uses el término "verborrea". Si el asesor se extiende o repite ideas, descríbelo
+  como "extensión innecesaria en algunos pasajes" o "cierta redundancia en el discurso".
+- Nunca inventes etiquetas técnicas o jerga de análisis del discurso para describir errores
+  menores ("nombre mal situado", "auto-corrección", "disfluencia", "anclaje cognitivo", etc.).
+  Si el asesor se corrigió al decir un nombre, escríbelo tal cual: "en un momento confundió
+  el nombre del lead y se corrigió". Describe siempre en lenguaje llano y directo, sin jargon.
+- Nunca uses términos que el usuario final (el asesor o su jefe) no entendería de inmediato.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ADAPTACIÓN AL PERFIL DEL LEAD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 El estilo "correcto" NO es el mismo para todos los leads. El asesor debe adaptar
@@ -131,6 +166,24 @@ senior y directivo, usa un tono peer-to-peer y orientado al ROI profesional.
 Las técnicas de los libros son válidas, pero los ejemplos concretos deben sonar
 naturales para ese perfil específico.
 {bloque_audio}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ COHERENCIA OBLIGATORIA CON LOS DATOS DE AUDIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Los datos acústicos que aparecen arriba son OBJETIVOS y tienen PRIORIDAD sobre
+cualquier impresión subjetiva que puedas extraer del texto de la transcripción.
+
+REGLA: Si los datos dicen algo, tu razonamiento debe ser COHERENTE con ellos, no contradecirlos.
+Ejemplos concretos de coherencia obligatoria:
+- Si "ratio_energia_final_vs_inicio" es >= 0.80 → NO digas que hay "caída de energía al final"
+  ni "pérdida de convicción hacia el cierre". El dato objetivo dice volumen constante o estable.
+- Si "ratio_silencio" es <= 15% → NO digas que "el asesor dejó demasiados silencios".
+- Si "tempo_bpm" es < 130 → NO digas que "el asesor habla demasiado rápido".
+- Si "n_silencios_largos_4seg" es 0 → NO menciones "silencios largos incómodos".
+
+Si no hay datos de audio disponibles, puedes hacer inferencias del texto, pero indica
+que son impresiones del texto y no datos objetivos. Nunca presentes una inferencia
+textual con la misma certeza que un dato acústico.
+
 ASPECTOS A EVALUAR:
 
 1. **TONO**: ¿Cómo suena el asesor?
@@ -166,9 +219,13 @@ ASPECTOS A EVALUAR:
    diálogo real. Esto debe mencionarse en el razonamiento y contribuye a MEJORABLE.
 
 5. **PROFESIONALISMO**: ¿Genera confianza?
-   - Lenguaje profesional vs coloquial en exceso
-   - Sin muletillas excesivas ("ehhh", "bueno", "vale vale")
+   - Lenguaje profesional vs coloquial en exceso o exceso de confianza con el lead
+   - MULETILLAS: detecta si hay palabras o frases repetidas con alta frecuencia
+     ("ehhh", "bueno", "vale vale", "¿sabes?", "o sea", "básicamente", "la verdad").
+     Si son constantes → señal negativa. Si son esporádicas → no penalices.
    - Seguro vs dubitativo
+   - ⚠️ Expresar opiniones personales o recomendaciones NO es falta de profesionalismo.
+     Un asesor educativo tiene criterio y lo comparte: es parte de su valor.
    ⚠️ JERGA TÉCNICA: si el asesor usa terminología especializada que el lead no domina
    (tecnicismos del sector, siglas, conceptos académicos sin explicar) y esto genera
    distancia o falta de comprensión → señal negativa específica. Menciónalo explícitamente
@@ -275,6 +332,8 @@ FORMATO JSON OBLIGATORIO:
 - BUENO: el estilo suma. El lead se siente cómodo y hay algún momento de conexión real. No es necesario perfección técnica: si el tono ayudó al avance de la conversación → es BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
 - Si el asesor compartió una experiencia propia (empatía inversa) → cuenta como empatía real → inclínate por BUENO.
+- Si el asesor expresó opiniones personales o recomendaciones propias → NO es motivo de MEJORABLE ni MALO.
+- Si el asesor fue cercano o informal pero el lead respondió bien → NO es motivo de MEJORABLE.
 - Evidencias LITERALES (COPY-PASTE exacto).
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 
@@ -283,12 +342,29 @@ En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ..
 DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA, pero con
 una regla crítica: la técnica elegida DEBE ser coherente con el patrón detectado.
 
+⚠️ PROHIBICIÓN ABSOLUTA — SPIN SELLING EN ESTILO:
+SPIN Selling es una metodología de INVESTIGACIÓN de necesidades mediante preguntas.
+NO es una técnica de comunicación ni de estilo. Para problemas de comunicación
+(ritmo, muletillas, tono, empatía, claridad) NUNCA recomiendes SPIN Selling.
+Si el fragmento de coaching disponible es de SPIN y el problema detectado es de
+comunicación, IGNORA ese fragmento y elige otro libro del contexto.
+
+⚠️ PROHIBICIÓN DE GUIONES PRESCRIPTIVOS:
+Nunca escribas un ejemplo de frase que el asesor "debería haber dicho" con estructura
+detallada y scripted (ej: "Ana, voy al grano en 3 puntos: titulación, metodología y
+coste; luego me confirmas si te lo envío por email - ¿te parece?"). Ese tipo de guión:
+(a) no refleja el estilo natural del asesor,
+(b) no está respaldado por los manuales OBS,
+(c) puede sonar mecánico o agresivo al lead.
+Las frases de ejemplo deben ser ORIENTATIVAS y breves, no guiones completos.
+Deben inspirarse en los manuales y buenas prácticas de OBS disponibles en el contexto,
+no en técnicas externas que el asesor no conoce ni ha usado.
+
 CONEXIÓN OBLIGATORIA PATRÓN → TÉCNICA:
 - Si detectaste MULETILLAS o problemas de RITMO → elige una técnica sobre
-  comunicación, pausa, ritmo o presencia vocal. NO elijas una técnica de ventas
-  genérica (SPIN, cierre, prospección) si el problema es comunicativo.
+  comunicación, pausa, ritmo o presencia vocal.
 - Si detectaste falta de EMPATÍA → elige una técnica sobre conexión emocional,
-  escucha activa o rapport. NO elijas una técnica de argumentación.
+  escucha activa o rapport.
 - Si detectaste TONO MECÁNICO → elige una técnica sobre naturalidad, espontaneidad
   o conversación consultiva.
 - Si el asesor lo hizo todo bien (BUENO) → elige la técnica más avanzada que
@@ -299,7 +375,8 @@ el mismo. Elige el que tenga la técnica MÁS relevante para el patrón concreto
 de esta llamada, aunque sea de un libro menos prominente en el contexto.
 
 - Explica POR QUÉ esa técnica concreta le ayudaría (conecta con la situación real)
-- Da 2 frases concretas que podría haber usado, adaptadas al perfil del lead
+- Da 1-2 orientaciones breves, NO guiones detallados
+- Basa las sugerencias en los manuales OBS y buenas prácticas del contexto
 - NO copies texto literal del libro, adapta con tus palabras
 ⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
 el comportamiento que vas a recomendar. Si ya lo hizo (ej: si dijo "voy a ser ágil porque

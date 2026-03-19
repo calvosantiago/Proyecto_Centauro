@@ -145,6 +145,36 @@ def texto_de_segmentos(segmentos: list) -> str:
     return " ".join(lineas)
 
 
+def segmentos_a_texto_timbrado(segmentos: list) -> str:
+    """
+    Construye texto con timestamps de segmento para diarización mejorada.
+
+    Formato de salida:
+        [0.0s-4.2s] Hola buenas tardes, soy María de OBS...
+        [4.8s-6.1s] Hola, sí te escucho.
+        [6.5s-15.3s] Perfecto, te llamo porque...
+
+    Las pausas entre segmentos son la señal acústica clave para detectar
+    cambios de hablante sin necesidad de un modelo de diarización dedicado.
+    Si no hay segmentos disponibles, devuelve cadena vacía.
+    """
+    if not segmentos:
+        return ""
+    lineas = []
+    for seg in segmentos:
+        if isinstance(seg, dict):
+            inicio = seg.get("start", 0.0)
+            fin = seg.get("end", 0.0)
+            texto = seg.get("text", "").strip()
+        else:
+            inicio = getattr(seg, "start", 0.0)
+            fin = getattr(seg, "end", 0.0)
+            texto = getattr(seg, "text", "").strip()
+        if texto:
+            lineas.append(f"[{inicio:.1f}s-{fin:.1f}s] {texto}")
+    return "\n".join(lineas)
+
+
 # ---------------------------------------------------------------------------
 # Lógica principal
 # ---------------------------------------------------------------------------

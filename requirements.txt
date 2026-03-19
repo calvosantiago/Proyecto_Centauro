@@ -16,7 +16,10 @@ chainlit>=1.0.0
 # Lectura de metadatos de audio (duración MP3 para cálculo de costes Whisper)
 mutagen
 
-# Transcripción de audio con Groq Whisper (API en la nube)
+# Transcripción y diarización de audio (AssemblyAI — activo)
+assemblyai
+
+# Transcripción de audio con Groq Whisper (desactivado del flujo principal, mantenido como fallback)
 groq
 
 # Análisis acústico de audio (métricas objetivas para EstiloAgent)
