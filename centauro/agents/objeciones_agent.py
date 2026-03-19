@@ -172,7 +172,6 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
      alternativa logística, no si no interrogó la circunstancia personal del lead.
    - El lead queda igual de dudoso o inseguro tras la respuesta
    - Intenta resolver pero no usa ninguna técnica estructurada
-   - Resuelve la objeción pero no genera compromiso concreto ni urgencia después
 
 🟢 BUENO — el asesor maneja y/o anticipa objeciones con confianza y el lead suaviza su postura:
    - Anticipa objeciones comunes sin que el lead las plantee (trabaja sin miedo a ellas)
@@ -184,7 +183,6 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
      ("no me queda ninguna duda", "estoy de acuerdo", "ya lo entiendo") → BUENO sin excepción.
    - En objeciones logísticas (timing/viaje): acordar pago parcial, reserva o fecha alternativa
      = resolución exitosa → BUENO.
-   - Tras resolver la objeción, genera compromiso concreto (documento, fecha, pago) y/o urgencia.
    - No es necesario que use técnica perfecta: basta con que la objeción quede resuelta o reducida
 
 TIPOS DE OBJECIONES Y CÓMO LEERLAS:
@@ -243,16 +241,25 @@ FORMATO JSON OBLIGATORIO:
 
 REGLAS PARA RECOMENDACIÓN CON COACHING:
 En el contexto tienes fragmentos de libros de ventas marcados como [COACHING: ...].
-DEBES integrarlos en tu "recomendacion_accionable" de forma ORGÁNICA:
-- Elige la técnica MÁS relevante para lo que le faltó al asesor
-- Explica POR QUÉ le ayudaría (conecta con la situación real de la llamada)
+Úsalos en "recomendacion_accionable" SOLO si se cumplen las dos condiciones:
+  (a) Hay un aspecto concreto donde el asesor tiene margen real de mejora en ESTA llamada.
+  (b) El fragmento de coaching es genuinamente relevante para ESA situación específica.
+
+Si el asesor manejó la objeción correctamente (calificación BUENO) y no encuentras
+una técnica de los libros que aplique de forma natural a lo ocurrido → NO fuerces
+una referencia de coaching. En ese caso escribe solo refuerzo de lo hecho bien
+y, si procede, un matiz menor de mejora sin citar libros.
+
+Cuando SÍ uses coaching:
+- Elige la técnica más relevante para lo que le faltó al asesor
+- Explica POR QUÉ le ayudaría conectándola con la situación real de la llamada
 - Da 2 frases concretas que podría haber usado en ESTA conversación
 - NO copies texto literal del libro, adapta con tus palabras
 - Menciona de qué libro/autor viene
-⚠️ VERIFICA ANTES DE RECOMENDAR: Comprueba si el asesor ya demostró en la conversación
-el comportamiento que vas a recomendar. Si ya lo hizo, NO lo recomiendes — elige otro
-aspecto donde haya margen real de mejora. Recomendar algo que el asesor ya hizo invalida
-el coaching.
+
+⚠️ VERIFICA ANTES DE RECOMENDAR: Si el asesor ya demostró en la conversación
+el comportamiento que ibas a recomendar, NO lo recomiendes — sería invalidar su trabajo.
+Elige otro aspecto con margen real o, si no hay ninguno, reconoce la buena gestión.
 
 REGLAS CRÍTICAS:
 - Evidencias LITERALES de la transcripción (COPY-PASTE exacto)
@@ -273,7 +280,7 @@ el estándar para el nivel general, no para un fragmento aislado.
 Tenlo presente al interpretar los fallos del checklist.
 
 Si hay objeciones detectadas, DETENTE. Antes de elegir la calificación, DEBES
-responder SÍ o NO a cada uno de estos 5 puntos. Cuenta cuántos tienen respuesta
+responder SÍ o NO a cada uno de estos 4 puntos. Cuenta cuántos tienen respuesta
 NEGATIVA (= fallo):
 
   1. ¿Validó la preocupación del lead antes de responder (no la ignoró ni minimizó)? → SÍ / NO
@@ -287,19 +294,19 @@ NEGATIVA (= fallo):
      objeción logística. Marca este ítem como SÍ en ese caso.
   3. ¿Usó técnica estructurada o evidencia concreta para resolver?                   → SÍ / NO
   4. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
-  5. ¿Generó compromiso o urgencia después de resolver la objeción?                   → SÍ / NO
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 (Si observabilidad es NO_OBSERVABLE, pon contador_fallos_criticos = 0.)
+NOTA: El compromiso concreto y el siguiente paso se evalúan en el bloque de Cierre, no aquí.
 
 🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
-   Analiza el peso real de cada fallo. Los 5 criterios son todos relevantes para gestionar
-   las resistencias del lead. No validar la preocupación, no profundizar, no usar técnica,
-   que el lead no suavice su postura y no generar compromiso post-resolución son fallos que
-   acumulados dejan la objeción sin resolver o la agravan. Si la mayoría fallaron, la
-   calificación debe ser MALO. No por un umbral mecánico, sino porque múltiples fallos en
-   el manejo de objeciones dejan al lead igualmente o más resistente. No detectes múltiples
-   fallos graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
+   Analiza el peso real de cada fallo. Los 4 criterios son todos relevantes para gestionar
+   las resistencias del lead. No validar la preocupación, no profundizar, no usar técnica
+   y que el lead no suavice su postura son fallos que acumulados dejan la objeción sin
+   resolver o la agravan. Si la mayoría fallaron, la calificación debe ser MALO. No por
+   un umbral mecánico, sino porque múltiples fallos en el manejo de objeciones dejan al
+   lead igualmente o más resistente. No detectes múltiples fallos graves y concluyas
+   MEJORABLE: sería incoherente con tu propio análisis.
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
 - MALO: múltiples fallos críticos acumulados, O ignora/agrava objeciones, O huye del tema.
@@ -308,7 +315,6 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 - Si dudas entre BUENO y MEJORABLE: ¿el lead quedó menos resistente después? Si sí → BUENO.
 - Si el lead confirma explícitamente que sus dudas se resolvieron → BUENO sin excepción.
 - Si la objeción era logística (timing/viaje) y se acordó pago parcial o alternativa → BUENO.
-- NO marques BUENO si resolvió la objeción pero dejó la conversación sin siguiente paso concreto.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
         
