@@ -249,7 +249,7 @@ async def start():
         else:
             banner_rol = f"\n> 👤 **Conectado como:** {nombre_display}. Tus evaluaciones se guardarán automáticamente en tu perfil.\n"
 
-        welcome_msg = f"""#  Bienvenido a **Centauro v5.0 (Fase BETA)**
+        welcome_msg = f"""#  Bienvenido a **Centauro v5.1 (Fase BETA)**
 Sistema de evaluación automatizada + **Chat Interactivo** con IA Multi-Agente.
 {banner_rol}
 ---
