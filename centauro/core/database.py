@@ -162,9 +162,7 @@ class DatabaseManager:
         asesor_id: int,
         resultado_evaluacion: Dict,
         opportunity_id: Optional[str] = None,
-        transcripcion_path: Optional[str] = None,
         archivo_origen: Optional[str] = None,
-        reporte_json_path: Optional[str] = None,
         reporte_pdf_path: Optional[str] = None,
         stats: Optional[Dict] = None
     ) -> Optional[int]:
@@ -175,9 +173,7 @@ class DatabaseManager:
             asesor_id: ID del asesor en Supabase
             resultado_evaluacion: Dict del reporte (output del orquestador)
             opportunity_id: ID de oportunidad (del nombre de archivo)
-            transcripcion_path: Path a la transcripción
             archivo_origen: Nombre del archivo original
-            reporte_json_path: Path al JSON del reporte
             reporte_pdf_path: Path al PDF del reporte
             stats: Dict con llamadas_api, tiempo_analisis_seg
 
@@ -197,14 +193,12 @@ class DatabaseManager:
             "opportunity_id": opportunity_id,
             "fecha": datetime.now().isoformat(),
             "calificacion_global": resultado_evaluacion.get("calificacion_global"),
-            "transcripcion_path": transcripcion_path,
             "archivo_origen": archivo_origen,
             "perfil_lead": resumen.get("perfil_lead"),
-            "fase_funnel": resumen.get("fase_funnel"),
             "objetivo_del_lead": resumen.get("objetivo_del_lead"),
-            "resultado_general": resumen.get("resultado_general"),
+            "factor_determinante_compra": resumen.get("factor_determinante_compra"),
             "barreras_principales": json.dumps(barreras) if barreras else "[]",
-            "reporte_json_path": reporte_json_path,
+            "fecha_seguimiento": resumen.get("fecha_seguimiento"),
             "reporte_pdf_path": reporte_pdf_path,
         }
 
@@ -337,7 +331,6 @@ class DatabaseManager:
                 calificaciones_por_bloque=calificaciones_por_bloque,
                 fortalezas=fortalezas,
                 areas_mejora=areas_mejora,
-                transcripcion_path=eval_raw.get("transcripcion_path")
             )
             evaluaciones.append(evaluacion)
 

@@ -19,18 +19,16 @@ CREATE TABLE IF NOT EXISTS evaluaciones (
     opportunity_id TEXT,                -- ej: "2021-002579270", nullable
     fecha TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     calificacion_global TEXT CHECK (calificacion_global IN ('MALO', 'MEJORABLE', 'BUENO')),
-    transcripcion_path TEXT,
     archivo_origen TEXT,
     -- Resumen contextual (del orquestador)
     perfil_lead TEXT,
-    fase_funnel TEXT,
     objetivo_del_lead TEXT,
-    resultado_general TEXT,
+    factor_determinante_compra TEXT,    -- factor clave que determinará la compra del lead
     barreras_principales JSONB DEFAULT '[]',
+    fecha_seguimiento TIMESTAMPTZ,      -- fecha y hora del seguimiento comprometido
     -- Stats de procesamiento
     llamadas_api INTEGER,
     tiempo_analisis_seg REAL,
-    reporte_json_path TEXT,
     reporte_pdf_path TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

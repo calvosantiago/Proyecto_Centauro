@@ -253,7 +253,6 @@ class MemoryManager:
         transcripcion_path: Optional[str] = None,
         opportunity_id: Optional[str] = None,
         archivo_origen: Optional[str] = None,
-        reporte_json_path: Optional[str] = None,
         reporte_pdf_path: Optional[str] = None,
         stats: Optional[Dict] = None
     ):
@@ -263,10 +262,9 @@ class MemoryManager:
         Args:
             nombre_asesor: Nombre del asesor evaluado
             resultado_evaluacion: Dict con resultados de CentauroOrchestrator
-            transcripcion_path: Path al archivo de transcripción original
+            transcripcion_path: Path al archivo de transcripción (solo para RAG, no se persiste en Supabase)
             opportunity_id: ID de oportunidad extraído del nombre de archivo
             archivo_origen: Nombre del archivo original
-            reporte_json_path: Path al JSON del reporte generado
             reporte_pdf_path: Path al PDF del reporte generado
             stats: Dict con estadísticas de procesamiento
         """
@@ -278,9 +276,7 @@ class MemoryManager:
                     asesor_id=asesor_id,
                     resultado_evaluacion=resultado_evaluacion,
                     opportunity_id=opportunity_id,
-                    transcripcion_path=transcripcion_path,
                     archivo_origen=archivo_origen,
-                    reporte_json_path=reporte_json_path,
                     reporte_pdf_path=reporte_pdf_path,
                     stats=stats
                 )

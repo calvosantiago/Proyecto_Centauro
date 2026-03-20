@@ -468,10 +468,10 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
 
         Genera:
         - perfil_lead: Descripción del candidato
-        - fase_funnel: En qué etapa del proceso está
         - objetivo_del_lead: Qué busca el candidato
+        - factor_determinante_compra: El factor clave que decidirá si compra
         - barreras_principales: Obstáculos detectados
-        - resultado_general: Cómo terminó la llamada
+        - fecha_seguimiento: Fecha y hora del seguimiento comprometido (o null)
         """
         print("   🔍 Extrayendo perfil del lead y contexto...")
 
@@ -517,29 +517,27 @@ del lead. En ese caso:
 FORMATO JSON OBLIGATORIO:
 {
   "perfil_lead": "Descripción breve: profesión, experiencia, situación actual. Ej: 'Ingeniero con 5 años de experiencia en logística, busca especialización para ascender'",
-  "fase_funnel": "AWARENESS | CONSIDERATION | DECISION | CIERRE_INMEDIATO",
   "objetivo_del_lead": "El objetivo PROFESIONAL del lead (qué quiere conseguir), no el nombre del programa. Ej: 'Cambio de carrera hacia análisis de datos'",
+  "factor_determinante_compra": "El factor ÚNICO más importante que decidirá si el lead compra o no. Ej: 'Aprobación de financiación por la empresa', 'Comparación de precio con competencia', 'Consulta con pareja'. Sé específico, no genérico.",
   "barreras_principales": ["Barrera 1", "Barrera 2"],
-  "resultado_general": "POSITIVO_CON_COMPROMISO | POSITIVO_SIN_FECHA | NEUTRO_PENDIENTE | NEGATIVO_OBJECCION_FUERTE",
+  "fecha_seguimiento": "ISO datetime del seguimiento acordado en la llamada, ej: '2026-03-25T10:00:00'. null si no se acordó fecha concreta.",
   "reconduccion_asesor": false,
   "nota_reconduccion": "Si reconduccion_asesor=true: describe brevemente el programa inicial del lead y hacia cuál lo recondujo el asesor. Ej: 'Lead llegó interesado en MBA, asesor recondujo hacia Máster en Marketing Digital por mejor encaje con su perfil'. Si false: dejar vacío."
 }
 
-GUÍA PARA FASE_FUNNEL:
-- AWARENESS: Apenas conoce OBS, explorando opciones
-- CONSIDERATION: Comparando activamente, tiene dudas específicas
-- DECISION: Ya decidido a estudiar, solo falta resolver detalles (precio, fechas)
-- CIERRE_INMEDIATO: Listo para matricularse en esta llamada
-
-GUÍA PARA RESULTADO_GENERAL:
-- POSITIVO_CON_COMPROMISO: Hay fecha de siguiente paso o intención clara
-- POSITIVO_SIN_FECHA: Interesado pero sin compromiso concreto
-- NEUTRO_PENDIENTE: Ni sí ni no, "lo pensaré"
-- NEGATIVO_OBJECCION_FUERTE: Objeción no resuelta (precio, tiempo, etc.)
+GUÍA PARA FACTOR_DETERMINANTE_COMPRA:
+- Es el factor que, si se resuelve positivamente, probablemente cierre la venta
+- Ejemplos: "Aprobación de beca por empresa", "Precio vs universidad X", "Decidir entre programa A y B",
+  "Consulta con pareja sobre dedicación horaria", "Ver si caben los plazos con su trabajo actual"
 
 GUÍA PARA BARRERAS:
 - Ejemplos: "Precio elevado", "Falta de tiempo", "Necesita consultar con pareja/jefe",
   "Comparando con otra universidad", "Dudas sobre modalidad online", "Sin urgencia"
+
+GUÍA PARA FECHA_SEGUIMIENTO:
+- Solo si en la llamada se acordó explícitamente una fecha/hora para el siguiente contacto
+- Si el asesor dijo "te llamo el martes a las 10" → extraer esa fecha/hora
+- Si no hay fecha concreta → null
 """
 
         prompt_usuario = f"""
@@ -555,12 +553,16 @@ Genera el JSON con la información del lead.
             data = json.loads(resp)
 
             # Validar campos obligatorios
-            campos_requeridos = ["perfil_lead", "fase_funnel", "objetivo_del_lead",
-                                "barreras_principales", "resultado_general"]
+            campos_requeridos = ["perfil_lead", "objetivo_del_lead",
+                                "factor_determinante_compra", "barreras_principales"]
 
             for campo in campos_requeridos:
                 if campo not in data:
                     data[campo] = "No identificado" if campo != "barreras_principales" else []
+
+            # fecha_seguimiento puede ser null
+            if "fecha_seguimiento" not in data:
+                data["fecha_seguimiento"] = None
 
             # Campos de reconducción con defaults seguros
             if "reconduccion_asesor" not in data:
@@ -569,8 +571,8 @@ Genera el JSON con la información del lead.
                 data["nota_reconduccion"] = ""
 
             print(f"      ✓ Perfil: {data.get('perfil_lead', 'N/A')[:50]}...")
-            print(f"      ✓ Fase: {data.get('fase_funnel', 'N/A')}")
-            print(f"      ✓ Resultado: {data.get('resultado_general', 'N/A')}")
+            print(f"      ✓ Factor compra: {data.get('factor_determinante_compra', 'N/A')}")
+            print(f"      ✓ Seguimiento: {data.get('fecha_seguimiento', 'sin fecha')}")
 
             return data
 
@@ -578,10 +580,10 @@ Genera el JSON con la información del lead.
             print(f"   ⚠️ Error extrayendo resumen contextual: {e}")
             return {
                 "perfil_lead": "Error en extracción",
-                "fase_funnel": "CONSIDERATION",
                 "objetivo_del_lead": "No identificado",
+                "factor_determinante_compra": "No identificado",
                 "barreras_principales": [],
-                "resultado_general": "NEUTRO_PENDIENTE"
+                "fecha_seguimiento": None,
             }
 
     # ========== SHERIFF ANTI-ALUCINACIONES ==========
@@ -737,10 +739,10 @@ Genera el JSON con la información del lead.
             },
             "resumen_contextual": resumen_contextual or {
                 "perfil_lead": "No extraído",
-                "fase_funnel": "CONSIDERATION",
                 "objetivo_del_lead": "No identificado",
+                "factor_determinante_compra": "No identificado",
                 "barreras_principales": [],
-                "resultado_general": "NEUTRO_PENDIENTE"
+                "fecha_seguimiento": None,
             },
             "evaluacion_por_bloques": evaluaciones,
             "calificacion_global": calificacion_global,

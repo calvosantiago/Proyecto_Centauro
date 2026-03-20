@@ -12,11 +12,13 @@ v4.1 - Mejoras:
 - Historial de conversación incluido en el contexto del LLM
 - Manejo de "mi rendimiento" sin nombre de asesor en sesión
 """
+import re
 from typing import List, Dict, Optional
 from ..config import centauro_config
 from ..rag import buscar_en_coleccion
 from ..llm_client import consultar_gpt
 from .memoria import memory_manager
+from .database import get_database
 
 
 # Mapeo de palabras clave a seccion_key (debe coincidir con SECCION_TO_BLOQUE en rag.py)
@@ -119,6 +121,11 @@ class ChatHandler:
             "mi rendimiento", "mi perfil", "mis evaluaciones",
             "cómo he mejorado", "mi progreso", "cómo estoy",
             "mis resultados",
+            # Consultas temporales / historial
+            "últimas", "ultimas", "última entrevista", "ultima entrevista",
+            "última llamada", "ultima llamada", "esta entrevista", "esta llamada",
+            "en esta llamada", "en esta entrevista",
+            "cómo fui", "como fui", "cómo quedé", "como quede",
             # Preguntas sobre otro asesor concreto
             "cuántas entrevistas", "cuantas entrevistas",
             "cuántas llamadas", "cuantas llamadas",
@@ -138,8 +145,7 @@ class ChatHandler:
 
         # Si la pregunta menciona un nombre propio Y un bloque de evaluación
         # → casi seguro es una consulta sobre el rendimiento de un asesor concreto
-        import re as _re
-        tiene_nombre_propio = bool(_re.search(r'\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b', pregunta))
+        tiene_nombre_propio = bool(re.search(r'\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b', pregunta))
         if tiene_nombre_propio:
             bloques_en_pregunta = [
                 "investigación", "investigacion", "cierre", "propuesta",
@@ -300,6 +306,22 @@ class ChatHandler:
                     "Por favor indica el nombre del asesor."
                 )
 
+        # ── Router: detectar si pide últimas N o esta/última entrevista ────
+        pregunta_lower = pregunta.lower()
+
+        # "últimas 5 entrevistas", "mis últimas 3 llamadas", etc.
+        m_n = re.search(r'\b[uú]ltimas?\s+(\d+)\b', pregunta_lower)
+        if m_n:
+            n = int(m_n.group(1))
+            return self._obtener_ultimas_n_evaluaciones(nombre_asesor, n, pregunta)
+
+        # "esta entrevista", "esta llamada", "última entrevista", "última llamada"
+        if any(kw in pregunta_lower for kw in [
+            "esta entrevista", "esta llamada", "en esta entrevista", "en esta llamada",
+            "última entrevista", "ultima entrevista", "última llamada", "ultima llamada",
+        ]):
+            return self._obtener_resumen_ultima_evaluacion(nombre_asesor)
+
         try:
             perfil = memory_manager.cargar_perfil(nombre_asesor)
 
@@ -356,6 +378,157 @@ class ChatHandler:
 
         except Exception as e:
             return f"Error obteniendo perfil de {nombre_asesor}: {e}"
+
+    def _obtener_ultimas_n_evaluaciones(
+        self, nombre_asesor: str, n: int, pregunta: str
+    ) -> str:
+        """
+        Consulta las últimas N evaluaciones de un asesor directamente desde Supabase
+        y devuelve un resumen estructurado con calificaciones por bloque.
+        """
+        db = get_database()
+        EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+
+        if db.disponible:
+            asesor = db.buscar_asesor(nombre_asesor)
+            if not asesor:
+                return f"No encontré a **{nombre_asesor}** en el sistema."
+
+            evaluaciones = db.obtener_evaluaciones(asesor["id"])
+            if not evaluaciones:
+                return f"No hay evaluaciones registradas para **{nombre_asesor}**."
+
+            ultimas = evaluaciones[-n:]
+            lineas = [
+                f"## Últimas {len(ultimas)} evaluaciones de {nombre_asesor}\n"
+            ]
+            for i, ev in enumerate(reversed(ultimas), 1):
+                fecha = ev.get("fecha", "")[:10]
+                cal_global = ev.get("calificacion_global") or "N/A"
+                opp_id = ev.get("opportunity_id") or "—"
+                archivo = ev.get("archivo_origen") or "—"
+
+                bloques_raw = db.obtener_calificaciones_bloque(ev["id"])
+                bloques_txt = "  _(sin datos de bloques)_"
+                if bloques_raw:
+                    bloques_txt = "\n".join(
+                        f"  {EMOJI.get(b['calificacion'], '⚪')} **{b['bloque']}**: {b['calificacion'] or 'N/A'}"
+                        for b in bloques_raw
+                    )
+
+                lineas.append(
+                    f"### #{i} — {fecha} | Global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n"
+                    f"**Oportunidad:** {opp_id} | **Archivo:** {archivo}\n"
+                    f"{bloques_txt}\n"
+                )
+            return "\n".join(lineas)
+
+        # Fallback a JSON si Supabase no disponible
+        try:
+            perfil = memory_manager.cargar_perfil(nombre_asesor)
+            ultimas = perfil.evaluaciones[-n:]
+            lineas = [f"## Últimas {len(ultimas)} evaluaciones de {nombre_asesor}\n"]
+            for i, ev in enumerate(reversed(ultimas), 1):
+                fecha = ev.fecha[:10]
+                cal_global = ev.calificacion_global or "N/A"
+                bloques_txt = "\n".join(
+                    f"  {EMOJI.get(cal, '⚪')} **{b}**: {cal or 'N/A'}"
+                    for b, cal in ev.calificaciones_por_bloque.items()
+                )
+                lineas.append(
+                    f"### #{i} — {fecha} | Global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n"
+                    f"{bloques_txt}\n"
+                )
+            return "\n".join(lineas)
+        except Exception as e:
+            return f"Error consultando evaluaciones de {nombre_asesor}: {e}"
+
+    def _obtener_resumen_ultima_evaluacion(self, nombre_asesor: str) -> str:
+        """
+        Devuelve el resumen de la evaluación más reciente de un asesor,
+        incluyendo calificaciones por bloque, recomendaciones y resumen contextual.
+        """
+        db = get_database()
+        EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+
+        if db.disponible:
+            asesor = db.buscar_asesor(nombre_asesor)
+            if not asesor:
+                return f"No encontré a **{nombre_asesor}** en el sistema."
+
+            evaluaciones = db.obtener_evaluaciones(asesor["id"])
+            if not evaluaciones:
+                return f"No hay evaluaciones registradas para **{nombre_asesor}**."
+
+            ev = evaluaciones[-1]
+            fecha = ev.get("fecha", "")[:10]
+            cal_global = ev.get("calificacion_global") or "N/A"
+            opp_id = ev.get("opportunity_id") or "—"
+            archivo = ev.get("archivo_origen") or "—"
+
+            # Contexto de la llamada
+            perfil_lead = ev.get("perfil_lead") or "—"
+            factor_compra = ev.get("factor_determinante_compra") or "—"
+            fecha_seguimiento = ev.get("fecha_seguimiento") or "—"
+            barreras = ev.get("barreras_principales")
+            if isinstance(barreras, str):
+                import json as _json
+                try:
+                    barreras = _json.loads(barreras)
+                except Exception:
+                    barreras = []
+            barreras_txt = ", ".join(barreras) if barreras else "—"
+
+            bloques_raw = db.obtener_calificaciones_bloque(ev["id"])
+            bloques_lineas = []
+            recomendaciones = []
+            for b in bloques_raw:
+                cal = b.get("calificacion") or "N/A"
+                bloque = b.get("bloque", "")
+                evidencia = b.get("evidencia_principal") or ""
+                rec = b.get("recomendacion_accionable") or ""
+                bloques_lineas.append(
+                    f"{EMOJI.get(cal, '⚪')} **{bloque}**: {cal}"
+                    + (f"\n   _{evidencia}_" if evidencia else "")
+                )
+                if rec:
+                    recomendaciones.append(f"- **{bloque}**: {rec}")
+
+            bloques_txt = "\n".join(bloques_lineas) or "_(sin datos)_"
+            recs_txt = "\n".join(recomendaciones) or "_(ninguna)_"
+
+            return (
+                f"## Última evaluación de {nombre_asesor}\n"
+                f"**Fecha:** {fecha} | **Oportunidad:** {opp_id}\n"
+                f"**Archivo:** {archivo}\n\n"
+                f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n\n"
+                f"**Perfil lead:** {perfil_lead}\n"
+                f"**Factor determinante compra:** {factor_compra}\n"
+                f"**Fecha seguimiento:** {fecha_seguimiento}\n"
+                f"**Barreras:** {barreras_txt}\n\n"
+                f"### Calificaciones por bloque\n{bloques_txt}\n\n"
+                f"### Recomendaciones accionables\n{recs_txt}"
+            )
+
+        # Fallback JSON
+        try:
+            perfil = memory_manager.cargar_perfil(nombre_asesor)
+            if not perfil.evaluaciones:
+                return f"No hay evaluaciones registradas para {nombre_asesor}."
+            ev = perfil.evaluaciones[-1]
+            cal_global = ev.calificacion_global or "N/A"
+            bloques_txt = "\n".join(
+                f"{EMOJI.get(cal, '⚪')} **{b}**: {cal or 'N/A'}"
+                for b, cal in ev.calificaciones_por_bloque.items()
+            )
+            return (
+                f"## Última evaluación de {nombre_asesor}\n"
+                f"**Fecha:** {ev.fecha[:10]}\n\n"
+                f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n\n"
+                f"### Calificaciones por bloque\n{bloques_txt}"
+            )
+        except Exception as e:
+            return f"Error consultando última evaluación de {nombre_asesor}: {e}"
 
     def _detalle_bloque_asesor(self, perfil, bloque_key: str) -> str:
         """Devuelve el historial detallado de un asesor en un bloque concreto."""
@@ -418,8 +591,6 @@ class ChatHandler:
         Intenta extraer un nombre de asesor mencionado en la pregunta.
         Admite varios patrones y hace fuzzy match contra perfiles existentes.
         """
-        import re
-
         candidatos = []
 
         # Patrón 1: "de Nombre Apellido" o "de Nombre"

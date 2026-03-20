@@ -908,7 +908,6 @@ async def main(message: cl.Message):
                     transcripcion_path=str(file_path),
                     opportunity_id=opp_id,
                     archivo_origen=file.name if file else None,
-                    reporte_json_path=str(json_path),
                 )
                 # Obtener feedback personalizado
                 feedback_personalizado = perfil.obtener_feedback_personalizado()

@@ -30,10 +30,10 @@ class CoberturaRevision(BaseModel):
 
 class ResumenContextual(BaseModel):
     perfil_lead: str = "..."
-    fase_funnel: str = "..."
     objetivo_del_lead: str = "..."
+    factor_determinante_compra: str = "..."
     barreras_principales: List[str] = []
-    resultado_general: str = "..."
+    fecha_seguimiento: Optional[str] = None
 
 class MomentoClave(BaseModel):
     tramo: str

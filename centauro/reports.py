@@ -343,10 +343,12 @@ def generar_pdf(reporte_json, output_filename):
     pdf.set_text_color(*COLOR_TEXT_MAIN)
     
     ctx = data.get('resumen_contextual', {})
+    seguimiento = ctx.get('fecha_seguimiento') or 'Sin fecha acordada'
     resumen_texto = (
         f"Perfil Lead: {ctx.get('perfil_lead', 'N/A')}\n"
         f"Objetivo: {ctx.get('objetivo_del_lead', 'N/A')}\n"
-        f"Resultado: {ctx.get('resultado_general', 'N/A')}"
+        f"Factor compra: {ctx.get('factor_determinante_compra', 'N/A')}\n"
+        f"Seguimiento: {seguimiento}"
     )
     pdf.multi_cell(0, 5, to_latin1(resumen_texto))
     
