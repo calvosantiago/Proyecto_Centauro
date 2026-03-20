@@ -48,6 +48,11 @@ class GestionAsesores:
                     nombre = asesor.get('nombre', '').strip()
                     if nombre and self._es_nombre_valido(nombre):
                         self.asesores_conocidos.append(nombre)
+                    # Añadir aliases como variantes conocidas para fuzzy matching
+                    for alias in (asesor.get('aliases') or []):
+                        alias = alias.strip()
+                        if alias and alias not in self.asesores_conocidos:
+                            self.asesores_conocidos.append(alias)
                 if self.asesores_conocidos:
                     return
 
@@ -301,15 +306,25 @@ class GestionAsesores:
 
     def obtener_nombre_canonico(self, nombre: str) -> str:
         """
-        Devuelve la versión "canónica" del nombre para usar en perfiles.
+        Devuelve el nombre canónico del asesor para usar en perfiles.
 
-        Si existe un asesor similar, devuelve ese nombre.
-        Si no, devuelve el nombre normalizado.
+        Si el match fue contra un alias, resuelve al nombre canónico de Supabase.
+        Si no hay Supabase, devuelve el nombre normalizado del match fuzzy.
         """
         resultado = self.validar_y_normalizar(nombre)
         nombre_normalizado, nombre_existente, score = resultado
 
         if nombre_existente and score >= self.umbral_similitud:
+            # Verificar si nombre_existente es un alias → resolver al canónico
+            try:
+                from .database import get_database
+                db = get_database()
+                if db.disponible:
+                    asesor = db.buscar_asesor(nombre_existente)
+                    if asesor:
+                        return asesor["nombre"]
+            except Exception:
+                pass
             return nombre_existente
         else:
             return nombre_normalizado

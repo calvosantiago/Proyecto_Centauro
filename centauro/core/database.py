@@ -67,9 +67,48 @@ class DatabaseManager:
 
     # ===================== ASESORES =====================
 
+    def buscar_asesor(self, nombre: str) -> Optional[dict]:
+        """
+        Busca un asesor por nombre canónico normalizado O por alias.
+
+        Estrategia:
+        1. Busca coincidencia exacta en nombre_normalizado
+        2. Si no encuentra, busca en el array aliases (contains)
+
+        Returns:
+            Dict del asesor si se encuentra, None si no existe.
+        """
+        if not self._disponible:
+            return None
+
+        nombre_norm = _normalizar_nombre(nombre)
+
+        # 1. Buscar por nombre canónico
+        result = (
+            self._client.table("asesores")
+            .select("*")
+            .eq("nombre_normalizado", nombre_norm)
+            .execute()
+        )
+        if result.data:
+            return result.data[0]
+
+        # 2. Buscar en aliases: traer todos y comparar
+        # (Supabase no soporta búsqueda dentro de strings en JSONB array fácilmente
+        # sin RPC, así que traemos todos y filtramos en Python)
+        todos = self.listar_asesores()
+        for asesor in todos:
+            aliases = asesor.get("aliases") or []
+            for alias in aliases:
+                if _normalizar_nombre(alias) == nombre_norm:
+                    return asesor
+
+        return None
+
     def registrar_asesor(self, nombre: str) -> Optional[int]:
         """
-        Registra un asesor (o devuelve su ID si ya existe).
+        Devuelve el ID del asesor si existe (por nombre o alias).
+        Si no existe, crea uno nuevo.
 
         Returns:
             ID del asesor en Supabase, o None si no disponible.
@@ -77,47 +116,30 @@ class DatabaseManager:
         if not self._disponible:
             return None
 
-        nombre_norm = _normalizar_nombre(nombre)
-
-        # Buscar existente
-        result = (
-            self._client.table("asesores")
-            .select("id")
-            .eq("nombre_normalizado", nombre_norm)
-            .execute()
-        )
-
-        if result.data:
-            return result.data[0]["id"]
+        asesor = self.buscar_asesor(nombre)
+        if asesor:
+            return asesor["id"]
 
         # Crear nuevo
+        nombre_norm = _normalizar_nombre(nombre)
         result = (
             self._client.table("asesores")
             .insert({
                 "nombre": nombre,
                 "nombre_normalizado": nombre_norm,
                 "fecha_creacion": datetime.now().isoformat(),
-                "activo": True
+                "activo": True,
+                "aliases": []
             })
             .execute()
         )
-
+        if result.data:
+            print(f"   ➕ Nuevo asesor creado en Supabase: {nombre}")
         return result.data[0]["id"] if result.data else None
 
     def obtener_asesor_por_nombre(self, nombre: str) -> Optional[dict]:
-        """Busca un asesor por nombre normalizado."""
-        if not self._disponible:
-            return None
-
-        nombre_norm = _normalizar_nombre(nombre)
-        result = (
-            self._client.table("asesores")
-            .select("*")
-            .eq("nombre_normalizado", nombre_norm)
-            .execute()
-        )
-
-        return result.data[0] if result.data else None
+        """Busca un asesor por nombre o alias. Alias de buscar_asesor para compatibilidad."""
+        return self.buscar_asesor(nombre)
 
     def listar_asesores(self) -> List[dict]:
         """Devuelve todos los asesores activos."""
