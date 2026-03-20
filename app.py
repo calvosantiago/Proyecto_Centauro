@@ -712,6 +712,30 @@ async def main(message: cl.Message):
         await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
         # Guardar en sesión
         cl.user_session.set("nombre_asesor", asesor_confirmado)
+
+        # ==================== OPPORTUNITY ID ====================
+        opp_id = extraer_opportunity_id(file.name) if file else None
+        if opp_id:
+            await cl.Message(content=f"🔗 **Opportunity ID detectado:** `{opp_id}`").send()
+        else:
+            try:
+                opp_respuesta = await cl.AskUserMessage(
+                    content=(
+                        "🔗 **¿Tienes el ID de oportunidad de esta entrevista?**\n"
+                        "Escríbelo (ej: `2021-002579270`) o escribe **no** para continuar sin él."
+                    ),
+                    timeout=30
+                ).send()
+                if opp_respuesta:
+                    texto = opp_respuesta.get("output", "").strip()
+                    if texto.lower() not in ("no", "n", "-", ""):
+                        opp_id = texto
+                        await cl.Message(content=f"✅ **Opportunity ID guardado:** `{opp_id}`").send()
+                    else:
+                        await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
+            except Exception:
+                pass  # Timeout o error → continuar sin ID
+        cl.user_session.set("opportunity_id", opp_id)
         # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
         async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
             try:
@@ -877,7 +901,7 @@ async def main(message: cl.Message):
         # ==================== REGISTRAR EN MEMORIA (NUEVO v4.0) ====================
         async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
             try:
-                opp_id = extraer_opportunity_id(file.name) if file else None
+                opp_id = cl.user_session.get("opportunity_id")
                 perfil = memory_manager.registrar_evaluacion(
                     nombre_asesor=asesor_confirmado,
                     resultado_evaluacion=reporte,
