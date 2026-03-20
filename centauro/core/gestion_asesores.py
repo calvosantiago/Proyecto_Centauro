@@ -35,9 +35,23 @@ class GestionAsesores:
         self._cargar_asesores_conocidos()
 
     def _cargar_asesores_conocidos(self):
-        """Carga lista de asesores desde perfiles existentes, leyendo el nombre del JSON"""
+        """Carga lista de asesores desde Supabase (o JSON como fallback)."""
         import json
         try:
+            # Intentar Supabase primero
+            from .database import get_database
+            db = get_database()
+
+            if db.disponible:
+                asesores = db.listar_asesores()
+                for asesor in asesores:
+                    nombre = asesor.get('nombre', '').strip()
+                    if nombre and self._es_nombre_valido(nombre):
+                        self.asesores_conocidos.append(nombre)
+                if self.asesores_conocidos:
+                    return
+
+            # Fallback: JSON local
             from .memoria import memory_manager
 
             perfiles_dir = memory_manager.perfiles_dir
@@ -51,11 +65,10 @@ class GestionAsesores:
                         if nombre and self._es_nombre_valido(nombre):
                             self.asesores_conocidos.append(nombre)
                     except Exception:
-                        # Fallback: reconstruir desde filename
                         nombre_legible = archivo.stem.replace('_', ' ').title()
                         self.asesores_conocidos.append(nombre_legible)
         except Exception as e:
-            print(f"⚠️ No se pudieron cargar asesores conocidos: {e}")
+            print(f"   ⚠️ No se pudieron cargar asesores conocidos: {e}")
 
     def normalizar_nombre(self, nombre: str) -> str:
         """

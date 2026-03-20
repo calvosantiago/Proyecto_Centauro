@@ -52,8 +52,9 @@ class MetaData(BaseModel):
 
 class ReporteCalidad(BaseModel):
     asesor: str = "Desconocido" # Se rellena en Python
+    opportunity_id: Optional[str] = None  # Se extrae del nombre de archivo
     meta: MetaData = Field(default_factory=MetaData) # Se rellena en Python
-    
+
     resumen_contextual: ResumenContextual
     cobertura_revision: CoberturaRevision
     momentos_clave: List[MomentoClave] = []

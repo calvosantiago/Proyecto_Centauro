@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     MODEL_NAME: str = "gpt-4o-mini"
     MODELO_EMBEDDING: str = "text-embedding-3-small"
 
+    # Configuración Supabase
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+
     class Config:
         env_file = ".env"
         extra = "ignore"

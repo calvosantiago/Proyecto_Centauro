@@ -8,6 +8,7 @@ Incluye validaciones específicas para:
 
 ACTUALIZADO v4.0: Usa configuración centralizada
 """
+import re
 from pathlib import Path
 from typing import Tuple, Optional
 from centauro.config import centauro_config
@@ -138,6 +139,30 @@ def validar_archivo_para_procesamiento(ruta: Path) -> ValidacionArchivo:
 
     # Validar longitud de nombre y path
     return validar_nombre_archivo(ruta)
+
+
+def extraer_opportunity_id(filename: str) -> Optional[str]:
+    """
+    Extrae el ID de oportunidad del prefijo del nombre de archivo.
+
+    Formato esperado: 2021-002579270_descripcion.ext
+    El ID tiene el patrón: 4 dígitos de año, guión, 6-12 dígitos.
+
+    Args:
+        filename: Nombre del archivo (con o sin path)
+
+    Returns:
+        El ID de oportunidad (ej: "2021-002579270") o None si no tiene prefijo válido.
+
+    Ejemplos:
+        >>> extraer_opportunity_id("2021-002579270_entrevista_MBA.mp4")
+        '2021-002579270'
+        >>> extraer_opportunity_id("entrevista_sin_id.mp4")
+        None
+    """
+    stem = Path(filename).stem
+    match = re.match(r'^(\d{4}-\d{6,12})_', stem)
+    return match.group(1) if match else None
 
 
 def generar_mensaje_error_usuario(validacion: ValidacionArchivo, contexto: str = "procesamiento") -> str:

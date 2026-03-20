@@ -185,7 +185,7 @@ class MemoryManager:
     Gestor de memoria del sistema.
 
     Responsabilidades:
-    1. Persistir perfiles de asesores
+    1. Persistir perfiles de asesores (Supabase o JSON fallback)
     2. Añadir nuevas evaluaciones y actualizar perfiles
     3. Agregar conversaciones excelentes al RAG
     4. Limpiar datos obsoletos (rolling window)
@@ -196,9 +196,27 @@ class MemoryManager:
         self.perfiles_dir.mkdir(parents=True, exist_ok=True)
         self.perfiles_cache: Dict[str, AsesorProfile] = {}
 
+        # Inicializar conexión a Supabase (lazy)
+        self._db = None
+
+    @property
+    def db(self):
+        """Acceso lazy al DatabaseManager."""
+        if self._db is None:
+            from .database import get_database
+            self._db = get_database()
+        return self._db
+
     def cargar_perfil(self, nombre_asesor: str) -> AsesorProfile:
-        """Carga perfil de asesor desde disco (o crea uno nuevo)"""
-        # Normalizar nombre para archivo
+        """Carga perfil de asesor desde Supabase (o JSON como fallback)."""
+        # Intentar Supabase primero
+        if self.db.disponible:
+            perfil = self.db.obtener_perfil(nombre_asesor)
+            if perfil:
+                self.perfiles_cache[nombre_asesor] = perfil
+                return perfil
+
+        # Fallback: JSON local
         nombre_safe = nombre_asesor.replace(" ", "_").lower()
         perfil_path = self.perfiles_dir / f"{nombre_safe}.json"
 
@@ -210,7 +228,7 @@ class MemoryManager:
                 self.perfiles_cache[nombre_asesor] = perfil
                 return perfil
             except Exception as e:
-                print(f"⚠️ Error cargando perfil de {nombre_asesor}: {e}")
+                print(f"   ⚠️ Error cargando perfil de {nombre_asesor}: {e}")
 
         # Crear nuevo perfil
         perfil = AsesorProfile(nombre=nombre_asesor)
@@ -218,7 +236,7 @@ class MemoryManager:
         return perfil
 
     def guardar_perfil(self, perfil: AsesorProfile):
-        """Persiste perfil a disco"""
+        """Persiste perfil a disco (JSON fallback)."""
         nombre_safe = perfil.nombre.replace(" ", "_").lower()
         perfil_path = self.perfiles_dir / f"{nombre_safe}.json"
 
@@ -226,13 +244,18 @@ class MemoryManager:
             with open(perfil_path, 'w', encoding='utf-8') as f:
                 json.dump(perfil.to_dict(), f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"❌ Error guardando perfil de {perfil.nombre}: {e}")
+            print(f"   ❌ Error guardando perfil de {perfil.nombre}: {e}")
 
     def registrar_evaluacion(
         self,
         nombre_asesor: str,
         resultado_evaluacion: Dict,
-        transcripcion_path: Optional[str] = None
+        transcripcion_path: Optional[str] = None,
+        opportunity_id: Optional[str] = None,
+        archivo_origen: Optional[str] = None,
+        reporte_json_path: Optional[str] = None,
+        reporte_pdf_path: Optional[str] = None,
+        stats: Optional[Dict] = None
     ):
         """
         Registra una nueva evaluación en el perfil del asesor.
@@ -241,8 +264,28 @@ class MemoryManager:
             nombre_asesor: Nombre del asesor evaluado
             resultado_evaluacion: Dict con resultados de CentauroOrchestrator
             transcripcion_path: Path al archivo de transcripción original
+            opportunity_id: ID de oportunidad extraído del nombre de archivo
+            archivo_origen: Nombre del archivo original
+            reporte_json_path: Path al JSON del reporte generado
+            reporte_pdf_path: Path al PDF del reporte generado
+            stats: Dict con estadísticas de procesamiento
         """
-        # Cargar perfil
+        # ── Guardar en Supabase ──
+        if self.db.disponible:
+            asesor_id = self.db.registrar_asesor(nombre_asesor)
+            if asesor_id:
+                self.db.registrar_evaluacion(
+                    asesor_id=asesor_id,
+                    resultado_evaluacion=resultado_evaluacion,
+                    opportunity_id=opportunity_id,
+                    transcripcion_path=transcripcion_path,
+                    archivo_origen=archivo_origen,
+                    reporte_json_path=reporte_json_path,
+                    reporte_pdf_path=reporte_pdf_path,
+                    stats=stats
+                )
+
+        # ── Guardar en JSON (fallback / dual-write durante transición) ──
         perfil = self.cargar_perfil(nombre_asesor)
 
         # Extraer datos de evaluación
@@ -250,7 +293,6 @@ class MemoryManager:
         fortalezas = []
         areas_mejora = []
 
-        # Iterar sobre los bloques en evaluacion_por_bloques
         bloques = resultado_evaluacion.get("evaluacion_por_bloques", [])
         for bloque_data in bloques:
             if isinstance(bloque_data, dict):
@@ -263,10 +305,8 @@ class MemoryManager:
                 elif cal == "MALO":
                     areas_mejora.append(nombre_bloque)
 
-        # Calificación global del reporte
         cal_global = resultado_evaluacion.get("calificacion_global")
 
-        # Crear registro histórico
         evaluacion = EvaluacionHistorica(
             fecha=datetime.now().isoformat(),
             asesor=nombre_asesor,
@@ -277,13 +317,8 @@ class MemoryManager:
             transcripcion_path=transcripcion_path
         )
 
-        # Añadir al perfil
         perfil.evaluaciones.append(evaluacion)
-
-        # Actualizar estadísticas
         perfil.actualizar_estadisticas()
-
-        # Guardar
         self.guardar_perfil(perfil)
 
         # Si es BUENO, considerar añadir al RAG como ejemplo de aprendizaje
@@ -373,8 +408,15 @@ class MemoryManager:
                 self.guardar_perfil(perfil)
 
     def obtener_estadisticas_globales(self) -> Dict:
-        """Genera estadísticas del sistema completo"""
-        # Cargar todos los perfiles
+        """Genera estadísticas del sistema completo."""
+        # Intentar Supabase primero
+        if self.db.disponible:
+            stats = self.db.obtener_estadisticas_globales()
+            if stats:
+                stats["conversaciones_en_rag"] = collection_evaluaciones.count()
+                return stats
+
+        # Fallback: JSON local
         perfiles = []
         for archivo in self.perfiles_dir.glob("*.json"):
             try:
@@ -388,8 +430,6 @@ class MemoryManager:
         if not perfiles:
             return {"total_asesores": 0}
 
-        # Calcular estadísticas
-        from collections import Counter
         total_evaluaciones = sum(p.total_evaluaciones for p in perfiles)
 
         mejorando = [p for p in perfiles if p.tendencia_global == "mejorando"]

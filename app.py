@@ -19,6 +19,7 @@ from centauro.rag import indexar_si_necesario
 from centauro.privacy import redact_pii
 from centauro.reports import generar_pdf
 from centauro.config import settings
+from centauro.utils.validaciones import extraer_opportunity_id
 from centauro.auth import autenticar
 import json
 # Importar funciones de lectura desde main.py (raíz del proyecto)
@@ -876,11 +877,14 @@ async def main(message: cl.Message):
         # ==================== REGISTRAR EN MEMORIA (NUEVO v4.0) ====================
         async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
             try:
-                # Registrar evaluación usando el reporte completo (tiene evaluacion_por_bloques y calificacion_global)
+                opp_id = extraer_opportunity_id(file.name) if file else None
                 perfil = memory_manager.registrar_evaluacion(
                     nombre_asesor=asesor_confirmado,
                     resultado_evaluacion=reporte,
-                    transcripcion_path=str(file_path)
+                    transcripcion_path=str(file_path),
+                    opportunity_id=opp_id,
+                    archivo_origen=file.name if file else None,
+                    reporte_json_path=str(json_path),
                 )
                 # Obtener feedback personalizado
                 feedback_personalizado = perfil.obtener_feedback_personalizado()

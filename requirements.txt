@@ -25,5 +25,8 @@ groq
 # Análisis acústico de audio (métricas objetivas para EstiloAgent)
 librosa
 
+# Base de datos (Supabase - PostgreSQL hosted)
+supabase
+
 # Optional (mejora performance)
 uvicorn[standard]
