@@ -26,7 +26,8 @@
       "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh 2>&1\")",
       "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh\")",
       "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh 2>&1 && echo FIN\")",
-      "Bash(cat \"C:/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/outputs/perfiles_asesores\"/*.json)"
+      "Bash(cat \"C:/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/outputs/perfiles_asesores\"/*.json)",
+      "Bash(python -c \":*)"
     ]
   }
 }
