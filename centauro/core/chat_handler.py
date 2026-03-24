@@ -155,6 +155,18 @@ class ChatHandler:
             if any(b in pregunta_lower for b in bloques_en_pregunta):
                 return "perfil"
 
+        # ── Consultas sobre pipeline de oportunidades/leads (CRM) ───────────
+        if any(kw in pregunta_lower for kw in [
+            "oportunidades de", "leads de", "cuántos leads", "cuantos leads",
+            "cuántas oportunidades", "cuantas oportunidades",
+            "por país", "por pais", "por programa", "por pilar",
+            "de qué país", "de que pais",
+            "entrevistas de méx", "entrevistas de esp",
+            "de méxico", "de españa", "de colombia", "de argentina", "de perú",
+            "del pilar", "del programa",
+        ]):
+            return "oportunidades"
+
         # ── Estadísticas globales ────────────────────────────────────────────
         if any(kw in pregunta_lower for kw in [
             "estadísticas", "cuántos asesores", "promedio general",
@@ -212,6 +224,9 @@ class ChatHandler:
 
         if intencion == "perfil":
             return self._obtener_perfil_asesor(nombre_asesor, pregunta, bloque_detectado)
+
+        elif intencion == "oportunidades":
+            return self._consultar_oportunidades(pregunta)
 
         elif intencion == "estadisticas":
             return self._obtener_estadisticas_globales()
@@ -665,6 +680,73 @@ class ChatHandler:
         except Exception:
             pass
         return None
+
+    def _consultar_oportunidades(self, pregunta: str) -> str:
+        """
+        Consulta estadísticas de la tabla oportunidades en Supabase.
+        Detecta filtros en la pregunta (país, pilar, programa) y agrega los datos.
+        """
+        db = get_database()
+        if not db.disponible:
+            return "Supabase no disponible para consultar oportunidades."
+
+        pregunta_lower = pregunta.lower()
+
+        # Detectar filtros en la pregunta
+        filtros = {}
+
+        PAISES = {
+            "méxico": "México", "mexico": "México",
+            "españa": "España", "espana": "España",
+            "colombia": "Colombia",
+            "argentina": "Argentina",
+            "perú": "Perú", "peru": "Perú",
+            "chile": "Chile",
+        }
+        for kw, valor in PAISES.items():
+            if kw in pregunta_lower:
+                filtros["pais"] = valor
+                break
+
+        PILARES = {
+            "redes sociales": "Redes Sociales",
+            "mba": "MBA",
+            "máster": "Máster", "master": "Máster",
+            "executive": "Executive Education",
+            "online": "Online",
+        }
+        for kw, valor in PILARES.items():
+            if kw in pregunta_lower:
+                filtros["pilar"] = valor
+                break
+
+        oportunidades = db.obtener_oportunidades_filtradas(
+            filtros=filtros if filtros else None
+        )
+
+        if not oportunidades:
+            filtro_desc = ", ".join(f"{k}={v}" for k, v in filtros.items()) if filtros else "sin filtros"
+            return f"No se encontraron oportunidades ({filtro_desc}) en Supabase."
+
+        from collections import Counter
+        total = len(oportunidades)
+        por_pais = Counter(o.get("pais") for o in oportunidades if o.get("pais"))
+        por_pilar = Counter(o.get("pilar") for o in oportunidades if o.get("pilar"))
+        por_programa = Counter(o.get("programa") for o in oportunidades if o.get("programa"))
+
+        top_paises = "\n".join(f"  - {p}: {c}" for p, c in por_pais.most_common(8))
+        top_pilares = "\n".join(f"  - {p}: {c}" for p, c in por_pilar.most_common(8))
+        top_programas = "\n".join(f"  - {p}: {c}" for p, c in por_programa.most_common(8))
+
+        filtro_desc = " | ".join(f"{k}: {v}" for k, v in filtros.items()) if filtros else "todos los registros"
+
+        return (
+            f"## Oportunidades en pipeline (filtro: {filtro_desc})\n"
+            f"**Total registros**: {total:,}\n\n"
+            f"### Por país (top 8)\n{top_paises}\n\n"
+            f"### Por pilar (top 8)\n{top_pilares}\n\n"
+            f"### Por programa (top 8)\n{top_programas}"
+        )
 
     def _obtener_estadisticas_globales(self) -> str:
         """Obtiene estadísticas del sistema completo."""

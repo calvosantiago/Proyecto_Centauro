@@ -874,7 +874,8 @@ async def main(message: cl.Message):
         async with cl.Step(name="📄 Generando reporte PDF", type="tool") as step:
             try:
                 pdf_filename = f"Reporte_{file.name.replace('.', '_')}_v3.pdf"
-                generar_pdf(reporte, pdf_filename)
+                datos_oportunidad = reporte.get("datos_oportunidad") if isinstance(reporte, dict) else None
+                generar_pdf(reporte, pdf_filename, datos_oportunidad=datos_oportunidad)
                 pdf_path = settings.OUTPUTS_DIR / "Reportes_PDF" / pdf_filename
                 if pdf_path.exists():
                     step.output = f"✅ PDF generado: {pdf_filename}"

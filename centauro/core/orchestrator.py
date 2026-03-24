@@ -12,6 +12,7 @@ CAMBIOS EN v3.0:
 """
 from typing import Dict, List
 import json
+import re
 
 # Importar TODOS los agentes v3.0
 from ..agents import (
@@ -83,6 +84,39 @@ class CentauroOrchestrator:
         else:
             print("   ✓ No se detectaron datos sensibles")
 
+        # --- ENRIQUECIMIENTO: DATOS DEL LEAD DESDE SUPABASE ---
+        datos_oportunidad = None
+        opp_match = re.match(r'^(\d{4}-\d{6,12})_', nombre_archivo)
+        opportunity_id = opp_match.group(1) if opp_match else None
+        if opportunity_id:
+            try:
+                from .database import get_database
+                db = get_database()
+                datos_oportunidad = db.obtener_oportunidad(opportunity_id)
+                if datos_oportunidad:
+                    nombre_lead = datos_oportunidad.get('nombre_lead', 'N/A')
+                    pais = datos_oportunidad.get('pais', 'N/A')
+                    edad = datos_oportunidad.get('edad', 'N/A')
+                    programa = datos_oportunidad.get('programa', 'N/A')
+                    pilar = datos_oportunidad.get('pilar', 'N/A')
+                    contexto_lead = (
+                        f"\n\n--- PERFIL DEL LEAD (datos verificados de CRM) ---\n"
+                        f"Nombre: {nombre_lead}\n"
+                        f"País: {pais}\n"
+                        f"Edad: {edad} años\n"
+                        f"Programa de interés: {programa}\n"
+                        f"Pilar: {pilar}\n"
+                        f"---------------------------------------------------\n"
+                        f"Usa estos datos para evaluar si el asesor adaptó su "
+                        f"discurso al perfil concreto de este lead.\n"
+                    )
+                    contexto_usuario = (contexto_usuario or "") + contexto_lead
+                    print(f"   ✅ Lead: {nombre_lead} ({pais}, {edad} años, {programa})")
+                else:
+                    print(f"   ℹ️ Oportunidad {opportunity_id} no encontrada en Supabase")
+            except Exception as e:
+                print(f"   ⚠️ No se pudo enriquecer con datos del lead: {e}")
+
         # --- FASE 1: DIARIZACIÓN ---
         print("\n📍 FASE 1: Diarización")
         diarization_agent = DiarizationAgent(nombre_asesor=nombre_archivo)
@@ -146,6 +180,7 @@ class CentauroOrchestrator:
         # NOTA: _sintetizar_evaluaciones NO hace llamada LLM, es puro Python
 
         reporte_final["meta"]["stats_optimizacion"] = self.stats
+        reporte_final["datos_oportunidad"] = datos_oportunidad
 
         print(f"\n{'='*60}")
         print(f"✅ COMPLETADO - Calificación: {reporte_final['calificacion_global']}")

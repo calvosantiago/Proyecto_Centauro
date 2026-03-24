@@ -419,6 +419,26 @@ class DatabaseManager:
 
         return result.data[0] if result.data else None
 
+    def obtener_oportunidades_filtradas(self, filtros: dict = None, limit: int = 5000) -> list:
+        """
+        Obtiene oportunidades con filtros opcionales (pais, pilar, programa...).
+        Usado para estadísticas de pipeline desde el chat.
+        """
+        if not self._disponible:
+            return []
+
+        query = self._client.table("oportunidades").select(
+            "opportunity_id, nombre_lead, pilar, pais, edad, programa, fecha_creacion"
+        )
+
+        if filtros:
+            for key, value in filtros.items():
+                if value is not None:
+                    query = query.eq(key, value)
+
+        result = query.limit(limit).execute()
+        return result.data if result.data else []
+
 
 # Instancia global (lazy init)
 _db_instance = None

@@ -442,7 +442,8 @@ def main():
             # PDF
             print("   🎨 Generando PDF...")
             nombre_pdf = f"Reporte_{archivo.stem}_v2.pdf"
-            generar_pdf(reporte, nombre_pdf)
+            datos_oportunidad = reporte.get("datos_oportunidad") if isinstance(reporte, dict) else None
+            generar_pdf(reporte, nombre_pdf, datos_oportunidad=datos_oportunidad)
 
             # ===== GUARDAR PERFIL DEL ASESOR =====
             try:
