@@ -28,5 +28,8 @@ librosa
 # Base de datos (Supabase - PostgreSQL hosted)
 supabase
 
+# Autenticación Microsoft (Power BI / Fabric — Device Code Flow)
+msal
+
 # Optional (mejora performance)
 uvicorn[standard]

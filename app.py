@@ -259,6 +259,7 @@ Ahora puedes **preguntar directamente** a Centauro:
 **Ejemplos de preguntas:**
 - *"¿Cómo debería hacer una buena apertura?"*
 - *"Muéstrame ejemplos de cierre exitoso"*
+- *"@pbi Top 5 programas matriculados del área A"*
 **Solo escribe tu pregunta abajo** 👇 y presiona Enter.
 ---
 ## 📤 **Modo Evaluación de Llamadas**
@@ -384,13 +385,32 @@ async def main(message: cl.Message):
                             "Adjunta primero un archivo de audio o texto para evaluarlo."
                 ).send()
             return
-        # ── Procesar pregunta con RAG ────────────────────────────────────────
-        await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
+        # ── Procesar pregunta con RAG / Power BI ────────────────────────────
+        _kpi_keywords = [
+            "kpi", "kpis", "métrica", "metrica", "dashboard", "power bi", "powerbi",
+            "ventas del mes", "ventas del año", "ventas de", "total ventas",
+            "objetivo de ventas", "target", "revenue", "tasa de conversión",
+            "tasa de conversion", "tasa de cierre", "leads totales", "leads activos",
+            "pipeline total", "matriculados", "matrículas", "matriculas",
+            "facturación", "facturacion", "ingresos del", "cuánto vendió",
+            "cuanto vendio", "cuánto se vendió", "ranking de asesores",
+            "ranking por ventas", "mejor asesor", "top asesores",
+        ]
+        es_consulta_pbi = any(kw in pregunta.lower() for kw in _kpi_keywords)
+        if es_consulta_pbi:
+            msg_espera = await cl.Message(
+                content="📊 Consultando el modelo semántico de Power BI...\n"
+                        "_Generando DAX → ejecutando consulta → interpretando resultado_"
+            ).send()
+        else:
+            msg_espera = await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
         try:
             # TODO: Detectar nombre de asesor si pregunta por su perfil
             # Por ahora, intentar extraer de la sesión o usar None
             nombre_asesor = cl.user_session.get("nombre_asesor", None)
-            respuesta = chat_handler.procesar_consulta(pregunta, nombre_asesor)
+            respuesta = await asyncio.get_event_loop().run_in_executor(
+                None, chat_handler.procesar_consulta, pregunta, nombre_asesor
+            )
             await cl.Message(content=respuesta).send()
         except Exception as e:
             await cl.Message(

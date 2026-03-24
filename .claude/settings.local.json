@@ -27,7 +27,9 @@
       "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh\")",
       "Bash(cmd /c \"dir C:\\\\Users\\\\uscp9a\\\\.ssh 2>&1 && echo FIN\")",
       "Bash(cat \"C:/Users/uscp9a/Grupo Planeta/BI POWER - General/PBI/PROYECTOS/Proyecto_Centauro/outputs/perfiles_asesores\"/*.json)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(.venv/Scripts/python \"C:\\\\Users\\\\uscp9a\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\82d4c73e-8736-4c02-9996-fe7951401924\\\\8a50a81c-2eb8-4c39-94cc-0bdf730fea56\\\\skills\\\\xlsx\\\\gen_pbi_template.py\")",
+      "Bash(.venv/Scripts/python \"C:\\\\Users\\\\uscp9a\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\82d4c73e-8736-4c02-9996-fe7951401924\\\\8a50a81c-2eb8-4c39-94cc-0bdf730fea56\\\\skills\\\\xlsx\\\\gen_pbi_obs.py\")"
     ]
   }
 }

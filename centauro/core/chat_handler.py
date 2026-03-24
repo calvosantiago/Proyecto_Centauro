@@ -13,12 +13,15 @@ v4.1 - Mejoras:
 - Manejo de "mi rendimiento" sin nombre de asesor en sesión
 """
 import re
+import logging
 from typing import List, Dict, Optional
 from ..config import centauro_config
 from ..rag import buscar_en_coleccion
 from ..llm_client import consultar_gpt
 from .memoria import memory_manager
 from .database import get_database
+
+logger = logging.getLogger(__name__)
 
 
 # Mapeo de palabras clave a seccion_key (debe coincidir con SECCION_TO_BLOQUE en rag.py)
@@ -82,7 +85,20 @@ class ChatHandler:
         intencion = self._clasificar_intencion(pregunta_usuario)
         bloque_detectado = self._detectar_bloque(pregunta_usuario)
 
-        # Buscar contexto relevante
+        # Cortocircuito para consultas al modelo semántico de Power BI
+        if intencion == "kpi":
+            # Limpiar prefijo @pbi antes de enviar a Power BI
+            pregunta_pbi = re.sub(r"^@pbi\s*", "", pregunta_usuario, flags=re.IGNORECASE).strip()
+            respuesta = self._consultar_powerbi(pregunta_pbi)
+            self.historial_conversacion.append({
+                "pregunta": pregunta_usuario,
+                "respuesta": respuesta,
+                "intencion": intencion,
+                "bloque": bloque_detectado,
+            })
+            return respuesta
+
+        # Buscar contexto relevante (flujo RAG normal)
         contexto = self._buscar_contexto_relevante(
             pregunta_usuario, intencion, bloque_detectado, nombre_asesor
         )
@@ -111,9 +127,18 @@ class ChatHandler:
         Clasifica la intención de la pregunta del usuario.
 
         Returns:
-            "manual" | "ejemplo" | "perfil" | "estadisticas" | "general"
+            "manual" | "ejemplo" | "perfil" | "estadisticas" | "kpi" | "general"
+
+        Prefijos especiales:
+            /modelo <pregunta>  → fuerza routing a Power BI (kpi)
         """
         pregunta_lower = pregunta.lower()
+
+        # ── Prefijo @pbi → fuerza Power BI siempre ──────────────────────
+        # Uso: "@pbi ¿Cuántas filas tiene H_Convocatorio?"
+        # Nota: no usar /modelo porque Chainlit intercepta el slash
+        if pregunta_lower.strip().startswith("@pbi"):
+            return "kpi"
 
         # ── Perfil de asesor concreto (PRIORIDAD ALTA) ──────────────────────
         # Preguntas sobre un asesor específico por nombre o sobre el propio asesor
@@ -189,6 +214,32 @@ class ChatHandler:
             "estrategia", "consejo", "consejos",
         ]):
             return "manual"
+
+        # ── KPIs y métricas del modelo semántico Power BI ────────────────
+        if any(kw in pregunta_lower for kw in [
+            "kpi", "kpis", "métrica", "metrica", "métricas", "metricas",
+            "dashboard", "power bi", "powerbi",
+            "ventas del mes", "ventas del año", "ventas de", "total ventas",
+            "objetivo de ventas", "target", "revenue",
+            "tasa de conversión", "tasa de conversion", "tasa de cierre",
+            "leads totales", "leads activos", "pipeline total",
+            "matriculados", "matrículas", "matriculas",
+            "facturación", "facturacion", "ingresos del",
+            "cuánto vendió", "cuanto vendio", "cuánto se vendió",
+            "ranking de asesores", "ranking por ventas",
+            "mejor asesor", "top asesores",
+            # consultas directas a tablas del modelo
+            "tabla h_", "h_convocatorio", "h_matricula", "h_lead", "h_contacto",
+            "cuántas filas", "cuantas filas", "cuántos registros", "cuantos registros",
+            "cuántas ventas", "cuantas ventas", "cuántos leads", "cuantos leads",
+            "cuántos matriculados", "cuantos matriculados",
+            "total de filas", "número de filas", "numero de filas",
+            "total de registros", "número de registros", "numero de registros",
+            "modelo semántico", "modelo semantico", "consulta dax", "dax",
+            "top 5", "top 10", "ranking", "promedio de", "suma de",
+            "por país", "por pais", "por programa", "por asesor", "por mes", "por año",
+        ]):
+            return "kpi"
 
         return "general"
 
@@ -905,6 +956,50 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
 
         except Exception as e:
             return f"Error generando respuesta: {e}"
+
+    # ------------------------------------------------------------------
+    # Power BI — Consultas al modelo semántico
+    # ------------------------------------------------------------------
+
+    def _consultar_powerbi(self, pregunta: str) -> str:
+        """
+        Consulta el modelo semántico de Power BI para responder KPIs y métricas.
+        Usa PowerBIClient.query_nl() que orquesta el pipeline NL→DAX→resultado→NL.
+        """
+        try:
+            from .powerbi_client import get_powerbi_client
+            client = get_powerbi_client()
+        except Exception as e:
+            logger.error(f"Error importando PowerBIClient: {e}")
+            return (
+                "No se pudo cargar el cliente de Power BI. "
+                f"Detalle: {e}"
+            )
+
+        if client is None:
+            return (
+                "El cliente de Power BI no está configurado.\n\n"
+                "Asegúrate de tener en `.env`:\n"
+                "- `AZURE_CLIENT_ID`\n"
+                "- `AZURE_TENANT_ID`\n"
+                "- `PBI_WORKSPACE_ID`\n"
+                "- `PBI_DATASET_ID`\n\n"
+                "Luego ejecuta `python scripts/pbi_auth.py` para autenticarte."
+            )
+
+        if not client.disponible:
+            return (
+                "No hay refresh token guardado para Power BI.\n\n"
+                "Ejecuta en la terminal:\n"
+                "```\npython scripts/pbi_auth.py\n```\n"
+                "y sigue las instrucciones para autenticarte con tu cuenta de Planeta."
+            )
+
+        try:
+            return client.query_nl(pregunta)
+        except Exception as e:
+            logger.error(f"Error consultando Power BI: {e}")
+            return f"Error al consultar el modelo semántico de Power BI: {e}"
 
     # ------------------------------------------------------------------
     # Utilidades
