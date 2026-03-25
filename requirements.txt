@@ -31,5 +31,8 @@ supabase
 # Autenticación Microsoft (Power BI / Fabric — Device Code Flow)
 msal
 
+# Gráficos automáticos en respuestas Power BI
+matplotlib
+
 # Optional (mejora performance)
 uvicorn[standard]

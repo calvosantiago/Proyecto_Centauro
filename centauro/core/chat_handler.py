@@ -135,10 +135,12 @@ class ChatHandler:
         pregunta_lower = pregunta.lower()
 
         # ── Prefijo @pbi → fuerza Power BI siempre ──────────────────────
-        # Uso: "@pbi ¿Cuántas filas tiene H_Convocatorio?"
-        # Nota: no usar /modelo porque Chainlit intercepta el slash
         if pregunta_lower.strip().startswith("@pbi"):
             return "kpi"
+
+        # ── ID de oportunidad (ej: 2021-002570912) → buscar en Supabase ─
+        if re.search(r'\b\d{4}-\d{6,12}\b', pregunta):
+            return "oportunidades"
 
         # ── Perfil de asesor concreto (PRIORIDAD ALTA) ──────────────────────
         # Preguntas sobre un asesor específico por nombre o sobre el propio asesor
@@ -742,6 +744,24 @@ class ChatHandler:
             return "Supabase no disponible para consultar oportunidades."
 
         pregunta_lower = pregunta.lower()
+
+        # ── Búsqueda por ID concreto (ej: 2021-002570912) ───────────────
+        match_id = re.search(r'\b(\d{4}-\d{6,12})\b', pregunta)
+        if match_id:
+            opportunity_id = match_id.group(1)
+            datos = db.obtener_oportunidad(opportunity_id)
+            if datos:
+                campos = []
+                for k, v in datos.items():
+                    if k not in ("id", "fecha_sync", "datos_extra") and v is not None:
+                        campos.append(f"- **{k}**: {v}")
+                detalle = "\n".join(campos)
+                return f"Datos de la oportunidad `{opportunity_id}` en Supabase:\n\n{detalle}"
+            else:
+                # No está en Supabase → fallback automático a Power BI
+                logger.info(f"ID {opportunity_id} no en Supabase → consultando Power BI")
+                pregunta_pbi = f"Dame los datos de la oportunidad {opportunity_id} en H_CUPONES: pilar, país, programa, estado, nombre del cliente"
+                return self._consultar_powerbi(pregunta_pbi)
 
         # Detectar filtros en la pregunta
         filtros = {}

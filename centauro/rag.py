@@ -108,6 +108,7 @@ collection_buenas_practicas = get_collection(centauro_config.COLLECTION_BUENAS_P
 collection_evaluaciones = get_collection(centauro_config.COLLECTION_EVALUACIONES)
 collection_dossiers = get_collection(centauro_config.COLLECTION_DOSSIERS)
 collection_coaching = get_collection(centauro_config.COLLECTION_COACHING)  # NUEVO
+collection_diccionario_datos = get_collection(centauro_config.COLLECTION_DICCIONARIO_DATOS)
 
 # Colección legacy para compatibilidad hacia atrás
 collection = collection_manuales  # Default para código legacy
@@ -472,6 +473,84 @@ def indexar_coaching_ventas():
         print(f"✅ Coaching indexado: {collection_coaching.count()} fragmentos totales")
 
 
+# ==================== INDEXACIÓN: DICCIONARIO MODELO SEMÁNTICO ====================
+
+def indexar_diccionario_datos():
+    """
+    Indexa el diccionario del modelo semántico de Power BI para el RAG de consultas DAX.
+
+    Carpeta: inputs/docs/diccionario_datos/
+    Formato: Entradas delimitadas por '===' en línea propia.
+    Cada entrada se indexa completa (sin chunking) para mantener contexto.
+    """
+    import re as _re
+
+    print("\n--- 📊 Indexando Diccionario del Modelo Semántico ---")
+
+    diccionario_dir = settings.INPUTS_DIR / "docs" / "diccionario_datos"
+
+    if not diccionario_dir.exists():
+        print(f"   ℹ️ Carpeta {diccionario_dir} no existe. Diccionario PBI no disponible.")
+        return
+
+    archivos = list(diccionario_dir.glob("*.txt"))
+    if not archivos:
+        print(f"   ℹ️ No hay archivos .txt en '{diccionario_dir}'")
+        return
+
+    count_entries = 0
+
+    for archivo in archivos:
+        try:
+            texto = archivo.read_text(encoding="utf-8")
+            if not texto:
+                continue
+
+            # Partir por delimitador ===
+            entradas_raw = _re.split(r'\n===\s*\n', texto)
+            entradas = []
+            for e in entradas_raw:
+                e = e.strip()
+                # Filtrar cabecera del archivo y entradas vacías
+                if not e or len(e) < 30 or e.startswith("DICCIONARIO DEL MODELO"):
+                    continue
+                entradas.append(e)
+
+            if not entradas:
+                continue
+
+            ids = [f"dict_{archivo.stem}_{i}" for i in range(len(entradas))]
+            metadatas = []
+            for i, entry in enumerate(entradas):
+                # Extraer tipo de la entrada (MEDIDA, TABLA, GLOSARIO, etc.)
+                tipo_match = _re.search(r'TIPO:\s*(\S+)', entry)
+                tipo = tipo_match.group(1) if tipo_match else "general"
+                # Extraer nombre/término
+                nombre_match = _re.search(r'(?:Nombre|Término):\s*(.+)', entry)
+                nombre = nombre_match.group(1).strip() if nombre_match else f"entry_{i}"
+                metadatas.append({
+                    "fuente": archivo.name,
+                    "tipo": f"diccionario_{tipo.lower()}",
+                    "nombre": nombre,
+                    "chunk_id": i,
+                })
+
+            collection_diccionario_datos.upsert(
+                ids=ids,
+                documents=entradas,
+                metadatas=metadatas,
+            )
+
+            count_entries += len(entradas)
+            print(f"   📊 {archivo.name} ({len(entradas)} entradas)")
+
+        except Exception as e:
+            print(f"   ❌ Error procesando {archivo.name}: {e}")
+
+    if count_entries > 0:
+        print(f"✅ Diccionario datos indexado: {collection_diccionario_datos.count()} entradas totales")
+
+
 # ==================== ESTADÍSTICAS DE TOKENS ====================
 
 def _contar_tokens_colecciones() -> dict:
@@ -495,6 +574,7 @@ def _contar_tokens_colecciones() -> dict:
         "buenas_practicas": collection_buenas_practicas,
         "coaching":         collection_coaching,
         "dossiers":         collection_dossiers,
+        "diccionario_datos": collection_diccionario_datos,
     }
 
     stats = {}
@@ -562,6 +642,7 @@ def indexar_documentacion():
     indexar_buenas_practicas()
     indexar_coaching_ventas()  # NUEVO
     indexar_dossiers()
+    indexar_diccionario_datos()
 
     print("\n" + "="*70)
     print("📊 RESUMEN DE INDEXACIÓN:")
@@ -570,6 +651,7 @@ def indexar_documentacion():
     print(f"   • Coaching/Libros: {collection_coaching.count()} fragmentos")
     print(f"   • Evaluaciones históricas: {collection_evaluaciones.count()} fragmentos")
     print(f"   • Dossiers programas: {collection_dossiers.count()} fragmentos")
+    print(f"   • Diccionario datos PBI: {collection_diccionario_datos.count()} entradas")
     _imprimir_resumen_tokens(_contar_tokens_colecciones())
     print("="*70 + "\n")
 
@@ -620,13 +702,14 @@ def _limpiar_colecciones_documentacion() -> None:
     NO toca collection_evaluaciones (historial de evaluaciones del sistema).
     """
     global collection_manuales, collection_buenas_practicas, \
-           collection_coaching, collection_dossiers, collection
+           collection_coaching, collection_dossiers, collection_diccionario_datos, collection
 
     colecciones_a_limpiar = [
         centauro_config.COLLECTION_MANUALES,
         centauro_config.COLLECTION_BUENAS_PRACTICAS,
         centauro_config.COLLECTION_COACHING,
         centauro_config.COLLECTION_DOSSIERS,
+        centauro_config.COLLECTION_DICCIONARIO_DATOS,
     ]
 
     for nombre in colecciones_a_limpiar:
@@ -641,6 +724,7 @@ def _limpiar_colecciones_documentacion() -> None:
     collection_buenas_practicas = get_collection(centauro_config.COLLECTION_BUENAS_PRACTICAS)
     collection_coaching = get_collection(centauro_config.COLLECTION_COACHING)
     collection_dossiers = get_collection(centauro_config.COLLECTION_DOSSIERS)
+    collection_diccionario_datos = get_collection(centauro_config.COLLECTION_DICCIONARIO_DATOS)
     collection = collection_manuales  # alias legacy
 
 

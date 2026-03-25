@@ -171,6 +171,7 @@ class CentauroConfig:
     COLLECTION_EVALUACIONES = "evaluaciones_historicas"
     COLLECTION_DOSSIERS = "dossiers_programas"
     COLLECTION_COACHING = "coaching_ventas"  # NUEVO: Libros y técnicas de ventas
+    COLLECTION_DICCIONARIO_DATOS = "diccionario_datos"  # Diccionario del modelo semántico PBI
 
     # ==================== COACHING: LIBROS DE VENTAS ====================
 

@@ -396,7 +396,10 @@ async def main(message: cl.Message):
             "cuanto vendio", "cuánto se vendió", "ranking de asesores",
             "ranking por ventas", "mejor asesor", "top asesores",
         ]
-        es_consulta_pbi = any(kw in pregunta.lower() for kw in _kpi_keywords)
+        es_consulta_pbi = (
+            pregunta.lower().strip().startswith("@pbi")
+            or any(kw in pregunta.lower() for kw in _kpi_keywords)
+        )
         if es_consulta_pbi:
             msg_espera = await cl.Message(
                 content="📊 Consultando el modelo semántico de Power BI...\n"
@@ -405,13 +408,42 @@ async def main(message: cl.Message):
         else:
             msg_espera = await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
         try:
-            # TODO: Detectar nombre de asesor si pregunta por su perfil
-            # Por ahora, intentar extraer de la sesión o usar None
             nombre_asesor = cl.user_session.get("nombre_asesor", None)
             respuesta = await asyncio.get_event_loop().run_in_executor(
                 None, chat_handler.procesar_consulta, pregunta, nombre_asesor
             )
-            await cl.Message(content=respuesta).send()
+            # ── Gráfico: solo si el usuario lo pide explícitamente ───────
+            _grafico_kw = [
+                "gráfico", "grafico", "chart", "gráfica", "grafica",
+                "visualiza", "visualización", "visualizacion",
+                "representa", "dibuja", "plot", "plotea",
+                "barras", "línea", "linea", "pie",
+            ]
+            pide_grafico = es_consulta_pbi and any(kw in pregunta.lower() for kw in _grafico_kw)
+            elementos = []
+            if pide_grafico:
+                try:
+                    from centauro.core.pbi_charts import generar_grafico_desde_rows
+                    from centauro.core.powerbi_client import get_powerbi_client
+                    _pbi = get_powerbi_client()
+                    if _pbi and len(_pbi._last_query_rows) >= 2:
+                        graf_path = await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            generar_grafico_desde_rows,
+                            _pbi._last_query_rows,
+                            pregunta,
+                            settings.OUTPUTS_DIR / "charts",
+                        )
+                        if graf_path:
+                            elementos = [cl.Image(
+                                name="grafico_pbi",
+                                path=str(graf_path),
+                                display="inline",
+                            )]
+                except Exception as _e:
+                    import logging as _log
+                    _log.getLogger(__name__).warning(f"No se pudo generar gráfico PBI: {_e}")
+            await cl.Message(content=respuesta, elements=elementos).send()
         except Exception as e:
             await cl.Message(
                 content=f"❌ Error procesando consulta: {str(e)}\n\nIntenta reformular tu pregunta."

@@ -53,6 +53,7 @@ class PowerBIClient:
         self._token_expiry: Optional[datetime] = None
         self._schema_cache: Optional[str] = None
         self._query_cache: Dict[str, str] = {}  # caché de resultados por pregunta
+        self._last_query_rows: list = []         # filas del último resultado (para gráficos)
 
         if not self.client_id or not self.tenant_id:
             raise ValueError("Faltan AZURE_CLIENT_ID o AZURE_TENANT_ID en .env")
@@ -168,47 +169,40 @@ class PowerBIClient:
     # Descubrimiento de esquema
     # ------------------------------------------------------------------
 
-    def _get_schema_description(self) -> str:
+    def _get_schema_for_question(self, pregunta: str) -> str:
         """
-        Devuelve descripción del esquema del modelo semántico para el prompt NL→DAX.
-        Prioridad: PBI_SCHEMA_HINT del .env > auto-descubrimiento vía DAX INFO().
+        Devuelve contexto del modelo semántico relevante para la pregunta,
+        consultando la colección RAG 'diccionario_datos' en ChromaDB.
+
+        Fallback: PBI_SCHEMA_HINT del .env si ChromaDB no tiene datos.
         """
-        if self._schema_cache:
-            return self._schema_cache
-
-        if self.schema_hint:
-            self._schema_cache = self.schema_hint
-            return self._schema_cache
-
-        # Auto-descubrimiento: tablas y medidas
+        # Intentar búsqueda RAG en el diccionario de datos
         try:
-            tables = self._discover_tables()
-            measures = self._discover_measures()
-
-            lines = []
-            if tables:
-                lines.append(f"TABLAS: {', '.join(tables)}")
-            if measures:
-                lines.append(f"MEDIDAS/KPIs disponibles:\n" + "\n".join(f"  - {m}" for m in measures))
-
-            self._schema_cache = "\n".join(lines) if lines else "Esquema no disponible."
+            from ..rag import collection_diccionario_datos
+            n_docs = collection_diccionario_datos.count()
+            if n_docs > 0:
+                # Recuperar entradas más relevantes para la pregunta
+                n_results = min(8, n_docs)
+                results = collection_diccionario_datos.query(
+                    query_texts=[pregunta],
+                    n_results=n_results,
+                )
+                docs = results.get("documents", [[]])[0]
+                if docs:
+                    contexto_rag = "\n\n---\n\n".join(docs)
+                    logger.info(
+                        f"RAG diccionario: {len(docs)} entradas recuperadas para: "
+                        f"{pregunta[:60]}..."
+                    )
+                    return contexto_rag
         except Exception as e:
-            logger.warning(f"Auto-descubrimiento de esquema falló: {e}")
-            self._schema_cache = (
-                "Esquema no disponible. Define PBI_SCHEMA_HINT en .env "
-                "con los nombres de tablas y medidas del modelo."
-            )
+            logger.warning(f"Error consultando RAG diccionario datos: {e}")
 
-        return self._schema_cache
+        # Fallback: hint estático del .env
+        if self.schema_hint:
+            return self.schema_hint
 
-    def _discover_tables(self) -> list:
-        # INFO.TABLES() requiere admin — no disponible con permisos delegados normales
-        # Devolvemos lista vacía; el esquema debe venir de PBI_SCHEMA_HINT
-        return []
-
-    def _discover_measures(self) -> list:
-        # INFO.MEASURES() requiere admin — no disponible con permisos delegados normales
-        return []
+        return "Esquema no disponible. Indexa el diccionario de datos o define PBI_SCHEMA_HINT en .env."
 
     def discover_columns(self, table_name: str) -> str:
         """
@@ -277,6 +271,34 @@ class PowerBIClient:
         import re as _re
         from ..llm_client import consultar_gpt
 
+        # ── Sandbox DAX directo ───────────────────────────────────────────
+        # Si el usuario escribe DAX crudo (EVALUATE / DEFINE), lo ejecutamos
+        # directamente sin pasar por el paso NL→DAX.
+        # Comandos: "@pbi EVALUATE ..." o "@pbi dax: EVALUATE ..."
+        pregunta_stripped = pregunta.strip()
+        # Limpiar prefijo "dax:" opcional
+        _dax_raw = _re.sub(r"^dax\s*:\s*", "", pregunta_stripped, flags=_re.IGNORECASE)
+        if _dax_raw.upper().startswith(("EVALUATE", "DEFINE")):
+            self._last_query_rows = []
+            raw_result = self.execute_dax(_dax_raw)
+            if "error" in raw_result:
+                return (
+                    f"⚠️ **Error ejecutando DAX:**\n```\n{raw_result['error']}\n```\n\n"
+                    f"*Consulta enviada:*\n```dax\n{_dax_raw}\n```"
+                )
+            rows = _extract_rows(raw_result)
+            self._last_query_rows = rows
+            tabla_md = _format_dax_result(raw_result)
+            n = len(rows)
+            return (
+                f"✅ **DAX ejecutado directamente** — {n} {'fila' if n == 1 else 'filas'}\n\n"
+                f"{tabla_md}\n\n"
+                f"---\n🔍 *DAX ejecutado:*\n```dax\n{_dax_raw}\n```"
+            )
+
+        # Resetear filas anteriores al comienzo de una nueva consulta
+        self._last_query_rows = []
+
         # ── Caché: devolver resultado previo si la pregunta es idéntica ──
         cache_key = pregunta.strip().lower()
         if cache_key in self._query_cache:
@@ -289,107 +311,44 @@ class PowerBIClient:
         if m:
             return self.discover_columns(m.group(1))
 
-        # @pbi schema → muestra el schema hint actual
+        # @pbi schema → muestra el diccionario indexado o el hint
         if pregunta.strip().lower() in ("schema", "esquema", "tablas", "tables"):
+            try:
+                from ..rag import collection_diccionario_datos
+                n = collection_diccionario_datos.count()
+                if n > 0:
+                    return (
+                        f"**Diccionario de datos indexado en RAG:** {n} entradas\n\n"
+                        f"Las entradas se recuperan automáticamente según tu pregunta.\n"
+                        f"Archivo fuente: `inputs/docs/diccionario_datos/diccionario_modelo_semantico.txt`"
+                    )
+            except Exception:
+                pass
             if self.schema_hint:
                 return f"**Schema configurado en PBI_SCHEMA_HINT:**\n\n{self.schema_hint}"
             return (
-                "No hay `PBI_SCHEMA_HINT` configurado.\n\n"
+                "No hay diccionario de datos ni `PBI_SCHEMA_HINT` configurado.\n\n"
                 "Usa `@pbi columnas <NombreTabla>` para ver las columnas de una tabla concreta.\n"
                 "Ejemplo: `@pbi columnas H_Convocatorio`"
             )
 
-        schema = self._get_schema_description()
+        schema = self._get_schema_for_question(pregunta)
+
+        # Fecha actual para que GPT no invente fechas
+        from datetime import datetime as _dt
+        fecha_hoy = _dt.now().strftime("%Y-%m-%d")
+        anio_actual = _dt.now().year
+        mes_actual = _dt.now().strftime("%Y-%m")
 
         # ── Contexto de negocio ──────────────────────────────────────────
-        BUSINESS_CONTEXT = """CONTEXTO DE NEGOCIO:
-Trabajas con un modelo comercial de venta de programas académicos (másteres, posgrados, formación continua) del Grupo Planeta.
+        # Reglas base compactas (siempre incluidas) + contexto dinámico del RAG
+        BUSINESS_CONTEXT = f"""CONTEXTO DE NEGOCIO:
+FECHA ACTUAL: {fecha_hoy} (año {anio_actual}, mes {mes_actual}). USA SIEMPRE ESTA FECHA como referencia para "hoy", "este mes", "esta semana", "este año". NUNCA uses fechas de tu entrenamiento.
+Modelo comercial de venta de programas académicos (másteres, posgrados, formación continua) del Grupo Planeta.
+Las medidas calculadas están en la tabla _MEDIDAS. SIEMPRE usar medidas de _MEDIDAS en vez de COUNTROWS directos, especialmente para H_CUPONES (las relaciones de fecha son INACTIVAS y las medidas activan USERELATIONSHIP internamente).
 
-LÓGICA DE NEGOCIO:
-- Los ASESORES COMERCIALES (ROL=AC en D_ESTRUCTURA) son los vendedores. Se organizan en EQUIPOS (columna EQUIPO de D_ESTRUCTURA) con un Jefe de Equipo (ROL=JE).
-- Un LEAD o CUPÓN es una oportunidad de venta (tabla H_CUPONES): alumno potencial asignado a un asesor.
-- Una MATRÍCULA es una venta cerrada (tabla H_Convocatorio). TIPOLOGIA_MATRICULA: ALTA=venta nueva, BAJA=cancelación, STOCK=en proceso.
-- MATRÍCULAS NETAS = ALTAS - BAJAS. Medida clave: [CON_MAT NETAS].
-- FACTURACION_NETA = importe real cobrado. PRECIO_CURSO = precio de catálogo.
-- PILAR agrupa familias de campañas, los más importantes son Web, Buscadores, Redes Sociales y PPVV. PROGRAMA_NORMALIZADO es el nombre del programa.
-- PAIS_NORMALIZADO = país del alumno (España, México, Colombia, Argentina...).
-- CONVOCATORIA = edición de la amtriculación (formato 2604 (Convocatoria de Abril 2026), 2610 (Convocatoria de octubre 2026)...). EJERCICIO = año fiscal (2024, 2025).
-- AÑO_MES = formato AAAA-MM (ej: 2025-03). AÑO_MES_SEM = semana comercial (ej: 2025-03-S1, 2025-03-S2...).
-- Tasa de conversión = matrículas / leads asignados. Medida: [CONV ASIGNADOS].
-
-TABLAS Y COLUMNAS EXACTAS:
-
-H_Convocatorio (matrículas): ID_REGISTRO, ID_OPORTUNIDAD, EJERCICIO, CONVOCATORIA, FECHA_PRODUCCION,
-  FECHA_INSCRIPCION, FECHA_ASIGNACION, FECHA_ENTREVISTA, FECHA_PRIMERA_CUOTA, FECHA_BAJA,
-  AÑO_MES, AÑO_MES_SEM, FK_Estructura_Comercial, MARCA, ASESOR_NORMALIZADO, CODIGO_EQUIPO_ACTUAL,
-  PAIS_NORMALIZADO, SIGLAS_PAIS, REGION, PROGRAMA_NORMALIZADO, ALUMNO_NOMBRE_COMPLETO, SEXO, EDAD,
-  TIPOLOGIA_ALUMNO, FACTURACION_NETA, IMPORTE_INSCRIPCION, PRECIO_CURSO, IMPORTE_PENDIENTE_PAGO,
-  NUMERO_CUOTAS, IMPORTE_DTO_COMERCIAL, IMPORTE_DTO_MATRICULACION, IMPORTE_DTO_PAGO_CONTADO,
-  COMISION_CONTADO, PCT_INSCRIPCION, RMA, RME, REA, TIPOLOGIA_MATRICULA[ALTA/BAJA/STOCK],
-  TIPOLOGIA_MATRICULA_REAL, STATUS, SEGUIMIENTO, FORMA_DE_PAGO, FORMA_PAGO_AGRUP[Contado/Otros],
-  MOTIVO_BAJA, PROMO_MODALIDAD, PILAR, SUBPILAR, COMBINACION, BAJA_PENDIENTE, ORIGEN_ETL.
-
-H_CUPONES (leads/oportunidades): ID_de_la_Oportunidad, FK_Fecha_Creacion, FK_Fecha_Asignacion,
-  FK_Estructura_Comercial_Asignacion, Nombre_Asesor_Normalizado, Codigo_Equipo_Detectado,
-  Programa_Interes_Normalizado, Programa_Ofrecido_Normalizado,
-  Estado[Abierto/Lograda/Perdida], Fase_de_canalizacion, STATUS_CUP,
-  Closure_Reason_NORM, Razon_para_el_estado, Pull_Push[PULL/PUSH],
-  Nombre_Cliente, Pais, Edad, Sexo_legal[Mujer/Hombre],
-  Numero_de_llamadas, Numero_de_emails, Fecha_de_creacion, Fecha_de_Asignacion,
-  Fecha_de_cierre_real, Fecha_Realizacion_Entrevista, ANO_MES_SEM, ANO_MES_SEM_ASIGNADO,
-  Pilar, Subpilar, isWon[True/False], Precio_Matricula, Modalidad, Promocion,
-  Fecha_de_la_Validacion_de_la_Documentacion.
-
-D_ESTRUCTURA (asesores y equipos): SK_Estructura, NOMBRE_CORTO, EQUIPO, JE,
-  CATEGORIA, ROL[AC/JE], ACTIVO, SEDE, ORIGEN, DV, AREA_EQUIPO,
-  EQUIPO_HISTORICO_AC, EQUIPO_HISTORICO_JE, IsCurrent[True/False], ValidFrom, ValidTo.
-
-D_PROGRAMAS (programas académicos): NOMBRE_CORTO_PROG, PROGRAMA, CATEGORIA,
-  CONVOCATORIA, IDIOMA, CAMPUS, AREA, CARGA_HORARIA, MODALIDAD, MARCA, SUBCATEGORIA.
-
-D_PAIS (países): ID_Pais, ISO2, ISO3, Pais, Continente, SubContinente,
-  Region, Mercado_MARCA, Agrupacion_Comercial, Region_Global.
-
-D_CAL_COM (calendario comercial): FECHA, AÑO, AÑO-MES, SEM, SEMESTRE, AÑO-MES-SEM,
-  SEMANA_N, MES_N, DIA_ON[1=laborable/0=festivo], SEMANA_ACTUAL[PASADO/ACTUAL/FUTURO], MES_ACTUAL,
-  SK_Fecha, AA_MM, DIA_SEMANA.
-
-RELACIONES CRÍTICAS — INACTIVAS (lee esto antes de generar cualquier DAX con fechas o estructura):
-Las siguientes relaciones son INACTIVAS en el modelo. No propagan filtros automáticamente.
-Las medidas del modelo ya las activan internamente con USERELATIONSHIP. Por eso SIEMPRE debes
-usar las medidas de la tabla _MEDIDAS en vez de hacer COUNTROWS directos sobre H_CUPONES con filtros de fecha.
-
-- D_CAL_COM[FECHA] → H_CUPONES[Fecha de Asignación]  ← INACTIVA (usada en CUP_CUPONES ASIGNADOS)
-- D_CAL_COM[FECHA] → H_CUPONES[Fecha de creación]    ← INACTIVA (usada en CUP_CUPONES ENTRADA)
-- D_CAL_COM[FECHA] → H_CUPONES[Fecha de cierre real]  ← INACTIVA
-- D_CAL_COM[FECHA] → H_CUPONES[Fecha Realizacion Entrevista] ← INACTIVA (usada en CUP_ENT)
-- D_ESTRUCTURA[CLAVE ESTRUCTURA] → H_CUPONES[CLAVE ESTRUCTURA] ← INACTIVA (relacion por fecha de asignacion)
-- D_ESTRUCTURA[CLAVE ESTRUCTURA] → H_CUPONES[CLAVE ESTRUCTURA 2] ← INACTIVA (Relacion por fecha de creacion )
-
-CÓMO FILTRAR POR PERIODO:
-- Semana comercial: filtrar D_CAL_COM[AÑO-MES-SEM] = "2026-03-S3"  (formato AAAA-MM-SN)
-- Mes: filtrar D_CAL_COM[AÑO-MES] = "2026-03"  (formato AAAA-MM)
-- Año: filtrar D_CAL_COM[AÑO] = 2026
-
-CÓMO FILTRAR POR EQUIPO:
-- En matrículas (H_Convocatorio): D_ESTRUCTURA[EQUIPO] propaga via relación activa → usar directamente
-- En cupones (H_CUPONES): D_ESTRUCTURA[EQUIPO] propaga via CLAVE ESTRUCTURA 2 (relación activa) → usar directamente
-
-PATRONES DAX CORRECTOS PARA PREGUNTAS FRECUENTES:
-1. Cupones asignados en una semana para un equipo:
-   EVALUATE ROW("Cupones Asignados", CALCULATE([CUP_CUPONES ASIGNADOS], D_CAL_COM[AÑO-MES-SEM] = "2026-03-S3", D_ESTRUCTURA[EQUIPO] = "EB1"))
-
-2. Matrículas netas en un mes para un equipo:
-   EVALUATE ROW("Mat Netas", CALCULATE([CON_MAT NETAS], D_CAL_COM[AÑO-MES] = "2026-03", D_ESTRUCTURA[EQUIPO] = "EB1"))
-
-3. Tasa de conversión por equipo en un mes:
-   EVALUATE SUMMARIZECOLUMNS(D_ESTRUCTURA[EQUIPO], KEEPFILTERS(D_CAL_COM[AÑO-MES] = "2026-03"), "Conversion", [CONV ASIGNADOS])
-
-4. Entrevistas realizadas en una semana:
-   EVALUATE ROW("Entrevistas", CALCULATE([CUP_ENT], D_CAL_COM[AÑO-MES-SEM] = "2026-03-S3"))
-
-5. Cupones en cartera activa por equipo:
-   EVALUATE SUMMARIZECOLUMNS(D_ESTRUCTURA[EQUIPO], "Cartera Activa", [CUP_CARTERA ACTIVA C.A.])"""
+DICCIONARIO DE DATOS (medidas, tablas, relaciones y patrones DAX relevantes para esta pregunta):
+{schema}"""
 
         # ── Paso 1: NL → DAX ────────────────────────────────────────────
         prompt_nl_to_dax = f"""Eres un experto en DAX y modelos semánticos de Power BI.
@@ -488,9 +447,13 @@ Corrige la consulta DAX para resolver el error. Devuelve SOLO la consulta DAX co
 
         tabla_md = _format_dax_result(raw_result)
         rows = _extract_rows(raw_result)
+        self._last_query_rows = rows  # expuesto para generación de gráficos en app.py
 
         # ── Caché de consultas (punto 3) ─────────────────────────────────
         self._query_cache[pregunta.strip().lower()] = tabla_md
+
+        # Bloque DAX para mostrar siempre al final (transparencia)
+        dax_detalle = f"\n\n---\n🔍 *DAX ejecutado:*\n```dax\n{dax_query}\n```"
 
         # ── Paso 3: Interpretar resultado ────────────────────────────────
         # Optimización (punto 1): si el resultado es un único valor numérico
@@ -508,7 +471,7 @@ Corrige la consulta DAX para resolver el error. Devuelve SOLO la consulta DAX co
                 val_fmt = f"{val:,.0f}" if isinstance(val, int) or val == int(val) else f"{val:,.2f}"
             else:
                 val_fmt = str(val)
-            return f"**{col}:** {val_fmt}"
+            return f"**{col}:** {val_fmt}{dax_detalle}"
 
         prompt_interpreta = """Eres un analista de datos que presenta resultados de Power BI de forma clara.
 Responde la pregunta original del usuario en español, interpretando los datos de la tabla.
@@ -524,9 +487,10 @@ DATOS OBTENIDOS DEL MODELO SEMÁNTICO:
 
 Responde la pregunta interpretando estos datos:"""
 
-        return consultar_gpt(
+        interpretacion = consultar_gpt(
             prompt_interpreta, prompt_datos, "pbi_interpret_result", force_json=False
         )
+        return f"{interpretacion}{dax_detalle}"
 
 
 # ------------------------------------------------------------------
