@@ -984,7 +984,10 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
     def _consultar_powerbi(self, pregunta: str) -> str:
         """
         Consulta el modelo semántico de Power BI para responder KPIs y métricas.
-        Usa PowerBIClient.query_nl() que orquesta el pipeline NL→DAX→resultado→NL.
+        Usa un agente Gemini (pbi_agent) que decide iterativamente qué herramientas
+        llamar (consultar diccionario, ejecutar DAX, reintentar si falla).
+
+        Los comandos DAX directos (@pbi EVALUATE ...) se ejecutan sin pasar por el agente.
         """
         try:
             from .powerbi_client import get_powerbi_client
@@ -1015,10 +1018,23 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
                 "y sigue las instrucciones para autenticarte con tu cuenta de Planeta."
             )
 
+        # Sandbox DAX directo: ejecutar sin pasar por el agente
+        import re as _re
+        pregunta_stripped = pregunta.strip()
+        _dax_raw = _re.sub(r"^dax\s*:\s*", "", pregunta_stripped, flags=_re.IGNORECASE)
+        if _dax_raw.upper().startswith(("EVALUATE", "DEFINE")):
+            try:
+                return client.query_nl(pregunta)
+            except Exception as e:
+                logger.error(f"Error en sandbox DAX: {e}")
+                return f"Error ejecutando DAX: {e}"
+
+        # Consulta en lenguaje natural → agente Gemini
         try:
-            return client.query_nl(pregunta)
+            from .pbi_agent import responder as agente_responder
+            return agente_responder(pregunta, client)
         except Exception as e:
-            logger.error(f"Error consultando Power BI: {e}")
+            logger.error(f"Error en agente PBI: {e}")
             return f"Error al consultar el modelo semántico de Power BI: {e}"
 
     # ------------------------------------------------------------------
