@@ -44,13 +44,34 @@ class CierreAgent(BaseEvaluatorAgent):
         # Extraer final de la conversación
         final_conversacion = transcripcion[-self.longitud_analisis:]
 
-        # Detectar si la conversación terminó abruptamente (off-record)
+        # Detectar si la grabación cortó antes del cierre (problema técnico)
         if self._detectar_fin_abrupto(final_conversacion):
             return self._crear_resultado_off_record()
 
+        # Detectar posible desconexión del lead — se pasa como SEÑAL al LLM,
+        # no como decisión final. El LLM decide si fue real/definitiva o parcial.
+        indicio_desconexion = self._detectar_desconexion_lead(final_conversacion)
+
         try:
-            resultado_raw = self._evaluar_con_llm(final_conversacion, transcripcion, contexto_manual, contexto_usuario)
+            resultado_raw = self._evaluar_con_llm(
+                final_conversacion, transcripcion, contexto_manual, contexto_usuario,
+                indicio_desconexion=indicio_desconexion
+            )
+            # Si el LLM confirma que la desconexión fue definitiva → resultado especial
+            if resultado_raw.get("desconexion_definitiva") is True:
+                print(f"   ℹ️ LLM confirmó desconexión definitiva del lead — evaluación no aplicable")
+                return self._crear_resultado_desconexion()
+
             confianza = self._calcular_confianza(resultado_raw)
+
+            # Tope universal: 3+ fallos críticos = MALO
+            contador_fallos = resultado_raw.get("contador_fallos_criticos", 0)
+            cal_tmp, raz_tmp = self._aplicar_tope_fallos_criticos(
+                resultado_raw.get("calificacion"), contador_fallos, resultado_raw.get("razonamiento", "")
+            )
+            if cal_tmp != resultado_raw.get("calificacion"):
+                resultado_raw["calificacion"] = cal_tmp
+                resultado_raw["razonamiento"] = raz_tmp
 
             # Validar que haya próximo paso concreto
             proximo_paso = resultado_raw.get("proximo_paso_concreto", "")
@@ -89,7 +110,7 @@ class CierreAgent(BaseEvaluatorAgent):
             print(f"   ❌ Error en evaluación de Cierre: {e}")
             return self._create_fallback_result(str(e))
     
-    def _evaluar_con_llm(self, final: str, transcripcion_completa: str, manual: str, contexto_usuario: str = None) -> dict:
+    def _evaluar_con_llm(self, final: str, transcripcion_completa: str, manual: str, contexto_usuario: str = None, indicio_desconexion: bool = False) -> dict:
         """Llama al LLM con prompt especializado"""
 
         # Enriquecer contexto con ejemplos de buenas prácticas
@@ -112,6 +133,30 @@ El speech NO es una checklist de frases exactas. Es la CARRETERA: define los lí
 Un asesor que cierra con sus propias palabras pero logra compromiso real → BUENO.
 Lo que evalúas es si se sale de los límites (cierre pasivo, sin próximo paso, sin validar)
 o si conduce bien dentro de ellos.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ DETECCIÓN PRIORITARIA: ¿SE DESCONECTÓ EL LEAD?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{f"""⚠️ SEÑAL AUTOMÁTICA: el sistema detectó un posible patrón de desconexión del lead
+en el tramo final de la transcripción (asesor hablando sin respuesta del lead,
+o frases como '¿Hola?', '¿Me escuchas?'). Lee el final con atención y determina:
+
+¿La desconexión fue DEFINITIVA (el lead nunca volvió a responder)?
+  → SÍ: "desconexion_definitiva": true — la evaluación no es aplicable
+  → NO (el lead volvió a conectarse y hubo cierre real): "desconexion_definitiva": false
+     y evalúa el cierre normalmente
+
+Si marcas desconexion_definitiva=true, el resto de los campos pueden estar vacíos
+o con valores neutros — solo importa el razonamiento explicando la situación.
+""" if indicio_desconexion else """Si en la transcripción encuentras señales claras de que el lead se desconectó
+definitivamente (el asesor dice "¿Hola?", "¿Me escuchas?" sin respuesta, varias
+intervenciones del asesor sin que el lead conteste), marca "desconexion_definitiva": true
+y NO evalúes el cierre como un fallo del asesor.
+Si no hay desconexión o el lead volvió a conectarse, marca "desconexion_definitiva": false.
+"""}
+⚠️ DIFERENCIA IMPORTANTE:
+- Desconexión del lead = lead cuelga o pierde señal → NO es fallo del asesor
+- Cierre pasivo = lead sí está pero el asesor no propone nada → SÍ es fallo del asesor
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CIRCUNSTANCIAS ATÍPICAS DE LA CONVERSACIÓN
@@ -280,8 +325,9 @@ EVIDENCIA REQUERIDA
 
 FORMATO JSON OBLIGATORIO:
 {{
+  "desconexion_definitiva": false,
   "contador_fallos_criticos": 0,
-  "calificacion": "MALO" | "MEJORABLE" | "BUENO",
+  "calificacion": "MALO" | "MEJORABLE" | "BUENO" | null,
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
   "evidencia_principal": "[ASESOR]: Frase del cierre con próximo paso... (COPY-PASTE LITERAL)",
   "evidencias_extra": [
@@ -357,6 +403,7 @@ de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
   5. ¿Usó alguna técnica de cierre (doble alternativa, asuntivo, resumen)?           → SÍ / NO
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
 
 🚦 TOPE AUTOMÁTICO — aplica ANTES de decidir la calificación final:
    ¿El punto 2 (fecha Y hora) es NO?  → calificación máxima: MEJORABLE. No puede ser BUENO.
@@ -399,29 +446,69 @@ Evalúa el cierre y próximos pasos en JSON.
         return self._extract_json_safe(resp)
     
     def _detectar_fin_abrupto(self, final: str) -> bool:
-        """Detecta si la grabación cortó antes del cierre"""
+        """Detecta si la grabación cortó antes del cierre (problema técnico)"""
         final_lower = final.lower()
-        
+
         indicadores = [
             "continuará",
             "seguimos hablando",
             "ahora tengo que",
             "me está entrando otra llamada"
         ]
-        
+
         for indicador in indicadores:
             if indicador in final_lower:
                 return True
-        
+
         # Si el final tiene menos de 200 chars y no hay despedida
         if len(final) < 200:
             despedidas = ["gracias", "hasta", "adiós", "perfecto", "genial"]
             tiene_despedida = any(d in final_lower for d in despedidas)
             if not tiene_despedida:
                 return True
-        
+
         return False
-    
+
+    def _detectar_desconexion_lead(self, final: str) -> bool:
+        """
+        Detecta si el lead se desconectó durante la llamada (no es un corte de grabación,
+        es el lead que colgó o perdió la señal).
+
+        Señales típicas: la asesora llama "¿Hola?", "¿Me escuchas?" al vacío,
+        o el lead deja de responder tras un momento crítico (precio, objeción).
+        """
+        final_lower = final.lower()
+
+        # Patrones donde el asesor habla pero nadie responde
+        patrones_asesor_solo = [
+            "¿hola?", "hola?",
+            "¿me escuchas?", "me escuchas?",
+            "¿sigues ahí?", "sigues ahí?",
+            "¿estás ahí?", "estás ahí?",
+            "parece que se ha cortado",
+            "creo que se cortó",
+            "se ha ido",
+            "se cortó la llamada",
+            "no me escucha",
+            "se ha caído",
+        ]
+
+        for patron in patrones_asesor_solo:
+            if patron in final_lower:
+                return True
+
+        # Patrón: hay intervenciones del asesor pero el lead deja de aparecer
+        # en el último tramo (últimas ~1500 chars)
+        ultimo_tramo = final[-1500:] if len(final) > 1500 else final
+        lineas_asesor = [l for l in ultimo_tramo.split("\n") if "[ASESOR]" in l.upper()]
+        lineas_lead = [l for l in ultimo_tramo.split("\n") if "[LEAD]" in l.upper() or "[CLIENTE]" in l.upper()]
+
+        # Si hay 3+ intervenciones del asesor y 0 del lead en el último tramo → desconexión probable
+        if len(lineas_asesor) >= 3 and len(lineas_lead) == 0:
+            return True
+
+        return False
+
     def _crear_resultado_off_record(self) -> EvaluationResult:
         """Resultado para casos donde la grabación cortó antes del cierre"""
         return EvaluationResult(
@@ -436,4 +523,29 @@ Evalúa el cierre y próximos pasos en JSON.
                 "antes del cierre formal. No se puede evaluar este bloque."
             ),
             recomendacion_accionable="Verificar que la grabación capture la conversación completa hasta la despedida"
+        )
+
+    def _crear_resultado_desconexion(self) -> EvaluationResult:
+        """
+        Resultado para casos donde el lead se desconectó durante la llamada.
+        No se penaliza al asesor: la desconexión no es un fallo de cierre.
+        """
+        return EvaluationResult(
+            bloque=self.nombre_bloque,
+            calificacion=None,
+            observabilidad="NO_OBSERVABLE_DESCONEXION",
+            confianza=1.0,
+            evidencia_principal="El lead se desconectó durante la llamada (detectado por patrones de transcripción)",
+            evidencias_extra=[],
+            razonamiento=(
+                "La transcripción indica que el lead se desconectó o perdió la señal durante "
+                "la llamada — el asesor intentó retomar el contacto pero no hubo respuesta. "
+                "Esta situación no es evaluable como cierre: la conversación terminó por causas "
+                "ajenas al asesor. No se asigna calificación."
+            ),
+            recomendacion_accionable=(
+                "Si el lead se desconectó tras recibir el precio u otro momento de tensión, "
+                "es recomendable hacer un seguimiento por escrito (WhatsApp o email) para "
+                "retomar la conversación desde ese punto."
+            )
         )

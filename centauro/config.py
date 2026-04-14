@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     MODEL_NAME: str = "gpt-4o-mini"
     MODELO_EMBEDDING: str = "text-embedding-3-small"
 
+    # Configuración Supabase
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+
     class Config:
         env_file = ".env"
         extra = "ignore"
@@ -167,6 +171,7 @@ class CentauroConfig:
     COLLECTION_EVALUACIONES = "evaluaciones_historicas"
     COLLECTION_DOSSIERS = "dossiers_programas"
     COLLECTION_COACHING = "coaching_ventas"  # NUEVO: Libros y técnicas de ventas
+    COLLECTION_DICCIONARIO_DATOS = "diccionario_datos"  # Diccionario del modelo semántico PBI
 
     # ==================== COACHING: LIBROS DE VENTAS ====================
 

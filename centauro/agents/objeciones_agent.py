@@ -28,6 +28,15 @@ class ObjecionesAgent(BaseEvaluatorAgent):
             resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario)
             confianza = self._calcular_confianza(resultado_raw)
             
+            # Tope universal: 3+ fallos críticos = MALO
+            contador_fallos = resultado_raw.get("contador_fallos_criticos", 0)
+            cal_tmp, raz_tmp = self._aplicar_tope_fallos_criticos(
+                resultado_raw.get("calificacion"), contador_fallos, resultado_raw.get("razonamiento", "")
+            )
+            if cal_tmp != resultado_raw.get("calificacion"):
+                resultado_raw["calificacion"] = cal_tmp
+                resultado_raw["razonamiento"] = raz_tmp
+
             # Validar que se detectaron objeciones
             objeciones_detectadas = resultado_raw.get("objeciones_identificadas", [])
             
@@ -296,6 +305,7 @@ NEGATIVA (= fallo):
   4. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
 (Si observabilidad es NO_OBSERVABLE, pon contador_fallos_criticos = 0.)
 NOTA: El compromiso concreto y el siguiente paso se evalúan en el bloque de Cierre, no aquí.
 

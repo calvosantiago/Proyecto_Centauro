@@ -57,6 +57,29 @@ class InvestigacionAgent(BaseEvaluatorAgent):
             # Hallazgos estructurados del lead
             hallazgos = resultado_raw.get("hallazgos_del_lead", {})
 
+            # ── Tope universal: 3+ fallos críticos = MALO ────────────────────────
+            contador_fallos = resultado_raw.get("contador_fallos_criticos", 0)
+            cal_tmp, raz_tmp = self._aplicar_tope_fallos_criticos(
+                resultado_raw.get("calificacion"), contador_fallos, resultado_raw.get("razonamiento", "")
+            )
+            if cal_tmp != resultado_raw.get("calificacion"):
+                resultado_raw["calificacion"] = cal_tmp
+                resultado_raw["razonamiento"] = raz_tmp
+            # ─────────────────────────────────────────────────────────────────────
+
+            # ── VALIDACIÓN DURA: aspectos clave no investigados ──────────────────
+            # Si perfil financiero o competidores no se exploraron, la calificación
+            # no puede ser BUENO (falta información esencial para la venta consultiva).
+            # Esta regla se aplica en Python y no puede ser sobreescrita por el LLM.
+            calificacion_llm = resultado_raw.get("calificacion")
+            calificacion_final, ajuste_razonamiento = self._aplicar_topes_aspectos_clave(
+                calificacion_llm, hallazgos, resultado_raw.get("razonamiento", "")
+            )
+            if calificacion_final != calificacion_llm:
+                resultado_raw["calificacion"] = calificacion_final
+                resultado_raw["razonamiento"] = ajuste_razonamiento
+            # ─────────────────────────────────────────────────────────────────────
+
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
             return EvaluationResult(
@@ -98,7 +121,44 @@ los hallazgos clave que el asesor obtuvo del lead.
 
 TONO DE REDACCIÓN: Escribe SIEMPRE en TERCERA PERSONA al referirte al asesor ("el asesor hizo...", "el asesor podría..."). NUNCA uses segunda persona ("hiciste...", "podrías...", "tu objetivo...").
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚫 LÍMITES DUROS — LEE ESTO ANTES DE ANALIZAR NADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Estas reglas se aplican SIEMPRE, independientemente de lo bien que haya ido el resto
+de la investigación. No hay excepciones.
+
+PERFIL FINANCIERO y COMPETIDORES son los dos aspectos más críticos de la investigación
+consultiva. Sin ellos, el asesor no tiene la información mínima para personalizar
+ni la propuesta económica ni el posicionamiento frente a la competencia.
+
+🔴 Si perfil_financiero = "No explorado" Y competidores = "No explorado"
+   → La calificación MÁXIMA es MALO. No puede ser MEJORABLE ni BUENO.
+
+🟡 Si perfil_financiero = "No explorado" O competidores = "No explorado" (uno de los dos)
+   → La calificación MÁXIMA es MEJORABLE. No puede ser BUENO.
+
+🟢 Solo puede ser BUENO si AMBOS aspectos fueron explorados (aunque sea brevemente).
+
+Escribe en el razonamiento qué aspecto faltó y por qué eso limita la calificación.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CHECKLIST PREVIO — RESPONDE ANTES DE LEER LA TRANSCRIPCIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ten presente estas 5 preguntas mientras lees. Al terminar, respóndelas SÍ/NO y
+usa ese conteo como "contador_fallos_criticos" en el JSON:
+
+  1. ¿Exploró el Factor de Compra (dolor/necesidad real, no solo "quiero crecer")?
+  2. ¿Exploró el perfil financiero (quién paga, cómo)? ← CRÍTICO (ver límites duros arriba)
+  3. ¿Hizo preguntas de profundización (repreguntó, no se quedó en la superficie)?
+  4. ¿El lead tuvo espacio real para hablar y abrirse?
+  5. ¿Obtuvo información aprovechable para personalizar la propuesta después?
+
+Si la mayoría tienen respuesta NO, la calificación debe ser MALO. No detectes múltiples
+fallos graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {manual_enriquecido}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -108,7 +168,8 @@ El speech NO es una checklist de frases que el asesor debe decir palabra por pal
 Es la CARRETERA: define los límites de lo que se puede y no se puede decir/hacer.
 El asesor puede moverse con libertad dentro de esa carretera; lo que evalúas es
 si se sale de los límites (mala investigación) o si conduce bien dentro de ellos.
-Un asesor que usa sus propias palabras pero logra el objetivo de la fase → BUENO.
+Un asesor que usa sus propias palabras pero logra el objetivo de la fase → BUENO
+(siempre que cumpla los límites duros de arriba).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 QUÉ DEBES EXTRAER DE LA INVESTIGACIÓN
@@ -128,9 +189,13 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
    Este perfil permite al asesor abordar la parte económica de forma personalizada más adelante.
    Preguntas típicas: "¿La formación la asumes tú o tienes apoyo de empresa?" / "¿Es una
    inversión que harías tú mismo o tienes respaldo familiar?"
+   ⚠️ "No explorado" SOLO si no hubo absolutamente ninguna referencia a quién paga ni cómo.
 
 3. COMPETIDORES EXPLORADOS: ¿Está comparando con otras instituciones o programas?
    ¿Qué otras opciones está evaluando?
+   ⚠️ Cuenta como explorado si: (a) el lead lo mencionó espontáneamente, O (b) el asesor
+   preguntó y el lead respondió nombrando instituciones, países o programas.
+   "No explorado" SOLO si no hubo ninguna referencia en toda la llamada.
 
 4. MOTIVACIONES PROFUNDAS: ¿Por qué ahora? ¿Qué cambió en su situación?
    ¿Qué espera conseguir con el máster?
@@ -164,6 +229,8 @@ del CONJUNTO, no el mejor instante aislado.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CRITERIOS DE CALIFICACIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Recuerda: los límites duros del inicio condicionan estas definiciones. BUENO solo
+es posible si perfil financiero Y competidores fueron explorados.
 
 🔴 MALO — el asesor no investiga o la investigación es tan superficial que no aporta nada útil:
    - Va directo a presentar sin explorar la situación del lead
@@ -183,11 +250,11 @@ CRITERIOS DE CALIFICACIÓN
    EJEMPLO: "[ASESOR]: ¿Qué te motivó? [LEAD]: Quiero crecer. [ASESOR]: Perfecto, te cuento..."
 
 🟢 BUENO — el asesor investiga activamente y obtiene información útil que podría usar:
+   - REQUISITO PREVIO: perfil financiero Y competidores explorados (aunque sea brevemente)
    - Identifica el Factor de Compra o al menos las motivaciones reales del lead
    - Repregunta o profundiza en al menos un punto relevante
    - El lead comparte información personal, profesional o emocional de valor
    - La apertura genera confianza y el lead habla con comodidad
-   - No es necesario cubrir TODOS los puntos: basta con que la investigación sea real y aprovechable
    - Si el asesor detecta que el lead viene por un programa/formato diferente y lo reconduce
      exitosamente, valóralo como investigación consultiva de alta calidad → contribuye a BUENO
    - Si el asesor recupera el Factor de Compra más adelante para personalizar la propuesta
@@ -248,8 +315,8 @@ FORMATO JSON OBLIGATORIO
   ],
   "hallazgos_del_lead": {{
     "factor_de_compra": "Descripción del dolor/necesidad real del lead. 'No detectado' si no se exploró.",
-    "perfil_financiero": "Perfil financiero del lead: ¿quién paga y cómo? NO hace falta que se haya hablado de importes ni de precio. Basta con que el lead haya indicado su situación financiera de cualquier forma. Ejemplos que SIEMPRE cuentan como 'explorado': 'lo asumo por cuenta propia', 'lo pago yo mismo', 'mi empresa me lo cubre', 'mis padres me ayudan', 'estoy buscando financiación'. Escribe el perfil detectado. 'No explorado' SOLO si no hubo absolutamente ninguna referencia a quién paga ni cómo en toda la llamada.",
-    "competidores": "Otras opciones que el lead mencionó estar evaluando. SIEMPRE cuenta como explorado si: (a) el lead lo mencionó espontáneamente, O (b) el asesor preguntó y el lead respondió nombrando instituciones o países donde ha consultado. Escribe las instituciones o referencias mencionadas. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
+    "perfil_financiero": "Perfil financiero del lead: ¿quién paga y cómo? Escribe el perfil detectado. 'No explorado' SOLO si no hubo absolutamente ninguna referencia a quién paga ni cómo en toda la llamada.",
+    "competidores": "Otras opciones que el lead mencionó estar evaluando. Escribe las instituciones o referencias mencionadas. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
     "reconduccion": "Si el asesor detectó que el lead venía interesado en un programa/formato diferente y lo recondujo exitosamente, describe cómo lo gestionó. 'No aplica' si no ocurrió.",
     "motivacion_principal": "Por qué quiere el máster y por qué ahora.",
     "fortalezas_debilidades": "Lo que el lead dijo sobre sí mismo. 'No explorado' si no se preguntó.",
@@ -292,55 +359,22 @@ REGLAS CRÍTICAS:
 - Evalúa TANTO la apertura COMO la investigación
 - NO penalices si el lead es cerrado, penaliza si el asesor no intentó abrir
 - Sé técnico, no motivacional
-- COMPETIDORES: Marca como "explorado" si (a) el lead mencionó espontáneamente otras
-  instituciones, O (b) el asesor preguntó y el lead respondió nombrando instituciones,
-  países o programas que consultó. Si el asesor preguntó y el lead respondió → SIEMPRE explorado.
-- PERFIL FINANCIERO: Marca como "explorado" si en cualquier punto de la conversación
-  el lead indicó quién paga o cómo. Ejemplos que SIEMPRE cuentan: "lo asumo por cuenta
-  propia", "lo pago yo", "mi empresa me lo cubre", "mis padres me ayudan", "busco financiación".
-  NO se necesita que se haya hablado de importes o precios concretos.
-- NEVER marques 'No explorado' si hay cualquier indicio de que el tema se tocó, aunque
-  haya sido brevemente o en cualquier momento de la conversación
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📌 CALIBRA con los ejemplos del CONTEXTO:
 Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
 del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
 Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
-palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
+palabras o no cubra cada punto al pie de la letra), está en zona BUENO (siempre que
+cumpla los límites duros del inicio).
 ⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
-completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
-el estándar para el nivel general, no para un fragmento aislado.
-Tenlo presente al interpretar los fallos del checklist.
+completo. Evalúa el CONJUNTO de la fase, no el mejor instante.
 
-DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
-de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
-
-  1. ¿Exploró el Factor de Compra (dolor/necesidad real, no solo "quiero crecer")? → SÍ / NO
-  2. ¿Exploró el perfil financiero (quién paga, cómo)?                            → SÍ / NO
-  3. ¿Hizo preguntas de profundización (repreguntó, no se quedó en la superficie)?  → SÍ / NO
-  4. ¿El lead tuvo espacio real para hablar y abrirse?                             → SÍ / NO
-  5. ¿Obtuvo información aprovechable para personalizar la propuesta después?       → SÍ / NO
-
-CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
-
-🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
-   Analiza el peso real de cada fallo. Los 5 criterios son esenciales para que la
-   investigación sea útil. Sin Factor de Compra, sin perfil financiero del lead, sin
-   preguntas de profundización, sin espacio real para que el lead se abra y sin
-   información aprovechable, la investigación fue superficial. Si la mayoría fallaron,
-   la calificación debe ser MALO. No por un umbral mecánico, sino porque sin información
-   real del lead, nada de lo que sigue puede personalizarse. No detectes múltiples fallos
-   graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
-
-⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
+⚠️ REGLAS FINALES PARA CALIFICAR:
 - MALO: la investigación no aportó nada útil: el asesor no investigó, fue directo a presentar, o hizo preguntas de puro trámite sin ningún valor real para entender al lead.
 - MEJORABLE: hubo intento de investigación pero el resultado es escaso o demasiado vago para personalizar la propuesta. El asesor preguntó pero no logró profundidad ni información realmente aprovechable.
-- BUENO: la investigación fue genuinamente útil. El asesor tiene información concreta del lead que puede usar para personalizar. No es necesario cubrir todos los puntos del checklist: si el resultado es aprovechable → es BUENO.
-- Si dudas entre BUENO y MEJORABLE: ¿el asesor sabe algo útil del lead después de esta fase? Si sí → BUENO.
-- Si dudas entre MEJORABLE y BUENO y el asesor usó el Factor de Compra más adelante → inclínate por BUENO.
+- BUENO: la investigación fue genuinamente útil Y se exploraron perfil financiero y competidores. No es necesario cubrir todos los demás puntos: si el resultado es aprovechable → es BUENO.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor sabe algo útil del lead después de esta fase? Si sí, y se cumplieron los límites duros → BUENO.
+- Si dudas entre MEJORABLE y BUENO y el asesor usó el Factor de Compra más adelante → inclínate por BUENO (si se cumplieron los límites duros).
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien, solo lo que falta mejorar.
 """
 
@@ -363,3 +397,71 @@ Genera la evaluación en JSON.
 
         resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_investigacion")
         return self._extract_json_safe(resp)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # VALIDACIÓN DURA: topes por aspectos clave no investigados
+    # ──────────────────────────────────────────────────────────────────────────
+    def _aplicar_topes_aspectos_clave(
+        self,
+        calificacion: str,
+        hallazgos: dict,
+        razonamiento_original: str,
+    ) -> tuple[str, str]:
+        """
+        Aplica topes de calificación cuando aspectos clave no fueron investigados.
+
+        Reglas:
+        - perfil_financiero Y competidores "No explorado" → MALO como máximo
+        - perfil_financiero O competidores "No explorado" → MEJORABLE como máximo
+
+        Devuelve (calificacion_final, razonamiento_actualizado).
+        """
+        def es_no_explorado(valor: str) -> bool:
+            return "no explorado" in (valor or "").lower()
+
+        perfil = hallazgos.get("perfil_financiero", "")
+        competidores = hallazgos.get("competidores", "")
+
+        falta_perfil = es_no_explorado(perfil)
+        falta_competidores = es_no_explorado(competidores)
+        num_faltantes = sum([falta_perfil, falta_competidores])
+
+        if num_faltantes == 0:
+            return calificacion, razonamiento_original
+
+        # Construir nota de ajuste
+        aspectos_faltantes = []
+        if falta_perfil:
+            aspectos_faltantes.append("perfil financiero")
+        if falta_competidores:
+            aspectos_faltantes.append("competidores")
+        faltantes_str = " y ".join(aspectos_faltantes)
+
+        if num_faltantes >= 2:
+            # Ambos aspectos críticos ausentes → máximo MALO
+            tope = "MALO"
+            nota = (
+                f"[Ajuste automático] Calificación bajada de {calificacion} a MALO: "
+                f"no se exploraron {faltantes_str}, ambos aspectos esenciales para una "
+                f"investigación consultiva completa."
+            )
+        else:
+            # Un aspecto crítico ausente → máximo MEJORABLE
+            tope = "MEJORABLE"
+            nota = (
+                f"[Ajuste automático] Calificación bajada de {calificacion} a MEJORABLE: "
+                f"no se exploró el {faltantes_str}, aspecto clave para completar la "
+                f"investigación. Sin esta información el asesor no puede personalizar "
+                f"adecuadamente la propuesta."
+            )
+
+        # Escala de valores para comparar
+        orden = {"MALO": 0, "MEJORABLE": 1, "BUENO": 2}
+        calificacion_actual = orden.get(calificacion, 1)
+        tope_valor = orden.get(tope, 0)
+
+        if calificacion_actual > tope_valor:
+            nuevo_razonamiento = f"{razonamiento_original}\n\n{nota}"
+            return tope, nuevo_razonamiento
+
+        return calificacion, razonamiento_original

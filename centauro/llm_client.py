@@ -85,6 +85,7 @@ CSV_COLUMNS = [
     "Timestamp",
     "Fecha",
     "Hora",
+    "Usuario",
     "Archivo/Referencia",
     "Operacion",
     "Endpoint",
@@ -102,6 +103,19 @@ CSV_COLUMNS = [
     "Coste Total (USD)",
     "Request ID",
 ]
+
+# Usuario activo en la sesión actual (se actualiza desde app.py al inicio de cada sesión)
+_usuario_activo: str = "sistema"
+
+
+def set_usuario_activo(username: str) -> None:
+    """Registra el usuario autenticado activo para incluirlo en los logs de gasto."""
+    global _usuario_activo
+    _usuario_activo = username or "sistema"
+
+
+def get_usuario_activo() -> str:
+    return _usuario_activo
 
 
 def _control_gastos_path() -> Path:
@@ -232,6 +246,7 @@ def registrar_gasto_chat(
         "Timestamp": now.isoformat(timespec="seconds"),
         "Fecha": now.strftime("%Y-%m-%d"),
         "Hora": now.strftime("%H:%M:%S"),
+        "Usuario": _usuario_activo,
         "Archivo/Referencia": referencia,
         "Operacion": "chat_completion",
         "Endpoint": "v1/chat/completions",
@@ -273,6 +288,7 @@ def registrar_gasto_embedding(
         "Timestamp": now.isoformat(timespec="seconds"),
         "Fecha": now.strftime("%Y-%m-%d"),
         "Hora": now.strftime("%H:%M:%S"),
+        "Usuario": _usuario_activo,
         "Archivo/Referencia": referencia,
         "Operacion": "embedding",
         "Endpoint": "v1/embeddings",

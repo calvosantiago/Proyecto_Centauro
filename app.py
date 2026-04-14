@@ -11,7 +11,7 @@ import chainlit as cl
 import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parent / ".env")
+load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 from centauro.core import CentauroOrchestrator
 from centauro.core.chat_handler import ChatHandler
 from centauro.core.memoria import memory_manager
@@ -19,7 +19,9 @@ from centauro.rag import indexar_si_necesario
 from centauro.privacy import redact_pii
 from centauro.reports import generar_pdf
 from centauro.config import settings
+from centauro.utils.validaciones import extraer_opportunity_id
 from centauro.auth import autenticar
+from centauro.llm_client import set_usuario_activo
 import json
 # Importar funciones de lectura desde main.py (raíz del proyecto)
 from main import leer_word, limpiar_formato_vtt
@@ -58,13 +60,14 @@ ASSEMBLYAI_COST_PER_SECOND = 0.0002  # $0.012/min = $0.72/hora (transcripción $
 def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
     """Registra el coste de una transcripción AssemblyAI en control_gastos.csv."""
     import datetime
-    from centauro.llm_client import _append_cost_row
+    from centauro.llm_client import _append_cost_row, get_usuario_activo
     coste = duracion_seg * ASSEMBLYAI_COST_PER_SECOND
     now = datetime.datetime.now()
     row = {
         "Timestamp": now.isoformat(timespec="seconds"),
         "Fecha": now.strftime("%Y-%m-%d"),
         "Hora": now.strftime("%H:%M:%S"),
+        "Usuario": get_usuario_activo(),
         "Archivo/Referencia": referencia,
         "Operacion": "transcripcion_assemblyai",
         "Endpoint": "assemblyai/v2/transcript",
@@ -227,6 +230,8 @@ async def start():
     app_user = cl.context.session.user
     nombre_del_login = None
     if app_user:
+        # Registrar usuario activo para que aparezca en control_gastos.csv
+        set_usuario_activo(app_user.identifier)
         rol = app_user.metadata.get("rol", "asesor")
         nombre_del_login = app_user.metadata.get("nombre_completo")
 
@@ -258,6 +263,7 @@ Ahora puedes **preguntar directamente** a Centauro:
 **Ejemplos de preguntas:**
 - *"¿Cómo debería hacer una buena apertura?"*
 - *"Muéstrame ejemplos de cierre exitoso"*
+- *"@pbi Top 5 programas matriculados del área A"*
 **Solo escribe tu pregunta abajo** 👇 y presiona Enter.
 ---
 ## 📤 **Modo Evaluación de Llamadas**
@@ -383,14 +389,65 @@ async def main(message: cl.Message):
                             "Adjunta primero un archivo de audio o texto para evaluarlo."
                 ).send()
             return
-        # ── Procesar pregunta con RAG ────────────────────────────────────────
-        await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
+        # ── Procesar pregunta con RAG / Power BI ────────────────────────────
+        _kpi_keywords = [
+            "kpi", "kpis", "métrica", "metrica", "dashboard", "power bi", "powerbi",
+            "ventas del mes", "ventas del año", "ventas de", "total ventas",
+            "objetivo de ventas", "target", "revenue", "tasa de conversión",
+            "tasa de conversion", "tasa de cierre", "leads totales", "leads activos",
+            "pipeline total", "matriculados", "matrículas", "matriculas",
+            "facturación", "facturacion", "ingresos del", "cuánto vendió",
+            "cuanto vendio", "cuánto se vendió", "ranking de asesores",
+            "ranking por ventas", "mejor asesor", "top asesores",
+        ]
+        es_consulta_pbi = (
+            pregunta.lower().strip().startswith("@pbi")
+            or any(kw in pregunta.lower() for kw in _kpi_keywords)
+        )
+        if es_consulta_pbi:
+            msg_espera = await cl.Message(
+                content="📊 Consultando el modelo semántico de Power BI...\n"
+                        "_Generando DAX → ejecutando consulta → interpretando resultado_"
+            ).send()
+        else:
+            msg_espera = await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
         try:
-            # TODO: Detectar nombre de asesor si pregunta por su perfil
-            # Por ahora, intentar extraer de la sesión o usar None
             nombre_asesor = cl.user_session.get("nombre_asesor", None)
-            respuesta = chat_handler.procesar_consulta(pregunta, nombre_asesor)
-            await cl.Message(content=respuesta).send()
+            respuesta = await asyncio.get_event_loop().run_in_executor(
+                None, chat_handler.procesar_consulta, pregunta, nombre_asesor
+            )
+            # ── Gráfico: solo si el usuario lo pide explícitamente ───────
+            _grafico_kw = [
+                "gráfico", "grafico", "chart", "gráfica", "grafica",
+                "visualiza", "visualización", "visualizacion",
+                "representa", "dibuja", "plot", "plotea",
+                "barras", "línea", "linea", "pie",
+            ]
+            pide_grafico = es_consulta_pbi and any(kw in pregunta.lower() for kw in _grafico_kw)
+            elementos = []
+            if pide_grafico:
+                try:
+                    from centauro.core.pbi_charts import generar_grafico_desde_rows
+                    from centauro.core.powerbi_client import get_powerbi_client
+                    _pbi = get_powerbi_client()
+                    if _pbi and len(_pbi._last_query_rows) >= 2:
+                        graf_path = await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            generar_grafico_desde_rows,
+                            _pbi._last_query_rows,
+                            pregunta,
+                            settings.OUTPUTS_DIR / "charts",
+                        )
+                        if graf_path:
+                            elementos = [cl.Image(
+                                name="grafico_pbi",
+                                path=str(graf_path),
+                                display="inline",
+                            )]
+                except Exception as _e:
+                    import logging as _log
+                    _log.getLogger(__name__).warning(f"No se pudo generar gráfico PBI: {_e}")
+            await cl.Message(content=respuesta, elements=elementos).send()
         except Exception as e:
             await cl.Message(
                 content=f"❌ Error procesando consulta: {str(e)}\n\nIntenta reformular tu pregunta."
@@ -515,6 +572,31 @@ async def main(message: cl.Message):
             respuesta_pre = res_nombre_previo["output"].strip()
             if respuesta_pre.lower() not in ("skip", "omitir", "-", "n/a"):
                 nombre_especificado_en_mensaje = respuesta_pre.strip().title()
+
+    # ── Pregunta anticipada de Opportunity ID (antes de transcribir) ──
+    if es_multimedia:
+        _opp_id_pre = extraer_opportunity_id(file.name) if file else None
+        if _opp_id_pre:
+            await cl.Message(content=f"🔗 **Opportunity ID detectado:** `{_opp_id_pre}`").send()
+        else:
+            try:
+                _opp_res = await cl.AskUserMessage(
+                    content=(
+                        "🔗 **¿Tienes el ID de oportunidad de esta entrevista?**\n"
+                        "Escríbelo (ej: `2021-002579270`) o escribe **no** para continuar sin él."
+                    ),
+                    timeout=30
+                ).send()
+                if _opp_res:
+                    _opp_txt = _opp_res.get("output", "").strip()
+                    if _opp_txt.lower() not in ("no", "n", "-", ""):
+                        _opp_id_pre = _opp_txt
+                        await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
+                    else:
+                        await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
+            except Exception:
+                pass
+        cl.user_session.set("opportunity_id", _opp_id_pre)
 
     import time as _time
     _tiempo_inicio = _time.time()
@@ -711,6 +793,9 @@ async def main(message: cl.Message):
         await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
         # Guardar en sesión
         cl.user_session.set("nombre_asesor", asesor_confirmado)
+
+        # opportunity_id ya fue preguntado antes de la transcripción
+        opp_id = cl.user_session.get("opportunity_id")
         # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
         async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
             try:
@@ -849,7 +934,8 @@ async def main(message: cl.Message):
         async with cl.Step(name="📄 Generando reporte PDF", type="tool") as step:
             try:
                 pdf_filename = f"Reporte_{file.name.replace('.', '_')}_v3.pdf"
-                generar_pdf(reporte, pdf_filename)
+                datos_oportunidad = reporte.get("datos_oportunidad") if isinstance(reporte, dict) else None
+                generar_pdf(reporte, pdf_filename, datos_oportunidad=datos_oportunidad)
                 pdf_path = settings.OUTPUTS_DIR / "Reportes_PDF" / pdf_filename
                 if pdf_path.exists():
                     step.output = f"✅ PDF generado: {pdf_filename}"
@@ -876,11 +962,13 @@ async def main(message: cl.Message):
         # ==================== REGISTRAR EN MEMORIA (NUEVO v4.0) ====================
         async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
             try:
-                # Registrar evaluación usando el reporte completo (tiene evaluacion_por_bloques y calificacion_global)
+                opp_id = cl.user_session.get("opportunity_id")
                 perfil = memory_manager.registrar_evaluacion(
                     nombre_asesor=asesor_confirmado,
                     resultado_evaluacion=reporte,
-                    transcripcion_path=str(file_path)
+                    transcripcion_path=str(file_path),
+                    opportunity_id=opp_id,
+                    archivo_origen=file.name if file else None,
                 )
                 # Obtener feedback personalizado
                 feedback_personalizado = perfil.obtener_feedback_personalizado()

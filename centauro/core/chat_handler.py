@@ -12,11 +12,16 @@ v4.1 - Mejoras:
 - Historial de conversación incluido en el contexto del LLM
 - Manejo de "mi rendimiento" sin nombre de asesor en sesión
 """
+import re
+import logging
 from typing import List, Dict, Optional
 from ..config import centauro_config
 from ..rag import buscar_en_coleccion
 from ..llm_client import consultar_gpt
 from .memoria import memory_manager
+from .database import get_database
+
+logger = logging.getLogger(__name__)
 
 
 # Mapeo de palabras clave a seccion_key (debe coincidir con SECCION_TO_BLOQUE en rag.py)
@@ -64,6 +69,8 @@ class ChatHandler:
 
     def __init__(self):
         self.historial_conversacion: List[Dict] = []
+        self._pbi_historial: List[Dict] = []  # Últimos intercambios PBI para contexto
+        self._asesor_sesion: Optional[str] = None  # Último asesor mencionado en esta sesión
 
     def procesar_consulta(self, pregunta_usuario: str, nombre_asesor: Optional[str] = None) -> str:
         """
@@ -80,7 +87,20 @@ class ChatHandler:
         intencion = self._clasificar_intencion(pregunta_usuario)
         bloque_detectado = self._detectar_bloque(pregunta_usuario)
 
-        # Buscar contexto relevante
+        # Cortocircuito para consultas al modelo semántico de Power BI
+        if intencion == "kpi":
+            # Limpiar prefijo @pbi antes de enviar a Power BI
+            pregunta_pbi = re.sub(r"^@pbi\s*", "", pregunta_usuario, flags=re.IGNORECASE).strip()
+            respuesta = self._consultar_powerbi(pregunta_pbi)
+            self.historial_conversacion.append({
+                "pregunta": pregunta_usuario,
+                "respuesta": respuesta,
+                "intencion": intencion,
+                "bloque": bloque_detectado,
+            })
+            return respuesta
+
+        # Buscar contexto relevante (flujo RAG normal)
         contexto = self._buscar_contexto_relevante(
             pregunta_usuario, intencion, bloque_detectado, nombre_asesor
         )
@@ -109,9 +129,20 @@ class ChatHandler:
         Clasifica la intención de la pregunta del usuario.
 
         Returns:
-            "manual" | "ejemplo" | "perfil" | "estadisticas" | "general"
+            "manual" | "ejemplo" | "perfil" | "estadisticas" | "kpi" | "general"
+
+        Prefijos especiales:
+            /modelo <pregunta>  → fuerza routing a Power BI (kpi)
         """
         pregunta_lower = pregunta.lower()
+
+        # ── Prefijo @pbi → fuerza Power BI siempre ──────────────────────
+        if pregunta_lower.strip().startswith("@pbi"):
+            return "kpi"
+
+        # ── ID de oportunidad (ej: 2021-002570912) → buscar en Supabase ─
+        if re.search(r'\b\d{4}-\d{6,12}\b', pregunta):
+            return "oportunidades"
 
         # ── Perfil de asesor concreto (PRIORIDAD ALTA) ──────────────────────
         # Preguntas sobre un asesor específico por nombre o sobre el propio asesor
@@ -119,6 +150,11 @@ class ChatHandler:
             "mi rendimiento", "mi perfil", "mis evaluaciones",
             "cómo he mejorado", "mi progreso", "cómo estoy",
             "mis resultados",
+            # Consultas temporales / historial
+            "últimas", "ultimas", "última entrevista", "ultima entrevista",
+            "última llamada", "ultima llamada", "esta entrevista", "esta llamada",
+            "en esta llamada", "en esta entrevista",
+            "cómo fui", "como fui", "cómo quedé", "como quede",
             # Preguntas sobre otro asesor concreto
             "cuántas entrevistas", "cuantas entrevistas",
             "cuántas llamadas", "cuantas llamadas",
@@ -138,8 +174,7 @@ class ChatHandler:
 
         # Si la pregunta menciona un nombre propio Y un bloque de evaluación
         # → casi seguro es una consulta sobre el rendimiento de un asesor concreto
-        import re as _re
-        tiene_nombre_propio = bool(_re.search(r'\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b', pregunta))
+        tiene_nombre_propio = bool(re.search(r'\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b', pregunta))
         if tiene_nombre_propio:
             bloques_en_pregunta = [
                 "investigación", "investigacion", "cierre", "propuesta",
@@ -148,6 +183,18 @@ class ChatHandler:
             ]
             if any(b in pregunta_lower for b in bloques_en_pregunta):
                 return "perfil"
+
+        # ── Consultas sobre pipeline de oportunidades/leads (CRM) ───────────
+        if any(kw in pregunta_lower for kw in [
+            "oportunidades de", "leads de", "cuántos leads", "cuantos leads",
+            "cuántas oportunidades", "cuantas oportunidades",
+            "por país", "por pais", "por programa", "por pilar",
+            "de qué país", "de que pais",
+            "entrevistas de méx", "entrevistas de esp",
+            "de méxico", "de españa", "de colombia", "de argentina", "de perú",
+            "del pilar", "del programa",
+        ]):
+            return "oportunidades"
 
         # ── Estadísticas globales ────────────────────────────────────────────
         if any(kw in pregunta_lower for kw in [
@@ -171,6 +218,32 @@ class ChatHandler:
             "estrategia", "consejo", "consejos",
         ]):
             return "manual"
+
+        # ── KPIs y métricas del modelo semántico Power BI ────────────────
+        if any(kw in pregunta_lower for kw in [
+            "kpi", "kpis", "métrica", "metrica", "métricas", "metricas",
+            "dashboard", "power bi", "powerbi",
+            "ventas del mes", "ventas del año", "ventas de", "total ventas",
+            "objetivo de ventas", "target", "revenue",
+            "tasa de conversión", "tasa de conversion", "tasa de cierre",
+            "leads totales", "leads activos", "pipeline total",
+            "matriculados", "matrículas", "matriculas",
+            "facturación", "facturacion", "ingresos del",
+            "cuánto vendió", "cuanto vendio", "cuánto se vendió",
+            "ranking de asesores", "ranking por ventas",
+            "mejor asesor", "top asesores",
+            # consultas directas a tablas del modelo
+            "tabla h_", "h_convocatorio", "h_matricula", "h_lead", "h_contacto",
+            "cuántas filas", "cuantas filas", "cuántos registros", "cuantos registros",
+            "cuántas ventas", "cuantas ventas", "cuántos leads", "cuantos leads",
+            "cuántos matriculados", "cuantos matriculados",
+            "total de filas", "número de filas", "numero de filas",
+            "total de registros", "número de registros", "numero de registros",
+            "modelo semántico", "modelo semantico", "consulta dax", "dax",
+            "top 5", "top 10", "ranking", "promedio de", "suma de",
+            "por país", "por pais", "por programa", "por asesor", "por mes", "por año",
+        ]):
+            return "kpi"
 
         return "general"
 
@@ -206,6 +279,9 @@ class ChatHandler:
 
         if intencion == "perfil":
             return self._obtener_perfil_asesor(nombre_asesor, pregunta, bloque_detectado)
+
+        elif intencion == "oportunidades":
+            return self._consultar_oportunidades(pregunta)
 
         elif intencion == "estadisticas":
             return self._obtener_estadisticas_globales()
@@ -279,26 +355,53 @@ class ChatHandler:
         bloque_filtro: Optional[str] = None,
     ) -> str:
         """Obtiene y formatea el perfil de un asesor, con detalle por bloque si se pide."""
+        # Prioridad de resolución:
+        # 1. nombre_asesor pasado por Chainlit (usuario logado → "mis evaluaciones")
+        # 2. Nombre extraído del texto de la pregunta ("de Laura", "a Aleix")
+        # 3. Último asesor mencionado en esta sesión (contexto conversacional)
+        # 4. Sin asesor → listar disponibles desde Supabase y pedir nombre
         if not nombre_asesor:
             nombre_asesor = self._extraer_nombre_de_pregunta(pregunta)
 
         if not nombre_asesor:
-            try:
-                archivos = list(memory_manager.perfiles_dir.glob("*.json"))
-                if not archivos:
+            nombre_asesor = self._asesor_sesion
+
+        if not nombre_asesor:
+            db = get_database()
+            if db.disponible:
+                asesores = db.listar_asesores()
+                if not asesores:
                     return "Aún no hay evaluaciones registradas en el sistema."
-                nombres = [f.stem.replace("_", " ").title() for f in archivos[:10]]
+                nombres = [a["nombre"] for a in asesores[:10]]
                 lista = "\n".join(f"- {n}" for n in nombres)
                 return (
                     f"No sé de qué asesor quieres ver el rendimiento. "
-                    f"Hay {len(archivos)} asesor(es) evaluado(s):\n{lista}\n\n"
+                    f"Hay {len(asesores)} asesor(es) en el sistema:\n{lista}\n\n"
                     f"Dime el nombre y te muestro su perfil."
                 )
-            except Exception:
-                return (
-                    "No sé de qué asesor quieres ver el rendimiento. "
-                    "Por favor indica el nombre del asesor."
-                )
+            return (
+                "No sé de qué asesor quieres ver el rendimiento. "
+                "Por favor indica el nombre del asesor."
+            )
+
+        # Actualizar contexto de sesión con el asesor identificado
+        self._asesor_sesion = nombre_asesor
+
+        # ── Router: detectar si pide últimas N o esta/última entrevista ────
+        pregunta_lower = pregunta.lower()
+
+        # "últimas 5 entrevistas", "mis últimas 3 llamadas", etc.
+        m_n = re.search(r'\b[uú]ltimas?\s+(\d+)\b', pregunta_lower)
+        if m_n:
+            n = int(m_n.group(1))
+            return self._obtener_ultimas_n_evaluaciones(nombre_asesor, n, pregunta)
+
+        # "esta entrevista", "esta llamada", "última entrevista", "última llamada"
+        if any(kw in pregunta_lower for kw in [
+            "esta entrevista", "esta llamada", "en esta entrevista", "en esta llamada",
+            "última entrevista", "ultima entrevista", "última llamada", "ultima llamada",
+        ]):
+            return self._obtener_resumen_ultima_evaluacion(nombre_asesor)
 
         try:
             perfil = memory_manager.cargar_perfil(nombre_asesor)
@@ -356,6 +459,187 @@ class ChatHandler:
 
         except Exception as e:
             return f"Error obteniendo perfil de {nombre_asesor}: {e}"
+
+    def _obtener_ultimas_n_evaluaciones(
+        self, nombre_asesor: str, n: int, pregunta: str
+    ) -> str:
+        """
+        Consulta las últimas N evaluaciones de un asesor directamente desde Supabase
+        y devuelve un resumen estructurado con calificaciones por bloque.
+        """
+        db = get_database()
+        EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+
+        if db.disponible:
+            asesor = db.buscar_asesor(nombre_asesor)
+            if not asesor:
+                return f"No encontré a **{nombre_asesor}** en el sistema."
+
+            evaluaciones = db.obtener_evaluaciones(asesor["id"])
+            if not evaluaciones:
+                return f"No hay evaluaciones registradas para **{nombre_asesor}**."
+
+            ultimas = evaluaciones[-n:]
+            lineas = [
+                f"## Últimas {len(ultimas)} evaluaciones de {nombre_asesor}\n"
+            ]
+            for i, ev in enumerate(reversed(ultimas), 1):
+                fecha = ev.get("fecha", "")[:10]
+                cal_global = ev.get("calificacion_global") or "N/A"
+                opp_id = ev.get("opportunity_id")
+                archivo = ev.get("archivo_origen") or "—"
+
+                # Enriquecer con datos del lead si hay opportunity_id
+                lead_linea = ""
+                if opp_id:
+                    opp = db.obtener_oportunidad(opp_id)
+                    if opp:
+                        nombre_lead = opp.get("nombre_lead") or "—"
+                        is_won = opp.get("is_won")
+                        if is_won is True:
+                            matricula_txt = "✅ Matriculado"
+                        elif is_won is False:
+                            matricula_txt = "❌ No matriculado"
+                        else:
+                            matricula_txt = "⏳ Resultado pendiente"
+                        lead_linea = f"**Lead:** {nombre_lead} | {matricula_txt}\n"
+
+                bloques_raw = db.obtener_calificaciones_bloque(ev["id"])
+                bloques_txt = "  _(sin datos de bloques)_"
+                if bloques_raw:
+                    bloques_txt = "\n".join(
+                        f"  {EMOJI.get(b['calificacion'], '⚪')} **{b['bloque']}**: {b['calificacion'] or 'N/A'}"
+                        for b in bloques_raw
+                    )
+
+                lineas.append(
+                    f"### #{i} — {fecha} | Global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n"
+                    f"{lead_linea}"
+                    f"**Oportunidad:** {opp_id or '—'} | **Archivo:** {archivo}\n"
+                    f"{bloques_txt}\n"
+                )
+            return "\n".join(lineas)
+
+        # Fallback a JSON si Supabase no disponible
+        try:
+            perfil = memory_manager.cargar_perfil(nombre_asesor)
+            ultimas = perfil.evaluaciones[-n:]
+            lineas = [f"## Últimas {len(ultimas)} evaluaciones de {nombre_asesor}\n"]
+            for i, ev in enumerate(reversed(ultimas), 1):
+                fecha = ev.fecha[:10]
+                cal_global = ev.calificacion_global or "N/A"
+                bloques_txt = "\n".join(
+                    f"  {EMOJI.get(cal, '⚪')} **{b}**: {cal or 'N/A'}"
+                    for b, cal in ev.calificaciones_por_bloque.items()
+                )
+                lineas.append(
+                    f"### #{i} — {fecha} | Global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n"
+                    f"{bloques_txt}\n"
+                )
+            return "\n".join(lineas)
+        except Exception as e:
+            return f"Error consultando evaluaciones de {nombre_asesor}: {e}"
+
+    def _obtener_resumen_ultima_evaluacion(self, nombre_asesor: str) -> str:
+        """
+        Devuelve el resumen de la evaluación más reciente de un asesor,
+        incluyendo calificaciones por bloque, recomendaciones y resumen contextual.
+        """
+        db = get_database()
+        EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+
+        if db.disponible:
+            asesor = db.buscar_asesor(nombre_asesor)
+            if not asesor:
+                return f"No encontré a **{nombre_asesor}** en el sistema."
+
+            evaluaciones = db.obtener_evaluaciones(asesor["id"])
+            if not evaluaciones:
+                return f"No hay evaluaciones registradas para **{nombre_asesor}**."
+
+            ev = evaluaciones[-1]
+            fecha = ev.get("fecha", "")[:10]
+            cal_global = ev.get("calificacion_global") or "N/A"
+            opp_id = ev.get("opportunity_id")
+            archivo = ev.get("archivo_origen") or "—"
+
+            # Enriquecer con datos del lead
+            nombre_lead = "—"
+            matricula_txt = "⏳ Resultado pendiente"
+            if opp_id:
+                opp = db.obtener_oportunidad(opp_id)
+                if opp:
+                    nombre_lead = opp.get("nombre_lead") or "—"
+                    is_won = opp.get("is_won")
+                    if is_won is True:
+                        matricula_txt = "✅ Matriculado"
+                    elif is_won is False:
+                        matricula_txt = "❌ No matriculado"
+
+            # Contexto de la llamada
+            perfil_lead = ev.get("perfil_lead") or "—"
+            factor_compra = ev.get("factor_determinante_compra") or "—"
+            fecha_seguimiento = ev.get("fecha_seguimiento") or "—"
+            barreras = ev.get("barreras_principales")
+            if isinstance(barreras, str):
+                import json as _json
+                try:
+                    barreras = _json.loads(barreras)
+                except Exception:
+                    barreras = []
+            barreras_txt = ", ".join(barreras) if barreras else "—"
+
+            bloques_raw = db.obtener_calificaciones_bloque(ev["id"])
+            bloques_lineas = []
+            recomendaciones = []
+            for b in bloques_raw:
+                cal = b.get("calificacion") or "N/A"
+                bloque = b.get("bloque", "")
+                evidencia = b.get("evidencia_principal") or ""
+                rec = b.get("recomendacion_accionable") or ""
+                bloques_lineas.append(
+                    f"{EMOJI.get(cal, '⚪')} **{bloque}**: {cal}"
+                    + (f"\n   _{evidencia}_" if evidencia else "")
+                )
+                if rec:
+                    recomendaciones.append(f"- **{bloque}**: {rec}")
+
+            bloques_txt = "\n".join(bloques_lineas) or "_(sin datos)_"
+            recs_txt = "\n".join(recomendaciones) or "_(ninguna)_"
+
+            return (
+                f"## Última evaluación de {nombre_asesor}\n"
+                f"**Fecha:** {fecha} | **Oportunidad:** {opp_id or '—'}\n"
+                f"**Lead:** {nombre_lead} | {matricula_txt}\n"
+                f"**Archivo:** {archivo}\n\n"
+                f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n\n"
+                f"**Perfil lead:** {perfil_lead}\n"
+                f"**Factor determinante compra:** {factor_compra}\n"
+                f"**Fecha seguimiento:** {fecha_seguimiento}\n"
+                f"**Barreras:** {barreras_txt}\n\n"
+                f"### Calificaciones por bloque\n{bloques_txt}\n\n"
+                f"### Recomendaciones accionables\n{recs_txt}"
+            )
+
+        # Fallback JSON
+        try:
+            perfil = memory_manager.cargar_perfil(nombre_asesor)
+            if not perfil.evaluaciones:
+                return f"No hay evaluaciones registradas para {nombre_asesor}."
+            ev = perfil.evaluaciones[-1]
+            cal_global = ev.calificacion_global or "N/A"
+            bloques_txt = "\n".join(
+                f"{EMOJI.get(cal, '⚪')} **{b}**: {cal or 'N/A'}"
+                for b, cal in ev.calificaciones_por_bloque.items()
+            )
+            return (
+                f"## Última evaluación de {nombre_asesor}\n"
+                f"**Fecha:** {ev.fecha[:10]}\n\n"
+                f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n\n"
+                f"### Calificaciones por bloque\n{bloques_txt}"
+            )
+        except Exception as e:
+            return f"Error consultando última evaluación de {nombre_asesor}: {e}"
 
     def _detalle_bloque_asesor(self, perfil, bloque_key: str) -> str:
         """Devuelve el historial detallado de un asesor en un bloque concreto."""
@@ -418,8 +702,6 @@ class ChatHandler:
         Intenta extraer un nombre de asesor mencionado en la pregunta.
         Admite varios patrones y hace fuzzy match contra perfiles existentes.
         """
-        import re
-
         candidatos = []
 
         # Patrón 1: "de Nombre Apellido" o "de Nombre"
@@ -457,43 +739,136 @@ class ChatHandler:
 
     def _resolver_nombre_en_perfiles(self, nombre_fragmento: str) -> Optional[str]:
         """
-        Busca el nombre_fragmento en los perfiles guardados.
-        Prioriza coincidencia por prefijo de tokens para evitar devolver un perfil
-        corto ("Aleix Ribas") cuando existe uno más completo ("Aleix Ribas Canadell").
+        Busca el nombre_fragmento en los asesores de Supabase (nombre canónico + aliases).
+
+        Prioriza coincidencia por prefijo de tokens:
+        "Aleix Ribas" matchea "Aleix Ribas Canadell" y viceversa.
+        También comprueba aliases para variantes de nombre.
         """
+        db = get_database()
+        if not db.disponible:
+            return None
+
         try:
-            archivos = list(memory_manager.perfiles_dir.glob("*.json"))
-            tokens_fragmento = nombre_fragmento.lower().split()
-            n_frag = len(tokens_fragmento)
+            asesores = db.listar_asesores()
+            tokens_frag = nombre_fragmento.lower().split()
+            n_frag = len(tokens_frag)
 
-            candidatos = []  # (nombre_perfil, longitud_tokens) — preferir el más largo
-            for f in archivos:
-                nombre_perfil = f.stem.replace("_", " ")
-                tokens_perfil = nombre_perfil.lower().split()
-                n_perfil = len(tokens_perfil)
+            candidatos = []  # (nombre_canonico, n_tokens) — preferir el más largo
 
-                # Coincidencia exacta de prefijo:
-                # "aleix ribas" matchea "aleix ribas canadell" (frag es prefijo del perfil)
-                # "aleix ribas canadell" matchea "aleix ribas" (perfil es prefijo del frag)
-                if n_frag >= 2 and n_perfil >= 2:
-                    n_min = min(n_frag, n_perfil)
-                    if tokens_fragmento[:n_min] == tokens_perfil[:n_min]:
-                        candidatos.append((nombre_perfil.title(), n_perfil))
+            for asesor in asesores:
+                nombres_a_probar = [asesor["nombre"]] + (asesor.get("aliases") or [])
+
+                for nombre_candidato in nombres_a_probar:
+                    tokens_c = nombre_candidato.lower().split()
+                    n_c = len(tokens_c)
+
+                    if n_frag >= 2 and n_c >= 2:
+                        n_min = min(n_frag, n_c)
+                        if tokens_frag[:n_min] == tokens_c[:n_min]:
+                            candidatos.append((asesor["nombre"], n_c))
+                            break  # un match por asesor es suficiente
 
             if candidatos:
-                # Devolver el perfil con más tokens (el nombre más completo)
                 candidatos.sort(key=lambda x: x[1], reverse=True)
                 return candidatos[0][0]
 
             # Fallback: algún token significativo en común
-            for f in archivos:
-                nombre_perfil = f.stem.replace("_", " ")
-                tokens_perfil = nombre_perfil.lower().split()
-                if any(t in tokens_perfil for t in tokens_fragmento if len(t) > 3):
-                    return nombre_perfil.title()
+            for asesor in asesores:
+                nombres_a_probar = [asesor["nombre"]] + (asesor.get("aliases") or [])
+                for nombre_candidato in nombres_a_probar:
+                    tokens_c = nombre_candidato.lower().split()
+                    if any(t in tokens_c for t in tokens_frag if len(t) > 3):
+                        return asesor["nombre"]
+
         except Exception:
             pass
         return None
+
+    def _consultar_oportunidades(self, pregunta: str) -> str:
+        """
+        Consulta estadísticas de la tabla oportunidades en Supabase.
+        Detecta filtros en la pregunta (país, pilar, programa) y agrega los datos.
+        """
+        db = get_database()
+        if not db.disponible:
+            return "Supabase no disponible para consultar oportunidades."
+
+        pregunta_lower = pregunta.lower()
+
+        # ── Búsqueda por ID concreto (ej: 2021-002570912) ───────────────
+        match_id = re.search(r'\b(\d{4}-\d{6,12})\b', pregunta)
+        if match_id:
+            opportunity_id = match_id.group(1)
+            datos = db.obtener_oportunidad(opportunity_id)
+            if datos:
+                campos = []
+                for k, v in datos.items():
+                    if k not in ("id", "fecha_sync", "datos_extra") and v is not None:
+                        campos.append(f"- **{k}**: {v}")
+                detalle = "\n".join(campos)
+                return f"Datos de la oportunidad `{opportunity_id}` en Supabase:\n\n{detalle}"
+            else:
+                # No está en Supabase → fallback automático a Power BI
+                logger.info(f"ID {opportunity_id} no en Supabase → consultando Power BI")
+                pregunta_pbi = f"Dame los datos de la oportunidad {opportunity_id} en H_CUPONES: pilar, país, programa, estado, nombre del cliente"
+                return self._consultar_powerbi(pregunta_pbi)
+
+        # Detectar filtros en la pregunta
+        filtros = {}
+
+        PAISES = {
+            "méxico": "México", "mexico": "México",
+            "españa": "España", "espana": "España",
+            "colombia": "Colombia",
+            "argentina": "Argentina",
+            "perú": "Perú", "peru": "Perú",
+            "chile": "Chile",
+        }
+        for kw, valor in PAISES.items():
+            if kw in pregunta_lower:
+                filtros["pais"] = valor
+                break
+
+        PILARES = {
+            "redes sociales": "Redes Sociales",
+            "mba": "MBA",
+            "máster": "Máster", "master": "Máster",
+            "executive": "Executive Education",
+            "online": "Online",
+        }
+        for kw, valor in PILARES.items():
+            if kw in pregunta_lower:
+                filtros["pilar"] = valor
+                break
+
+        oportunidades = db.obtener_oportunidades_filtradas(
+            filtros=filtros if filtros else None
+        )
+
+        if not oportunidades:
+            filtro_desc = ", ".join(f"{k}={v}" for k, v in filtros.items()) if filtros else "sin filtros"
+            return f"No se encontraron oportunidades ({filtro_desc}) en Supabase."
+
+        from collections import Counter
+        total = len(oportunidades)
+        por_pais = Counter(o.get("pais") for o in oportunidades if o.get("pais"))
+        por_pilar = Counter(o.get("pilar") for o in oportunidades if o.get("pilar"))
+        por_programa = Counter(o.get("programa") for o in oportunidades if o.get("programa"))
+
+        top_paises = "\n".join(f"  - {p}: {c}" for p, c in por_pais.most_common(8))
+        top_pilares = "\n".join(f"  - {p}: {c}" for p, c in por_pilar.most_common(8))
+        top_programas = "\n".join(f"  - {p}: {c}" for p, c in por_programa.most_common(8))
+
+        filtro_desc = " | ".join(f"{k}: {v}" for k, v in filtros.items()) if filtros else "todos los registros"
+
+        return (
+            f"## Oportunidades en pipeline (filtro: {filtro_desc})\n"
+            f"**Total registros**: {total:,}\n\n"
+            f"### Por país (top 8)\n{top_paises}\n\n"
+            f"### Por pilar (top 8)\n{top_pilares}\n\n"
+            f"### Por programa (top 8)\n{top_programas}"
+        )
 
     def _obtener_estadisticas_globales(self) -> str:
         """Obtiene estadísticas del sistema completo."""
@@ -652,6 +1027,73 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
 
         except Exception as e:
             return f"Error generando respuesta: {e}"
+
+    # ------------------------------------------------------------------
+    # Power BI — Consultas al modelo semántico
+    # ------------------------------------------------------------------
+
+    def _consultar_powerbi(self, pregunta: str) -> str:
+        """
+        Consulta el modelo semántico de Power BI para responder KPIs y métricas.
+        Usa un agente OpenAI (pbi_agent) que decide iterativamente qué herramientas
+        llamar (consultar diccionario, ejecutar DAX, reintentar si falla).
+
+        Los comandos DAX directos (@pbi EVALUATE ...) se ejecutan sin pasar por el agente.
+        """
+        try:
+            from .powerbi_client import get_powerbi_client
+            client = get_powerbi_client()
+        except Exception as e:
+            logger.error(f"Error importando PowerBIClient: {e}")
+            return (
+                "No se pudo cargar el cliente de Power BI. "
+                f"Detalle: {e}"
+            )
+
+        if client is None:
+            return (
+                "El cliente de Power BI no está configurado.\n\n"
+                "Asegúrate de tener en `.env`:\n"
+                "- `AZURE_CLIENT_ID`\n"
+                "- `AZURE_TENANT_ID`\n"
+                "- `PBI_WORKSPACE_ID`\n"
+                "- `PBI_DATASET_ID`\n\n"
+                "Luego ejecuta `python scripts/pbi_auth.py` para autenticarte."
+            )
+
+        if not client.disponible:
+            return (
+                "No hay refresh token guardado para Power BI.\n\n"
+                "Ejecuta en la terminal:\n"
+                "```\npython scripts/pbi_auth.py\n```\n"
+                "y sigue las instrucciones para autenticarte con tu cuenta de Planeta."
+            )
+
+        # Sandbox DAX directo: ejecutar sin pasar por el agente
+        import re as _re
+        pregunta_stripped = pregunta.strip()
+        _dax_raw = _re.sub(r"^dax\s*:\s*", "", pregunta_stripped, flags=_re.IGNORECASE)
+        if _dax_raw.upper().startswith(("EVALUATE", "DEFINE")):
+            try:
+                return client.query_nl(pregunta)
+            except Exception as e:
+                logger.error(f"Error en sandbox DAX: {e}")
+                return f"Error ejecutando DAX: {e}"
+
+        # Consulta en lenguaje natural → agente Claude
+        try:
+            from .pbi_agent import responder as agente_responder
+            respuesta = agente_responder(pregunta, client, historial=self._pbi_historial)
+
+            # Guardar intercambio en historial (máximo 3 últimos)
+            self._pbi_historial.append({"pregunta": pregunta, "respuesta": respuesta})
+            if len(self._pbi_historial) > 3:
+                self._pbi_historial.pop(0)
+
+            return respuesta
+        except Exception as e:
+            logger.error(f"Error en agente PBI: {e}")
+            return f"Error al consultar el modelo semántico de Power BI: {e}"
 
     # ------------------------------------------------------------------
     # Utilidades

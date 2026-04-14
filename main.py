@@ -28,6 +28,7 @@ from centauro.core import CentauroOrchestrator
 # ================================================
 
 from centauro.core.memoria import MemoryManager
+from centauro.utils.validaciones import extraer_opportunity_id
 memory_manager = MemoryManager()
 
 # ---------------------------------------------------------------------------
@@ -441,15 +442,26 @@ def main():
             # PDF
             print("   🎨 Generando PDF...")
             nombre_pdf = f"Reporte_{archivo.stem}_v2.pdf"
-            generar_pdf(reporte, nombre_pdf)
+            datos_oportunidad = reporte.get("datos_oportunidad") if isinstance(reporte, dict) else None
+            generar_pdf(reporte, nombre_pdf, datos_oportunidad=datos_oportunidad)
 
             # ===== GUARDAR PERFIL DEL ASESOR =====
             try:
                 nombre_asesor = reporte.get("asesor") or archivo.stem
+                opp_id = extraer_opportunity_id(archivo.name)
+                if opp_id:
+                    print(f"   🔗 Opportunity ID detectado: {opp_id}")
+
+                pdf_path = settings.OUTPUTS_DIR / "Reportes_PDF" / nombre_pdf
+
                 perfil = memory_manager.registrar_evaluacion(
                     nombre_asesor=nombre_asesor,
                     resultado_evaluacion=reporte,
-                    transcripcion_path=str(archivo)
+                    transcripcion_path=str(archivo),
+                    opportunity_id=opp_id,
+                    archivo_origen=archivo.name,
+                    reporte_json_path=str(json_path),
+                    reporte_pdf_path=str(pdf_path),
                 )
                 print(f"   🧠 Perfil actualizado: {nombre_asesor} "
                       f"({perfil.total_evaluaciones} evaluación(es) registradas)")
