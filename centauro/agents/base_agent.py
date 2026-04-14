@@ -157,6 +157,30 @@ Refleja explícitamente el uso de este contexto en el campo "razonamiento".
             metadata={"error": error_msg}
         )
     
+    def _aplicar_tope_fallos_criticos(
+        self,
+        calificacion: str,
+        contador_fallos: int,
+        razonamiento_original: str,
+    ) -> tuple:
+        """
+        Regla universal: 3 o más fallos críticos en el checklist → MALO automático.
+        Se aplica en todos los agentes tras recibir el JSON del LLM.
+        """
+        if contador_fallos < 3:
+            return calificacion, razonamiento_original
+
+        orden = {"MALO": 0, "MEJORABLE": 1, "BUENO": 2}
+        if orden.get(calificacion, 0) == 0:
+            return calificacion, razonamiento_original  # Ya es MALO, no hay que bajar
+
+        nota = (
+            f"[Ajuste automático] Calificación bajada de {calificacion} a MALO: "
+            f"el checklist detectó {contador_fallos} fallos críticos. "
+            f"Con 3 o más fallos el resultado no puede ser {calificacion}."
+        )
+        return "MALO", f"{razonamiento_original}\n\n{nota}"
+
     def _validar_evidencia_literal(self, evidencia: str, transcripcion: str) -> bool:
         """Valida que la evidencia citada exista realmente en la transcripción"""
         try:

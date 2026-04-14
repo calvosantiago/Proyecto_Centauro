@@ -70,6 +70,7 @@ class ChatHandler:
     def __init__(self):
         self.historial_conversacion: List[Dict] = []
         self._pbi_historial: List[Dict] = []  # Últimos intercambios PBI para contexto
+        self._asesor_sesion: Optional[str] = None  # Último asesor mencionado en esta sesión
 
     def procesar_consulta(self, pregunta_usuario: str, nombre_asesor: Optional[str] = None) -> str:
         """
@@ -354,26 +355,37 @@ class ChatHandler:
         bloque_filtro: Optional[str] = None,
     ) -> str:
         """Obtiene y formatea el perfil de un asesor, con detalle por bloque si se pide."""
+        # Prioridad de resolución:
+        # 1. nombre_asesor pasado por Chainlit (usuario logado → "mis evaluaciones")
+        # 2. Nombre extraído del texto de la pregunta ("de Laura", "a Aleix")
+        # 3. Último asesor mencionado en esta sesión (contexto conversacional)
+        # 4. Sin asesor → listar disponibles desde Supabase y pedir nombre
         if not nombre_asesor:
             nombre_asesor = self._extraer_nombre_de_pregunta(pregunta)
 
         if not nombre_asesor:
-            try:
-                archivos = list(memory_manager.perfiles_dir.glob("*.json"))
-                if not archivos:
+            nombre_asesor = self._asesor_sesion
+
+        if not nombre_asesor:
+            db = get_database()
+            if db.disponible:
+                asesores = db.listar_asesores()
+                if not asesores:
                     return "Aún no hay evaluaciones registradas en el sistema."
-                nombres = [f.stem.replace("_", " ").title() for f in archivos[:10]]
+                nombres = [a["nombre"] for a in asesores[:10]]
                 lista = "\n".join(f"- {n}" for n in nombres)
                 return (
                     f"No sé de qué asesor quieres ver el rendimiento. "
-                    f"Hay {len(archivos)} asesor(es) evaluado(s):\n{lista}\n\n"
+                    f"Hay {len(asesores)} asesor(es) en el sistema:\n{lista}\n\n"
                     f"Dime el nombre y te muestro su perfil."
                 )
-            except Exception:
-                return (
-                    "No sé de qué asesor quieres ver el rendimiento. "
-                    "Por favor indica el nombre del asesor."
-                )
+            return (
+                "No sé de qué asesor quieres ver el rendimiento. "
+                "Por favor indica el nombre del asesor."
+            )
+
+        # Actualizar contexto de sesión con el asesor identificado
+        self._asesor_sesion = nombre_asesor
 
         # ── Router: detectar si pide últimas N o esta/última entrevista ────
         pregunta_lower = pregunta.lower()
@@ -474,8 +486,23 @@ class ChatHandler:
             for i, ev in enumerate(reversed(ultimas), 1):
                 fecha = ev.get("fecha", "")[:10]
                 cal_global = ev.get("calificacion_global") or "N/A"
-                opp_id = ev.get("opportunity_id") or "—"
+                opp_id = ev.get("opportunity_id")
                 archivo = ev.get("archivo_origen") or "—"
+
+                # Enriquecer con datos del lead si hay opportunity_id
+                lead_linea = ""
+                if opp_id:
+                    opp = db.obtener_oportunidad(opp_id)
+                    if opp:
+                        nombre_lead = opp.get("nombre_lead") or "—"
+                        is_won = opp.get("is_won")
+                        if is_won is True:
+                            matricula_txt = "✅ Matriculado"
+                        elif is_won is False:
+                            matricula_txt = "❌ No matriculado"
+                        else:
+                            matricula_txt = "⏳ Resultado pendiente"
+                        lead_linea = f"**Lead:** {nombre_lead} | {matricula_txt}\n"
 
                 bloques_raw = db.obtener_calificaciones_bloque(ev["id"])
                 bloques_txt = "  _(sin datos de bloques)_"
@@ -487,7 +514,8 @@ class ChatHandler:
 
                 lineas.append(
                     f"### #{i} — {fecha} | Global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n"
-                    f"**Oportunidad:** {opp_id} | **Archivo:** {archivo}\n"
+                    f"{lead_linea}"
+                    f"**Oportunidad:** {opp_id or '—'} | **Archivo:** {archivo}\n"
                     f"{bloques_txt}\n"
                 )
             return "\n".join(lineas)
@@ -532,8 +560,21 @@ class ChatHandler:
             ev = evaluaciones[-1]
             fecha = ev.get("fecha", "")[:10]
             cal_global = ev.get("calificacion_global") or "N/A"
-            opp_id = ev.get("opportunity_id") or "—"
+            opp_id = ev.get("opportunity_id")
             archivo = ev.get("archivo_origen") or "—"
+
+            # Enriquecer con datos del lead
+            nombre_lead = "—"
+            matricula_txt = "⏳ Resultado pendiente"
+            if opp_id:
+                opp = db.obtener_oportunidad(opp_id)
+                if opp:
+                    nombre_lead = opp.get("nombre_lead") or "—"
+                    is_won = opp.get("is_won")
+                    if is_won is True:
+                        matricula_txt = "✅ Matriculado"
+                    elif is_won is False:
+                        matricula_txt = "❌ No matriculado"
 
             # Contexto de la llamada
             perfil_lead = ev.get("perfil_lead") or "—"
@@ -568,7 +609,8 @@ class ChatHandler:
 
             return (
                 f"## Última evaluación de {nombre_asesor}\n"
-                f"**Fecha:** {fecha} | **Oportunidad:** {opp_id}\n"
+                f"**Fecha:** {fecha} | **Oportunidad:** {opp_id or '—'}\n"
+                f"**Lead:** {nombre_lead} | {matricula_txt}\n"
                 f"**Archivo:** {archivo}\n\n"
                 f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n\n"
                 f"**Perfil lead:** {perfil_lead}\n"
@@ -697,40 +739,48 @@ class ChatHandler:
 
     def _resolver_nombre_en_perfiles(self, nombre_fragmento: str) -> Optional[str]:
         """
-        Busca el nombre_fragmento en los perfiles guardados.
-        Prioriza coincidencia por prefijo de tokens para evitar devolver un perfil
-        corto ("Aleix Ribas") cuando existe uno más completo ("Aleix Ribas Canadell").
+        Busca el nombre_fragmento en los asesores de Supabase (nombre canónico + aliases).
+
+        Prioriza coincidencia por prefijo de tokens:
+        "Aleix Ribas" matchea "Aleix Ribas Canadell" y viceversa.
+        También comprueba aliases para variantes de nombre.
         """
+        db = get_database()
+        if not db.disponible:
+            return None
+
         try:
-            archivos = list(memory_manager.perfiles_dir.glob("*.json"))
-            tokens_fragmento = nombre_fragmento.lower().split()
-            n_frag = len(tokens_fragmento)
+            asesores = db.listar_asesores()
+            tokens_frag = nombre_fragmento.lower().split()
+            n_frag = len(tokens_frag)
 
-            candidatos = []  # (nombre_perfil, longitud_tokens) — preferir el más largo
-            for f in archivos:
-                nombre_perfil = f.stem.replace("_", " ")
-                tokens_perfil = nombre_perfil.lower().split()
-                n_perfil = len(tokens_perfil)
+            candidatos = []  # (nombre_canonico, n_tokens) — preferir el más largo
 
-                # Coincidencia exacta de prefijo:
-                # "aleix ribas" matchea "aleix ribas canadell" (frag es prefijo del perfil)
-                # "aleix ribas canadell" matchea "aleix ribas" (perfil es prefijo del frag)
-                if n_frag >= 2 and n_perfil >= 2:
-                    n_min = min(n_frag, n_perfil)
-                    if tokens_fragmento[:n_min] == tokens_perfil[:n_min]:
-                        candidatos.append((nombre_perfil.title(), n_perfil))
+            for asesor in asesores:
+                nombres_a_probar = [asesor["nombre"]] + (asesor.get("aliases") or [])
+
+                for nombre_candidato in nombres_a_probar:
+                    tokens_c = nombre_candidato.lower().split()
+                    n_c = len(tokens_c)
+
+                    if n_frag >= 2 and n_c >= 2:
+                        n_min = min(n_frag, n_c)
+                        if tokens_frag[:n_min] == tokens_c[:n_min]:
+                            candidatos.append((asesor["nombre"], n_c))
+                            break  # un match por asesor es suficiente
 
             if candidatos:
-                # Devolver el perfil con más tokens (el nombre más completo)
                 candidatos.sort(key=lambda x: x[1], reverse=True)
                 return candidatos[0][0]
 
             # Fallback: algún token significativo en común
-            for f in archivos:
-                nombre_perfil = f.stem.replace("_", " ")
-                tokens_perfil = nombre_perfil.lower().split()
-                if any(t in tokens_perfil for t in tokens_fragmento if len(t) > 3):
-                    return nombre_perfil.title()
+            for asesor in asesores:
+                nombres_a_probar = [asesor["nombre"]] + (asesor.get("aliases") or [])
+                for nombre_candidato in nombres_a_probar:
+                    tokens_c = nombre_candidato.lower().split()
+                    if any(t in tokens_c for t in tokens_frag if len(t) > 3):
+                        return asesor["nombre"]
+
         except Exception:
             pass
         return None

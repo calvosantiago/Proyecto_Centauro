@@ -29,6 +29,15 @@ class EstiloAgent(BaseEvaluatorAgent):
             resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario, audio_features)
             confianza = self._calcular_confianza(resultado_raw)
             
+            # Tope universal: 3+ fallos críticos = MALO
+            contador_fallos = resultado_raw.get("contador_fallos_criticos", 0)
+            cal_tmp, raz_tmp = self._aplicar_tope_fallos_criticos(
+                resultado_raw.get("calificacion"), contador_fallos, resultado_raw.get("razonamiento", "")
+            )
+            if cal_tmp != resultado_raw.get("calificacion"):
+                resultado_raw["calificacion"] = cal_tmp
+                resultado_raw["razonamiento"] = raz_tmp
+
             # Validar aspectos críticos
             aspectos = resultado_raw.get("aspectos_evaluados", {})
             problemas_graves = []
@@ -82,7 +91,41 @@ TU ÚNICA TAREA: Evaluar la CALIDAD COMUNICATIVA del [ASESOR] a lo largo de toda
 
 TONO DE REDACCIÓN: Escribe SIEMPRE en TERCERA PERSONA al referirte al asesor ("el asesor hizo...", "el asesor podría..."). NUNCA uses segunda persona ("hiciste...", "podrías...", "tu objetivo...").
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚫 LÍMITES DUROS — LEE ESTO ANTES DE ANALIZAR NADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Estas reglas se aplican SIEMPRE. No hay excepciones.
+
+MALO no requiere que el asesor haya sido grosero o agresivo. También es MALO cuando
+el estilo acumula varios fallos comunicativos sin ninguna fortaleza real que lo compense.
+Si el razonamiento no puede citar ni un aspecto genuinamente positivo del estilo del
+asesor, la calificación no puede ser MEJORABLE — debe ser MALO.
+
+Regla concreta: MEJORABLE requiere al menos UNA fortaleza comunicativa real y observable
+(tono cercano, momento de empatía, ritmo adecuado, vocabulario bien adaptado...).
+Si no existe ninguna, la calificación es MALO.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CHECKLIST PREVIO — RESPONDE ANTES DE LEER LA TRANSCRIPCIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ten presente estas 5 preguntas mientras lees. Al terminar, respóndelas SÍ/NO y
+usa ese conteo como "contador_fallos_criticos" en el JSON:
+
+  1. ¿El tono fue profesional y cercano (no mecánico ni inapropiado)?
+  2. ¿El vocabulario estuvo adaptado al lead (sin jerga técnica inadecuada)?
+  3. ¿Hubo al menos un momento de empatía real (incluye empatía inversa)?
+  4. ¿El lead participó activamente (no lead silencioso ni asesor monopolizando)?
+  5. ¿El profesionalismo fue alto (sin muletillas excesivas, seguro)?
+
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
+Si no puedes identificar ni UNA fortaleza comunicativa real → también es MALO.
+Si no puedes identificar ni UNA fortaleza comunicativa real → la calificación es MALO.
+No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {manual_enriquecido}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -167,6 +210,26 @@ Las técnicas de los libros son válidas, pero los ejemplos concretos deben sona
 naturales para ese perfil específico.
 {bloque_audio}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ADVERTENCIA: MÉTRICAS DE AUDIO PUEDEN ESTAR DISTORSIONADAS POR DESCONEXIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Antes de interpretar métricas de audio, comprueba si el lead se desconectó en algún
+punto de la llamada. Señales: el asesor dice "¿Hola?", "¿Me escuchas?", "¿Sigues ahí?",
+o hay un tramo donde el asesor habla varias veces sin que el lead responda.
+
+Si hay indicios de desconexión (parcial o definitiva):
+⚠️ Las métricas de silencio y energía pueden estar infladas artificialmente:
+   - ratio_silencio y n_silencios_largos_4seg incluyen el tiempo que el asesor
+     esperó al vacío — no son silencios comunicativos del asesor
+   - ratio_energia_final_vs_inicio puede mostrar caída porque el asesor estaba
+     esperando sin hablar, no porque perdiera convicción
+   - NO uses estas métricas distorsionadas para penalizar el estilo del asesor
+   - En el razonamiento, indica que las métricas del final pueden estar afectadas
+     por la desconexión y no son atribuibles al estilo comunicativo del asesor
+
+Si la desconexión fue parcial (el lead volvió): evalúa solo el tramo donde sí
+había conversación real. Ignora las métricas del intervalo sin lead.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ COHERENCIA OBLIGATORIA CON LOS DATOS DE AUDIO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Los datos acústicos que aparecen arriba son OBJETIVOS y tienen PRIORIDAD sobre
@@ -232,38 +295,10 @@ ASPECTOS A EVALUAR:
    en el razonamiento y en las evidencias. Es diferente de "informal": la jerga técnica
    sin adaptar aleja al lead en vez de acercarlo.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ ANTES DE CALIFICAR — VERIFICACIÓN OBLIGATORIA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📌 CALIBRA con los ejemplos del CONTEXTO:
-Los ejemplos de buenas prácticas que aparecen arriba son el estándar de referencia
-del programa — no son inspiración para el coaching, son la definición concreta de BUENO.
-Si lo que hizo este asesor se parece en espíritu a esos ejemplos (aunque use otras
-palabras o no cubra cada punto al pie de la letra), está en zona BUENO.
-⚠️ Matiz: un momento aislado que se parece a un ejemplo NO hace BUENO el bloque
-completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos marcan
-el estándar para el nivel general, no para un fragmento aislado.
-Tenlo presente al interpretar los fallos del checklist.
-
-DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
-de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
-
-  1. ¿El tono fue profesional y cercano (no mecánico ni inapropiado)?              → SÍ / NO
-  2. ¿El vocabulario estuvo adaptado al lead (sin jerga técnica inadecuada)?       → SÍ / NO
-  3. ¿Hubo al menos un momento de empatía real (incluye empatía inversa)?          → SÍ / NO
-  4. ¿El lead participó activamente (no lead silencioso ni asesor monopolizando)?   → SÍ / NO
-  5. ¿El profesionalismo fue alto (sin muletillas excesivas, seguro)?              → SÍ / NO
-
-CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
-
-🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
-   Analiza el peso real de cada fallo. Los 5 criterios comunicativos son todos relevantes
-   para que el lead se sienta cómodo y confíe en el asesor. Tono inapropiado, vocabulario
-   inadaptado, ausencia de empatía, lead silencioso y profesionalismo bajo son señales que
-   acumuladas dañan la conversación. Si la mayoría fallaron, la calificación debe ser MALO.
-   No por un umbral mecánico, sino porque múltiples fallos comunicativos crean distancia y
-   erosionan la confianza. No detectes múltiples fallos graves en el estilo y concluyas
-   MEJORABLE: sería incoherente con tu propio análisis.
+Los ejemplos de buenas prácticas son el estándar de referencia — la definición concreta de BUENO.
+Si lo que hizo este asesor se parece en espíritu a esos ejemplos → está en zona BUENO.
+Un momento aislado NO hace BUENO el bloque completo. Evalúa el CONJUNTO.
 
 CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
 
@@ -276,21 +311,29 @@ Son dos cosas completamente diferentes. NO las confundas:
 Un asesor puede ser informal Y estructurado a la vez. NO marques MEJORABLE o MALO
 solo porque el tono es informal si la conversación tiene coherencia y orden.
 
-🔴 MALO — el estilo comunicativo genera rechazo, incomodidad o rompe la confianza:
+🔴 MALO — el estilo no aporta nada positivo a la conversación. Dos vías posibles:
+   VÍA A — Activamente dañino:
    - Tono grosero, condescendiente, o tan desorganizado que el lead no entiende la conversación
-   - Muletillas constantes que restan credibilidad o dificultan la comprensión
-   - Cero empatía: el asesor habla sin considerar cómo se siente el lead
+   - Tono agresivo, impaciente o que hace sentir al lead presionado
    - Genera incomodidad, distancia o rechazo visible en el lead
-   - También: tono agresivo, impaciente o que hace sentir al lead presionado
+   VÍA B — Acumulación de fallos sin fortalezas que los compensen:
+   - Múltiples problemas comunicativos (monólogos, muletillas, sin empatía, ritmo malo...)
+   - Y no hay ni UNA fortaleza comunicativa real observable en toda la conversación
+   - La conversación es mecánica, impersonal y no genera ninguna conexión
+   ⚠️ Un asesor puede ser MALO sin ser grosero: basta con que el estilo falle en todos
+   los frentes y no tenga nada que rescatar. Si el razonamiento no cita ningún aspecto
+   positivo real → la calificación debe ser MALO, no MEJORABLE.
 
-🟡 MEJORABLE — el estilo es correcto pero frío, mecánico y sin conexión real:
-   - Tono educado pero robótico, como si siguiera un guión
-   - Sin momentos de empatía o cercanía genuina a lo largo de la conversación
-   - El lead responde pero no hay señales de que se sienta cómodo o escuchado
-   - Profesional pero impersonal: correcto, pero no conecta
+🟡 MEJORABLE — hay al menos UNA fortaleza comunicativa real, pero el conjunto es insuficiente:
+   - Tono educado pero robótico en la mayoría de la conversación
+   - Pocos o ningún momento de empatía o cercanía genuina
+   - El lead responde pero no hay señales claras de que se sienta cómodo o escuchado
+   - Profesional pero impersonal: correcto en superficie, pero no conecta
    - TONO MECÁNICO: patrón específico a detectar — el asesor encadena bloques de
      información sin pausas ni preguntas, el lead apenas tiene espacio para hablar
      y la conversación suena más a monólogo que a diálogo
+   ⚠️ REQUISITO: para ser MEJORABLE debe existir al menos UNA fortaleza real (tono
+   amable, momento de empatía, vocabulario bien adaptado...). Sin ninguna → es MALO.
 
 🟢 BUENO — el estilo genera confianza y el lead se siente cómodo participando:
    - Hay al menos un momento de empatía real o cercanía genuina (incluye: frases
@@ -326,12 +369,13 @@ FORMATO JSON OBLIGATORIO:
   "lead_participa_activamente": true/false
 }}
 
-⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
-- MALO: el estilo genera rechazo, incomodidad o desconfianza activa, O es tan mecánico y frío que bloquea la apertura del lead y dificulta el avance de la conversación.
-- MEJORABLE: el estilo es correcto pero mecánico, educado pero sin calidez real. El lead responde pero no se abre con confianza ni se percibe conexión personal.
-- BUENO: el estilo suma. El lead se siente cómodo y hay algún momento de conexión real. No es necesario perfección técnica: si el tono ayudó al avance de la conversación → es BUENO.
+⚠️ REGLAS FINALES PARA CALIFICAR:
+- MALO: múltiples fallos comunicativos sin ninguna fortaleza real que los compense, O estilo activamente dañino (grosero, agresivo, condescendiente). Si el razonamiento no puede citar ni un aspecto positivo genuino → MALO.
+- MEJORABLE: hay al menos UNA fortaleza comunicativa real, pero el conjunto falla. Educado pero mecánico, sin conexión real ni calidez.
+- BUENO: el estilo suma. El lead se siente cómodo y hay algún momento de conexión real. No hace falta perfección: si el tono ayudó al avance de la conversación → BUENO.
 - Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
-- Si el asesor compartió una experiencia propia (empatía inversa) → cuenta como empatía real → inclínate por BUENO.
+- Si dudas entre MEJORABLE y MALO: ¿puedes citar al menos UNA fortaleza comunicativa real? Si no → MALO.
+- Si el asesor compartió una experiencia propia (empatía inversa) → empatía real → inclínate por BUENO.
 - Si el asesor expresó opiniones personales o recomendaciones propias → NO es motivo de MEJORABLE ni MALO.
 - Si el asesor fue cercano o informal pero el lead respondió bien → NO es motivo de MEJORABLE.
 - Evidencias LITERALES (COPY-PASTE exacto).

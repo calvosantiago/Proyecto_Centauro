@@ -35,8 +35,7 @@ class GestionAsesores:
         self._cargar_asesores_conocidos()
 
     def _cargar_asesores_conocidos(self):
-        """Carga lista de asesores desde Supabase (o JSON como fallback)."""
-        import json
+        """Carga lista de asesores desde Supabase."""
         try:
             # Intentar Supabase primero
             from .database import get_database
@@ -56,22 +55,8 @@ class GestionAsesores:
                 if self.asesores_conocidos:
                     return
 
-            # Fallback: JSON local
-            from .memoria import memory_manager
-
-            perfiles_dir = memory_manager.perfiles_dir
-
-            if perfiles_dir.exists():
-                for archivo in perfiles_dir.glob("*.json"):
-                    try:
-                        with open(archivo, 'r', encoding='utf-8') as f:
-                            data = json.load(f)
-                        nombre = data.get('nombre', '').strip()
-                        if nombre and self._es_nombre_valido(nombre):
-                            self.asesores_conocidos.append(nombre)
-                    except Exception:
-                        nombre_legible = archivo.stem.replace('_', ' ').title()
-                        self.asesores_conocidos.append(nombre_legible)
+            # Sin Supabase disponible → la lista de asesores conocidos queda vacía
+            # (el fuzzy matching no podrá sugerir correcciones, pero no rompe)
         except Exception as e:
             print(f"   ⚠️ No se pudieron cargar asesores conocidos: {e}")
 
