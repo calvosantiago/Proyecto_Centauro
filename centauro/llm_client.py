@@ -351,7 +351,7 @@ def _log_prompt_debug(referencia_log: str, prompt_sistema: str, prompt_usuario: 
         print(f"  [DEBUG] Error guardando prompt: {e}")
 
 
-def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", force_json=None):
+def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", force_json=None, max_tokens=None):
     """
     Envía la consulta a OpenAI y registra el gasto asociado al archivo 'referencia_log'.
 
@@ -360,6 +360,8 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
         prompt_usuario: Prompt del usuario
         referencia_log: Referencia para el log de gastos
         force_json: Si True, fuerza JSON. Si False, texto libre. Si None, auto-detecta si el prompt pide JSON
+        max_tokens: Límite explícito de tokens de salida. Si None, usa el default del modelo.
+                    Recomendado para evaluaciones con JSON estructurado: 2500-3000.
     """
     # Auto-detectar si el prompt pide JSON (para compatibilidad con código existente)
     if force_json is None:
@@ -385,6 +387,15 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
     if model_name not in REASONING_MODELS:
         kwargs["temperature"] = 0.0
         kwargs["seed"] = 42
+
+    # max_tokens explícito (evita truncamiento de respuestas JSON largas).
+    # Los modelos de razonamiento (o-series, gpt-5-mini) usan max_completion_tokens;
+    # los modelos estándar usan max_tokens.
+    if max_tokens is not None:
+        if model_name in REASONING_MODELS:
+            kwargs["max_completion_tokens"] = max_tokens
+        else:
+            kwargs["max_tokens"] = max_tokens
 
     # Agregar response_format solo si se necesita JSON
     if force_json:

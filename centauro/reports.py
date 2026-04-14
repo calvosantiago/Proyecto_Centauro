@@ -181,6 +181,22 @@ class ModernReport(FPDF):
                 self.multi_cell(129, 5, to_latin1(quien or "No definido"), fill=True)
                 self.ln(2)
 
+            # 5a-bis. Feedback de coaching personalizado (Cierre)
+            feedback_coach = (
+                bloque.get('feedback_personalizado', '')
+                or bloque.get('metadata', {}).get('feedback_personalizado', '')
+            )
+            if feedback_coach and str(feedback_coach).strip():
+                self.set_x(15)
+                self.set_font('Helvetica', 'B', 9)
+                self.set_text_color(100, 80, 0)   # Ocre oscuro, igual que el coaching
+                self.cell(0, 5, to_latin1("Coaching personalizado"), 0, 1)
+                self.set_x(15)
+                self.set_font('Helvetica', '', 9)
+                self.set_text_color(60, 60, 60)
+                self.multi_cell(0, 5, to_latin1(str(feedback_coach).strip()))
+                self.ln(2)
+
         # 5b. Hallazgos clave en Investigación
         if nombre_normalizado in ("investigación", "investigacion"):
             factor_compra = hallazgos.get("factor_de_compra", "")

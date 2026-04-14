@@ -22,14 +22,93 @@ class EstiloAgent(BaseEvaluatorAgent):
     def __init__(self):
         super().__init__(nombre_bloque="Estilo y comunicación")
     
+    # ── Valores que representan un fallo en cada aspecto de aspectos_evaluados ──
+    _FALLOS_ASPECTOS = {
+        "tono":            {"mecanico", "inapropiado"},
+        "vocabulario":     {"inadecuado"},
+        "empatia":         {"ausente"},
+        "ritmo":           {"monopoliza"},
+        "profesionalismo": {"bajo"},
+    }
+
+    def _aplicar_topes_estilo(
+        self,
+        calificacion: str,
+        resultado_raw: dict,
+        razonamiento: str,
+    ) -> tuple:
+        """
+        Validación Python adicional al tope genérico de base_agent.
+
+        Regla A — Aspectos fallidos: si los aspectos_evaluados muestran ≥3 áreas
+        con valor de fallo, la calificación no puede superar MALO.
+
+        Regla B — Sin fortaleza: si la calificación es MEJORABLE pero el LLM no
+        pudo identificar ninguna fortaleza comunicativa real, se baja a MALO.
+
+        Regla C — Lead no participa + 2 aspectos fallidos: combinación que indica
+        que la conversación fue monólogo sin conexión, fuerza MALO.
+
+        Estas reglas usan los propios campos semánticos del JSON del LLM (no el
+        contador), porque el LLM tiende a manipular el contador a la baja para
+        evitar llegar a 3 y así justificar MEJORABLE.
+        """
+        if calificacion == "MALO":
+            return calificacion, razonamiento  # ya es el mínimo, nada que bajar
+
+        aspectos = resultado_raw.get("aspectos_evaluados", {})
+
+        # ── Regla A: contar áreas con valor de fallo ──
+        fallos_aspectos = sum(
+            1 for asp, malos in self._FALLOS_ASPECTOS.items()
+            if aspectos.get(asp, "") in malos
+        )
+
+        if fallos_aspectos >= 3:
+            nota = (
+                f"[Ajuste automático] Calificación bajada de {calificacion} a MALO: "
+                f"los aspectos evaluados muestran {fallos_aspectos} áreas con fallos "
+                f"(tono / vocabulario / empatía / ritmo / profesionalismo). "
+                f"Con 3 o más áreas fallidas el resultado no puede ser {calificacion}."
+            )
+            print(f"   ⚠️ Tope estilo Regla A: {fallos_aspectos} aspectos fallidos → MALO")
+            return "MALO", f"{razonamiento}\n\n{nota}"
+
+        # ── Regla B: sin fortaleza real → MEJORABLE no es posible ──
+        if calificacion == "MEJORABLE":
+            fortaleza = str(resultado_raw.get("fortaleza_principal", "") or "").strip().lower()
+            sin_fortaleza = fortaleza in ("", "ninguna", "no identificada", "n/a", "-", "no hay", "ninguno")
+            if sin_fortaleza:
+                nota = (
+                    "[Ajuste automático] Calificación bajada de MEJORABLE a MALO: "
+                    "el agente no pudo identificar ninguna fortaleza comunicativa real. "
+                    "Sin al menos una fortaleza observable, la calificación no puede ser MEJORABLE."
+                )
+                print("   ⚠️ Tope estilo Regla B: sin fortaleza real → MALO")
+                return "MALO", f"{razonamiento}\n\n{nota}"
+
+        # ── Regla C: lead no participa + 2 aspectos fallidos ──
+        lead_pasivo = not resultado_raw.get("lead_participa_activamente", True)
+        if lead_pasivo and fallos_aspectos >= 2:
+            nota = (
+                f"[Ajuste automático] Calificación bajada de {calificacion} a MALO: "
+                f"el lead no participó activamente Y se detectaron {fallos_aspectos} "
+                f"áreas comunicativas fallidas. Una conversación monólogo sin conexión "
+                f"real no puede calificarse como {calificacion}."
+            )
+            print(f"   ⚠️ Tope estilo Regla C: lead pasivo + {fallos_aspectos} fallos → MALO")
+            return "MALO", f"{razonamiento}\n\n{nota}"
+
+        return calificacion, razonamiento
+
     def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None, audio_features: dict = None) -> EvaluationResult:
         """Evalúa el estilo comunicativo en toda la conversación"""
 
         try:
             resultado_raw = self._evaluar_con_llm(transcripcion, contexto_manual, contexto_usuario, audio_features)
             confianza = self._calcular_confianza(resultado_raw)
-            
-            # Tope universal: 3+ fallos críticos = MALO
+
+            # Tope universal: 3+ fallos en checklist = MALO
             contador_fallos = resultado_raw.get("contador_fallos_criticos", 0)
             cal_tmp, raz_tmp = self._aplicar_tope_fallos_criticos(
                 resultado_raw.get("calificacion"), contador_fallos, resultado_raw.get("razonamiento", "")
@@ -38,18 +117,32 @@ class EstiloAgent(BaseEvaluatorAgent):
                 resultado_raw["calificacion"] = cal_tmp
                 resultado_raw["razonamiento"] = raz_tmp
 
-            # Validar aspectos críticos
+            # Tope específico de estilo: cross-validación con aspectos_evaluados
+            # (el LLM tiende a bajar el contador para evitar MALO, pero los aspectos
+            #  los rellena más honestamente — usamos esos para la decisión final)
+            cal_tmp, raz_tmp = self._aplicar_topes_estilo(
+                resultado_raw.get("calificacion"), resultado_raw, resultado_raw.get("razonamiento", "")
+            )
+            if cal_tmp != resultado_raw.get("calificacion"):
+                resultado_raw["calificacion"] = cal_tmp
+                resultado_raw["razonamiento"] = raz_tmp
+
+            # Validar aspectos críticos (para confianza y metadatos)
             aspectos = resultado_raw.get("aspectos_evaluados", {})
             problemas_graves = []
-            
-            if aspectos.get("tono") == "inapropiado":
-                problemas_graves.append("Tono inapropiado detectado")
-                confianza *= 0.7
-            
+
+            if aspectos.get("tono") in ("inapropiado", "mecanico"):
+                problemas_graves.append(f"Tono: {aspectos.get('tono')}")
+                confianza *= 0.85
+
             if aspectos.get("empatia") == "ausente":
-                problemas_graves.append("Falta de empatía")
-                confianza *= 0.8
-            
+                problemas_graves.append("Empatía ausente")
+                confianza *= 0.85
+
+            if aspectos.get("ritmo") == "monopoliza":
+                problemas_graves.append("Asesor monopoliza la conversación")
+                confianza *= 0.9
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 calificacion=resultado_raw.get("calificacion"),
@@ -105,8 +198,19 @@ Regla concreta: MEJORABLE requiere al menos UNA fortaleza comunicativa real y ob
 (tono cercano, momento de empatía, ritmo adecuado, vocabulario bien adaptado...).
 Si no existe ninguna, la calificación es MALO.
 
+⚠️ QUÉ NO CUENTA COMO FORTALEZA REAL:
+La tentación habitual es buscar el mínimo positivo para justificar MEJORABLE. Estas
+cosas NO son fortalezas reales que salven a un asesor de MALO:
+- "Hizo algunas preguntas puntuales" en medio de largos monólogos. Hacer preguntas
+  esporádicas cuando el patrón dominante es el monólogo NO es una fortaleza de ritmo.
+- "Fue educado" o "no fue grosero". La cortesía basal no es una fortaleza comunicativa.
+- "Usó el nombre del lead una vez". Un uso aislado sin patrón de personalización
+  no compensa una comunicación mecánica.
+- "El vocabulario fue claro". Claridad mínima es el estándar base, no un positivo.
+Si el único "positivo" que puedes citar es de estas categorías, la calificación es MALO.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ CHECKLIST PREVIO — RESPONDE ANTES DE LEER LA TRANSCRIPCIÓN
+✅ CHECKLIST PREVIO — RESPONDE ANTES DE ANALIZAR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Ten presente estas 5 preguntas mientras lees. Al terminar, respóndelas SÍ/NO y
 usa ese conteo como "contador_fallos_criticos" en el JSON:
@@ -119,8 +223,8 @@ usa ese conteo como "contador_fallos_criticos" en el JSON:
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
-Si no puedes identificar ni UNA fortaleza comunicativa real → también es MALO.
-Si no puedes identificar ni UNA fortaleza comunicativa real → la calificación es MALO.
+Si no puedes identificar ni UNA fortaleza comunicativa REAL (ver lista de lo que
+no cuenta arriba) → la calificación también es MALO.
 No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -235,7 +339,15 @@ había conversación real. Ignora las métricas del intervalo sin lead.
 Los datos acústicos que aparecen arriba son OBJETIVOS y tienen PRIORIDAD sobre
 cualquier impresión subjetiva que puedas extraer del texto de la transcripción.
 
-REGLA: Si los datos dicen algo, tu razonamiento debe ser COHERENTE con ellos, no contradecirlos.
+⚠️ EXCEPCIÓN: Si detectaste que el lead se desconectó en algún punto de la llamada,
+las métricas de silencio (ratio_silencio, n_silencios_largos_4seg) y de energía
+(ratio_energia_final_vs_inicio) pueden estar INFLADAS por ese tramo sin lead y NO
+reflejan el comportamiento comunicativo real del asesor. En ese caso:
+- Puedes mencionarlas como contexto, pero NO las uses como argumento de penalización
+- Las reglas de coherencia de abajo se aplican solo al tramo con conversación real
+
+REGLA (cuando NO hay desconexión): Si los datos dicen algo, tu razonamiento debe
+ser COHERENTE con ellos, no contradecirlos.
 Ejemplos concretos de coherencia obligatoria:
 - Si "ratio_energia_final_vs_inicio" es >= 0.80 → NO digas que hay "caída de energía al final"
   ni "pérdida de convicción hacia el cierre". El dato objetivo dice volumen constante o estable.

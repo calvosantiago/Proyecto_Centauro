@@ -147,6 +147,7 @@ def extraer_opportunity_id(filename: str) -> Optional[str]:
 
     Formato esperado: 2021-002579270_descripcion.ext
     El ID tiene el patrón: 4 dígitos de año, guión, 6-12 dígitos.
+    Separadores aceptados tras el ID: "_", "-" o ".".
 
     Args:
         filename: Nombre del archivo (con o sin path)
@@ -157,11 +158,15 @@ def extraer_opportunity_id(filename: str) -> Optional[str]:
     Ejemplos:
         >>> extraer_opportunity_id("2021-002579270_entrevista_MBA.mp4")
         '2021-002579270'
+        >>> extraer_opportunity_id("2021-002586934-entrevista.mp4")
+        '2021-002586934'
+        >>> extraer_opportunity_id("2021-002586934.entrevista.mp4")
+        '2021-002586934'
         >>> extraer_opportunity_id("entrevista_sin_id.mp4")
         None
     """
     stem = Path(filename).stem
-    match = re.match(r'^(\d{4}-\d{6,12})_', stem)
+    match = re.match(r'^(\d{4}-\d{6,12})(?:[_\-.]|$)', stem)
     return match.group(1) if match else None
 
 

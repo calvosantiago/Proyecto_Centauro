@@ -83,6 +83,26 @@ class CierreAgent(BaseEvaluatorAgent):
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
 
+            # ── Validar razonamiento: detectar truncamiento del LLM ──────────
+            razonamiento_raw = resultado_raw.get("razonamiento", "")
+            razonamiento_ok  = razonamiento_raw.strip()
+            _truncado = (
+                len(razonamiento_ok) < 120
+                or razonamiento_ok.endswith("(")
+                or razonamiento_ok.endswith(",")
+            )
+            if _truncado:
+                print(f"   ⚠️ Razonamiento de Cierre posiblemente truncado "
+                      f"({len(razonamiento_ok)} chars). Añadiendo nota.")
+                razonamiento_ok = (
+                    razonamiento_ok
+                    + (" ..." if not razonamiento_ok.endswith("...") else "")
+                    + "\n\n[Nota automática: el texto anterior puede estar incompleto — "
+                    "el modelo recortó la respuesta. Consultar el feedback de coaching "
+                    "más abajo para el análisis completo.]"
+                )
+                confianza *= 0.7  # Reducir confianza si el razonamiento es dudoso
+
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
             return EvaluationResult(
@@ -92,7 +112,7 @@ class CierreAgent(BaseEvaluatorAgent):
                 confianza=confianza,
                 evidencia_principal=resultado_raw.get("evidencia_principal", ""),
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
-                razonamiento=resultado_raw.get("razonamiento", ""),
+                razonamiento=razonamiento_ok,
                 recomendacion_accionable=recomendacion_base,
                 metadata={
                     "proximo_paso": proximo_paso,
@@ -442,7 +462,9 @@ FINAL DE LA CONVERSACIÓN (enfócate aquí):
 Evalúa el cierre y próximos pasos en JSON.
 """
         
-        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre")
+        # max_tokens=2500: el prompt de cierre es largo (transcript x2 + manual)
+        # sin este límite explícito gpt-5-mini puede recortar campos de texto en el JSON.
+        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre", max_tokens=2500)
         return self._extract_json_safe(resp)
     
     def _detectar_fin_abrupto(self, final: str) -> bool:
