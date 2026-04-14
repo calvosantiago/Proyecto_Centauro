@@ -21,6 +21,7 @@ from centauro.reports import generar_pdf
 from centauro.config import settings
 from centauro.utils.validaciones import extraer_opportunity_id
 from centauro.auth import autenticar
+from centauro.llm_client import set_usuario_activo
 import json
 # Importar funciones de lectura desde main.py (raíz del proyecto)
 from main import leer_word, limpiar_formato_vtt
@@ -59,13 +60,14 @@ ASSEMBLYAI_COST_PER_SECOND = 0.0002  # $0.012/min = $0.72/hora (transcripción $
 def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
     """Registra el coste de una transcripción AssemblyAI en control_gastos.csv."""
     import datetime
-    from centauro.llm_client import _append_cost_row
+    from centauro.llm_client import _append_cost_row, get_usuario_activo
     coste = duracion_seg * ASSEMBLYAI_COST_PER_SECOND
     now = datetime.datetime.now()
     row = {
         "Timestamp": now.isoformat(timespec="seconds"),
         "Fecha": now.strftime("%Y-%m-%d"),
         "Hora": now.strftime("%H:%M:%S"),
+        "Usuario": get_usuario_activo(),
         "Archivo/Referencia": referencia,
         "Operacion": "transcripcion_assemblyai",
         "Endpoint": "assemblyai/v2/transcript",
@@ -228,6 +230,8 @@ async def start():
     app_user = cl.context.session.user
     nombre_del_login = None
     if app_user:
+        # Registrar usuario activo para que aparezca en control_gastos.csv
+        set_usuario_activo(app_user.identifier)
         rol = app_user.metadata.get("rol", "asesor")
         nombre_del_login = app_user.metadata.get("nombre_completo")
 
