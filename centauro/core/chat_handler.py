@@ -69,6 +69,7 @@ class ChatHandler:
 
     def __init__(self):
         self.historial_conversacion: List[Dict] = []
+        self._pbi_historial: List[Dict] = []  # Últimos intercambios PBI para contexto
 
     def procesar_consulta(self, pregunta_usuario: str, nombre_asesor: Optional[str] = None) -> str:
         """
@@ -984,7 +985,7 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
     def _consultar_powerbi(self, pregunta: str) -> str:
         """
         Consulta el modelo semántico de Power BI para responder KPIs y métricas.
-        Usa un agente Gemini (pbi_agent) que decide iterativamente qué herramientas
+        Usa un agente OpenAI (pbi_agent) que decide iterativamente qué herramientas
         llamar (consultar diccionario, ejecutar DAX, reintentar si falla).
 
         Los comandos DAX directos (@pbi EVALUATE ...) se ejecutan sin pasar por el agente.
@@ -1029,10 +1030,17 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
                 logger.error(f"Error en sandbox DAX: {e}")
                 return f"Error ejecutando DAX: {e}"
 
-        # Consulta en lenguaje natural → agente Gemini
+        # Consulta en lenguaje natural → agente Claude
         try:
             from .pbi_agent import responder as agente_responder
-            return agente_responder(pregunta, client)
+            respuesta = agente_responder(pregunta, client, historial=self._pbi_historial)
+
+            # Guardar intercambio en historial (máximo 3 últimos)
+            self._pbi_historial.append({"pregunta": pregunta, "respuesta": respuesta})
+            if len(self._pbi_historial) > 3:
+                self._pbi_historial.pop(0)
+
+            return respuesta
         except Exception as e:
             logger.error(f"Error en agente PBI: {e}")
             return f"Error al consultar el modelo semántico de Power BI: {e}"

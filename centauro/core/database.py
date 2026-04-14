@@ -229,13 +229,14 @@ class DatabaseManager:
                     "calificacion": bloque.get("calificacion"),
                     "observabilidad": bloque.get("observabilidad"),
                     "confianza": bloque.get("confianza"),
-                    "evidencia_principal": bloque.get("evidencia_principal"),
                     "razonamiento": bloque.get("razonamiento"),
-                    "recomendacion_accionable": bloque.get("recomendacion_accionable"),
                 })
 
         if bloques_data:
-            self._client.table("calificaciones_bloque").insert(bloques_data).execute()
+            try:
+                self._client.table("calificaciones_bloque").insert(bloques_data).execute()
+            except Exception as e:
+                logger.error(f"Error insertando calificaciones_bloque (evaluacion_id={evaluacion_id}): {e}")
 
         return evaluacion_id
 

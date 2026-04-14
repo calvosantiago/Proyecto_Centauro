@@ -11,7 +11,7 @@ import chainlit as cl
 import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parent / ".env")
+load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 from centauro.core import CentauroOrchestrator
 from centauro.core.chat_handler import ChatHandler
 from centauro.core.memoria import memory_manager
@@ -569,6 +569,31 @@ async def main(message: cl.Message):
             if respuesta_pre.lower() not in ("skip", "omitir", "-", "n/a"):
                 nombre_especificado_en_mensaje = respuesta_pre.strip().title()
 
+    # ── Pregunta anticipada de Opportunity ID (antes de transcribir) ──
+    if es_multimedia:
+        _opp_id_pre = extraer_opportunity_id(file.name) if file else None
+        if _opp_id_pre:
+            await cl.Message(content=f"🔗 **Opportunity ID detectado:** `{_opp_id_pre}`").send()
+        else:
+            try:
+                _opp_res = await cl.AskUserMessage(
+                    content=(
+                        "🔗 **¿Tienes el ID de oportunidad de esta entrevista?**\n"
+                        "Escríbelo (ej: `2021-002579270`) o escribe **no** para continuar sin él."
+                    ),
+                    timeout=30
+                ).send()
+                if _opp_res:
+                    _opp_txt = _opp_res.get("output", "").strip()
+                    if _opp_txt.lower() not in ("no", "n", "-", ""):
+                        _opp_id_pre = _opp_txt
+                        await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
+                    else:
+                        await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
+            except Exception:
+                pass
+        cl.user_session.set("opportunity_id", _opp_id_pre)
+
     import time as _time
     _tiempo_inicio = _time.time()
 
@@ -765,29 +790,8 @@ async def main(message: cl.Message):
         # Guardar en sesión
         cl.user_session.set("nombre_asesor", asesor_confirmado)
 
-        # ==================== OPPORTUNITY ID ====================
-        opp_id = extraer_opportunity_id(file.name) if file else None
-        if opp_id:
-            await cl.Message(content=f"🔗 **Opportunity ID detectado:** `{opp_id}`").send()
-        else:
-            try:
-                opp_respuesta = await cl.AskUserMessage(
-                    content=(
-                        "🔗 **¿Tienes el ID de oportunidad de esta entrevista?**\n"
-                        "Escríbelo (ej: `2021-002579270`) o escribe **no** para continuar sin él."
-                    ),
-                    timeout=30
-                ).send()
-                if opp_respuesta:
-                    texto = opp_respuesta.get("output", "").strip()
-                    if texto.lower() not in ("no", "n", "-", ""):
-                        opp_id = texto
-                        await cl.Message(content=f"✅ **Opportunity ID guardado:** `{opp_id}`").send()
-                    else:
-                        await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
-            except Exception:
-                pass  # Timeout o error → continuar sin ID
-        cl.user_session.set("opportunity_id", opp_id)
+        # opportunity_id ya fue preguntado antes de la transcripción
+        opp_id = cl.user_session.get("opportunity_id")
         # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
         async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
             try:

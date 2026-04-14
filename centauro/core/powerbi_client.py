@@ -182,7 +182,7 @@ class PowerBIClient:
             n_docs = collection_diccionario_datos.count()
             if n_docs > 0:
                 # Recuperar entradas más relevantes para la pregunta
-                n_results = min(8, n_docs)
+                n_results = min(4, n_docs)
                 results = collection_diccionario_datos.query(
                     query_texts=[pregunta],
                     n_results=n_results,

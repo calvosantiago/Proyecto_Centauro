@@ -34,8 +34,8 @@ msal
 # Gráficos automáticos en respuestas Power BI
 matplotlib
 
-# Agente PBI (Gemini — alternativa económica a Claude para consultas DAX)
-google-generativeai
+# Agente PBI (Claude Sonnet — consultas DAX sobre modelo semántico Power BI)
+anthropic
 
 # Optional (mejora performance)
 uvicorn[standard]
