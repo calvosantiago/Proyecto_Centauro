@@ -31,13 +31,26 @@ class GestionAsesores:
                              85 = suficientemente similar para alertar
         """
         self.umbral_similitud = umbral_similitud
+
+        # ── Dos listas con propósito distinto ───────────────────────────────
+        # nombres_canonicos: SOLO nombres canónicos de Supabase.
+        #   Uso: mostrar sugerencias al usuario en Chainlit.
+        # asesores_conocidos: canónicos + aliases validados.
+        #   Uso: fuzzy matching interno para identificar asesores.
+        # ────────────────────────────────────────────────────────────────────
+        self.nombres_canonicos: List[str] = []
         self.asesores_conocidos: List[str] = []
         self._cargar_asesores_conocidos()
 
     def _cargar_asesores_conocidos(self):
-        """Carga lista de asesores desde Supabase."""
+        """Carga lista de asesores desde Supabase.
+
+        nombres_canonicos ← solo el campo 'nombre' de cada asesor activo.
+        asesores_conocidos ← canónicos + aliases que pasen _es_nombre_valido().
+        Los aliases nunca aparecen en sugerencias al usuario (evita mostrar
+        variantes parciales o antiguas que confunden).
+        """
         try:
-            # Intentar Supabase primero
             from .database import get_database
             db = get_database()
 
@@ -46,17 +59,23 @@ class GestionAsesores:
                 for asesor in asesores:
                     nombre = asesor.get('nombre', '').strip()
                     if nombre and self._es_nombre_valido(nombre):
+                        self.nombres_canonicos.append(nombre)
                         self.asesores_conocidos.append(nombre)
-                    # Añadir aliases como variantes conocidas para fuzzy matching
+                    # Aliases: solo para fuzzy matching, NO para display.
+                    # Se validan igual que los canónicos.
                     for alias in (asesor.get('aliases') or []):
                         alias = alias.strip()
-                        if alias and alias not in self.asesores_conocidos:
+                        if (alias
+                                and alias not in self.asesores_conocidos
+                                and self._es_nombre_valido(alias)):
                             self.asesores_conocidos.append(alias)
                 if self.asesores_conocidos:
+                    print(f"   ✅ GestionAsesores: {len(self.nombres_canonicos)} asesores canónicos cargados "
+                          f"({len(self.asesores_conocidos)} con aliases para fuzzy matching)")
                     return
 
-            # Sin Supabase disponible → la lista de asesores conocidos queda vacía
-            # (el fuzzy matching no podrá sugerir correcciones, pero no rompe)
+            # Sin Supabase → ambas listas quedan vacías (no rompe el flujo)
+            print("   ⚠️ GestionAsesores: Supabase no disponible — sin lista de asesores conocidos")
         except Exception as e:
             print(f"   ⚠️ No se pudieron cargar asesores conocidos: {e}")
 

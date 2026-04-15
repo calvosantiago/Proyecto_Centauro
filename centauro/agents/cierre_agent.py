@@ -462,9 +462,10 @@ FINAL DE LA CONVERSACIÓN (enfócate aquí):
 Evalúa el cierre y próximos pasos en JSON.
 """
         
-        # max_tokens=2500: el prompt de cierre es largo (transcript x2 + manual)
-        # sin este límite explícito gpt-5-mini puede recortar campos de texto en el JSON.
-        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre", max_tokens=2500)
+        # max_tokens=4000: gpt-5-mini es reasoning model — usa tokens internos de "thinking"
+        # que cuentan contra max_completion_tokens. Con 2500 el thinking podía agotar el límite
+        # antes de generar el JSON, resultando en content=None ("Respuesta vacía del LLM").
+        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre", max_tokens=4000)
         return self._extract_json_safe(resp)
     
     def _detectar_fin_abrupto(self, final: str) -> bool:

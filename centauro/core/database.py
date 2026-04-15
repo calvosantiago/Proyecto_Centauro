@@ -240,6 +240,99 @@ class DatabaseManager:
 
         return evaluacion_id
 
+    def buscar_evaluacion_por_oportunidad(self, opportunity_id: str) -> Optional[dict]:
+        """
+        Busca si ya existe una evaluación para un opportunity_id dado.
+
+        Returns:
+            Dict con los datos de la evaluación más reciente, o None si no existe.
+        """
+        if not self._disponible or not opportunity_id:
+            return None
+
+        result = (
+            self._client.table("evaluaciones")
+            .select("*")
+            .eq("opportunity_id", opportunity_id)
+            .order("fecha", desc=True)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def actualizar_evaluacion(
+        self,
+        evaluacion_id: int,
+        asesor_id: int,
+        resultado_evaluacion: Dict,
+        opportunity_id: Optional[str] = None,
+        archivo_origen: Optional[str] = None,
+        reporte_pdf_path: Optional[str] = None,
+        stats: Optional[Dict] = None
+    ) -> bool:
+        """
+        Sobreescribe una evaluación existente (UPDATE) y reemplaza sus calificaciones_bloque.
+
+        Returns:
+            True si la actualización fue exitosa.
+        """
+        if not self._disponible:
+            return False
+
+        resumen = resultado_evaluacion.get("resumen_contextual", {})
+        barreras = resumen.get("barreras_principales", [])
+
+        eval_data = {
+            "asesor_id": asesor_id,
+            "opportunity_id": opportunity_id,
+            "fecha": datetime.now().isoformat(),
+            "calificacion_global": resultado_evaluacion.get("calificacion_global"),
+            "archivo_origen": archivo_origen,
+            "perfil_lead": resumen.get("perfil_lead"),
+            "objetivo_del_lead": resumen.get("objetivo_del_lead"),
+            "factor_determinante_compra": resumen.get("factor_determinante_compra"),
+            "barreras_principales": json.dumps(barreras) if barreras else "[]",
+            "fecha_seguimiento": resumen.get("fecha_seguimiento"),
+            "reporte_pdf_path": reporte_pdf_path,
+        }
+
+        if stats:
+            eval_data["llamadas_api"] = stats.get("llamadas_api")
+            eval_data["tiempo_analisis_seg"] = stats.get("tiempo_analisis_seg")
+
+        try:
+            self._client.table("evaluaciones").update(eval_data).eq("id", evaluacion_id).execute()
+        except Exception as e:
+            logger.error(f"Error actualizando evaluacion (id={evaluacion_id}): {e}")
+            return False
+
+        # Reemplazar calificaciones_bloque: borrar las viejas e insertar las nuevas
+        try:
+            self._client.table("calificaciones_bloque").delete().eq("evaluacion_id", evaluacion_id).execute()
+        except Exception as e:
+            logger.error(f"Error borrando calificaciones_bloque antiguas (evaluacion_id={evaluacion_id}): {e}")
+
+        bloques = resultado_evaluacion.get("evaluacion_por_bloques", [])
+        bloques_data = []
+        for bloque in bloques:
+            if isinstance(bloque, dict):
+                bloques_data.append({
+                    "evaluacion_id": evaluacion_id,
+                    "bloque": bloque.get("bloque", ""),
+                    "calificacion": bloque.get("calificacion"),
+                    "observabilidad": bloque.get("observabilidad"),
+                    "confianza": bloque.get("confianza"),
+                    "razonamiento": bloque.get("razonamiento"),
+                })
+
+        if bloques_data:
+            try:
+                self._client.table("calificaciones_bloque").insert(bloques_data).execute()
+            except Exception as e:
+                logger.error(f"Error reinsertando calificaciones_bloque (evaluacion_id={evaluacion_id}): {e}")
+
+        return True
+
     def obtener_evaluaciones(
         self,
         asesor_id: int,

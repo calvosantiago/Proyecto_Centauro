@@ -7,6 +7,7 @@ NUEVO en v4.0:
 - Múltiples colecciones ChromaDB
 Ejecutar con: chainlit run app.py -w
 """
+import re
 import chainlit as cl
 import asyncio
 from pathlib import Path
@@ -92,12 +93,34 @@ def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
         print(f"  ⚠️ No se pudo registrar gasto AssemblyAI: {e}")
 
 
+def _get_transcripcion_cache_path(audio_path: Path) -> Path:
+    """Devuelve la ruta del archivo de caché para una transcripción."""
+    from centauro.config import settings
+    cache_dir = settings.OUTPUTS_DIR / "transcripciones_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    # Clave: nombre del archivo (sin extensión) — suficiente para archivos con nombre único.
+    # Si quisieramos comparar por contenido usaríamos hash MD5 del fichero.
+    return cache_dir / f"{audio_path.stem}.txt"
+
+
 def _transcribir_con_assemblyai(audio_path: Path, api_key: str, referencia: str = "") -> str:
     """
     Transcribe y diariza el audio usando AssemblyAI.
     Devuelve texto en formato [Speaker_A]: texto / [Speaker_B]: texto
     que el DiarizationAgent reconoce y mapea a ASESOR/LEAD por contenido.
+
+    Antes de llamar a AssemblyAI comprueba un caché local por nombre de archivo.
+    Si el archivo ya fue transcrito, devuelve el resultado guardado sin coste adicional.
     """
+    # ── Caché de transcripciones ──────────────────────────────────────────────
+    # Usar el nombre original del archivo (referencia) como clave de caché,
+    # no el path temporal donde Chainlit guarda el upload (que cambia cada vez).
+    cache_stem = Path(referencia).stem if referencia else audio_path.stem
+    cache_path = _get_transcripcion_cache_path(Path(cache_stem))
+    if cache_path.exists():
+        print(f"   💾 Transcripción en caché encontrada — omitiendo llamada a AssemblyAI ({cache_path.name})")
+        return cache_path.read_text(encoding="utf-8")
+
     import assemblyai as aai
 
     aai.settings.api_key = api_key
@@ -127,6 +150,14 @@ def _transcribir_con_assemblyai(audio_path: Path, api_key: str, referencia: str 
         lineas.append(f"[Speaker_{utt.speaker}]: {utt.text}")
     resultado = "\n\n".join(lineas)
     print(f"   ✅ AssemblyAI: {len(transcript.utterances)} utterances, {duracion_seg/60:.1f} min")
+
+    # ── Guardar en caché para evitar re-transcribir si se vuelve a evaluar ──
+    try:
+        cache_path.write_text(resultado, encoding="utf-8")
+        print(f"   💾 Transcripción guardada en caché: {cache_path.name}")
+    except Exception as e:
+        print(f"   ⚠️ No se pudo guardar caché de transcripción: {e}")
+
     return resultado
 
 
@@ -447,6 +478,36 @@ async def main(message: cl.Message):
                 except Exception as _e:
                     import logging as _log
                     _log.getLogger(__name__).warning(f"No se pudo generar gráfico PBI: {_e}")
+            # ── Aclaración PBI: el agente necesita más info del usuario ─────
+            _ACLARACION_PREFIX = "__PBI_ACLARACION__: "
+            if respuesta.startswith(_ACLARACION_PREFIX):
+                pregunta_aclaracion = respuesta[len(_ACLARACION_PREFIX):].strip()
+                # Sustituir el spinner por la pregunta de aclaración vía AskUserMessage
+                await msg_espera.remove()
+                res_aclaracion = await cl.AskUserMessage(
+                    content=pregunta_aclaracion,
+                    timeout=120,
+                ).send()
+                if res_aclaracion and res_aclaracion.get("output"):
+                    aclaracion = res_aclaracion["output"].strip()
+                    # Reenviar a PBI con contexto completo (sin pasar por clasificador)
+                    pregunta_limpia = re.sub(r"^@pbi\s*", "", pregunta, flags=re.IGNORECASE).strip()
+                    pregunta_enriquecida = f"@pbi {pregunta_limpia}. El usuario confirma: {aclaracion}"
+                    msg_espera2 = await cl.Message(
+                        content="📊 Consultando el modelo semántico de Power BI...\n"
+                                "_Generando DAX → ejecutando consulta → interpretando resultado_"
+                    ).send()
+                    nombre_asesor = cl.user_session.get("nombre_asesor", None)
+                    respuesta = await asyncio.get_event_loop().run_in_executor(
+                        None, chat_handler.procesar_consulta, pregunta_enriquecida, nombre_asesor
+                    )
+                    await msg_espera2.remove()
+                else:
+                    respuesta = (
+                        "⏱️ No recibí tu respuesta. "
+                        "Por favor, reformula tu pregunta empezando por `@pbi`."
+                    )
+
             await cl.Message(content=respuesta, elements=elementos).send()
         except Exception as e:
             await cl.Message(
@@ -557,7 +618,7 @@ async def main(message: cl.Message):
     nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
     if es_multimedia and not nombre_asesor_login and not nombre_especificado_en_mensaje:
         from centauro.core.gestion_asesores import gestion_asesores as _ga_pre
-        sugerencias_pre = _ga_pre.asesores_conocidos[:5] if _ga_pre.asesores_conocidos else []
+        sugerencias_pre = _ga_pre.nombres_canonicos[:5] if _ga_pre.nombres_canonicos else []
         sugerencias_pre_txt = (
             "\n\n**Asesores conocidos:** " + " · ".join(f"`{s}`" for s in sugerencias_pre)
         ) if sugerencias_pre else ""
@@ -597,6 +658,71 @@ async def main(message: cl.Message):
             except Exception:
                 pass
         cl.user_session.set("opportunity_id", _opp_id_pre)
+
+    # ── Verificar si ya existe evaluación para este opportunity_id ────────────
+    # Lo hacemos antes de transcribir para que, si el usuario dice "no sobreescribir",
+    # podamos devolver la evaluación existente sin gastar nada en LLMs ni transcripción.
+    _sobreescribir_eval_id = None  # None = INSERT nueva; int = UPDATE fila existente
+    if _opp_id_pre:
+        try:
+            from centauro.core.database import get_database as _get_db
+            _db_check = _get_db()
+            _eval_existente = _db_check.buscar_evaluacion_por_oportunidad(_opp_id_pre)
+            if _eval_existente:
+                _fecha_eval = (_eval_existente.get("fecha") or "")[:10]
+                _cal_existente = _eval_existente.get("calificacion_global", "N/A")
+                EMOJI_CAL_CHECK = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+                _emoji_check = EMOJI_CAL_CHECK.get(_cal_existente, "⚪")
+                try:
+                    _res_sobreescribir = await cl.AskUserMessage(
+                        content=(
+                            f"⚠️ **Esta entrevista ya fue evaluada anteriormente**\n\n"
+                            f"- **Opportunity ID:** `{_opp_id_pre}`\n"
+                            f"- **Fecha:** {_fecha_eval}\n"
+                            f"- **Calificación:** {_emoji_check} {_cal_existente}\n\n"
+                            f"¿Qué deseas hacer?\n"
+                            f"- Escribe **sí** para re-analizar y sobreescribir los datos\n"
+                            f"- Escribe **no** para ver la evaluación ya guardada (sin coste)"
+                        ),
+                        timeout=60
+                    ).send()
+                except Exception:
+                    _res_sobreescribir = None
+
+                _resp_txt = (_res_sobreescribir or {}).get("output", "no").strip().lower()
+                if _resp_txt in ("sí", "si", "s", "yes", "y", "sobreescribir", "reanalizar", "re-analizar", "1"):
+                    _sobreescribir_eval_id = _eval_existente.get("id")
+                    await cl.Message(
+                        content=f"🔄 **Re-analizando...** Se sobreescribirá la evaluación del {_fecha_eval}."
+                    ).send()
+                else:
+                    # Mostrar evaluación existente y salir sin gastar nada
+                    _bloques_existentes = _db_check.obtener_calificaciones_bloque(_eval_existente["id"])
+                    EMOJI_CAL_SHOW = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+                    _cal_g = _eval_existente.get("calificacion_global", "N/A")
+                    _msg_existente = (
+                        f"# 📊 Evaluación guardada — {_fecha_eval}\n"
+                        f"---\n"
+                        f"## {EMOJI_CAL_SHOW.get(_cal_g, '⚪')} Calificación Global: **{_cal_g}**\n"
+                        f"**Archivo:** {_eval_existente.get('archivo_origen', 'N/A')}\n"
+                        f"---\n"
+                        f"## 📈 Evaluación por Bloques\n"
+                    )
+                    for _b in _bloques_existentes:
+                        _bcal = _b.get("calificacion", "N/A")
+                        _msg_existente += f"{EMOJI_CAL_SHOW.get(_bcal, '⚪')} **{_b.get('bloque', '')}**: {_bcal}\n"
+                    if _eval_existente.get("perfil_lead"):
+                        _msg_existente += f"\n**Perfil Lead:** {_eval_existente['perfil_lead']}\n"
+                    _msg_existente += (
+                        "\n---\n"
+                        "💡 Escribe **sí** en el siguiente mensaje si deseas sobreescribir esta evaluación."
+                    )
+                    await cl.Message(content=_msg_existente).send()
+                    return  # Salir sin analizar ni gastar
+        except Exception as _e_check:
+            pass  # Si falla la consulta a Supabase, continuar normalmente
+
+    cl.user_session.set("sobreescribir_eval_id", _sobreescribir_eval_id)
 
     import time as _time
     _tiempo_inicio = _time.time()
@@ -752,7 +878,7 @@ async def main(message: cl.Message):
                     asesor_confirmado = nombre_norm
             else:
                 # No se detectó nombre válido — preguntar al usuario
-                sugerencias = gestion_asesores.asesores_conocidos[:5] if gestion_asesores.asesores_conocidos else []
+                sugerencias = gestion_asesores.nombres_canonicos[:5] if gestion_asesores.nombres_canonicos else []
                 sugerencias_texto = ""
                 if sugerencias:
                     sugerencias_texto = "\n\n**Asesores conocidos:**\n" + "\n".join(f"• {s}" for s in sugerencias)
@@ -963,18 +1089,38 @@ async def main(message: cl.Message):
         async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
             try:
                 opp_id = cl.user_session.get("opportunity_id")
-                perfil = memory_manager.registrar_evaluacion(
-                    nombre_asesor=asesor_confirmado,
-                    resultado_evaluacion=reporte,
-                    transcripcion_path=str(file_path),
-                    opportunity_id=opp_id,
-                    archivo_origen=file.name if file else None,
-                )
-                # Obtener feedback personalizado
-                feedback_personalizado = perfil.obtener_feedback_personalizado()
-                step.output = f"✅ Perfil actualizado\n\n{feedback_personalizado}"
-                # Ya está guardado en sesión desde la confirmación
-                # cl.user_session.set("nombre_asesor", asesor_confirmado)
+                _eval_id_sobrescribir = cl.user_session.get("sobreescribir_eval_id")
+
+                if _eval_id_sobrescribir:
+                    # Modo sobreescritura: UPDATE fila existente en Supabase
+                    from centauro.core.database import get_database as _get_db_reg
+                    _db_reg = _get_db_reg()
+                    _asesor_id_reg = _db_reg.registrar_asesor(asesor_confirmado)
+                    if _asesor_id_reg:
+                        _pdf_path_str = str(settings.OUTPUTS_DIR / "Reportes_PDF" / f"Reporte_{file.name.replace('.', '_')}_v3.pdf")
+                        _ok = _db_reg.actualizar_evaluacion(
+                            evaluacion_id=_eval_id_sobrescribir,
+                            asesor_id=_asesor_id_reg,
+                            resultado_evaluacion=reporte,
+                            opportunity_id=opp_id,
+                            archivo_origen=file.name if file else None,
+                            reporte_pdf_path=_pdf_path_str,
+                            stats=orchestrator.stats,
+                        )
+                        step.output = "✅ Evaluación sobreescrita en Supabase" if _ok else "⚠️ Error sobreescribiendo en Supabase"
+                    else:
+                        step.output = "⚠️ No se pudo resolver el asesor en Supabase"
+                else:
+                    # Modo normal: INSERT nueva evaluación
+                    perfil = memory_manager.registrar_evaluacion(
+                        nombre_asesor=asesor_confirmado,
+                        resultado_evaluacion=reporte,
+                        transcripcion_path=str(file_path),
+                        opportunity_id=opp_id,
+                        archivo_origen=file.name if file else None,
+                    )
+                    feedback_personalizado = perfil.obtener_feedback_personalizado()
+                    step.output = f"✅ Perfil actualizado\n\n{feedback_personalizado}"
             except Exception as e:
                 step.output = f"⚠️ Error actualizando perfil: {e}"
         # Calcular tiempo total del análisis

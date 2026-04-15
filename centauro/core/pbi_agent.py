@@ -35,8 +35,8 @@ REGLAS DAX IMPORTANTES:
 - Toda consulta DAX debe empezar con EVALUATE.
 - Las medidas calculadas están en la tabla _MEDIDAS. Úsalas en vez de COUNTROWS directos.
 - Las relaciones de fecha en H_CUPONES son INACTIVAS — las medidas las activan internamente con USERELATIONSHIP.
-- Para agrupar por país usa H_CUPONES[Pais] directamente.
-- NUNCA agrupes por D_PAIS[Pais] (tiene valores duplicados) — usa D_PAIS[ID_Pais].
+- Para agrupar o filtrar por país SIEMPRE usa D_PAIS[Pais] (la dimensión), nunca H_CUPONES[Pais] ni H_CONVOCATORIO[PAIS_NORMALIZADO] directamente.
+- Para filtrar por nombre de asesor SIEMPRE usa D_ESTRUCTURA[NOMBRE_CORTO], nunca H_CUPONES[Nombre_Asesor_Normalizado] ni H_CONVOCATORIO[ASESOR_NORMALIZADO] como filtro directo. Ejemplo: CALCULATE([CONV ASIGNADOS], D_ESTRUCTURA[NOMBRE_CORTO] = "Ivonne Rose").
 - Usa SIEMPRE la FECHA ACTUAL que se te proporciona como referencia para "hoy", "este mes", "este año". Nunca inventes fechas.
 - Para valores monetarios usa FORMAT([Medida], "#,0.00").
 
@@ -65,7 +65,8 @@ REGLA CRÍTICA DE CONTEXTO CONVERSACIONAL:
 
 PATRONES DAX CORRECTOS:
 - Ventas en una semana: EVALUATE ROW("Total", CALCULATE([CON_MAT], D_CAL_COM[AÑO-MES-SEM] = "2026-03-S3"))
-- Ranking asesores: EVALUATE TOPN(10, CALCULATETABLE(SUMMARIZECOLUMNS(H_CONVOCATORIO[ASESOR_NORMALIZADO], "Ventas", [CON_MAT]), D_CAL_COM[AÑO-MES-SEM] = "2026-03-S2"), [Ventas], DESC)
+- Ranking asesores: EVALUATE TOPN(10, CALCULATETABLE(SUMMARIZECOLUMNS(D_ESTRUCTURA[NOMBRE_CORTO], "Ventas", [CON_MAT]), D_CAL_COM[AÑO-MES-SEM] = "2026-03-S2"), [Ventas], DESC)
+- Conversión por país de un asesor: EVALUATE TOPN(10, CALCULATETABLE(SUMMARIZECOLUMNS(D_PAIS[Pais], "Conversion", [CONV ASIGNADOS]), D_ESTRUCTURA[NOMBRE_CORTO] = "Ivonne Rose"), [Conversion], DESC)
 - Programa más vendido: EVALUATE TOPN(1, CALCULATETABLE(SUMMARIZECOLUMNS(H_CONVOCATORIO[PROGRAMA_NORMALIZADO], "Ventas", [CON_MAT]), D_CAL_COM[AÑO-MES-SEM] = "2026-03-S2"), [Ventas], DESC)
 - Entrevistas en un día (CORRECTO): EVALUATE ROW("Entrevistas", CALCULATE([CUP_ENT], D_CAL_COM[FECHA] = DATE(2026,3,26)))
 - Entrevistas en una semana (CORRECTO): EVALUATE ROW("Entrevistas", CALCULATE([CUP_ENT], D_CAL_COM[AÑO-MES-SEM] = "2026-03-S3"))
@@ -73,6 +74,10 @@ PATRONES DAX CORRECTOS:
 - Entrevistas por equipo en una semana (CORRECTO): EVALUATE CALCULATETABLE(SUMMARIZECOLUMNS(H_CUPONES[Equipo_de_Ventas], "Entrevistas", [CUP_ENT]), D_CAL_COM[AÑO-MES-SEM] = "2026-03-S3")
 - NUNCA: CALCULATE([CUP_ENT], H_CUPONES[Fecha_Realizacion_Entrevista] = ...) — las fechas de H_CUPONES son INACTIVAS, siempre filtrar por D_CAL_COM
 - NUNCA: CALCULATE([CUP_ENT], D_ESTRUCTURA[EQUIPO] = ...) — D_ESTRUCTURA filtra H_CUPONES por asignación, no por entrevista. Para filtrar entrevistas por equipo usar H_CUPONES[Equipo_de_Ventas]
+
+CUÁNDO PEDIR ACLARACIÓN:
+- Usa la tool `pedir_aclaracion` cuando la pregunta sea ambigua y necesites información del usuario antes de poder construir un DAX correcto (ej: periodo temporal no claro, equipo no especificado cuando hay varios, métrica ambigua).
+- NUNCA hagas preguntas de aclaración en el texto libre de tu respuesta — usa siempre la tool `pedir_aclaracion`.
 
 FORMATO DE RESPUESTA FINAL:
 - Responde en español, de forma clara y concisa.
@@ -101,6 +106,28 @@ _TOOLS = [
                     "pregunta": {
                         "type": "string",
                         "description": "La pregunta del usuario o el aspecto que quieres buscar en el diccionario de datos.",
+                    }
+                },
+                "required": ["pregunta"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "pedir_aclaracion",
+            "description": (
+                "Pide una aclaración al usuario cuando la pregunta es ambigua. "
+                "Usa esta tool ANTES de ejecutar DAX cuando no tengas suficiente información "
+                "para construir una consulta correcta. "
+                "NUNCA preguntes en el texto libre de la respuesta."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pregunta": {
+                        "type": "string",
+                        "description": "La pregunta de aclaración concreta para el usuario.",
                     }
                 },
                 "required": ["pregunta"],
@@ -238,6 +265,11 @@ def responder(pregunta: str, pbi_client: "PowerBIClient", historial: list | None
 
             result_str = _ejecutar_tool(nombre_tool, args, pregunta, pbi_client)
 
+            # Si el agente pidió aclaración, salir del bucle con el sentinel
+            if result_str.startswith("__STOP_ACLARACION__:"):
+                pregunta_aclaracion = result_str[len("__STOP_ACLARACION__:"):].strip()
+                return f"__PBI_ACLARACION__: {pregunta_aclaracion}"
+
             if nombre_tool == "ejecutar_dax":
                 last_dax_query = args.get("dax", "")
 
@@ -263,6 +295,10 @@ def _ejecutar_tool(
     pbi_client: "PowerBIClient",
 ) -> str:
     """Despacha la ejecución de una tool y devuelve el resultado como string."""
+    if nombre == "pedir_aclaracion":
+        pregunta_aclaracion = args.get("pregunta", "¿Puedes aclarar tu pregunta?")
+        return f"__STOP_ACLARACION__: {pregunta_aclaracion}"
+
     if nombre == "consultar_diccionario":
         query = args.get("pregunta", pregunta_original)
         try:

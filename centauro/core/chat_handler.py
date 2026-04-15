@@ -1085,10 +1085,11 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
             from .pbi_agent import responder as agente_responder
             respuesta = agente_responder(pregunta, client, historial=self._pbi_historial)
 
-            # Guardar intercambio en historial (máximo 3 últimos)
-            self._pbi_historial.append({"pregunta": pregunta, "respuesta": respuesta})
-            if len(self._pbi_historial) > 3:
-                self._pbi_historial.pop(0)
+            # Solo guardar en historial si es una respuesta real, no una solicitud de aclaración
+            if not respuesta.startswith("__PBI_ACLARACION__:"):
+                self._pbi_historial.append({"pregunta": pregunta, "respuesta": respuesta})
+                if len(self._pbi_historial) > 3:
+                    self._pbi_historial.pop(0)
 
             return respuesta
         except Exception as e:

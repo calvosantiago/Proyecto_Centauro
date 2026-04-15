@@ -444,6 +444,16 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
 
     resultado = response.choices[0].message.content
 
+    # Los reasoning models (gpt-5-mini, o-series) pueden devolver content=None si
+    # max_completion_tokens se agotó en el thinking antes de generar la respuesta.
+    if resultado is None:
+        finish_reason = getattr(response.choices[0], "finish_reason", "unknown")
+        raise RuntimeError(
+            f"El modelo ({model_name}) devolvió content=None "
+            f"[finish_reason={finish_reason}]. "
+            f"Posible causa: max_completion_tokens insuficiente para reasoning + respuesta."
+        )
+
     # Log de debug con respuesta incluida
     _log_prompt_debug(referencia_log, prompt_sistema, prompt_usuario, resultado)
 

@@ -182,14 +182,21 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
    Preguntas típicas: "¿Para qué buscas el máster, qué necesitas?" / "¿Qué cambiarías
    de tu situación actual?"
 
-2. PERFIL FINANCIERO: ¿El asesor exploró el contexto económico del lead?
-   NO busques discusiones de precio — lo que importa es calificar quién y cómo paga:
+2. PERFIL FINANCIERO: ¿El asesor PREGUNTÓ al lead sobre su situación económica personal?
+   NO busques discusiones de precio — lo que importa es si el ASESOR preguntó quién y cómo paga:
    ¿Es inversión propia o la financia la empresa? ¿Si es perfil junior, cuenta con apoyo familiar?
    ¿Lleva tiempo buscando y tiene un presupuesto destinado a su formación?
    Este perfil permite al asesor abordar la parte económica de forma personalizada más adelante.
    Preguntas típicas: "¿La formación la asumes tú o tienes apoyo de empresa?" / "¿Es una
    inversión que harías tú mismo o tienes respaldo familiar?"
-   ⚠️ "No explorado" SOLO si no hubo absolutamente ninguna referencia a quién paga ni cómo.
+
+   ⚠️ DISTINCIÓN CRÍTICA — "explorado" vs "No explorado":
+   EXPLORADO: el ASESOR hizo AL MENOS UNA PREGUNTA sobre la situación económica PERSONAL del lead
+   (¿lo pagas tú? ¿tienes apoyo de empresa o familia? ¿lo financias tú mismo?).
+   NO EXPLORADO: el ASESOR presentó precios, descuentos, cuotas o condiciones de financiación
+   al lead, pero NUNCA preguntó sobre la situación económica del propio lead.
+   ⚠️ El asesor hablar de precios o de opciones de financiación ≠ explorar el perfil financiero del lead.
+   Si el asesor solo habló del precio y de cuotas pero NO preguntó nada sobre quién paga → "No explorado".
 
 3. COMPETIDORES EXPLORADOS: ¿Está comparando con otras instituciones o programas?
    ¿Qué otras opciones está evaluando?
@@ -315,7 +322,7 @@ FORMATO JSON OBLIGATORIO
   ],
   "hallazgos_del_lead": {{
     "factor_de_compra": "Descripción del dolor/necesidad real del lead. 'No detectado' si no se exploró.",
-    "perfil_financiero": "Perfil financiero del lead: ¿quién paga y cómo? Escribe el perfil detectado. 'No explorado' SOLO si no hubo absolutamente ninguna referencia a quién paga ni cómo en toda la llamada.",
+    "perfil_financiero": "Perfil financiero del lead: ¿quién paga y cómo? Escribe lo que el ASESOR preguntó y el lead respondió sobre su situación económica. 'No explorado' si el asesor NO hizo ninguna pregunta sobre quién paga — aunque haya presentado precios, descuentos o cuotas.",
     "competidores": "Otras opciones que el lead mencionó estar evaluando. Escribe las instituciones o referencias mencionadas. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
     "reconduccion": "Si el asesor detectó que el lead venía interesado en un programa/formato diferente y lo recondujo exitosamente, describe cómo lo gestionó. 'No aplica' si no ocurrió.",
     "motivacion_principal": "Por qué quiere el máster y por qué ahora.",
