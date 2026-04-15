@@ -35,7 +35,7 @@ from main import leer_word, limpiar_formato_vtt
 @cl.password_auth_callback
 def auth_callback(username: str, password: str) -> cl.User | None:
     """
-    Verifica credenciales contra centauro_users.json.
+    Verifica credenciales contra usuarios_auth en Supabase.
     Devuelve cl.User si son válidas, None si fallan.
     """
     usuario = autenticar(username, password)

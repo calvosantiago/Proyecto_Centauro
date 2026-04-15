@@ -70,6 +70,7 @@ class ChatHandler:
     def __init__(self):
         self.historial_conversacion: List[Dict] = []
         self._pbi_historial: List[Dict] = []  # Últimos intercambios PBI para contexto
+        self._pbi_memoria_analitica: Dict = {"hechos": []}  # Hallazgos analíticos acumulados en sesión
         self._asesor_sesion: Optional[str] = None  # Último asesor mencionado en esta sesión
 
     def procesar_consulta(self, pregunta_usuario: str, nombre_asesor: Optional[str] = None) -> str:
@@ -1083,7 +1084,12 @@ Si el contexto no es suficiente para responder con precisión, indícalo clarame
         # Consulta en lenguaje natural → agente Claude
         try:
             from .pbi_agent import responder as agente_responder
-            respuesta = agente_responder(pregunta, client, historial=self._pbi_historial)
+            respuesta = agente_responder(
+                pregunta,
+                client,
+                historial=self._pbi_historial,
+                memoria_analitica=self._pbi_memoria_analitica,
+            )
 
             # Solo guardar en historial si es una respuesta real, no una solicitud de aclaración
             if not respuesta.startswith("__PBI_ACLARACION__:"):

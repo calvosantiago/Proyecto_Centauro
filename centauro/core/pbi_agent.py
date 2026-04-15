@@ -79,11 +79,21 @@ CUÁNDO PEDIR ACLARACIÓN:
 - Usa la tool `pedir_aclaracion` cuando la pregunta sea ambigua y necesites información del usuario antes de poder construir un DAX correcto (ej: periodo temporal no claro, equipo no especificado cuando hay varios, métrica ambigua).
 - NUNCA hagas preguntas de aclaración en el texto libre de tu respuesta — usa siempre la tool `pedir_aclaracion`.
 
+MEMORIA ANALÍTICA:
+- Al inicio de cada respuesta, revisa si existe una sección <memoria_analitica> en el contexto.
+- Si existe, úsala como referencia directa: no re-consultes datos que ya estén guardados y sigan siendo válidos para el mismo período.
+- Si el período de la pregunta actual difiere del período de un dato en memoria, ignora ese dato (puede estar obsoleto) y ejecuta DAX.
+- Usa la tool `guardar_hallazgo` tras ejecutar DAX cuando obtengas métricas de referencia útiles para turnos futuros: media del equipo, total de período, top performer, benchmarks. No guardes resultados triviales o muy específicos de una sola persona.
+- Si ya existe un hallazgo con la misma clave en memoria, solo actualiza si el nuevo dato tiene un período más reciente.
+
 FORMATO DE RESPUESTA FINAL:
 - Responde en español, de forma clara y concisa.
 - Usa markdown (negrita, tablas) cuando hay múltiples valores.
 - Incluye siempre al final el DAX ejecutado en un bloque ```dax ... ```.
 - Si la tabla está vacía, indícalo claramente.
+- Tras los datos, añade siempre una sección **Conclusión** (2-3 frases) que responda directamente a la pregunta de negocio: qué significa el dato, qué tendencia muestra o qué decisión sugiere.
+- Si detectas algo destacable en los datos (un outlier, una caída brusca, un dato que se sale de lo normal, alguien que destaca muy por encima o muy por debajo), señálalo con **⚠️ Atención:** antes de la conclusión.
+- No inventes contexto que no esté en los datos devueltos. Si no tienes suficiente información para concluir algo, dilo.
 """
 
 # ---------------------------------------------------------------------------
@@ -137,6 +147,40 @@ _TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "guardar_hallazgo",
+            "description": (
+                "Guarda un dato clave en la memoria analítica de la sesión para poder "
+                "referenciarlo en turnos futuros sin repetir la consulta DAX. "
+                "Úsala tras ejecutar_dax cuando obtengas benchmarks, medias de equipo, "
+                "totales de período o rankings que puedan ser útiles más adelante."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "clave": {
+                        "type": "string",
+                        "description": "Identificador breve y descriptivo del dato (ej: 'media_ventas_equipo', 'total_entrevistas_semana', 'top_asesor_mes').",
+                    },
+                    "valor": {
+                        "type": "string",
+                        "description": "El valor concreto con sus unidades (ej: '14.67 matrículas', '342 entrevistas', 'María García con 23 mat.').",
+                    },
+                    "contexto": {
+                        "type": "string",
+                        "description": "Qué representa este dato y bajo qué condiciones (ej: 'Media del equipo completo', 'Solo equipo B1, España').",
+                    },
+                    "periodo": {
+                        "type": "string",
+                        "description": "Período al que corresponde el dato (ej: '2026-03-S4', '2026-03', '2026'). Clave para saber si el dato sigue vigente.",
+                    },
+                },
+                "required": ["clave", "valor", "contexto", "periodo"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "ejecutar_dax",
             "description": (
                 "Ejecuta una consulta DAX en el modelo semántico de Power BI y devuelve "
@@ -161,7 +205,12 @@ _TOOLS = [
 # Bucle agéntico
 # ---------------------------------------------------------------------------
 
-def responder(pregunta: str, pbi_client: "PowerBIClient", historial: list | None = None) -> str:
+def responder(
+    pregunta: str,
+    pbi_client: "PowerBIClient",
+    historial: list | None = None,
+    memoria_analitica: dict | None = None,
+) -> str:
     """
     Responde una pregunta sobre KPIs/métricas usando un agente OpenAI con tool use.
 
@@ -169,6 +218,8 @@ def responder(pregunta: str, pbi_client: "PowerBIClient", historial: list | None
         pregunta: Pregunta en lenguaje natural del usuario.
         pbi_client: Instancia activa de PowerBIClient.
         historial: Lista de dicts {"pregunta": ..., "respuesta": ...} con intercambios previos.
+        memoria_analitica: Dict mutable {"hechos": [...]} compartido con chat_handler.
+                           El agente puede añadir hallazgos via guardar_hallazgo tool.
 
     Returns:
         Respuesta en texto Markdown lista para mostrar en Chainlit.
@@ -194,6 +245,15 @@ def responder(pregunta: str, pbi_client: "PowerBIClient", historial: list | None
     fecha_hoy = datetime.now().strftime("%Y-%m-%d")
     anio_actual = datetime.now().year
     system_with_date = _SYSTEM_PROMPT + f"\nFECHA ACTUAL: {fecha_hoy} (año {anio_actual}).\n"
+
+    # Inyectar memoria analítica si hay hechos guardados
+    if memoria_analitica and memoria_analitica.get("hechos"):
+        lineas = ["<memoria_analitica>"]
+        lineas.append("Datos clave de esta sesión (referencia directa, no re-consultes si el período coincide):")
+        for h in memoria_analitica["hechos"]:
+            lineas.append(f"- {h['clave']}: {h['valor']} | {h['contexto']} | período: {h['periodo']}")
+        lineas.append("</memoria_analitica>")
+        system_with_date += "\n" + "\n".join(lineas) + "\n"
 
     # Construir mensaje con historial previo si existe
     if historial:
@@ -263,7 +323,7 @@ def responder(pregunta: str, pbi_client: "PowerBIClient", historial: list | None
                 logger.warning(f"Argumentos inválidos para tool '{nombre_tool}': {raw_args}")
                 args = {}
 
-            result_str = _ejecutar_tool(nombre_tool, args, pregunta, pbi_client)
+            result_str = _ejecutar_tool(nombre_tool, args, pregunta, pbi_client, memoria_analitica)
 
             # Si el agente pidió aclaración, salir del bucle con el sentinel
             if result_str.startswith("__STOP_ACLARACION__:"):
@@ -288,16 +348,92 @@ def responder(pregunta: str, pbi_client: "PowerBIClient", historial: list | None
 # Ejecución de tools
 # ---------------------------------------------------------------------------
 
+def _enriquecer_con_estadisticas(rows: list) -> str:
+    """
+    Calcula estadísticas básicas (media, máx, mín) sobre columnas numéricas
+    para que el LLM las reciba ya calculadas con precisión exacta.
+    Solo actúa si hay más de una fila y columnas numéricas.
+    """
+    if len(rows) <= 1:
+        return ""
+
+    # Detectar columnas numéricas con al menos 2 valores válidos
+    numeric_cols: dict[str, list[float]] = {}
+    for col in rows[0].keys():
+        valores = [r[col] for r in rows if isinstance(r.get(col), (int, float))]
+        if len(valores) >= 2:
+            numeric_cols[col] = [float(v) for v in valores]
+
+    if not numeric_cols:
+        return ""
+
+    # Primera columna no numérica como etiqueta (ej: nombre del asesor)
+    label_col = next(
+        (k for k in rows[0].keys() if k not in numeric_cols),
+        None,
+    )
+
+    lineas = ["\n**Estadísticas calculadas (exactas):**"]
+    for col, valores in numeric_cols.items():
+        media = sum(valores) / len(valores)
+        maximo = max(valores)
+        minimo = min(valores)
+
+        max_label = ""
+        min_label = ""
+        if label_col:
+            max_row = next((r for r in rows if r.get(col) == maximo), None)
+            min_row = next((r for r in rows if r.get(col) == minimo), None)
+            if max_row:
+                max_label = f" ({max_row[label_col]})"
+            if min_row:
+                min_label = f" ({min_row[label_col]})"
+
+        lineas.append(
+            f"- **{col}**: media={media:.2f} | máx={maximo:.2f}{max_label} | mín={minimo:.2f}{min_label}"
+        )
+
+    return "\n".join(lineas)
+
+
 def _ejecutar_tool(
     nombre: str,
     args: dict,
     pregunta_original: str,
     pbi_client: "PowerBIClient",
+    memoria_analitica: dict | None = None,
 ) -> str:
     """Despacha la ejecución de una tool y devuelve el resultado como string."""
     if nombre == "pedir_aclaracion":
         pregunta_aclaracion = args.get("pregunta", "¿Puedes aclarar tu pregunta?")
         return f"__STOP_ACLARACION__: {pregunta_aclaracion}"
+
+    if nombre == "guardar_hallazgo":
+        if memoria_analitica is None:
+            return "Memoria no disponible en esta sesión."
+        clave = args.get("clave", "").strip()
+        if not clave:
+            return "ERROR: clave vacía, hallazgo no guardado."
+
+        hechos: list = memoria_analitica.setdefault("hechos", [])
+
+        # Actualizar si ya existe la clave, insertar si no
+        existente = next((h for h in hechos if h.get("clave") == clave), None)
+        nuevo = {
+            "clave": clave,
+            "valor": args.get("valor", ""),
+            "contexto": args.get("contexto", ""),
+            "periodo": args.get("periodo", ""),
+        }
+        if existente:
+            existente.update(nuevo)
+            return f"Hallazgo '{clave}' actualizado en memoria."
+        else:
+            # Limitar a 15 hechos para no saturar el prompt
+            if len(hechos) >= 15:
+                hechos.pop(0)
+            hechos.append(nuevo)
+            return f"Hallazgo '{clave}' guardado en memoria."
 
     if nombre == "consultar_diccionario":
         query = args.get("pregunta", pregunta_original)
@@ -325,7 +461,8 @@ def _ejecutar_tool(
             return "_La consulta no devolvió resultados._"
 
         tabla_md = _format_dax_result(raw)
-        return f"{len(rows)} filas devueltas:\n\n{tabla_md}"
+        stats_md = _enriquecer_con_estadisticas(rows)
+        return f"{len(rows)} filas devueltas:\n\n{tabla_md}{stats_md}"
 
     logger.warning(f"Tool desconocida solicitada por el agente: {nombre}")
     return f"Tool '{nombre}' no disponible."

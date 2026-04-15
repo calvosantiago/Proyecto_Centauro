@@ -3,6 +3,18 @@
 -- Ejecutar en SQL Editor de Supabase para crear las tablas
 -- ============================================================
 
+-- Usuarios de autenticación Chainlit
+CREATE TABLE IF NOT EXISTS usuarios_auth (
+    id BIGSERIAL PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    nombre_completo TEXT NOT NULL,
+    rol TEXT NOT NULL DEFAULT 'asesor' CHECK (rol IN ('asesor', 'admin')),
+    password_hash TEXT NOT NULL, -- pbkdf2:sha256:<salt>:<hash>
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Asesores (reemplaza JSONs individuales en outputs/perfiles_asesores/)
 CREATE TABLE IF NOT EXISTS asesores (
     id BIGSERIAL PRIMARY KEY,

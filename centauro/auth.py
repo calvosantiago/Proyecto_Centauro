@@ -1,20 +1,20 @@
 """
-Módulo de autenticación para Centauro v4.0
+Módulo de autenticación para Centauro v5.0
 
 Sistema de autenticación basado en usuario/contraseña con:
 - Contraseñas hasheadas con PBKDF2-SHA256 (estándar NIST 2024)
-- Base de datos de usuarios en JSON externo al código fuente
+- Usuarios almacenados en Supabase (tabla `usuarios_auth`)
 - Roles: "asesor" | "admin"
 - Mapeo username → nombre completo del asesor (para perfiles automáticos)
 """
-import json
 import hashlib
 import secrets
-from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional
 
-# Archivo de usuarios: DEBE estar en .gitignore / fuera de control de versiones
-USERS_FILE = Path(__file__).resolve().parent.parent / "centauro_users.json"
+from .config import settings
+
+AUTH_USERS_TABLE = "usuarios_auth"
+_supabase_client = None
 
 
 def hash_password(password: str, salt: str = None) -> str:
@@ -61,16 +61,29 @@ def verificar_password(password: str, stored_hash: str) -> bool:
         return False
 
 
-def cargar_usuarios() -> Dict[str, dict]:
-    """Carga la base de datos de usuarios desde el archivo JSON."""
-    if not USERS_FILE.exists():
-        return {}
+def _get_supabase_client():
+    """
+    Crea (lazy) y devuelve el cliente de Supabase para autenticación.
+
+    Retorna None si faltan credenciales o si el cliente no se puede inicializar.
+    """
+    global _supabase_client
+    if _supabase_client is not None:
+        return _supabase_client
+
+    url = getattr(settings, "SUPABASE_URL", "") or ""
+    key = getattr(settings, "SUPABASE_KEY", "") or ""
+    if not url or not key:
+        print("⚠️ AUTH: SUPABASE_URL/SUPABASE_KEY no configurados.")
+        return None
+
     try:
-        with open(USERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        from supabase import create_client
+        _supabase_client = create_client(url, key)
+        return _supabase_client
     except Exception as e:
-        print(f"⚠️ Error cargando usuarios de Centauro: {e}")
-        return {}
+        print(f"⚠️ AUTH: Error inicializando cliente Supabase: {e}")
+        return None
 
 
 def autenticar(username: str, password: str) -> Optional[dict]:
@@ -89,13 +102,29 @@ def autenticar(username: str, password: str) -> Optional[dict]:
     if not username or not password:
         return None
 
-    usuarios = cargar_usuarios()
     username_normalizado = username.strip().lower()
-
-    if username_normalizado not in usuarios:
+    client = _get_supabase_client()
+    if client is None:
         return None
 
-    usuario = usuarios[username_normalizado]
+    try:
+        result = (
+            client.table(AUTH_USERS_TABLE)
+            .select("username,nombre_completo,rol,password_hash,activo")
+            .eq("username", username_normalizado)
+            .limit(1)
+            .execute()
+        )
+    except Exception as e:
+        print(f"⚠️ AUTH: Error consultando usuarios en Supabase: {e}")
+        return None
+
+    if not result.data:
+        return None
+
+    usuario = result.data[0]
+    if usuario.get("activo") is False:
+        return None
 
     if not verificar_password(password, usuario.get("password_hash", "")):
         return None
