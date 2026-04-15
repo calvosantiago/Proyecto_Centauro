@@ -635,8 +635,9 @@ async def main(message: cl.Message):
                 nombre_especificado_en_mensaje = respuesta_pre.strip().title()
 
     # ── Pregunta anticipada de Opportunity ID (antes de transcribir) ──
-    if es_multimedia:
-        _opp_id_pre = extraer_opportunity_id(file.name) if file else None
+    _opp_id_pre = None  # aplica a cualquier tipo de archivo (txt, vtt, docx, mp3, mp4)
+    if file:
+        _opp_id_pre = extraer_opportunity_id(file.name)
         if _opp_id_pre:
             await cl.Message(content=f"🔗 **Opportunity ID detectado:** `{_opp_id_pre}`").send()
         else:
@@ -658,6 +659,34 @@ async def main(message: cl.Message):
             except Exception:
                 pass
         cl.user_session.set("opportunity_id", _opp_id_pre)
+
+        # ── Enriquecer contexto_usuario con datos del lead desde Supabase ────
+        # Mismo enriquecimiento que hace analizar_entrevista_completa() en batch.
+        # Sin esto, los agentes no saben el nombre del lead, país, edad ni programa.
+        if _opp_id_pre:
+            try:
+                from centauro.core.database import get_database as _get_db_lead
+                _db_lead = _get_db_lead()
+                _datos_lead = _db_lead.obtener_oportunidad(_opp_id_pre)
+                if _datos_lead:
+                    _contexto_lead = (
+                        f"\n\n--- PERFIL DEL LEAD (datos verificados de CRM) ---\n"
+                        f"Nombre: {_datos_lead.get('nombre_lead', 'N/A')}\n"
+                        f"País: {_datos_lead.get('pais', 'N/A')}\n"
+                        f"Edad: {_datos_lead.get('edad', 'N/A')} años\n"
+                        f"Programa: {_datos_lead.get('programa', 'N/A')}\n"
+                        f"Pilar: {_datos_lead.get('pilar', 'N/A')}\n"
+                        f"---\n"
+                    )
+                    contexto_usuario = (contexto_usuario + _contexto_lead) if contexto_usuario else _contexto_lead
+                    cl.user_session.set("datos_oportunidad", _datos_lead)
+                    await cl.Message(
+                        content=f"📋 **Lead identificado:** {_datos_lead.get('nombre_lead', 'N/A')} "
+                                f"· {_datos_lead.get('pais', '')} "
+                                f"· {_datos_lead.get('programa', '')}"
+                    ).send()
+            except Exception as _e_lead:
+                pass  # No bloquear la evaluación si falla el enriquecimiento
 
     # ── Verificar si ya existe evaluación para este opportunity_id ────────────
     # Lo hacemos antes de transcribir para que, si el usuario dice "no sobreescribir",
@@ -1019,6 +1048,7 @@ async def main(message: cl.Message):
                     resumen_contextual
                 )
                 reporte["meta"]["stats_optimizacion"] = orchestrator.stats
+                reporte["datos_oportunidad"] = cl.user_session.get("datos_oportunidad")
                 step.output = "✅ Reporte JSON generado"
             except Exception as e:
                 step.output = f"❌ Error en síntesis: {e}"
