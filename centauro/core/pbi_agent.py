@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from .powerbi_client import PowerBIClient
 
-_MODEL = "gpt-5-mini"
+_MODEL = "gpt-4o-mini"
 
 # ---------------------------------------------------------------------------
 # System prompt

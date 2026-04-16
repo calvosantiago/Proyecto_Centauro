@@ -502,6 +502,10 @@ async def main(message: cl.Message):
                         None, chat_handler.procesar_consulta, pregunta_enriquecida, nombre_asesor
                     )
                     await msg_espera2.remove()
+                    # Si el agente vuelve a pedir aclaración, mostrar la pregunta limpia
+                    _ACLARACION_PREFIX2 = "__PBI_ACLARACION__: "
+                    if respuesta.startswith(_ACLARACION_PREFIX2):
+                        respuesta = respuesta[len(_ACLARACION_PREFIX2):]
                 else:
                     respuesta = (
                         "⏱️ No recibí tu respuesta. "
