@@ -136,6 +136,27 @@ class CierreAgent(BaseEvaluatorAgent):
         # Enriquecer contexto con ejemplos de buenas prácticas
         manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion_completa)
 
+        if indicio_desconexion:
+            seccion_desconexion = """⚠️ SEÑAL AUTOMÁTICA: el sistema detectó un posible patrón de desconexión del lead
+en el tramo final de la transcripción (asesor hablando sin respuesta del lead,
+o frases como '¿Hola?', '¿Me escuchas?'). Lee el final con atención y determina:
+
+¿La desconexión fue DEFINITIVA (el lead nunca volvió a responder)?
+  → SÍ: "desconexion_definitiva": true — la evaluación no es aplicable
+  → NO (el lead volvió a conectarse y hubo cierre real): "desconexion_definitiva": false
+     y evalúa el cierre normalmente
+
+Si marcas desconexion_definitiva=true, el resto de los campos pueden estar vacíos
+o con valores neutros — solo importa el razonamiento explicando la situación.
+"""
+        else:
+            seccion_desconexion = """Si en la transcripción encuentras señales claras de que el lead se desconectó
+definitivamente (el asesor dice "¿Hola?", "¿Me escuchas?" sin respuesta, varias
+intervenciones del asesor sin que el lead conteste), marca "desconexion_definitiva": true
+y NO evalúes el cierre como un fallo del asesor.
+Si no hay desconexión o el lead volvió a conectarse, marca "desconexion_definitiva": false.
+"""
+
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de CIERRE Y PRÓXIMOS PASOS en venta consultiva de formación.
 
@@ -157,23 +178,7 @@ o si conduce bien dentro de ellos.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ DETECCIÓN PRIORITARIA: ¿SE DESCONECTÓ EL LEAD?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{f"""⚠️ SEÑAL AUTOMÁTICA: el sistema detectó un posible patrón de desconexión del lead
-en el tramo final de la transcripción (asesor hablando sin respuesta del lead,
-o frases como '¿Hola?', '¿Me escuchas?'). Lee el final con atención y determina:
-
-¿La desconexión fue DEFINITIVA (el lead nunca volvió a responder)?
-  → SÍ: "desconexion_definitiva": true — la evaluación no es aplicable
-  → NO (el lead volvió a conectarse y hubo cierre real): "desconexion_definitiva": false
-     y evalúa el cierre normalmente
-
-Si marcas desconexion_definitiva=true, el resto de los campos pueden estar vacíos
-o con valores neutros — solo importa el razonamiento explicando la situación.
-""" if indicio_desconexion else """Si en la transcripción encuentras señales claras de que el lead se desconectó
-definitivamente (el asesor dice "¿Hola?", "¿Me escuchas?" sin respuesta, varias
-intervenciones del asesor sin que el lead conteste), marca "desconexion_definitiva": true
-y NO evalúes el cierre como un fallo del asesor.
-Si no hay desconexión o el lead volvió a conectarse, marca "desconexion_definitiva": false.
-"""}
+{seccion_desconexion}
 ⚠️ DIFERENCIA IMPORTANTE:
 - Desconexión del lead = lead cuelga o pierde señal → NO es fallo del asesor
 - Cierre pasivo = lead sí está pero el asesor no propone nada → SÍ es fallo del asesor
