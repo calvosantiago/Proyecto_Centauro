@@ -3,8 +3,10 @@ python-docx
 rapidfuzz
 python-dotenv
 chromadb
+# Agente PBI (OpenAI GPT-5-mini — consultas DAX sobre modelo semántico Power BI)
 openai>=1.0.0
 pydantic>=2.0.0
+pydantic-settings
 fpdf
 scikit-learn
 pandas
@@ -34,8 +36,8 @@ msal
 # Gráficos automáticos en respuestas Power BI
 matplotlib
 
-# Agente PBI (Claude Sonnet — consultas DAX sobre modelo semántico Power BI)
-anthropic
-
 # Optional (mejora performance)
 uvicorn[standard]
+
+# HTTP client explícito para Power BI/Fabric APIs
+requests
