@@ -539,7 +539,6 @@ async def main(message: cl.Message):
     # Detectar si el usuario especificó el nombre del asesor explícitamente en el mensaje
     nombre_especificado_en_mensaje = None
     if contexto_usuario:
-        import re
         # ── Patrón 1: formato explícito "Asesor: Nombre Apellido" ──────────
         patron_nombre = re.search(
             r'(?:asesor|nombre\s+asesor?|advisor)\s*[:=]\s*'
