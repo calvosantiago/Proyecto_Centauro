@@ -197,7 +197,7 @@ class DatabaseManager:
             "perfil_lead": resumen.get("perfil_lead"),
             "objetivo_del_lead": resumen.get("objetivo_del_lead"),
             "factor_determinante_compra": resumen.get("factor_determinante_compra"),
-            "barreras_principales": json.dumps(barreras) if barreras else "[]",
+            "barreras_principales": barreras if barreras else [],
             "fecha_seguimiento": resumen.get("fecha_seguimiento"),
             "reporte_pdf_path": reporte_pdf_path,
         }
@@ -229,6 +229,7 @@ class DatabaseManager:
                     "calificacion": bloque.get("calificacion"),
                     "observabilidad": bloque.get("observabilidad"),
                     "confianza": bloque.get("confianza"),
+                    "razonamiento": bloque.get("razonamiento"),
                 })
 
         if bloques_data:
@@ -290,7 +291,7 @@ class DatabaseManager:
             "perfil_lead": resumen.get("perfil_lead"),
             "objetivo_del_lead": resumen.get("objetivo_del_lead"),
             "factor_determinante_compra": resumen.get("factor_determinante_compra"),
-            "barreras_principales": json.dumps(barreras) if barreras else "[]",
+            "barreras_principales": barreras if barreras else [],
             "fecha_seguimiento": resumen.get("fecha_seguimiento"),
             "reporte_pdf_path": reporte_pdf_path,
         }
@@ -321,6 +322,7 @@ class DatabaseManager:
                     "calificacion": bloque.get("calificacion"),
                     "observabilidad": bloque.get("observabilidad"),
                     "confianza": bloque.get("confianza"),
+                    "razonamiento": bloque.get("razonamiento"),
                 })
 
         if bloques_data:
