@@ -13,8 +13,9 @@ Uso:
     bloque = formatear_metricas_para_prompt(metricas)
 """
 
+import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
 def extraer_metricas_audio(audio_path: Path) -> Dict[str, Any]:
@@ -99,19 +100,57 @@ def extraer_metricas_audio(audio_path: Path) -> Dict[str, Any]:
         return {"disponible": False, "motivo": f"Error al procesar audio: {e}"}
 
 
-def formatear_sin_audio_para_prompt() -> str:
+def calcular_ratio_habla_diarizada(transcripcion: str) -> Dict[str, Optional[float]]:
+    """
+    Calcula el porcentaje de habla de cada speaker a partir de la transcripción diarizada.
+    Usa el número de caracteres por speaker como proxy del tiempo de habla.
+    Devuelve pct_asesor y pct_lead (None si la transcripción no tiene etiquetas).
+    """
+    chars_asesor = 0
+    chars_lead = 0
+    for linea in transcripcion.splitlines():
+        linea = linea.strip()
+        m = re.match(r'^\[ASESOR\]:\s*(.+)', linea)
+        if m:
+            chars_asesor += len(m.group(1))
+            continue
+        m = re.match(r'^\[LEAD\]:\s*(.+)', linea)
+        if m:
+            chars_lead += len(m.group(1))
+    total = chars_asesor + chars_lead
+    if total == 0:
+        return {"pct_asesor": None, "pct_lead": None}
+    return {
+        "pct_asesor": round(chars_asesor / total * 100, 1),
+        "pct_lead": round(chars_lead / total * 100, 1),
+    }
+
+
+def _formatear_ratio_habla(ratio_habla: Optional[Dict]) -> str:
+    """Genera la línea de % habla para insertar en el bloque de audio."""
+    if not ratio_habla or ratio_habla.get("pct_asesor") is None:
+        return ""
+    pct_a = ratio_habla["pct_asesor"]
+    pct_l = ratio_habla["pct_lead"]
+    return f"• % habla asesor / lead: {pct_a}% asesor — {pct_l}% lead\n"
+
+
+def formatear_sin_audio_para_prompt(ratio_habla: Optional[Dict] = None) -> str:
     """Bloque para insertar en el prompt cuando no hay archivo de audio disponible."""
-    return """━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    linea_ratio = _formatear_ratio_habla(ratio_habla)
+    ratio_bloque = f"\n{linea_ratio}" if linea_ratio else ""
+    return f"""━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 DATOS OBJETIVOS DEL AUDIO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 No hay archivo de audio disponible para esta transcripción.
 El input fue texto (TXT, VTT o DOCX), por lo que no es posible
 analizar métricas acústicas (energía, silencios, ritmo).
-Evalúa el estilo comunicativo únicamente a partir del texto transcrito.
+Evalúa el estilo comunicativo únicamente a partir del texto transcrito.{ratio_bloque}
+⚠️ El % de habla es un dato informativo. No lo uses para calificar como bueno o malo.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
 
 
-def formatear_metricas_para_prompt(metricas: Dict[str, Any]) -> str:
+def formatear_metricas_para_prompt(metricas: Dict[str, Any], ratio_habla: Optional[Dict] = None) -> str:
     """
     Convierte el dict de métricas en un bloque de texto descriptivo
     listo para insertar en el prompt del LLM.
@@ -165,6 +204,8 @@ def formatear_metricas_para_prompt(metricas: Dict[str, Any]) -> str:
     else:
         tempo_desc = "cadencia rápida — el asesor habla acelerado, riesgo de no dejar espacio al lead"
 
+    linea_ratio = _formatear_ratio_habla(ratio_habla)
+
     return f"""━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 DATOS OBJETIVOS DEL AUDIO (medición acústica)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -172,12 +213,13 @@ Estos datos son señales objetivas medidas sobre la onda de audio.
 Úsalos para COMPLEMENTAR tu análisis del texto, no para sustituirlo.
 
 • Duración de la llamada: {minutos} min {segundos} seg
-• Energía vocal (final vs inicio): {energia_desc}
+{linea_ratio}• Energía vocal (final vs inicio): {energia_desc}
 • Silencios totales: {silencio_pct}% del audio — {silencio_ctx}
 • Pausas largas (>4 seg): {pausas_desc}
 • Ritmo conversacional: {tempo_desc}
 
 ⚠️ Interpretación orientativa:
+- El % de habla es un dato informativo. No lo uses para calificar como bueno o malo.
 - Caída de energía al final → posible desenganche o cansancio del asesor
 - Múltiples pausas largas → pueden indicar incomodidad, espera o momentos de reflexión
 - Cadencia muy rápida → riesgo de atropellar al lead sin dejarle espacio

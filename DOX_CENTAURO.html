@@ -190,13 +190,13 @@
 
     <div class="info-box">
         <strong>Proyecto Centauro - Manual Técnico Integral (actualizado al código real)</strong><br>
-        Este documento está reconstruido desde el repositorio actual y cubre arquitectura, evaluación, agentes, tools, diarización, transcripción, flujos de entrada y contexto teórico (incluyendo RAG).
+        Este documento está reconstruido desde el repositorio actual y cubre arquitectura, evaluación, agentes, tools, autenticación Supabase, integración con modelo semántico Power BI (<code>@pbi</code>), transcripción con AssemblyAI y operación RAG.
     </div>
 
     <header>
         <h1>Proyecto Centauro: Documentación Técnica Integral</h1>
-        <p><strong>Estado de referencia:</strong> Código del repositorio a fecha <strong>19 de febrero de 2026</strong>.<br>
-        <strong>Stack vigente observado:</strong> Multi-Agente Híbrido + Sheriff + RAG Multi-Colección + Chat + Memoria Continua.</p>
+        <p><strong>Estado de referencia:</strong> Código del repositorio a fecha <strong>21 de abril de 2026</strong>.<br>
+        <strong>Stack vigente observado:</strong> Multi-Agente Híbrido + Sheriff + RAG Multi-Colección + Chainlit con login + Supabase + agente <code>@pbi</code> sobre modelo semántico Power BI.</p>
     </header>
 
     <section>
@@ -224,8 +224,13 @@
                 <tr><td><code>pandas</code></td><td>Procesamiento tabular auxiliar en tools.</td><td>Obligatoria</td></tr>
                 <tr><td><code>numpy</code></td><td>Soporte numérico general.</td><td>Obligatoria</td></tr>
                 <tr><td><code>scikit-learn</code></td><td>Utilidades de análisis/soporte ML.</td><td>Obligatoria</td></tr>
-                <tr><td><code>mutagen</code></td><td>Lectura de duración MP3 para cálculo de costes Whisper.</td><td>Obligatoria</td></tr>
-                <tr><td><code>groq</code></td><td>Transcripción Whisper vía API Groq (<code>whisper_transcribe.py</code>).</td><td>Obligatoria para Plan B de audio</td></tr>
+                <tr><td><code>supabase</code></td><td>Persistencia SQL (usuarios, asesores, evaluaciones, oportunidades).</td><td>Obligatoria</td></tr>
+                <tr><td><code>requests</code></td><td>Cliente HTTP para Power BI REST API.</td><td>Obligatoria</td></tr>
+                <tr><td><code>msal</code></td><td>Autenticación Device Code Flow contra Entra para Power BI.</td><td>Obligatoria para <code>@pbi</code></td></tr>
+                <tr><td><code>matplotlib</code></td><td>Gráficos automáticos en respuestas analíticas de Power BI.</td><td>Obligatoria para <code>@pbi</code></td></tr>
+                <tr><td><code>assemblyai</code></td><td>Transcripción + diarización nativa en carga de MP3/MP4 desde Chainlit.</td><td>Obligatoria para multimedia web</td></tr>
+                <tr><td><code>mutagen</code></td><td>Lectura de duración de audio para trazabilidad/costes.</td><td>Obligatoria</td></tr>
+                <tr><td><code>librosa</code></td><td>Métricas acústicas objetivas para enriquecer evaluación de estilo.</td><td>Obligatoria en flujo de audio</td></tr>
             </tbody>
         </table>
 
@@ -239,7 +244,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr><td><code>chainlit&gt;=1.0.0</code></td><td>Interfaz web/chat y carga de archivos.</td><td>Si vas a operar en modo web (<code>app.py</code>).</td></tr>
+                <tr><td><code>chainlit&gt;=1.0.0</code></td><td>Interfaz web/chat, login y carga de archivos.</td><td>Si vas a operar en modo web (<code>app.py</code>).</td></tr>
                 <tr><td><code>uvicorn[standard]</code></td><td>Servidor ASGI (mejor rendimiento/entorno web).</td><td>Recomendado para despliegue web.</td></tr>
             </tbody>
         </table>
@@ -247,12 +252,15 @@
         <h3>0.3 Requisitos del sistema (no Python)</h3>
         <ul>
             <li><code>ffmpeg</code>: obligatorio para extraer audio desde video (<code>centauro/tools/extract_audio.py</code>).</li>
-            <li>Variables de entorno: <code>OPENAI_API_KEY</code> y <code>GROQ_API_KEY</code> (esta última para transcripción Whisper).</li>
+            <li>Autenticación Chainlit: <code>CHAINLIT_AUTH_SECRET</code>.</li>
+            <li>Credenciales OpenAI: <code>OPENAI_API_KEY</code>.</li>
+            <li>Credenciales Supabase: <code>SUPABASE_URL</code>, <code>SUPABASE_KEY</code>.</li>
+            <li>Power BI/Fabric: <code>AZURE_CLIENT_ID</code>, <code>AZURE_TENANT_ID</code>, <code>PBI_WORKSPACE_ID</code>, <code>PBI_DATASET_ID</code>, <code>PBI_REFRESH_TOKEN</code> (generado con <code>scripts/pbi_auth.py</code>).</li>
+            <li>Multimedia web: <code>ASSEMBLYAI_API_KEY</code>.</li>
         </ul>
 
         <h3>0.4 Instalación recomendada</h3>
-        <pre><code>pip install -r requirements.txt
-pip install groq pydantic-settings</code></pre>
+        <pre><code>pip install -r requirements.txt</code></pre>
     </section>
 
     <section>
@@ -282,32 +290,29 @@ pip install groq pydantic-settings</code></pre>
         <div class="mermaid">
 flowchart TD
     A[Entrada]
-    B{Tipo de entrada}
-    C[Transcripcion txt vtt docx]
-    D[Audio mp3]
-    E[Video]
-    F[Extract audio]
-    G[Whisper transcribe]
-    H[Lectura transcripcion]
-    I[Fase 0 Redaccion PII]
-    J[Fase 1 Diarizacion]
-    K[Fase 2 Temas]
-    L[Fase 2_5 Perfil lead]
-    M[Fase 3 Evaluacion]
-    N[Fase 3_5 Sheriff]
-    O[Fase 4 Sintesis]
-    P[Salida JSON PDF]
-    Q[Memoria y aprendizaje]
+    B{Tipo}
+    C[TXT VTT DOCX]
+    D[MP3 MP4]
+    E[AssemblyAI transcribe + diarize]
+    F[Texto diarizado]
+    G[Fase 0 PII]
+    H[Fase 1 Diarización final]
+    I[Fase 2 Temas RAG]
+    J[Fase 2.5 Perfil lead]
+    K[Fase 3 Evaluación]
+    L[Fase 3.5 Sheriff]
+    M[Fase 4 Síntesis]
+    N[Salida JSON PDF]
+    O[Memoria Supabase + RAG histórico]
 
     A --> B
     B --> C
     B --> D
-    B --> E
+    D --> E
     E --> F
+    C --> F
     F --> G
-    D --> G
     G --> H
-    C --> H
     H --> I
     I --> J
     J --> K
@@ -315,8 +320,6 @@ flowchart TD
     L --> M
     M --> N
     N --> O
-    O --> P
-    P --> Q
         </div>
 
         <h3>2.2 Módulos Principales</h3>
@@ -334,7 +337,7 @@ flowchart TD
                 <tr><td>Memoria</td><td><code>centauro/core/memoria.py</code></td><td>Perfiles históricos por asesor y tendencias.</td></tr>
                 <tr><td>Chat semántico</td><td><code>centauro/core/chat_handler.py</code></td><td>Intención + consulta multi-colección + respuesta LLM.</td></tr>
                 <tr><td>Reportes</td><td><code>centauro/reports.py</code>, <code>centauro/schema.py</code></td><td>Salida PDF y estructura de reporte JSON.</td></tr>
-                <tr><td>Costes</td><td><code>centauro/llm_client.py</code>, <code>centauro/tools/whisper_transcribe.py</code></td><td>Registro de costes de chat, embeddings y Whisper.</td></tr>
+                <tr><td>Costes</td><td><code>centauro/llm_client.py</code>, <code>app.py</code></td><td>Registro de costes de chat, embeddings y transcripción AssemblyAI.</td></tr>
             </tbody>
         </table>
     </section>
@@ -347,6 +350,8 @@ flowchart TD
             <li><code>.txt</code></li>
             <li><code>.vtt</code></li>
             <li><code>.docx</code></li>
+            <li><code>.mp3</code> (modo web Chainlit)</li>
+            <li><code>.mp4</code> (modo web Chainlit)</li>
         </ul>
         <p>Validaciones en <code>centauro/utils/validaciones.py</code>:</p>
         <ul>
@@ -356,22 +361,28 @@ flowchart TD
         </ul>
 
         <h3>3.2 Flujo audio</h3>
+        <p><strong>Modo web (app.py / Chainlit):</strong> MP3 se transcribe y diariza con AssemblyAI de forma nativa.</p>
         <ol>
-            <li>Colocar mp3 en <code>inputs/audios</code>.</li>
-            <li>Ejecutar <code>python centauro/tools/whisper_transcribe.py</code>.</li>
-            <li>Salida en <code>inputs/transcripts/*_whisper.txt</code>.</li>
-            <li>Procesar luego con <code>main.py</code> o por Chainlit.</li>
+            <li>Usuario adjunta <code>.mp3</code> en chat.</li>
+            <li>Se calcula caché en <code>outputs/transcripciones_cache/</code> por nombre de archivo.</li>
+            <li>Si no existe caché, se llama a AssemblyAI con <code>speaker_labels=True</code>, idioma <code>es</code> y modelo <code>universal-3-pro</code>.</li>
+            <li>Salida estructurada como <code>[Speaker_X]: ...</code> para consumo del <code>DiarizationAgent</code>.</li>
+            <li>Se registra coste en <code>outputs/control_gastos.csv</code> como <code>transcripcion_assemblyai</code>.</li>
         </ol>
         <div class="ok-box">
-            <strong>Detalle:</strong> la transcripción Whisper se guarda sin speaker tags para que la diarización posterior sea contextual por LLM.
+            <strong>Clave:</strong> en flujo web actual, si falta <code>ASSEMBLYAI_API_KEY</code> se lanza error y no se procesa audio/vídeo.
+        </div>
+        <div class="ok-box">
+            <strong>Detalle:</strong> el flujo actual documentado usa AssemblyAI como motor de transcripción/diarización para multimedia.
         </div>
 
         <h3>3.3 Flujo video</h3>
+        <p><strong>Modo web:</strong> el MP4 se convierte a MP3 temporal con ffmpeg y después pasa por AssemblyAI (mismo flujo que audio).</p>
         <ol>
             <li>Colocar videos en <code>inputs/videollamadas</code>.</li>
             <li>Ejecutar <code>python centauro/tools/extract_audio.py</code> (requiere <code>C:\ffmpeg\bin\ffmpeg.exe</code>).</li>
             <li>Se generan MP3 en <code>inputs/audios</code>.</li>
-            <li>Ejecutar Whisper para pasar a transcripción y continuar flujo normal.</li>
+            <li>Procesar en Chainlit (AssemblyAI).</li>
         </ol>
 
         <h3>3.4 Privacidad y RGPD</h3>
@@ -383,110 +394,14 @@ flowchart TD
             <li>IBAN español</li>
         </ul>
 
-        <h3>3.5 Flujos de ejecución por casuística (main.py v3.0)</h3>
-        <pre><code>╔══════════════════════════════════════════════════════════════════════════════════╗
-║              PROYECTO CENTAURO — FLUJOS DE EJECUCIÓN POR CASUÍSTICA             ║
-║                              main.py v3.0                                        ║
-╚══════════════════════════════════════════════════════════════════════════════════╝</code></pre>
-
-        <h4>PASO 2 · EXTRACCIÓN DE AUDIO (<code>inputs/videollamadas/</code>)</h4>
-        <pre><code>📹 MP4 encontrado
-      │
-      ├── ¿Ya existe MP3 en audios/?
-      │         │
-      │    SÍ ──┘→  ⏭️ SKIP (no doble trabajo)
-      │
-      └── NO ──→  🔧 ffmpeg  ──→  📦 MP3 en inputs/audios/
-                  32kbps · mono · 16kHz · ~10MB/45min</code></pre>
-
-        <h4>PASO 3 · TRANSCRIPCIÓN (<code>inputs/audios/</code>)</h4>
-        <pre><code>📦 MP3 encontrado
-      │
-      ├─ A ── ¿Existe _whisper.txt? ────────────────→  ⏭️ SKIP
-      │
-      ├─ B ── ¿Existe transcripción Teams/Word/VTT?
-      │              │
-      │         Validar calidad (6 señales)
-      │              │
-      │         BUENA (score ≥ 0.5) ───────────────→  ⏭️ SKIP (Groq no necesario)
-      │              │
-      │         MALA  (score < 0.5) ───────────────→  🎙️ Groq Whisper
-      │                                                      │
-      │                                               _whisper.txt ✅ (Plan B real)
-      │
-      └─ C ── Sin ninguna transcripción ──────────→  🎙️ Groq Whisper
-                                                            │
-                                                     _whisper.txt ✅ (audio nuevo)</code></pre>
-
-        <div class="warning-box">
-            <strong>Nota operativa:</strong> sin <code>GROQ_API_KEY</code> se muestra aviso en consola y el pipeline continúa sin transcribir.
-        </div>
-
-        <h4>PASO 4 · ANÁLISIS (<code>inputs/transcripts/</code>)</h4>
-        <pre><code>Para cada archivo en transcripts/ (*.txt · *.vtt · *.docx)
-      │
-      ├── 1. cargar_transcripcion()
-      │         │
-      │         ├── .docx  →  leer_word()     (extrae [Nombre HH:MM])
-      │         ├── .vtt   →  texto crudo VTT (UUIDs o speaker tags)
-      │         └── .txt   →  texto plano
-      │
-      ├── 2. validar_transcripcion()
-      │         │
-      │    BUENA ┘→ continuar con texto original
-      │         │
-      │    MALA ──→ activar_plan_b_whisper(nombre)
-      │                    │
-      │               ┌────┴────────────────────────────────────┐
-      │               │                                         │
-      │          ¿_whisper.txt existe?               ¿MP3 existe?
-      │               │                                         │
-      │              SÍ → reusar (gratis, instant)    SÍ → 🎙️ Groq
-      │                                               NO → ⚠️ continuar igual
-      │
-      ├── 3. DiarizationAgent (decide ruta por formato)
-      │         │
-      │         ├── VTT con UUID    →  diarización por UUID       (Teams nativo)
-      │         ├── VTT con nombre  →  diarización por speaker tag
-      │         ├── DOCX Teams      →  diarización por timestamps
-      │         └── TXT plano       →  🤖 LLM batch               (Whisper)
-      │
-      └── 4. 6 Agentes evaluadores → Orquestador
-                  │
-            📄 PDF + 🗃️ JSON en outputs/</code></pre>
-
-        <h4>Casuística completa (resumen)</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>CASO</th>
-                    <th>ENTRADA</th>
-                    <th>PASO 2</th>
-                    <th>PASO 3</th>
-                    <th>PASO 4 DIARIZACIÓN</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>1</td><td>MP4 sin MP3</td><td>ffmpeg</td><td>Groq</td><td>LLM batch</td></tr>
-                <tr><td>2</td><td>MP4 con MP3 ya hecho</td><td>SKIP</td><td>Groq</td><td>LLM batch</td></tr>
-                <tr><td>3</td><td>MP3 sin transcript</td><td>—</td><td>Groq</td><td>LLM batch</td></tr>
-                <tr><td>4</td><td>MP3 + Teams OK</td><td>—</td><td>SKIP</td><td>UUID / timestamp</td></tr>
-                <tr><td>5</td><td>MP3 + Teams MAL</td><td>—</td><td>Groq (Plan B)</td><td>LLM batch</td></tr>
-                <tr><td>6</td><td>MP3 + _whisper.txt</td><td>—</td><td>SKIP</td><td>LLM batch</td></tr>
-                <tr><td>7</td><td>Solo VTT Teams OK</td><td>—</td><td>—</td><td>UUID / speaker tag</td></tr>
-                <tr><td>8</td><td>Solo VTT Teams MAL</td><td>—</td><td>Plan B→_whisper</td><td>LLM batch</td></tr>
-                <tr><td>9</td><td>Solo DOCX Teams OK</td><td>—</td><td>—</td><td>timestamps</td></tr>
-                <tr><td>10</td><td>Solo DOCX Teams MAL</td><td>—</td><td>Plan B→_whisper</td><td>LLM batch</td></tr>
-                <tr><td>11</td><td>VTT MAL + _whisper.txt</td><td>—</td><td>—</td><td>LLM batch (Plan B auto)</td></tr>
-                <tr>
-                    <td>★</td>
-                    <td>Caso Esther Lopez (VTT basura Teams + _whisper.txt de Groq)</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>Caso 11 exacto: ambos reportes usan el mismo texto Whisper</td>
-                </tr>
-            </tbody>
-        </table>
+        <h3>3.5 Flujo operativo actual (resumen)</h3>
+        <ol>
+            <li>Carga de archivo en Chainlit: <code>.txt</code>, <code>.vtt</code>, <code>.docx</code>, <code>.mp3</code>, <code>.mp4</code>.</li>
+            <li>Si es multimedia, se convierte a audio cuando aplica y se envía a AssemblyAI con diarización.</li>
+            <li>Se guarda caché de transcripción en <code>outputs/transcripciones_cache/</code> para evitar coste repetido.</li>
+            <li>Se normaliza y protege PII antes de evaluación.</li>
+            <li>Orquestador ejecuta agentes + Sheriff + síntesis final y persiste resultados.</li>
+        </ol>
 
         <h4>Señales de calidad (<code>transcript_validator.py</code>)</h4>
         <table>
@@ -506,7 +421,7 @@ flowchart TD
                 <tr><td>Sin signos de puntuación</td><td>—</td><td>-0.10</td></tr>
             </tbody>
         </table>
-        <p><strong>Regla de decisión:</strong> score <strong>≥ 0.50</strong> → ✅ VÁLIDA · score <strong>&lt; 0.50</strong> → ❌ PLAN B.</p>
+        <p><strong>Regla de decisión:</strong> score <strong>≥ 0.50</strong> → ✅ VÁLIDA · score <strong>&lt; 0.50</strong> → ❌ REVISAR.</p>
     </section>
 
     <section>
@@ -616,17 +531,23 @@ flowchart TD
                 <tr><td><code>coaching_ventas</code></td><td>Técnicas de libros/mentores</td><td><code>inputs/docs/coaching_ventas/*.txt</code></td></tr>
                 <tr><td><code>evaluaciones_historicas</code></td><td>Aprendizaje desde llamadas buenas</td><td>Memoria continua</td></tr>
                 <tr><td><code>dossiers_programas</code></td><td>Contexto específico de programas</td><td><code>outputs/dossiers_procesados/*.txt</code></td></tr>
+                <tr><td><code>diccionario_datos</code></td><td>Diccionario del modelo semántico para consultas <code>@pbi</code></td><td><code>inputs/docs/diccionario_datos/*.txt</code></td></tr>
             </tbody>
         </table>
 
         <h3>6.3 Indexación documental</h3>
-        <p>Función principal: <code>indexar_documentacion()</code>. Ejecuta:</p>
+        <p>Entrada recomendada: <code>indexar_si_necesario()</code>. Usa hash de <code>inputs/docs/**/*.txt</code> y solo reindexa si detecta cambios.</p>
         <ol>
             <li>Manuales generales (chunking configurable).</li>
             <li>Buenas prácticas por sección (indexación completa por ejemplo).</li>
             <li>Coaching de ventas con chunking semántico.</li>
             <li>Dossiers procesados.</li>
+            <li>Diccionario de datos del modelo semántico (Power BI).</li>
         </ol>
+        <div class="warning-box">
+            <strong>Operación segura:</strong> no es necesario borrar <code>chroma_db/</code> para reindexar.
+            Si quieres forzar recálculo, borra solo <code>chroma_db/.index_hash</code> o ejecuta una llamada manual a <code>indexar_si_necesario()</code>.
+        </div>
 
         <h3>6.4 RAG dinámico por bloque</h3>
         <p><code>DynamicRAGAgent</code> hace:</p>
@@ -720,11 +641,12 @@ flowchart LR
             <li><code>ejemplo</code> → buenas prácticas.</li>
             <li><code>perfil</code> → perfil histórico de asesor.</li>
             <li><code>estadisticas</code> → métricas globales.</li>
+            <li><code>kpi</code> → modelo semántico Power BI (incluye prefijo forzado <code>@pbi</code>).</li>
             <li><code>general</code> → búsqueda multicolección.</li>
         </ul>
 
         <h3>9.2 Memoria por asesor</h3>
-        <p><code>MemoryManager</code> mantiene perfiles en <code>outputs/perfiles_asesores/*.json</code>:</p>
+        <p><code>MemoryManager</code> persiste perfiles en Supabase (con fallback operativo si no está disponible):</p>
         <ul>
             <li>Histórico de evaluaciones.</li>
             <li>Tendencia (mejorando / estable / empeorando).</li>
@@ -734,6 +656,16 @@ flowchart LR
 
         <h3>9.3 Aprendizaje hacia RAG histórico</h3>
         <p>Evaluaciones con nivel mínimo configurado se pueden indexar en <code>evaluaciones_historicas</code> para alimentar ejemplos futuros.</p>
+
+        <h3>9.4 Agente <code>@pbi</code> (Power BI)</h3>
+        <ul>
+            <li>Prefijo <code>@pbi</code> fuerza consulta al modelo semántico.</li>
+            <li>Cliente: <code>centauro/core/powerbi_client.py</code> (REST <code>executeQueries</code>).</li>
+            <li>Agente: <code>centauro/core/pbi_agent.py</code> con OpenAI <code>gpt-5-mini</code> (sin fallback a otro modelo).</li>
+            <li>Comandos directos soportados:
+                <code>@pbi schema</code>, <code>@pbi columnas &lt;tabla&gt;</code>, <code>@pbi EVALUATE ...</code>.</li>
+            <li>Timeout de ejecución DAX: 30 segundos por consulta HTTP.</li>
+        </ul>
     </section>
 
     <section>
@@ -746,7 +678,10 @@ flowchart LR
             </thead>
             <tbody>
                 <tr><td>Extracción audio</td><td><code>centauro/tools/extract_audio.py</code></td><td>Pasa video a MP3 con ffmpeg.</td></tr>
-                <tr><td>Transcripción Whisper</td><td><code>centauro/tools/whisper_transcribe.py</code></td><td>Transcribe MP3 con Groq Whisper y registra coste.</td></tr>
+                <tr><td>Transcripción multimedia</td><td><code>app.py</code></td><td>Transcribe y diariza MP3/MP4 con AssemblyAI en flujo web.</td></tr>
+                <tr><td>Auth Power BI</td><td><code>scripts/pbi_auth.py</code></td><td>Device Code Flow (MSAL) y guardado de <code>PBI_REFRESH_TOKEN</code> en <code>.env</code>.</td></tr>
+                <tr><td>Usuarios Supabase</td><td><code>centauro/tools/gestionar_usuarios.py</code></td><td>Alta, listado, baja, cambio de contraseña y migración desde JSON.</td></tr>
+                <tr><td>Migración perfiles</td><td><code>centauro/tools/migrar_json_a_supabase.py</code></td><td>Migra reportes/perfiles históricos hacia tablas SQL en Supabase.</td></tr>
                 <tr><td>Buenas prácticas</td><td><code>centauro/tools/procesar_buenas_practicas.py</code></td><td>Procesa VTT de ejemplos y exporta texto indexable.</td></tr>
                 <tr><td>Limpieza de BP</td><td><code>centauro/tools/limpiar_buenas_practicas.py</code></td><td>Normaliza nombres, deduplica y ordena ejemplos.</td></tr>
                 <tr><td>Mapeo de secciones</td><td><code>centauro/tools/mapeo_secciones.py</code></td><td>Mapea carpeta ↔ bloque/agente.</td></tr>
@@ -759,9 +694,9 @@ flowchart LR
         <h3>10.2 Flujos de operación recomendados</h3>
         <ol>
             <li><strong>Si ya tienes transcripción:</strong> subir a Chainlit o colocar en <code>inputs/transcripts</code> y ejecutar <code>main.py</code>.</li>
-            <li><strong>Si tienes audio:</strong> <code>whisper_transcribe.py</code> → evaluación normal.</li>
-            <li><strong>Si tienes video:</strong> <code>extract_audio.py</code> → <code>whisper_transcribe.py</code> → evaluación normal.</li>
-            <li><strong>Si actualizas conocimiento:</strong> reindexar con <code>indexar_documentacion()</code>.</li>
+            <li><strong>Si tienes audio/video en web:</strong> subir <code>.mp3/.mp4</code> a Chainlit (AssemblyAI + diarización).</li>
+            <li><strong>Si trabajas en lote CLI:</strong> prepara transcripciones en <code>inputs/transcripts</code> y procesa con <code>main.py</code>.</li>
+            <li><strong>Si actualizas conocimiento:</strong> relanzar app o ejecutar <code>indexar_si_necesario()</code> (sin borrar <code>chroma_db</code>).</li>
         </ol>
     </section>
 
@@ -790,7 +725,8 @@ flowchart LR
         <ul>
             <li><code>outputs/Input_Debug/*_diarizada.txt</code></li>
             <li><code>outputs/control_gastos.csv</code></li>
-            <li><code>outputs/perfiles_asesores/*.json</code></li>
+            <li><code>outputs/transcripciones_cache/*.txt</code></li>
+            <li>Persistencia principal de usuarios/evaluaciones en Supabase (no en JSON local).</li>
         </ul>
     </section>
 
@@ -799,8 +735,12 @@ flowchart LR
 
         <h3>12.1 Variables y settings</h3>
         <ul>
-            <li><code>OPENAI_API_KEY</code> (obligatoria para evaluación/RAG).</li>
-            <li><code>GROQ_API_KEY</code> (obligatoria para Whisper tool).</li>
+            <li><code>OPENAI_API_KEY</code> (obligatoria para evaluación, chat y agente <code>@pbi</code>).</li>
+            <li><code>CHAINLIT_AUTH_SECRET</code> (firma de sesión de login en Chainlit).</li>
+            <li><code>SUPABASE_URL</code> y <code>SUPABASE_KEY</code> (auth y persistencia SQL).</li>
+            <li><code>ASSEMBLYAI_API_KEY</code> (transcripción/diarización en uploads multimedia web).</li>
+            <li><code>AZURE_CLIENT_ID</code>, <code>AZURE_TENANT_ID</code>, <code>PBI_WORKSPACE_ID</code>, <code>PBI_DATASET_ID</code>, <code>PBI_REFRESH_TOKEN</code> (Power BI).</li>
+            <li><code>PBI_SCHEMA_HINT</code> (fallback de esquema si el diccionario RAG está vacío).</li>
         </ul>
 
         <h3>12.2 Modelos observados en código (enrutado real)</h3>
@@ -867,6 +807,11 @@ flowchart LR
                     <td><code>rag_temas</code></td>
                     <td><code>gpt-4o-mini</code></td>
                 </tr>
+                <tr>
+                    <td>Agente Power BI (<code>@pbi</code>)</td>
+                    <td><code>centauro/core/pbi_agent.py</code></td>
+                    <td><code>gpt-5-mini</code> (fijo)</td>
+                </tr>
             </tbody>
         </table>
         <ul>
@@ -874,11 +819,90 @@ flowchart LR
             <li>Resumen contextual (<code>*_resumen_contextual</code>): <code>gpt-4o-mini</code>.</li>
             <li>Fallback por defecto (<code>settings.MODEL_NAME</code>): <code>gpt-4o-mini</code>.</li>
             <li>Embeddings: <code>text-embedding-3-small</code>.</li>
-            <li>Transcripción: <code>whisper-large-v3-turbo</code> (Groq).</li>
+            <li>Transcripción web: AssemblyAI (<code>universal-3-pro</code> + diarización).</li>
         </ul>
 
         <h3>12.3 Registro de gastos</h3>
-        <p>Todos los consumos se registran en <code>outputs/control_gastos.csv</code> (chat, embeddings y whisper).</p>
+        <p>Todos los consumos se registran en <code>outputs/control_gastos.csv</code> (chat, embeddings y AssemblyAI).</p>
+
+        <h3>12.4 Timeouts operativos relevantes</h3>
+        <ul>
+            <li>Inicialización RAG en <code>app.py</code>: 120 s (<code>asyncio.wait_for</code>).</li>
+            <li>Ejecución DAX en Power BI (<code>requests.post</code>): 30 s por consulta.</li>
+            <li>Llamadas OpenAI (cliente general): timeout base 180 s en <code>llm_client.py</code>.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>12B. Supabase: Autenticación Y Persistencia SQL</h2>
+
+        <h3>12B.1 Login Chainlit (estado actual)</h3>
+        <ul>
+            <li>Callback de login: <code>@cl.password_auth_callback</code> en <code>app.py</code>.</li>
+            <li>Validación de credenciales en <code>centauro/auth.py</code> contra tabla <code>usuarios_auth</code>.</li>
+            <li>Hash de contraseñas: <code>pbkdf2:sha256:salt:hash</code> con 260.000 iteraciones.</li>
+            <li>Roles operativos: <code>asesor</code> y <code>admin</code> (alias <code>jefe</code> en script CLI).</li>
+        </ul>
+
+        <h3>12B.2 Tablas SQL principales</h3>
+        <p>Definición en <code>centauro/tools/supabase_schema.sql</code>.</p>
+        <ul>
+            <li><code>usuarios_auth</code> (autenticación Chainlit).</li>
+            <li><code>asesores</code> (catálogo de asesores y nombre normalizado).</li>
+            <li><code>evaluaciones</code> (cabecera de evaluación por llamada).</li>
+            <li><code>calificaciones_bloque</code> (detalle por bloque).</li>
+            <li><code>oportunidades</code> (cache de datos de lead/oportunidad).</li>
+        </ul>
+
+        <h3>12B.3 Gestión de usuarios (CLI)</h3>
+        <p>Ruta recomendada:</p>
+        <pre><code>python -m centauro.tools.gestionar_usuarios listar
+python -m centauro.tools.gestionar_usuarios crear usuario@dominio.com "Nombre Apellido" Password123 asesor
+python -m centauro.tools.gestionar_usuarios cambiar_password usuario@dominio.com NuevaPassword123
+python -m centauro.tools.gestionar_usuarios eliminar usuario@dominio.com
+python -m centauro.tools.gestionar_usuarios migrar_json</code></pre>
+        <p>Compatibilidad histórica disponible: <code>python scripts/gestionar_usuarios.py ...</code></p>
+        <div class="warning-box">
+            <strong>Seguridad:</strong> no se puede recuperar la contraseña actual de un usuario; solo resetearla.
+        </div>
+
+        <h3>12B.4 Persistencia de evaluaciones</h3>
+        <ul>
+            <li><code>MemoryManager</code> escribe primero en Supabase si está disponible.</li>
+            <li>Si Supabase no está disponible, la memoria sigue operando con fallback para no bloquear evaluación.</li>
+            <li>El RAG histórico (<code>evaluaciones_historicas</code>) sigue en ChromaDB para aprendizaje.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>12C. Integración Power BI / Fabric Y Agente <code>@pbi</code></h2>
+
+        <h3>12C.1 Flujo de conexión al modelo semántico</h3>
+        <ol>
+            <li>Configurar variables en <code>.env</code>: <code>AZURE_CLIENT_ID</code>, <code>AZURE_TENANT_ID</code>, <code>PBI_WORKSPACE_ID</code>, <code>PBI_DATASET_ID</code>.</li>
+            <li>Ejecutar una vez: <code>python scripts/pbi_auth.py</code>.</li>
+            <li>El script guarda <code>PBI_REFRESH_TOKEN</code> en <code>.env</code>.</li>
+            <li>En runtime, <code>PowerBIClient</code> renueva access token automáticamente y ejecuta DAX por REST <code>/executeQueries</code>.</li>
+        </ol>
+
+        <h3>12C.2 Diccionario del modelo semántico (RAG)</h3>
+        <ul>
+            <li>Fuente principal: <code>inputs/docs/diccionario_datos/diccionario_modelo_semantico.txt</code>.</li>
+            <li>Colección: <code>diccionario_datos</code> en ChromaDB.</li>
+            <li>Fallback si no hay datos: <code>PBI_SCHEMA_HINT</code> en <code>.env</code>.</li>
+            <li>Reindexación: <code>indexar_si_necesario()</code> detecta cambios por hash y reconstruye automáticamente.</li>
+        </ul>
+
+        <h3>12C.3 Uso de comandos en chat</h3>
+        <pre><code>@pbi cuantas entrevistas hubo en marzo 2026
+@pbi schema
+@pbi columnas H_CUPONES
+@pbi EVALUATE ROW("Entrevistas", CALCULATE([CUP_ENT], D_CAL_COM[AÑO-MES] = "2026-03"))</code></pre>
+        <ul>
+            <li><code>@pbi</code> fuerza routing a Power BI.</li>
+            <li>Consultas DAX directas (<code>EVALUATE</code>/<code>DEFINE</code>) se ejecutan en modo sandbox.</li>
+            <li>Timeout actual por consulta DAX: 30 s; si excede, devuelve error de timeout controlado.</li>
+        </ul>
     </section>
 
     <section>
@@ -887,17 +911,20 @@ flowchart LR
         <h3>13.1 Inicialización rápida (CLI)</h3>
         <pre><code>pip install -r requirements.txt
 python main.py</code></pre>
+        <p class="small">Este flujo procesa entradas de lote y transcripciones ya disponibles.</p>
 
         <h3>13.2 Modo web (Chainlit)</h3>
         <pre><code>chainlit run app.py -w</code></pre>
         <p>También existe <code>start_chainlit.bat</code> para entorno Windows.</p>
+        <p class="small">En web, login por Supabase y multimedia por AssemblyAI.</p>
 
         <h3>13.3 Preparación de conocimiento</h3>
         <ul>
             <li>Manuales: <code>inputs/docs/*.txt</code></li>
-            <li>Buenas prácticas: <code>inputs/buenas_practicas/&lt;carpeta_seccion&gt;/*.vtt</code></li>
+            <li>Buenas prácticas: <code>inputs/docs/buenas_practicas/&lt;carpeta_seccion&gt;/*.txt|.vtt</code></li>
             <li>Coaching: <code>inputs/docs/coaching_ventas/*.txt</code></li>
             <li>Dossiers: <code>inputs/dossiers/*.pdf|.docx|.txt</code></li>
+            <li>Diccionario PBI: <code>inputs/docs/diccionario_datos/diccionario_modelo_semantico.txt</code></li>
         </ul>
     </section>
 
@@ -932,60 +959,53 @@ python main.py</code></pre>
     <section>
         <h2>16. Anexos Prácticos</h2>
 
-        <h3>16.1 Ejemplo de flujo completo desde video</h3>
-        <pre><code>python centauro/tools/extract_audio.py
-python centauro/tools/whisper_transcribe.py
-chainlit run app.py -w
-# subir el *_whisper.txt o evaluar desde main.py</code></pre>
+        <h3>16.1 Ejemplo de flujo completo desde video (modo web actual)</h3>
+        <pre><code>chainlit run app.py -w
+# iniciar sesión
+# adjuntar .mp4 directamente (ffmpeg + AssemblyAI + diarización)</code></pre>
 
-        <h3>16.2 Ejemplo de flujo de buenas prácticas</h3>
+        <h3>16.2 Ejemplo de flujo por lote (con transcripciones existentes)</h3>
+        <pre><code>python main.py
+# procesa *.txt/*.vtt/*.docx de inputs/transcripts</code></pre>
+
+        <h3>16.3 Ejemplo de flujo de buenas prácticas</h3>
         <pre><code>python -m centauro.tools.procesar_buenas_practicas
 python main.py   # reindexa documentación y evalúa</code></pre>
 
-        <h3>16.3 Ejemplo de flujo de dossiers</h3>
+        <h3>16.4 Ejemplo de flujo de dossiers</h3>
         <pre><code>python -m centauro.tools.procesar_dossiers --carpeta inputs/dossiers
 python main.py   # para reindexar y operar con nuevo contexto</code></pre>
+
+        <h3>16.5 Ejemplo de preparación de @pbi</h3>
+        <pre><code>python scripts/pbi_auth.py
+chainlit run app.py -w
+# en chat:
+@pbi schema
+@pbi cuantas entrevistas hubo en marzo 2026</code></pre>
     </section>
 
     <section>
-        <h2>17. Posibles Mejoras Y Roadmap</h2>
-        <p>Esta sección recoge mejoras identificadas durante el desarrollo, no implementadas por coste, complejidad o prioridad. Se documenta aquí para referencia futura.</p>
+        <h2>17. Estado Actual Multimedia Y Mejoras Pendientes</h2>
+        <p>Resumen de lo que ya está en producción y lo que sigue como línea de mejora.</p>
 
-        <h3>17.1 Análisis de emoción y tono desde audio (AssemblyAI)</h3>
-        <p>
-            Actualmente Centauro analiza el estilo comunicativo del asesor a partir del texto transcrito. Una mejora significativa sería obtener
-            señales emocionales directamente del audio (tono de voz, velocidad de habla, energía), independientemente de lo que se diga.
-        </p>
-        <p>
-            <strong>Servicio evaluado: <a href="https://www.assemblyai.com" target="_blank">AssemblyAI</a></strong><br>
-            Ofrece transcripción + sentiment analysis por utterance nativo. Devuelve etiqueta emocional
-            (<code>POSITIVE</code> / <code>NEUTRAL</code> / <code>NEGATIVE</code>) con score de confianza para cada intervención,
-            diferenciando asesor y lead si se usa diarización.
-        </p>
-        <p><strong>Por qué no se implementó:</strong> coste ~$0.37/hora de audio, frente a ~$0.01/hora de Groq Whisper (≈35× más caro). No viable con el presupuesto actual.</p>
-
-        <h3>17.2 Métricas de audio con librosa (alternativa open source)</h3>
-        <p>
-            Alternativa de coste cero usando la librería <code>librosa</code> (análisis de audio local, sin API). En lugar de clasificar emociones,
-            extrae métricas objetivas y robustas del audio antes de que sea descartado tras la transcripción:
-        </p>
+        <h3>17.1 AssemblyAI (estado implementado)</h3>
         <ul>
-            <li><strong>Ratio de habla asesor/lead</strong> — quién domina la conversación en tiempo (requiere timestamps de Whisper).</li>
-            <li><strong>Velocidad de habla</strong> — palabras por minuto por segmento; velocidad alta puede indicar nerviosismo o presión.</li>
-            <li><strong>Energía/volumen medio</strong> — decaimiento de energía al final de la llamada como señal de desenganche.</li>
-            <li><strong>Silencios prolongados</strong> — pausas >2-3 s que pueden indicar incomodidad, reflexión o falta de respuesta.</li>
+            <li>En <code>app.py</code>, la carga de <code>.mp3</code>/<code>.mp4</code> usa AssemblyAI para transcripción + diarización.</li>
+            <li>Se cachea resultado por nombre de archivo en <code>outputs/transcripciones_cache/</code>.</li>
+            <li>Se registra coste de transcripción en <code>outputs/control_gastos.csv</code>.</li>
         </ul>
-        <p>
-            Estas métricas se pasarían como bloque de contexto adicional al prompt de <code>EstiloAgent</code>, enriqueciendo la evaluación sin
-            añadir coste de API. La implementación requeriría procesar el audio antes del paso de transcripción y guardar las métricas en un dict
-            que el orquestador transmitiría al agente.
-        </p>
-        <p><strong>Dependencia a añadir:</strong> <code>librosa</code> (ya disponible en PyPI, sin requisitos de GPU).</p>
 
-        <h3>17.3 Otras mejoras identificadas</h3>
+        <h3>17.2 Métricas acústicas con librosa</h3>
+        <p>
+            El sistema extrae métricas de audio objetivas (cuando hay audio disponible) para enriquecer análisis de estilo.
+            Es una línea activa para mejorar la señal no textual del asesor.
+        </p>
+
+        <h3>17.3 Mejoras identificadas</h3>
         <ul>
             <li><strong>Reset de <code>stats["llamadas_api"]</code> entre asesores:</strong> el contador se inicializa en <code>__init__</code> del orquestador y no se resetea entre evaluaciones consecutivas en la misma sesión, produciendo acumulación (14, 28, 42…). Mover la inicialización dentro de <code>evaluar()</code> lo resolvería.</li>
-            <li><strong>Modelos de emoción HuggingFace:</strong> existen modelos <code>wav2vec2</code> fine-tuned para reconocimiento de emoción en audio. La calidad para español de llamadas comerciales (con ruido y variaciones de calidad) es inferior a AssemblyAI, pero podrían ser válidos como señal de apoyo si se validan con datos propios.</li>
+            <li><strong>Análisis de emoción avanzado:</strong> incorporar señales de sentimiento/emoción por utterance como contexto estructurado para <code>EstiloAgent</code>.</li>
+            <li><strong>Runbook unificado CLI/Web:</strong> mantener documentación sincronizada para evitar divergencias operativas.</li>
         </ul>
     </section>
 

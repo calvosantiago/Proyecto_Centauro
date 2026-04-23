@@ -372,22 +372,24 @@ def generar_pdf(reporte_json, output_filename, datos_oportunidad=None):
         pdf.set_font('Helvetica', '', 9)
         pdf.set_text_color(*COLOR_TEXT_MUTED)
         pdf.multi_cell(135, 4, to_latin1(f"{pais_lead}  |  {edad_str}  |  {programa_lead}"))
-        pdf.set_x(65)
-        pdf.ln(3)
         pdf.set_font('Helvetica', '', 10)
         pdf.set_text_color(*COLOR_TEXT_MAIN)
+        pdf.set_x(65)
+        pdf.ln(2)
 
     ctx = data.get('resumen_contextual', {})
     seguimiento = ctx.get('fecha_seguimiento') or 'Sin fecha acordada'
     resumen_texto = (
         f"Perfil Lead: {ctx.get('perfil_lead', 'N/A')}\n"
         f"Objetivo: {ctx.get('objetivo_del_lead', 'N/A')}\n"
-        f"Factor compra: {ctx.get('factor_determinante_compra', 'N/A')}\n"
         f"Seguimiento: {seguimiento}"
     )
-    pdf.multi_cell(0, 5, to_latin1(resumen_texto))
-    
-    pdf.ln(15)
+    # set_x antes del multi_cell para que el texto arranque siempre desde la columna derecha
+    pdf.set_x(65)
+    pdf.multi_cell(135, 5, to_latin1(resumen_texto))
+
+    # Asegurar que siempre arrancamos tras el cuadro de calificación (Y=70) + margen
+    pdf.set_y(max(pdf.get_y() + 5, 78))
 
     # --- SECCIÓN: EVALUACIÓN DETALLADA ---
     pdf.set_font('Helvetica', 'B', 14)

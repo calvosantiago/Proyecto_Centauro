@@ -72,6 +72,13 @@ class ChatHandler:
         self._pbi_historial: List[Dict] = []  # Últimos intercambios PBI para contexto
         self._pbi_memoria_analitica: Dict = {"hechos": []}  # Hallazgos analíticos acumulados en sesión
         self._asesor_sesion: Optional[str] = None  # Último asesor mencionado en esta sesión
+        self._transcripcion_actual: Optional[str] = None  # Transcripción de la entrevista evaluada en esta sesión
+        self._resumen_bloques: Optional[List[Dict]] = None  # evaluacion_por_bloques del reporte
+
+    def cargar_contexto_entrevista(self, transcripcion: str, bloques_evaluacion: List[Dict]) -> None:
+        """Carga la transcripción y el reporte de la entrevista recién evaluada para consultas posteriores."""
+        self._transcripcion_actual = transcripcion
+        self._resumen_bloques = bloques_evaluacion
 
     def procesar_consulta(self, pregunta_usuario: str, nombre_asesor: Optional[str] = None) -> str:
         """
@@ -144,6 +151,18 @@ class ChatHandler:
         # ── ID de oportunidad (ej: 2021-002570912) → buscar en Supabase ─
         if re.search(r'\b\d{4}-\d{6,12}\b', pregunta):
             return "oportunidades"
+
+        # ── Contenido de la entrevista actual (si hay una cargada en sesión) ──
+        # Detecta preguntas sobre qué ocurrió en la llamada recién evaluada
+        if self._transcripcion_actual and any(kw in pregunta_lower for kw in [
+            "habló", "hablo", "mencionó", "menciono", "dijo", "dijeron",
+            "preguntó", "pregunto", "trató", "trato el tema", "tocó", "toco el tema",
+            "hubo", "se habló", "se hablo", "se trató", "se trato", "se mencionó", "se menciono",
+            "comentó", "comento", "explicó", "explico", "propuso", "ofreció", "ofrecio",
+            "en la llamada", "durante la llamada", "durante la entrevista",
+            "en la grabación", "en la grabacion", "en el audio",
+        ]):
+            return "entrevista_actual"
 
         # ── Perfil de asesor concreto (PRIORIDAD ALTA) ──────────────────────
         # Preguntas sobre un asesor específico por nombre o sobre el propio asesor
@@ -278,7 +297,10 @@ class ChatHandler:
     ) -> str:
         """Busca contexto en las colecciones apropiadas según intención y bloque."""
 
-        if intencion == "perfil":
+        if intencion == "entrevista_actual":
+            return self._consultar_contenido_entrevista(pregunta, bloque_detectado)
+
+        elif intencion == "perfil":
             return self._obtener_perfil_asesor(nombre_asesor, pregunta, bloque_detectado)
 
         elif intencion == "oportunidades":
@@ -896,6 +918,76 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
         except Exception as e:
             return f"Error obteniendo estadísticas: {e}"
 
+    def _consultar_contenido_entrevista(self, pregunta: str, bloque: Optional[str]) -> str:
+        """
+        Responde preguntas sobre el contenido concreto de la entrevista evaluada en esta sesión.
+        Combina el resumen por bloques del reporte con un extracto de la transcripción.
+        """
+        MAX_TRANSCRIPCION_CHARS = 10_000
+        partes: List[str] = []
+
+        # ── Parte 1: resumen de evaluación por bloques ───────────────────────
+        if self._resumen_bloques:
+            EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+            lineas_bloques = ["RESUMEN DE LA EVALUACIÓN POR BLOQUES:"]
+            for b in self._resumen_bloques:
+                nombre_b = b.get("bloque", "")
+                cal = b.get("calificacion", "")
+                resumen = b.get("resumen", "")
+                # Si hay bloque detectado, incluir solo ese; si no, incluir todos
+                if bloque:
+                    bloque_display = {
+                        "investigacion": "investigación",
+                        "propuesta_valor": "propuesta",
+                        "admision_economica": "admisión",
+                        "cierre": "cierre",
+                        "objeciones": "objeciones",
+                        "estilo": "estilo",
+                    }.get(bloque, bloque)
+                    if bloque_display.lower() not in nombre_b.lower():
+                        continue
+                emoji = EMOJI.get(cal, "⚪")
+                lineas_bloques.append(f"\n{emoji} {nombre_b} ({cal}):\n{resumen}")
+            if len(lineas_bloques) > 1:
+                partes.append("\n".join(lineas_bloques))
+
+        # ── Parte 2: extracto de transcripción ──────────────────────────────
+        if self._transcripcion_actual:
+            transcripcion = self._transcripcion_actual
+            if len(transcripcion) <= MAX_TRANSCRIPCION_CHARS:
+                extracto = transcripcion
+            elif bloque == "cierre":
+                # Cierre suele estar al final
+                extracto = transcripcion[-MAX_TRANSCRIPCION_CHARS:]
+            elif bloque == "investigacion":
+                # Investigación suele estar al principio
+                extracto = transcripcion[:MAX_TRANSCRIPCION_CHARS]
+            else:
+                # Buscar menciones de palabras clave de la pregunta y extraer ventana
+                palabras = [p for p in pregunta.lower().split() if len(p) > 4]
+                mejor_pos = -1
+                for palabra in palabras:
+                    pos = transcripcion.lower().find(palabra)
+                    if pos != -1:
+                        mejor_pos = pos
+                        break
+                if mejor_pos != -1:
+                    inicio = max(0, mejor_pos - 2000)
+                    fin = min(len(transcripcion), inicio + MAX_TRANSCRIPCION_CHARS)
+                    extracto = transcripcion[inicio:fin]
+                else:
+                    # Sin match → tomar porción central
+                    mitad = len(transcripcion) // 2
+                    inicio = max(0, mitad - MAX_TRANSCRIPCION_CHARS // 2)
+                    extracto = transcripcion[inicio:inicio + MAX_TRANSCRIPCION_CHARS]
+
+            partes.append(f"\nTRANSCRIPCIÓN (extracto):\n{extracto}")
+
+        if not partes:
+            return "No hay transcripción disponible en esta sesión. Sube primero un archivo de audio o texto para evaluarlo."
+
+        return "\n\n---\n\n".join(partes)
+
     def _busqueda_multicoleccion(self, pregunta: str) -> str:
         """Busca en múltiples colecciones y combina resultados."""
         resultados_todos = []
@@ -950,7 +1042,16 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
             f"sea estrictamente necesario para dar contexto.\n"
         ) if bloque else ""
 
-        if intencion == "perfil":
+        if intencion == "entrevista_actual":
+            prompt_sistema = f"""Eres un analista de entrevistas de ventas. Respondes preguntas concretas sobre el contenido de una llamada específica.
+IMPORTANTE:
+- Responde SOLO basándote en la transcripción y el resumen de evaluación proporcionados en el contexto.
+- Si el tema preguntado NO aparece en la transcripción, responde claramente: "No, no se mencionó en esta llamada."
+- Cuando puedas, cita fragmentos textuales de la transcripción para respaldar tu respuesta.
+- Sé directo y preciso. No inventes ni supongas lo que pudo haberse dicho.
+{bloque_instruccion}"""
+
+        elif intencion == "perfil":
             prompt_sistema = f"""Eres un asistente especializado en análisis de rendimiento de asesores comerciales.
 El usuario pregunta por un perfil y tienes acceso a sus estadísticas históricas REALES en el contexto.
 IMPORTANTE:

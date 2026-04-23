@@ -380,6 +380,9 @@ async def main(message: cl.Message):
     )
     # ==================== MODO CHAT INTERACTIVO ====================
     if not files and message.content:
+        # Si hay un archivo en proceso, este mensaje es respuesta a un AskUserMessage — ignorar
+        if cl.user_session.get("procesando_archivo"):
+            return
         # El usuario escribió texto sin adjuntar archivo → Modo chat
         pregunta = message.content.strip()
         if not pregunta:
@@ -532,6 +535,7 @@ async def main(message: cl.Message):
     # Obtener archivo
     file = files[0]
     file_path = Path(file.path)
+    cl.user_session.set("procesando_archivo", True)  # Bloquear chat mientras haya AskUserMessages pendientes
     # Capturar texto del usuario como contexto adicional
     # Si el usuario escribe texto junto con el archivo, se usa como contexto
     contexto_usuario = message.content.strip() if message.content and message.content.strip() else None
@@ -608,6 +612,7 @@ async def main(message: cl.Message):
             await cl.Message(
                 content=mensaje_error
             ).send()
+            cl.user_session.set("procesando_archivo", False)
             return
     except ImportError:
         # Si no existe el módulo de validaciones, continuar sin validar
@@ -655,8 +660,15 @@ async def main(message: cl.Message):
                 if _opp_res:
                     _opp_txt = _opp_res.get("output", "").strip()
                     if _opp_txt.lower() not in ("no", "n", "-", ""):
-                        _opp_id_pre = _opp_txt
-                        await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
+                        # Validar formato: debe ser AAAA-NNNNNN (ej: 2021-002579270)
+                        if re.match(r'^\d{4}-\d{6,12}$', _opp_txt):
+                            _opp_id_pre = _opp_txt
+                            await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
+                        else:
+                            await cl.Message(
+                                content=f"⚠️ `{_opp_txt}` no tiene el formato esperado (`2021-002579270`). "
+                                        f"Continuando sin Opportunity ID."
+                            ).send()
                     else:
                         await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
             except Exception:
@@ -747,9 +759,10 @@ async def main(message: cl.Message):
                         _msg_existente += f"\n**Perfil Lead:** {_eval_existente['perfil_lead']}\n"
                     _msg_existente += (
                         "\n---\n"
-                        "💡 Escribe **sí** en el siguiente mensaje si deseas sobreescribir esta evaluación."
+                        "💡 Si quieres re-analizarla, sube el archivo de nuevo y responde **sí** a la confirmación."
                     )
                     await cl.Message(content=_msg_existente).send()
+                    cl.user_session.set("procesando_archivo", False)
                     return  # Salir sin analizar ni gastar
         except Exception as _e_check:
             pass  # Si falla la consulta a Supabase, continuar normalmente
@@ -947,6 +960,24 @@ async def main(message: cl.Message):
                 else:
                     # Timeout → continuar sin bloquear
                     asesor_confirmado = "Asesor Desconocido"
+        # ── Verificar que el asesor existe en Supabase ──────────────────────
+        # Si el nombre no está registrado (no viene del login ni es ya "Desconocido"),
+        # avisar y redirigir al dummy para no crear entradas basura.
+        _nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
+        _es_desconocido = asesor_confirmado == "Asesor Desconocido"
+        if not _nombre_asesor_login and not _es_desconocido:
+            from centauro.core.database import get_database as _get_db_check
+            _db_check = _get_db_check()
+            if _db_check.disponible and not _db_check.buscar_asesor(asesor_confirmado):
+                await cl.Message(
+                    content=f"⚠️ **Asesor no reconocido:** _{asesor_confirmado}_\n\n"
+                            f"Este nombre no está registrado en el sistema. "
+                            f"La evaluación se procesará y guardará bajo **Asesor Desconocido**.\n\n"
+                            f"Si es un asesor real, añade el nombre al Excel TTAA "
+                            f"y ejecuta la sincronización con Supabase."
+                ).send()
+                asesor_confirmado = "Asesor Desconocido"
+        # ─────────────────────────────────────────────────────────────────────
         # Mostrar confirmación
         await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
         # Guardar en sesión
@@ -1052,6 +1083,15 @@ async def main(message: cl.Message):
                 )
                 reporte["meta"]["stats_optimizacion"] = orchestrator.stats
                 reporte["datos_oportunidad"] = cl.user_session.get("datos_oportunidad")
+                # Cargar transcripción + bloques en el chat handler para consultas posteriores
+                _chat_handler = cl.user_session.get("chat_handler")
+                if _chat_handler is None:
+                    _chat_handler = ChatHandler()
+                    cl.user_session.set("chat_handler", _chat_handler)
+                _chat_handler.cargar_contexto_entrevista(
+                    transcripcion_diarizada,
+                    reporte.get("evaluacion_por_bloques", []),
+                )
                 step.output = "✅ Reporte JSON generado"
             except Exception as e:
                 step.output = f"❌ Error en síntesis: {e}"
@@ -1198,6 +1238,8 @@ Por favor, verifica:
 """,
             author="Sistema"
         ).send()
+    finally:
+        cl.user_session.set("procesando_archivo", False)
 if __name__ == "__main__":
     # Esto solo se ejecuta si corres directamente python app.py
     # Lo normal es usar: chainlit run app.py

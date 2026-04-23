@@ -171,11 +171,16 @@ class EstiloAgent(BaseEvaluatorAgent):
         manual_enriquecido = self._enriquecer_contexto_con_ejemplos(manual, transcripcion)
 
         # Bloque de métricas de audio (siempre presente)
-        from ..tools.audio_features import formatear_metricas_para_prompt, formatear_sin_audio_para_prompt
+        from ..tools.audio_features import (
+            formatear_metricas_para_prompt,
+            formatear_sin_audio_para_prompt,
+            calcular_ratio_habla_diarizada,
+        )
+        ratio_habla = calcular_ratio_habla_diarizada(transcripcion)
         if audio_features and audio_features.get("disponible"):
-            bloque_audio = f"\n{formatear_metricas_para_prompt(audio_features)}\n"
+            bloque_audio = f"\n{formatear_metricas_para_prompt(audio_features, ratio_habla)}\n"
         else:
-            bloque_audio = f"\n{formatear_sin_audio_para_prompt()}\n"
+            bloque_audio = f"\n{formatear_sin_audio_para_prompt(ratio_habla)}\n"
 
         prompt_sistema = f"""
 Eres un AUDITOR ESPECIALIZADO en evaluación de ESTILO, TONO Y VOCABULARIO en comunicación comercial.

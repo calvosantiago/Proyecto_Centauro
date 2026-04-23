@@ -242,6 +242,10 @@ class MemoryManager:
         # ── Guardar en Supabase ──
         if self.db.disponible:
             asesor_id = self.db.registrar_asesor(nombre_asesor)
+            if not asesor_id:
+                # Asesor no reconocido → guardar bajo el dummy "Asesor Desconocido" (id=68)
+                asesor_id = self.db.obtener_id_asesor_desconocido()
+                print(f"   ⚠️ Evaluación de '{nombre_asesor}' guardada bajo 'Asesor Desconocido' (id=68)")
             if asesor_id:
                 self.db.registrar_evaluacion(
                     asesor_id=asesor_id,

@@ -108,10 +108,11 @@ class DatabaseManager:
     def registrar_asesor(self, nombre: str) -> Optional[int]:
         """
         Devuelve el ID del asesor si existe (por nombre o alias).
-        Si no existe, crea uno nuevo.
+        NO crea asesores nuevos — la tabla de asesores se gestiona
+        exclusivamente desde el Excel TTAA vía el notebook de Fabric.
 
         Returns:
-            ID del asesor en Supabase, o None si no disponible.
+            ID del asesor en Supabase, None si no encontrado o no disponible.
         """
         if not self._disponible:
             return None
@@ -120,22 +121,16 @@ class DatabaseManager:
         if asesor:
             return asesor["id"]
 
-        # Crear nuevo
-        nombre_norm = _normalizar_nombre(nombre)
-        result = (
-            self._client.table("asesores")
-            .insert({
-                "nombre": nombre,
-                "nombre_normalizado": nombre_norm,
-                "fecha_creacion": datetime.now().isoformat(),
-                "activo": True,
-                "aliases": []
-            })
-            .execute()
-        )
-        if result.data:
-            print(f"   ➕ Nuevo asesor creado en Supabase: {nombre}")
-        return result.data[0]["id"] if result.data else None
+        # Asesor no reconocido → NO crear, devolver None
+        print(f"   ⚠️ Asesor no reconocido en Supabase (no se crea): '{nombre}'")
+        return None
+
+    def obtener_id_asesor_desconocido(self) -> int:
+        """
+        Devuelve el ID fijo del asesor 'Asesor Desconocido' (id=68).
+        Usado para evaluaciones de asesores no reconocidos.
+        """
+        return 68
 
     def obtener_asesor_por_nombre(self, nombre: str) -> Optional[dict]:
         """Busca un asesor por nombre o alias. Alias de buscar_asesor para compatibilidad."""

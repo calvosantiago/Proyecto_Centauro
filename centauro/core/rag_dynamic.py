@@ -48,39 +48,41 @@ class DynamicRAGAgent:
         
         print("   🔍 Extrayendo temas (análisis exhaustivo)...")
         
-        # v5.1: Muestreo ampliado para mayor cobertura temática
+        # v5.2: Muestreo expandido para mayor cobertura temática
         if len(transcripcion) > 12000:
-            # Para entrevistas de 40+ min: 6 muestras ampliadas
+            # Para entrevistas de 40+ min: 6 muestras expandidas (19K → 24K chars)
             longitud = len(transcripcion)
             segmento = longitud // 6
 
             transcripcion_resumida = (
-                transcripcion[:3500] +                      # Inicio (apertura) — ampliado de 2500
+                transcripcion[:4000] +                      # Inicio (apertura)
                 "\n\n[... MUESTRA 2 ...]\n\n" +
-                transcripcion[segmento:segmento+3000] +     # ~15% — ampliado de 2000
+                transcripcion[segmento:segmento+4000] +     # ~16%
                 "\n\n[... MUESTRA 3 ...]\n\n" +
-                transcripcion[segmento*2:segmento*2+3000] + # ~30% — ampliado de 2000
+                transcripcion[segmento*2:segmento*2+4000] + # ~33%
                 "\n\n[... MUESTRA 4 ...]\n\n" +
-                transcripcion[segmento*3:segmento*3+3000] + # ~50% — ampliado de 2000
+                transcripcion[segmento*3:segmento*3+4000] + # ~50% (objeciones y propuesta económica)
                 "\n\n[... MUESTRA 5 ...]\n\n" +
-                transcripcion[segmento*4:segmento*4+3000] + # ~70% — ampliado de 2000
+                transcripcion[segmento*4:segmento*4+4000] + # ~66%
                 "\n\n[... MUESTRA 6 ...]\n\n" +
-                transcripcion[-3500:]                       # Final (cierre) — ampliado de 2500
+                transcripcion[-4000:]                       # Final (cierre)
             )
-            print(f"      📊 Llamada larga detectada: 6 muestras ampliadas (~19K chars)")
+            print(f"      📊 Llamada larga detectada: 6 muestras expandidas (~24K chars)")
         elif len(transcripcion) > 6000:
-            # Para entrevistas de 20-40 min: 4 muestras ampliadas
+            # Para entrevistas de 20-40 min: 5 muestras (añadida muestra al 75%)
             cuarto = len(transcripcion) // 4
             transcripcion_resumida = (
-                transcripcion[:3500] +                          # ampliado de 2500
+                transcripcion[:4000] +                          # Inicio (apertura)
                 "\n\n[... MUESTRA 2 ...]\n\n" +
-                transcripcion[cuarto:cuarto+2500] +             # ampliado de 1500
+                transcripcion[cuarto:cuarto+3000] +             # ~25%
                 "\n\n[... MUESTRA 3 ...]\n\n" +
-                transcripcion[cuarto*2:cuarto*2+2500] +         # ampliado de 1500
+                transcripcion[cuarto*2:cuarto*2+3000] +         # ~50%
                 "\n\n[... MUESTRA 4 ...]\n\n" +
-                transcripcion[-3500:]                           # ampliado de 2500
+                transcripcion[cuarto*3:cuarto*3+3000] +         # ~75% (nueva)
+                "\n\n[... MUESTRA 5 ...]\n\n" +
+                transcripcion[-4000:]                           # Final (cierre)
             )
-            print(f"      📊 Llamada media: 4 muestras ampliadas (~12K chars)")
+            print(f"      📊 Llamada media: 5 muestras expandidas (~17K chars)")
         else:
             # Para entrevistas cortas (<20 min): enviar completa
             transcripcion_resumida = transcripcion
@@ -245,9 +247,8 @@ Si hay menos de 8, devuelve solo los que existan.
         
         query_final = " ".join(componentes)
         
-        # OPTIMIZACIÓN: Limitar a 100 caracteres
-        if len(query_final) > 100:
-            query_final = query_final[:100]
+        if len(query_final) > 200:
+            query_final = query_final[:200]
         
         return query_final
     
