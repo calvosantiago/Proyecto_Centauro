@@ -25,6 +25,7 @@ class EvaluationResult:
     evidencias_extra: List[str] = field(default_factory=list)
     razonamiento: str = ""
     recomendacion_accionable: str = ""
+    mejoras: str = ""
     metadata: Dict = field(default_factory=dict)
 
     def to_dict(self) -> Dict:
@@ -38,6 +39,7 @@ class EvaluationResult:
             "evidencias_extra": self.evidencias_extra,
             "razonamiento": self.razonamiento,
             "recomendacion_accionable": self.recomendacion_accionable,
+            "mejoras": self.mejoras,
             **self.metadata
         }
 
@@ -65,6 +67,15 @@ class BaseEvaluatorAgent(ABC):
             contexto_usuario: (Opcional) Contexto adicional del usuario (info del lead, instrucciones, etc.)
         """
         pass
+
+    def _formato_mejoras(self, raw) -> str:
+        """Convierte la lista de mejoras del LLM a texto estandarizado para BD."""
+        if not raw:
+            return ""
+        if isinstance(raw, list):
+            items = [str(m).strip() for m in raw if str(m).strip()]
+            return "\n".join(f"• {m}" for m in items[:3])
+        return str(raw).strip()
 
     def _construir_bloque_contexto_usuario(self, contexto_usuario: str = None) -> str:
         """

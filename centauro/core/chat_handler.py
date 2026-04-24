@@ -426,6 +426,22 @@ class ChatHandler:
         ]):
             return self._obtener_resumen_ultima_evaluacion(nombre_asesor)
 
+        # Preguntas sobre datos del lead (país, edad, programa, pilar...)
+        if any(kw in pregunta_lower for kw in [
+            "país", "pais", "edad", "programa", "pilar", " lead", "cliente",
+            "matriculado", "matriculada", "won", "de dónde", "de donde",
+        ]):
+            return self._consultar_lead_de_asesor(nombre_asesor)
+
+        # Preguntas sobre el resultado de la última evaluación ("cómo le fue", "qué nota")
+        if any(kw in pregunta_lower for kw in [
+            "cómo le fue", "como le fue", "cómo lo hizo", "como lo hizo",
+            "cómo ha ido", "como ha ido", "cómo quedó", "como quedo",
+            "qué nota", "que nota", "qué resultado", "que resultado",
+            "nota de", "resultado de", "cómo va ", "como va ",
+        ]):
+            return self._obtener_resumen_ultima_evaluacion(nombre_asesor)
+
         try:
             perfil = memory_manager.cargar_perfil(nombre_asesor)
 
@@ -565,8 +581,8 @@ class ChatHandler:
 
     def _obtener_resumen_ultima_evaluacion(self, nombre_asesor: str) -> str:
         """
-        Devuelve el resumen de la evaluación más reciente de un asesor,
-        incluyendo calificaciones por bloque, recomendaciones y resumen contextual.
+        Devuelve el resumen de la evaluación más reciente de un asesor con razonamiento
+        por bloque y comparación de tendencia frente a las 3 evaluaciones anteriores.
         """
         db = get_database()
         EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
@@ -584,9 +600,8 @@ class ChatHandler:
             fecha = ev.get("fecha", "")[:10]
             cal_global = ev.get("calificacion_global") or "N/A"
             opp_id = ev.get("opportunity_id")
-            archivo = ev.get("archivo_origen") or "—"
 
-            # Enriquecer con datos del lead
+            # Lead data
             nombre_lead = "—"
             matricula_txt = "⏳ Resultado pendiente"
             if opp_id:
@@ -612,39 +627,66 @@ class ChatHandler:
                     barreras = []
             barreras_txt = ", ".join(barreras) if barreras else "—"
 
+            # Calificaciones por bloque de la evaluación actual
             bloques_raw = db.obtener_calificaciones_bloque(ev["id"])
+
+            # Historial de bloques de las 3 evaluaciones previas para tendencia
+            previas = evaluaciones[-4:-1]
+            hist_bloques: dict = {}  # {bloque: [cal_prev1, cal_prev2, ...]}
+            for ev_prev in previas:
+                for b in db.obtener_calificaciones_bloque(ev_prev["id"]):
+                    nombre_b = b.get("bloque", "")
+                    cal_b = b.get("calificacion")
+                    if nombre_b and cal_b:
+                        hist_bloques.setdefault(nombre_b, []).append(cal_b)
+
+            # Tendencia global (últimas evaluaciones)
+            if len(evaluaciones) >= 2:
+                ultimas_g = evaluaciones[-4:]
+                tendencia_global_txt = " → ".join(
+                    EMOJI.get(e.get("calificacion_global"), "⚪") for e in ultimas_g
+                )
+                tendencia_global_linea = f"_Tendencia: {tendencia_global_txt}_\n\n"
+            else:
+                tendencia_global_linea = ""
+
+            # Construir sección de bloques con razonamiento + tendencia
             bloques_lineas = []
-            recomendaciones = []
             for b in bloques_raw:
                 cal = b.get("calificacion") or "N/A"
                 bloque = b.get("bloque", "")
-                evidencia = b.get("evidencia_principal") or ""
-                rec = b.get("recomendacion_accionable") or ""
-                bloques_lineas.append(
-                    f"{EMOJI.get(cal, '⚪')} **{bloque}**: {cal}"
-                    + (f"\n   _{evidencia}_" if evidencia else "")
-                )
-                if rec:
-                    recomendaciones.append(f"- **{bloque}**: {rec}")
+                razonamiento = b.get("razonamiento") or ""
 
-            bloques_txt = "\n".join(bloques_lineas) or "_(sin datos)_"
-            recs_txt = "\n".join(recomendaciones) or "_(ninguna)_"
+                linea = f"{EMOJI.get(cal, '⚪')} **{bloque}**: {cal}"
+
+                # Razonamiento (por qué esa nota)
+                if razonamiento:
+                    recortado = razonamiento[:220] + ("..." if len(razonamiento) > 220 else "")
+                    linea += f"\n   _{recortado}_"
+
+                # Tendencia de ese bloque vs. las 3 evaluaciones previas
+                previas_cal = hist_bloques.get(bloque, [])
+                if previas_cal:
+                    hist_str = " → ".join(EMOJI.get(c, "⚪") for c in previas_cal)
+                    linea += f"\n   Tendencia: {hist_str} → **{EMOJI.get(cal, '⚪')} ahora**"
+
+                bloques_lineas.append(linea)
+
+            bloques_txt = "\n\n".join(bloques_lineas) or "_(sin datos)_"
 
             return (
                 f"## Última evaluación de {nombre_asesor}\n"
-                f"**Fecha:** {fecha} | **Oportunidad:** {opp_id or '—'}\n"
-                f"**Lead:** {nombre_lead} | {matricula_txt}\n"
-                f"**Archivo:** {archivo}\n\n"
-                f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n\n"
+                f"**Fecha:** {fecha} | **Lead:** {nombre_lead} | {matricula_txt}\n\n"
+                f"### Resultado global: {EMOJI.get(cal_global, '⚪')} {cal_global}\n"
+                f"{tendencia_global_linea}"
                 f"**Perfil lead:** {perfil_lead}\n"
                 f"**Factor determinante compra:** {factor_compra}\n"
                 f"**Fecha seguimiento:** {fecha_seguimiento}\n"
                 f"**Barreras:** {barreras_txt}\n\n"
-                f"### Calificaciones por bloque\n{bloques_txt}\n\n"
-                f"### Recomendaciones accionables\n{recs_txt}"
+                f"### Calificaciones por bloque\n{bloques_txt}"
             )
 
-        # Fallback JSON
+        # Fallback JSON (sin razonamiento ni tendencia detallada)
         try:
             perfil = memory_manager.cargar_perfil(nombre_asesor)
             if not perfil.evaluaciones:
@@ -663,6 +705,65 @@ class ChatHandler:
             )
         except Exception as e:
             return f"Error consultando última evaluación de {nombre_asesor}: {e}"
+
+    def _consultar_lead_de_asesor(self, nombre_asesor: str) -> str:
+        """
+        Devuelve los datos del lead de la última evaluación de un asesor
+        (país, edad, programa, pilar, nombre, resultado) consultando la tabla oportunidades.
+        """
+        db = get_database()
+        if not db.disponible:
+            return "Supabase no disponible para consultar datos del lead."
+
+        asesor = db.buscar_asesor(nombre_asesor)
+        if not asesor:
+            return f"No encontré a **{nombre_asesor}** en el sistema."
+
+        evaluaciones = db.obtener_evaluaciones(asesor["id"])
+        if not evaluaciones:
+            return f"No hay evaluaciones registradas para **{nombre_asesor}**."
+
+        ev = evaluaciones[-1]
+        fecha_ev = ev.get("fecha", "")[:10]
+        opp_id = ev.get("opportunity_id")
+
+        if not opp_id:
+            return (
+                f"La última evaluación de **{nombre_asesor}** ({fecha_ev}) "
+                f"no tiene un opportunity_id asociado, así que no puedo buscar datos del lead."
+            )
+
+        opp = db.obtener_oportunidad(opp_id)
+        if not opp:
+            return (
+                f"No se encontró información del lead para la oportunidad `{opp_id}` "
+                f"(última evaluación de {nombre_asesor} del {fecha_ev})."
+            )
+
+        is_won = opp.get("is_won")
+        if is_won is True:
+            resultado_txt = "✅ Matriculado"
+        elif is_won is False:
+            resultado_txt = "❌ No matriculado"
+        else:
+            resultado_txt = "⏳ Resultado pendiente"
+
+        campos = [
+            f"**Nombre lead:** {opp.get('nombre_lead') or '—'}",
+            f"**País:** {opp.get('pais') or '—'}",
+            f"**Edad:** {opp.get('edad') or '—'}",
+            f"**Programa:** {opp.get('programa') or '—'}",
+            f"**Pilar:** {opp.get('pilar') or '—'}",
+            f"**Resultado:** {resultado_txt}",
+            f"**Fecha entrevista:** {str(opp.get('fecha_entrevista') or '—')[:10]}",
+            f"**Oportunidad ID:** `{opp_id}`",
+        ]
+
+        return (
+            f"## Datos del lead — última evaluación de {nombre_asesor}\n"
+            f"_(Evaluación del {fecha_ev})_\n\n"
+            + "\n".join(campos)
+        )
 
     def _detalle_bloque_asesor(self, perfil, bloque_key: str) -> str:
         """Devuelve el historial detallado de un asesor en un bloque concreto."""
@@ -812,12 +913,19 @@ class ChatHandler:
         """
         Consulta estadísticas de la tabla oportunidades en Supabase.
         Detecta filtros en la pregunta (país, pilar, programa) y agrega los datos.
+        Si hay un nombre de asesor en la pregunta, devuelve los datos del lead
+        de su última evaluación en vez de estadísticas agregadas.
         """
         db = get_database()
         if not db.disponible:
             return "Supabase no disponible para consultar oportunidades."
 
         pregunta_lower = pregunta.lower()
+
+        # ── Si hay nombre de asesor → datos del lead de su última evaluación ──
+        nombre_en_pregunta = self._extraer_nombre_de_pregunta(pregunta)
+        if nombre_en_pregunta:
+            return self._consultar_lead_de_asesor(nombre_en_pregunta)
 
         # ── Búsqueda por ID concreto (ej: 2021-002570912) ───────────────
         match_id = re.search(r'\b(\d{4}-\d{6,12})\b', pregunta)

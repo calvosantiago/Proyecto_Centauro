@@ -124,6 +124,25 @@ class CentauroOrchestrator:
         asesor_detectado = diarization_agent.asesor_detectado or nombre_archivo
         self.stats["llamadas_api"] += 7
 
+        # --- DETECCIÓN DE IDIOMA ---
+        from centauro.utils.validaciones import detectar_idioma_transcripcion
+        idioma_entrevista = detectar_idioma_transcripcion(transcripcion_diarizada)
+        if idioma_entrevista == "en":
+            print("   🌐 Entrevista detectada en INGLÉS — ajustando evaluación")
+            contexto_idioma = (
+                "\n\nIDIOMA DE LA ENTREVISTA: INGLÉS\n"
+                "Esta entrevista fue conducida en inglés. Evalúa los comportamientos "
+                "del asesor y del lead en inglés. Los criterios de evaluación son "
+                "exactamente los mismos, pero aplicados al contexto lingüístico inglés. "
+                "Los ejemplos de frases del prompt están en español como referencia "
+                "conceptual — busca sus equivalentes en inglés en la transcripción. "
+                "Devuelve el JSON de evaluación con los campos de texto en español, "
+                "excepto las citas literales de evidencia (evidencia_principal, "
+                "evidencias_extra), que deben reproducirse en inglés tal como "
+                "aparecen en la transcripción.\n"
+            )
+            contexto_usuario = (contexto_usuario or "") + contexto_idioma
+
         # --- GUARDAR TRANSCRIPCIÓN DIARIZADA PARA DEBUG ---
         self._guardar_transcripcion_debug(nombre_archivo, transcripcion_diarizada)
 

@@ -53,6 +53,7 @@ class InvestigacionAgent(BaseEvaluatorAgent):
             # Detectar técnicas
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            mejoras = self._formato_mejoras(resultado_raw.get("mejoras", []))
 
             # Hallazgos estructurados del lead
             hallazgos = resultado_raw.get("hallazgos_del_lead", {})
@@ -91,6 +92,7 @@ class InvestigacionAgent(BaseEvaluatorAgent):
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
                 recomendacion_accionable=recomendacion_base,
+                mejoras=mejoras,
                 metadata={
                     "calidad_apertura": resultado_raw.get("calidad_apertura", "MEDIA"),
                     "num_preguntas_detectadas": len([e for e in evidencias_extra if "[ASESOR]" in e and "?" in e]),
@@ -144,17 +146,19 @@ Escribe en el razonamiento qué aspecto faltó y por qué eso limita la califica
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ CHECKLIST PREVIO — RESPONDE ANTES DE LEER LA TRANSCRIPCIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ten presente estas 5 preguntas mientras lees. Al terminar, respóndelas SÍ/NO y
+Ten presente estas 6 preguntas mientras lees. Al terminar, respóndelas SÍ/NO y
 usa ese conteo como "contador_fallos_criticos" en el JSON:
 
   1. ¿Exploró el Factor de Compra (dolor/necesidad real, no solo "quiero crecer")?
-  2. ¿Exploró el perfil financiero (quién paga, cómo)? ← CRÍTICO (ver límites duros arriba)
-  3. ¿Hizo preguntas de profundización (repreguntó, no se quedó en la superficie)?
+  2. ¿Exploró el perfil financiero (quién paga, cuánto piensa invertir)? ← CRÍTICO (ver límites duros)
+  3. ¿Indagó en la información relevante cuando el lead se abrió o la aportó espontáneamente?
   4. ¿El lead tuvo espacio real para hablar y abrirse?
   5. ¿Obtuvo información aprovechable para personalizar la propuesta después?
+  6. ¿Hizo un resumen/revalidación de lo investigado antes de pasar a la siguiente fase?
 
-Si la mayoría tienen respuesta NO, la calificación debe ser MALO. No detectes múltiples
-fallos graves y concluyas MEJORABLE: sería incoherente con tu propio análisis.
+CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
+🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
+No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CONTEXTO DEL SPEECH Y BUENAS PRÁCTICAS:
@@ -183,20 +187,31 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
    de tu situación actual?"
 
 2. PERFIL FINANCIERO: ¿El asesor PREGUNTÓ al lead sobre su situación económica personal?
-   NO busques discusiones de precio — lo que importa es si el ASESOR preguntó quién y cómo paga:
+   NO busques discusiones de precio — lo que importa es si el ASESOR exploró quién y cómo paga,
+   y cuánto tiene pensado invertir:
    ¿Es inversión propia o la financia la empresa? ¿Si es perfil junior, cuenta con apoyo familiar?
-   ¿Lleva tiempo buscando y tiene un presupuesto destinado a su formación?
+   ¿Cuánto tiene pensado invertir o qué presupuesto tiene destinado a su formación?
+   ¿Lleva tiempo buscando y ya tiene un rango de inversión en mente?
    Este perfil permite al asesor abordar la parte económica de forma personalizada más adelante.
    Preguntas típicas: "¿La formación la asumes tú o tienes apoyo de empresa?" / "¿Es una
-   inversión que harías tú mismo o tienes respaldo familiar?"
+   inversión que harías tú mismo o tienes respaldo familiar?" / "¿Cuánto tenías pensado invertir
+   en tu formación?" / "¿Ya tienes un presupuesto en mente o es algo que estás explorando?"
 
    ⚠️ DISTINCIÓN CRÍTICA — "explorado" vs "No explorado":
    EXPLORADO: el ASESOR hizo AL MENOS UNA PREGUNTA sobre la situación económica PERSONAL del lead
-   (¿lo pagas tú? ¿tienes apoyo de empresa o familia? ¿lo financias tú mismo?).
+   (¿lo pagas tú? ¿tienes apoyo de empresa o familia? ¿lo financias tú mismo? ¿cuánto piensas invertir?).
    NO EXPLORADO: el ASESOR presentó precios, descuentos, cuotas o condiciones de financiación
    al lead, pero NUNCA preguntó sobre la situación económica del propio lead.
    ⚠️ El asesor hablar de precios o de opciones de financiación ≠ explorar el perfil financiero del lead.
    Si el asesor solo habló del precio y de cuotas pero NO preguntó nada sobre quién paga → "No explorado".
+
+   ⚠️ MOMENTO EN QUE SE EXPLORA — TIMING IMPORTA:
+   La información financiera debe recogerse durante la FASE DE INVESTIGACIÓN para que el asesor
+   pueda usarla al diseñar la propuesta de valor y el cierre. Si esta información apareció
+   TARDE en la llamada (en la propuesta de valor, en el cierre, o como reacción a una objeción),
+   anótalo en "perfil_financiero_momento" como "tardio_resto_llamada". Aunque técnicamente se
+   exploró, el timing incorrecto es un fallo: el asesor no pudo personalizar con esa información
+   en el momento adecuado. Menciónalo explícitamente en el razonamiento.
 
 3. COMPETIDORES EXPLORADOS: ¿Está comparando con otras instituciones o programas?
    ¿Qué otras opciones está evaluando?
@@ -213,7 +228,49 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
 6. INFORMACIÓN APROVECHABLE: ¿Hay datos personales, profesionales o emocionales
    que el asesor podría usar más adelante para personalizar el discurso?
 
-7. RECONDUCCIÓN (si aplica): ¿El lead llegó interesado en un programa o formato diferente
+7. INDAGAR VS. PREGUNTAR — LA DIFERENCIA CRÍTICA:
+   Formular una pregunta no es investigar. La investigación consultiva exige escuchar la
+   respuesta y PROFUNDIZAR en ella cuando revela algo relevante. Si el asesor pregunta
+   sobre la situación económica y el lead responde con algo importante, el asesor debe
+   continuar explorando esa línea, no avanzar al siguiente bloque de su guión.
+
+   CASO ESPECIAL — INFORMACIÓN ESPONTÁNEA DEL LEAD:
+   Si el lead menciona espontáneamente su situación financiera, quién paga, sus dudas
+   económicas, o cualquier dato relevante SIN que el asesor lo haya preguntado, el
+   asesor tiene la OBLIGACIÓN de indagar en esa información. Dejarla pasar sin explorarla
+   es un fallo de investigación aunque el dato "exista" en la conversación.
+   Ejemplos de lo que el asesor DEBE hacer:
+   - [LEAD]: "La empresa me podría apoyar" → el asesor debe explorar: "¿Ya tienes
+     confirmado ese apoyo? ¿La empresa tiene un tope de presupuesto para esto?"
+   - [LEAD]: "Tengo algo ahorrado para formación" → el asesor debe indagar: "¿Tienes
+     ya un rango en mente o todavía lo estás valorando?"
+   - [LEAD]: "Mis padres me ayudarían" → el asesor debe explorar: "¿Ya tienes esa
+     conversación hecha con ellos o todavía está pendiente?"
+   Si el lead da información financiera o relevante Y el asesor pasa de largo → FALLO.
+
+   VALORACIÓN DE LA INICIATIVA:
+   ✅ Asesor pregunta proactivamente → MEJOR (demuestra dominio del proceso consultivo)
+   ✅ Lead da info espontánea + asesor profundiza → ACEPTABLE (aprovecha la apertura)
+   ❌ Lead da info espontánea + asesor la ignora → FALLO (perdió la oportunidad)
+
+8. REVALIDACIÓN AL CIERRE DE LA INVESTIGACIÓN:
+   Antes de pasar a la siguiente fase (propuesta de valor, programa, precio), el asesor
+   debería hacer un breve resumen/recapitulación de todo lo que ha aprendido del lead,
+   para que el lead lo escuche y lo valide. Esta revalidación:
+   - Confirma que el asesor escuchó y entendió correctamente
+   - Permite al lead corregir o añadir algo antes de avanzar
+   - Establece explícitamente el Factor Determinante de Compra, que usará después
+   - Genera sensación de entrevista personalizada, no genérica
+
+   Señales de revalidación:
+   ✅ "Entonces, si te entiendo bien, lo que buscas es X y tu situación es Y... ¿lo resumo bien?"
+   ✅ "Antes de contarte el programa: me has comentado que X, que Y, y que Z. ¿Correcto?"
+   ✅ "El factor clave para ti entonces sería Z, ¿verdad? Tenlo en cuenta porque es justo
+      lo que este programa..."
+   ⚠️ Si esta revalidación NO existe, menciónalo explícitamente en el razonamiento y
+   en las mejoras. Por sí sola no baja la nota a MALO, pero suma como fallo del checklist.
+
+9. RECONDUCCIÓN (si aplica): ¿El lead llegó interesado en un programa o formato diferente
    al que finalmente se le ofreció? Si el asesor detectó esto durante la investigación y
    recondujo al lead hacia la opción adecuada, es un indicador de calidad consultiva alta.
 
@@ -245,6 +302,7 @@ es posible si perfil financiero Y competidores fueron explorados.
    - No descubre el Factor de Compra ni ninguna motivación relevante
    - El lead no tuvo espacio real para abrirse
    - También: hace preguntas pero ignora las respuestas o no las aprovecha en absoluto
+   - También: el lead da información financiera espontáneamente y el asesor la ignora por completo
    - Si faltan MÚLTIPLES elementos clave (factor de compra, perfil financiero, puntos de dolor
      o de ilusión, objetivos concretos) y lo que hay es genérico y vago → es MALO, no MEJORABLE
    EJEMPLO: "[ASESOR]: Hola, te cuento del máster. Cuesta 10mil..." (sin preguntar nada)
@@ -254,14 +312,19 @@ es posible si perfil financiero Y competidores fueron explorados.
    - Recopila datos básicos (nombre, trabajo, motivación vaga) pero no llega al Factor de Compra
    - El lead da respuestas cortas porque el asesor no invita a desarrollar
    - La información obtenida es insuficiente para personalizar nada después
+   - Preguntó sobre el perfil financiero pero no indagó cuando el lead respondió algo relevante
+   - No hizo revalidación al final de la fase (si lo demás también fue escaso)
    EJEMPLO: "[ASESOR]: ¿Qué te motivó? [LEAD]: Quiero crecer. [ASESOR]: Perfecto, te cuento..."
 
 🟢 BUENO — el asesor investiga activamente y obtiene información útil que podría usar:
    - REQUISITO PREVIO: perfil financiero Y competidores explorados (aunque sea brevemente)
    - Identifica el Factor de Compra o al menos las motivaciones reales del lead
-   - Repregunta o profundiza en al menos un punto relevante
+   - Repregunta o profundiza en al menos un punto relevante (ya sea por iniciativa propia
+     o porque el lead aportó algo espontáneamente y el asesor lo aprovechó)
    - El lead comparte información personal, profesional o emocional de valor
    - La apertura genera confianza y el lead habla con comodidad
+   - SUMA: hace revalidación al final de la investigación recogiendo los puntos clave
+   - SUMA: detecta el Factor Determinante de Compra y lo nombra en la revalidación
    - Si el asesor detecta que el lead viene por un programa/formato diferente y lo reconduce
      exitosamente, valóralo como investigación consultiva de alta calidad → contribuye a BUENO
    - Si el asesor recupera el Factor de Compra más adelante para personalizar la propuesta
@@ -322,17 +385,21 @@ FORMATO JSON OBLIGATORIO
   ],
   "hallazgos_del_lead": {{
     "factor_de_compra": "Descripción del dolor/necesidad real del lead. 'No detectado' si no se exploró.",
-    "perfil_financiero": "Perfil financiero del lead: ¿quién paga y cómo? Escribe lo que el ASESOR preguntó y el lead respondió sobre su situación económica. 'No explorado' si el asesor NO hizo ninguna pregunta sobre quién paga — aunque haya presentado precios, descuentos o cuotas.",
+    "perfil_financiero": "Perfil financiero del lead: ¿quién paga, cómo y cuánto tiene pensado invertir? Escribe lo que el ASESOR preguntó y el lead respondió sobre su situación económica. 'No explorado' si el asesor NO hizo ninguna pregunta sobre quién paga ni sobre el presupuesto — aunque haya presentado precios, descuentos o cuotas.",
+    "perfil_financiero_momento": "investigacion_temprana | tardio_resto_llamada | no_explorado — indica cuándo se obtuvo esta información en la llamada",
+    "iniciativa_perfil_financiero": "asesor_pregunto_proactivamente | lead_espontaneo_asesor_indago | lead_espontaneo_asesor_no_indago | no_explorado — quién inició la discusión financiera y cómo respondió el asesor",
     "competidores": "Otras opciones que el lead mencionó estar evaluando. Escribe las instituciones o referencias mencionadas. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
     "reconduccion": "Si el asesor detectó que el lead venía interesado en un programa/formato diferente y lo recondujo exitosamente, describe cómo lo gestionó. 'No aplica' si no ocurrió.",
     "motivacion_principal": "Por qué quiere el máster y por qué ahora.",
     "fortalezas_debilidades": "Lo que el lead dijo sobre sí mismo. 'No explorado' si no se preguntó.",
-    "datos_aprovechables": "Resumen en 2-3 frases de la info clave que el asesor podría usar para personalizar."
+    "datos_aprovechables": "Resumen en 2-3 frases de la info clave que el asesor podría usar para personalizar.",
+    "revalidacion_investigacion": "Si, con detalle | Parcial (mencionó algunos puntos) | No realizada — indica si el asesor hizo un resumen/recapitulación de lo investigado antes de pasar a la siguiente fase. Si hubo revalidación, describe brevemente qué incluyó."
   }},
   "info_aprovechada_despues": true | false,
   "nota_aprovechamiento": "Explica brevemente si el asesor usó (o no) la info recopilada más adelante en la llamada. Cita un ejemplo específico si lo hay.",
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué logró el asesor en la investigación, qué calidad tuvo la apertura y las preguntas, qué información obtuvo del lead y por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
+  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué logró el asesor en la investigación, qué calidad tuvo la apertura y las preguntas, si indagó cuando el lead se abrió (o si perdió información relevante que el lead ofreció), qué información obtuvo y cuándo la obtuvo (si el perfil financiero apareció tarde, dilo), y si hizo o no revalidación al finalizar la fase. Por qué merece esa calificación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO que aplique, con 2 frases que el asesor podría haber usado en ESTA conversación. Máximo 6-8 líneas. No copies texto literal, adapta con tus palabras.",
+  "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "calidad_apertura": "EXCELENTE | BUENA | CORRECTA | DEFICIENTE",
   "indicios_escucha_activa": true | false,
   "tecnicas_detectadas": ["lista de técnicas que usó el asesor"],
@@ -388,10 +455,12 @@ completo. Evalúa el CONJUNTO de la fase, no el mejor instante.
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
-ANTES DE EVALUAR: Lee la transcripción completa de principio a fin. El asesor puede
-hacer preguntas de investigación en cualquier momento, no solo al inicio. Identifica
-TODOS los momentos de exploración (preguntas, repreguntas, profundizaciones) antes de
-decidir la calificación. Evalúa el CONJUNTO, no el mejor momento aislado.
+ANTES DE EVALUAR: Lee la transcripción completa de principio a fin. Identifica:
+(1) TODOS los momentos de exploración (preguntas, repreguntas, profundizaciones)
+(2) Si el asesor indagó cuando el lead aportó información relevante espontáneamente
+(3) Si la información financiera se obtuvo durante la investigación o apareció tarde
+(4) Si al final de la investigación el asesor hizo un resumen/revalidación antes de pasar al programa
+Evalúa el CONJUNTO, no el mejor momento aislado.
 
 Analiza la fase de INVESTIGACIÓN (apertura + descubrimiento) en esta conversación.
 Extrae los hallazgos del lead de forma estructurada y evalúa si el asesor los aprovechó
@@ -428,8 +497,9 @@ Genera la evaluación en JSON.
 
         perfil = hallazgos.get("perfil_financiero", "")
         competidores = hallazgos.get("competidores", "")
+        iniciativa = hallazgos.get("iniciativa_perfil_financiero", "")
 
-        falta_perfil = es_no_explorado(perfil)
+        falta_perfil = es_no_explorado(perfil) or iniciativa == "lead_espontaneo_asesor_no_indago"
         falta_competidores = es_no_explorado(competidores)
         num_faltantes = sum([falta_perfil, falta_competidores])
 
@@ -453,13 +523,18 @@ Genera la evaluación en JSON.
                 f"investigación consultiva completa."
             )
         else:
-            # Un aspecto crítico ausente → máximo MEJORABLE
+            # Un aspecto crítico ausente o no indagado → máximo MEJORABLE
             tope = "MEJORABLE"
+            sufijo = ""
+            if falta_perfil and iniciativa == "lead_espontaneo_asesor_no_indago":
+                sufijo = (" El lead aportó información financiera espontáneamente pero el "
+                          "asesor no indagó en ella, perdiendo la oportunidad de completar "
+                          "el perfil financiero.")
             nota = (
                 f"[Ajuste automático] Calificación bajada de {calificacion} a MEJORABLE: "
-                f"no se exploró el {faltantes_str}, aspecto clave para completar la "
-                f"investigación. Sin esta información el asesor no puede personalizar "
-                f"adecuadamente la propuesta."
+                f"no se exploró adecuadamente el {faltantes_str}, aspecto clave para "
+                f"completar la investigación. Sin esta información el asesor no puede "
+                f"personalizar adecuadamente la propuesta.{sufijo}"
             )
 
         # Escala de valores para comparar

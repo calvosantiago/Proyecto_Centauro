@@ -141,6 +141,36 @@ def validar_archivo_para_procesamiento(ruta: Path) -> ValidacionArchivo:
     return validar_nombre_archivo(ruta)
 
 
+def detectar_idioma_transcripcion(texto: str) -> str:
+    """
+    Detecta si una transcripción está principalmente en inglés o español.
+    Sin dependencias externas. Usa stopwords de alta discriminación.
+
+    Returns: "en" (inglés) o "es" (español)
+    """
+    palabras = re.findall(r'\b\w+\b', texto.lower())
+
+    en_markers = {
+        "the", "is", "are", "was", "were", "would", "could", "should",
+        "they", "their", "them", "which", "this", "that", "have", "has",
+        "been", "being", "will", "can", "do", "did", "just", "from",
+        "what", "where", "who", "when", "how", "not", "but", "also",
+    }
+    es_markers = {
+        "que", "la", "el", "los", "las", "una", "un", "del", "al",
+        "también", "porque", "cuando", "muy", "hay", "sino", "aunque",
+        "está", "estoy", "estás", "tengo", "tienes", "tiene",
+        "soy", "son", "eres", "para", "pero", "más", "así", "ya",
+    }
+
+    en_count = sum(1 for w in palabras if w in en_markers)
+    es_count = sum(1 for w in palabras if w in es_markers)
+
+    if en_count > 0 and en_count > es_count * 1.5:
+        return "en"
+    return "es"
+
+
 def extraer_opportunity_id(filename: str) -> Optional[str]:
     """
     Extrae el ID de oportunidad del prefijo del nombre de archivo.

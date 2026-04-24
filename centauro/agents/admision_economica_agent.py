@@ -45,6 +45,7 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
                 confianza *= 0.7
 
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            mejoras = self._formato_mejoras(resultado_raw.get("mejoras", []))
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -55,6 +56,7 @@ class AdmisionEconomicaAgent(BaseEvaluatorAgent):
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
                 recomendacion_accionable=recomendacion_base,
+                mejoras=mejoras,
                 metadata={
                     "menciona_precio": menciona_precio,
                     "explica_financiacion": resultado_raw.get("explica_financiacion", False),
@@ -252,6 +254,7 @@ FORMATO JSON OBLIGATORIO:
   ],
   "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué hizo bien el asesor y en qué aspectos falló en la admisión y propuesta económica. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
+  "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "menciona_precio": true/false,
   "explica_financiacion": true/false,
   "menciona_comite": true/false,

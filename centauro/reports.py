@@ -294,6 +294,11 @@ class ModernReport(FPDF):
                 motivo = (af.get("motivo", "") if af else "") or "input de texto (sin archivo de audio)"
                 filas = [("Sin datos de audio:", to_latin1(motivo))]
 
+            pct_asesor = metadata.get("pct_asesor")
+            pct_lead = metadata.get("pct_lead")
+            if pct_asesor is not None and pct_lead is not None:
+                filas.append(("Habla asesor / lead:", f"{pct_asesor}% asesor — {pct_lead}% lead"))
+
             for label, valor in filas:
                 self.set_x(18)
                 self.set_font('Helvetica', 'B', 9)

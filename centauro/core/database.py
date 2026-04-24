@@ -225,6 +225,7 @@ class DatabaseManager:
                     "observabilidad": bloque.get("observabilidad"),
                     "confianza": bloque.get("confianza"),
                     "razonamiento": bloque.get("razonamiento"),
+                    "mejoras": bloque.get("mejoras", ""),
                 })
 
         if bloques_data:
@@ -318,6 +319,7 @@ class DatabaseManager:
                     "observabilidad": bloque.get("observabilidad"),
                     "confianza": bloque.get("confianza"),
                     "razonamiento": bloque.get("razonamiento"),
+                    "mejoras": bloque.get("mejoras", ""),
                 })
 
         if bloques_data:

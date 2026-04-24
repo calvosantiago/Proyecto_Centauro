@@ -82,6 +82,7 @@ class CierreAgent(BaseEvaluatorAgent):
             # Detectar técnicas
             tecnicas_detectadas = resultado_raw.get("tecnicas_detectadas", [])
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            mejoras = self._formato_mejoras(resultado_raw.get("mejoras", []))
 
             # ── Validar razonamiento: detectar truncamiento del LLM ──────────
             razonamiento_raw = resultado_raw.get("razonamiento", "")
@@ -114,6 +115,7 @@ class CierreAgent(BaseEvaluatorAgent):
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=razonamiento_ok,
                 recomendacion_accionable=recomendacion_base,
+                mejoras=mejoras,
                 metadata={
                     "proximo_paso": proximo_paso,
                     "compromiso_fecha": resultado_raw.get("compromiso_fecha", False),
@@ -240,13 +242,47 @@ El objetivo es avanzar al siguiente paso del proceso:
 - Programar entrevista de admisión
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISTINCIÓN CRÍTICA: CIERRE DE VENTA vs. COMPROMISO DE SEGUIMIENTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Un compromiso de seguimiento (fecha + hora para la próxima llamada) es PARTE del cierre
+consultivo, pero NO ES el cierre en sí. El asesor debe hacer ambas cosas y en este orden:
+
+PRIMERO — Intentar cerrar o comprometer al lead en el proceso de admisión:
+  El asesor debe preguntar activamente si el lead quiere avanzar ANTES de aceptar que el
+  seguimiento sea el plan A: "¿Te parece si damos el primer paso hoy?" / "¿Lo damos por
+  hecho y te meto en el próximo comité?" / "¿Qué necesitarías para arrancar esta semana?"
+  Este intento de avanzar en la venta debe ocurrir ANTES de proponer el seguimiento.
+
+DESPUÉS — Si el lead no puede comprometerse ahora → fijar seguimiento concreto (plan B):
+  Solo cuando el lead no puede avanzar en el acto, el asesor propone fecha + hora.
+  El seguimiento es el plan B consultivo, no el plan A.
+
+⚠️ PATRÓN A PENALIZAR — Seguimiento sin intento de cierre:
+El asesor fija directamente un seguimiento ("te llamo el martes a las 11") sin antes
+preguntar si el lead quiere avanzar = no intentó cerrar la venta.
+Esto limita la calificación a MEJORABLE como máximo, aunque la fecha+hora sean correctas.
+
+⚠️ PATRÓN CRÍTICO — MALO — Lead en control del cierre:
+Si el lead termina la llamada con frases como "Mándame la info y te respondo" / "Ya te
+escribo yo" / "Lo pienso y te aviso" — y el asesor acepta sin proponer ningún compromiso
+alternativo — la venta quedó completamente en manos del lead. El asesor perdió el control
+del proceso. → MALO sin excepción. No importa qué pasó antes: si el lead dicta los
+próximos pasos sin comprometerse con nada y el asesor no reacciona, la conversación
+terminó sin avance real.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CLAVES DE ESTE CIERRE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. VALIDACIÓN ANTES DE CERRAR:
-   El asesor no da por supuesto que el lead está convencido. Valida explícitamente
-   antes de pedir el compromiso: "¿Cómo lo ves hasta aquí?" / "¿Tienes alguna duda
-   antes de avanzar?" No asumir, preguntar.
+1. REVALIDACIÓN ANTES DE CERRAR:
+   El asesor no da por supuesto que el lead está convencido. Antes de proponer el
+   siguiente paso, revalida los puntos clave tratados: se asegura de que el lead no
+   tiene dudas sobre el programa, el proceso de admisión y la inversión. No basta con
+   preguntar "¿Tienes alguna duda?": el asesor debe repasar activamente lo hablado y
+   confirmar que el lead lo ve claro. "¿Cómo lo ves? ¿Todo lo que hemos visto encaja
+   con lo que buscas?" / "¿Hay algo que no te haya quedado claro antes de avanzar?"
+   Esta revalidación es especialmente crítica en el cierre porque es el último momento
+   para resolver lo que impide comprometerse.
 
 2. PREGUNTA DIRECTA DE COMPROMISO (señal positiva, no penaliza si no se hace):
    Aunque el lead haya verbalizado durante la conversación que quiere avanzar, hacer
@@ -264,7 +300,28 @@ CLAVES DE ESTE CIERRE
    si lo dejamos para más adelante perdería ese descuento."
    Ausencia de estas palancas al cerrar = oportunidad perdida (contribuye a MEJORABLE).
 
-3. PRÓXIMO PASO CONCRETO CON FECHA Y HORA:
+3b. COHERENCIA ENTRE URGENCIA EMPLEADA Y CIERRE:
+   Si el asesor usó argumentos de urgencia en cualquier momento de la conversación
+   (plazas limitadas, fecha del próximo comité, descuento con fecha límite), DEBE
+   reflejar esa urgencia en el cierre y actuar en consecuencia.
+   ⚠️ INCOHERENCIA QUE DEBE SER MALO: El asesor usó urgencia en un bloque previo
+   ("quedan pocas plazas", "la oferta expira esta semana", "el comité cierra el viernes")
+   pero en el cierre dejó todo abierto sin reflejar esa urgencia ni usarla para
+   comprometer al lead. No solo es un cierre pasivo: el asesor contradice su propia
+   estrategia. Si usó urgencia y luego cerró de forma abierta y ambigua → MALO,
+   no MEJORABLE. El feedback debe señalar la incoherencia explícitamente.
+
+3c. INTENTO REAL DE CIERRE DE VENTA:
+   El asesor debe intentar que el lead avance en el proceso de admisión ANTES de
+   aceptar que el siguiente paso sea una llamada futura. Esto incluye:
+   - Preguntar directamente si el lead está listo para avanzar
+   - Proponer el inicio del proceso de admisión o el envío de documentación
+   - Gestionar las objeciones que impiden comprometerse ahora
+   Un asesor que salta directamente al seguimiento sin intentar el cierre real = no
+   vendió, solo agendó. El seguimiento es necesario pero insuficiente por sí solo para
+   alcanzar BUENO.
+
+4. PRÓXIMO PASO CONCRETO CON FECHA Y HORA:
    El siguiente paso debe ser específico y con fecha Y hora reales. Hay grados:
    - SIN FECHA (→ MALO): "Piénsalo y me dices", "Ya hablaremos", ningún próximo paso.
    - SOLO FECHA SIN HORA (→ MEJORABLE): "Te llamo mañana", "Esta semana te escribo",
@@ -314,6 +371,14 @@ CRITERIOS DE CALIFICACIÓN
    ⚠️ REGLA DE ACUMULACIÓN: Si detectas simultáneamente (1) sin validación de dudas,
      (2) sin compromiso real del lead, (3) respuesta negativa o evasiva del lead →
      la calificación debe ser MALO. El feedback debe enumerar estos fallos.
+   - TAMBIÉN MALO — urgencia usada pero cierre incoherente: el asesor usó urgencia
+     durante la conversación (plazas, comité, descuento) pero en el cierre dejó todo
+     abierto sin reflejar esa urgencia. La contradicción entre estrategia y ejecución
+     es un fallo grave. → MALO, no MEJORABLE.
+   - TAMBIÉN MALO — lead en control del cierre: el lead dictó el siguiente paso
+     ("te respondo por WhatsApp", "ya te escribo yo", "lo pienso y te digo") y el
+     asesor aceptó sin proponer ningún compromiso alternativo ni fecha concreta.
+     El asesor perdió el control del proceso → MALO.
 
 🟡 MEJORABLE — hay un cierre pero le falta al menos uno de los requisitos para ser BUENO:
    - Hay próximo paso pero solo fecha sin hora ("te llamo mañana", "el lunes hablamos") → MEJORABLE
@@ -325,21 +390,26 @@ CRITERIOS DE CALIFICACIÓN
    - No vincula el cierre a la fecha del comité ni a las ayudas económicas disponibles
    - Crea complejidad innecesaria: pospone al día siguiente algo que podría haberse
      cerrado en la llamada ("mañana te mando la propuesta", "lo reviso y te escribo")
+   - Fijó un seguimiento con fecha + hora correctas, pero no intentó cerrar la venta
+     antes: fue directo al seguimiento sin preguntar si el lead quería avanzar ahora
    ⚠️ Si falla UN solo requisito de los tres (fecha+hora / compromiso / próximos pasos
      bien definidos), la calificación es MEJORABLE aunque todo lo demás esté bien.
 
 🟢 BUENO — el asesor lidera el cierre y genera un compromiso claro con estructura completa:
-   ⚠️ REQUISITOS MÍNIMOS OBLIGATORIOS para ser BUENO (deben cumplirse los tres):
+   ⚠️ REQUISITOS MÍNIMOS OBLIGATORIOS para ser BUENO (deben cumplirse los cuatro):
      (A) Próximos pasos bien definidos con FECHA Y HORA concretas
          (ej: "mañana a las 5", "martes a las 11") — solo fecha sin hora → MEJORABLE
      (B) Compromiso explícito del lead (acepta el siguiente paso con claridad)
-     (C) Alguna estructura de cierre: valida dudas, usa técnica, o resume lo acordado
-   - Valida si el lead tiene dudas antes de cerrar, o resume lo acordado
+     (C) Alguna estructura de cierre: revalida dudas, usa técnica, o resume lo acordado
+     (D) Intentó cerrar la venta antes del seguimiento: preguntó activamente si el lead
+         quería avanzar en el proceso de admisión antes de proponer la llamada de seguimiento
+   - Revalida que el lead no tiene dudas antes de cerrar, o resume lo acordado
    - Usa alguna técnica de cierre (doble alternativa, asuntivo, resumen-acción)
    - El lead confirma su compromiso con claridad
    - Hace una pregunta directa de compromiso, aunque el lead ya hubiera expresado intención
    - Vincula el cierre a la fecha del comité y/o a las ayudas económicas para generar urgencia
-   - No es necesario que use todas las técnicas: basta con que cumpla (A)+(B)+(C)
+   - La urgencia usada durante la conversación se refleja en el tono y la concreción del cierre
+   - No es necesario que use todas las técnicas: basta con que cumpla (A)+(B)+(C)+(D)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EVIDENCIA REQUERIDA
@@ -362,6 +432,7 @@ FORMATO JSON OBLIGATORIO:
   ],
   "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo condujo el asesor el cierre, qué hizo bien y en qué aspectos falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente al final de la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
+  "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "proximo_paso_concreto": "Descripción del próximo paso acordado (o 'ninguno' si no lo hubo)",
   "compromiso_fecha": true/false,
   "valido_antes_cerrar": true/false,
@@ -419,13 +490,15 @@ el estándar para el nivel general, no para un fragmento aislado.
 Tenlo presente al interpretar los fallos del checklist.
 
 DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
-de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+de estos 6 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
-  1. ¿Validó dudas del lead antes de cerrar?                                        → SÍ / NO
-  2. ¿Propuso un próximo paso con FECHA Y HORA concretas? (solo fecha → NO)         → SÍ / NO
-  3. ¿El lead aceptó con compromiso real y explícito (no pasivo ni evasivo)?         → SÍ / NO
-  4. ¿Vinculó el cierre a urgencia real (comité, ayudas, plazos)?                   → SÍ / NO
-  5. ¿Usó alguna técnica de cierre (doble alternativa, asuntivo, resumen)?           → SÍ / NO
+  1. ¿Revalidó lo hablado y se aseguró de que el lead no tiene dudas antes de cerrar?  → SÍ / NO
+  2. ¿Propuso un próximo paso con FECHA Y HORA concretas? (solo fecha → NO)            → SÍ / NO
+  3. ¿El lead aceptó con compromiso real y explícito (no pasivo ni evasivo)?            → SÍ / NO
+  4. ¿Vinculó el cierre a urgencia real (comité, ayudas, plazos)?                      → SÍ / NO
+  5. ¿Usó alguna técnica de cierre (doble alternativa, asuntivo, resumen)?              → SÍ / NO
+  6. ¿Intentó cerrar la venta antes de aceptar el seguimiento?                         → SÍ / NO
+     ¿Preguntó si el lead quería avanzar ahora? (Si fue directo al seguimiento → NO)
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
@@ -433,8 +506,9 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 🚦 TOPE AUTOMÁTICO — aplica ANTES de decidir la calificación final:
    ¿El punto 2 (fecha Y hora) es NO?  → calificación máxima: MEJORABLE. No puede ser BUENO.
    ¿El punto 3 (compromiso del lead) es NO? → calificación máxima: MEJORABLE. No puede ser BUENO.
+   ¿El punto 6 (intento de cierre real) es NO? → calificación máxima: MEJORABLE. No puede ser BUENO.
    ¿Los puntos 2 Y 3 son ambos NO, Y además no hay ningún próximo paso definido? → MALO.
-   Estos topes son absolutos: aunque el resto esté bien, sin hora+compromiso no hay BUENO.
+   Estos topes son absolutos: aunque el resto esté bien, sin hora+compromiso+intento de cierre no hay BUENO.
 
 🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
    Analiza el peso real de cada fallo. Los 5 criterios son todos relevantes para que el

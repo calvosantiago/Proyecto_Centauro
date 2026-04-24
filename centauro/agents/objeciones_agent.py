@@ -49,6 +49,7 @@ class ObjecionesAgent(BaseEvaluatorAgent):
 
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            mejoras = self._formato_mejoras(resultado_raw.get("mejoras", []))
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -59,10 +60,13 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
                 recomendacion_accionable=recomendacion_base,
+                mejoras=mejoras,
                 metadata={
                     "num_objeciones": len(objeciones_detectadas),
                     "objeciones_identificadas": objeciones_detectadas,
                     "anticipo_objeciones": resultado_raw.get("anticipo_objeciones", False),
+                    "anticipo_posibles_bajas": resultado_raw.get("anticipo_posibles_bajas", False),
+                    "revalido_informacion_explicada": resultado_raw.get("revalido_informacion_explicada", False),
                     "tecnica_detectada": resultado_raw.get("tecnica_detectada", "ninguna")
                 }
             )
@@ -154,6 +158,49 @@ Trabajar sin miedo a la objeción y anticiparse a ella es una señal clara de BU
 También evalúa si el asesor retoma el tema económico o temporal de forma proactiva,
 o si solo reacciona cuando el lead protesta.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANTICIPACIÓN A BAJAS FUTURAS — INFORMACIÓN PROACTIVA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Un asesor de alto nivel no solo resuelve objeciones en el momento — también PREVIENE
+bajas futuras siendo transparente sobre aspectos del programa que el lead podría
+descubrir después y considerar un engaño o decepción.
+
+Este agente también evalúa si el asesor mencionó PROACTIVAMENTE información potencialmente
+incómoda ANTES de que el lead la preguntara. Esto incluye, entre otros:
+- Trabajos en grupo o en equipo (si el lead es introvertido o tiene poca disponibilidad)
+- Diferencia entre titulación propia (de la institución) y titulación oficial (del Estado)
+- Carga de trabajo real, horas semanales, ritmo del programa
+- Requisitos de admisión que puedan ser obstáculos (expediente, idioma, experiencia)
+- Condiciones de financiación que luego puedan ser motivo de baja
+
+⚠️ Esta anticipación es una de las conductas MÁS VALORADAS del asesor:
+✅ Asesor menciona "te aviso que los trabajos son en grupo, así que necesitarás
+   coordinar con compañeros" → señal de transparencia y prevención de bajas → BUENO
+✅ Asesor explica "la titulación es propia de OBS, no es un título oficial del Estado —
+   te cuento por qué esto igual o más te conviene" → previene malentendido futuro → BUENO
+❌ Asesor omite deliberadamente que la titulación es propia cuando es relevante para el lead
+   o cuando el lead podría haberlo necesitado saber → señal de MALO
+
+NOTA: No debes inventar que faltó info proactiva si el tema no era relevante para este lead.
+Solo penaliza si el programa tiene un aspecto que claramente podría sorprender negativamente
+a este lead específico Y el asesor no lo mencionó en ningún momento de la llamada.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REVALIDACIÓN DE LO EXPLICADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Antes de avanzar o cerrar, el asesor debería confirmar que el lead ha entendido bien
+todo lo que se explicó y no le ha quedado ninguna duda. Esta revalidación:
+- Genera seguridad en el lead y reduce el riesgo de malentendidos que deriven en baja
+- Permite al asesor detectar dudas latentes no verbalizadas espontáneamente
+- Es la contrapartida de la anticipación: primero anticipa, luego confirma comprensión
+
+Señales de revalidación:
+✅ "¿Te ha quedado alguna duda sobre lo que te he explicado del programa?"
+✅ "¿Hay algo de lo que hemos comentado que quieras que te aclare?"
+✅ "Antes de seguir, ¿estás cómodo con todo lo que te he contado?"
+Si esta revalidación existe → señal positiva que contribuye a BUENO.
+Si falta completamente → menciónalo en las mejoras.
+
 ⚠️ SENSIBILIDAD CONTEXTUAL — REGLA ANTES DE CALIFICAR:
 Cuando el lead revela una circunstancia personal (viaje, compromiso familiar, trabajo,
 situación médica), preguntar por qué esa circunstancia existe o cuándo cambiará es
@@ -171,6 +218,8 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
    - Presiona al lead sin escucharle ("Tienes que decidirte ya")
    - Genera más resistencia en vez de reducirla
    - También: el lead lanza una objeción seria y el asesor la pasa por alto o cambia de tema
+   - También: omite deliberadamente información que el lead claramente necesitaba conocer
+     (titulación propia vs oficial, trabajos en grupo, carga real) → posible baja futura
 
 🟡 MEJORABLE — el asesor responde pero de forma reactiva y sin lograr resolución real:
    - Solo reacciona a objeciones explícitas, nunca anticipa
@@ -192,6 +241,11 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
      ("no me queda ninguna duda", "estoy de acuerdo", "ya lo entiendo") → BUENO sin excepción.
    - En objeciones logísticas (timing/viaje): acordar pago parcial, reserva o fecha alternativa
      = resolución exitosa → BUENO.
+   - SUMA POSITIVA: el asesor anticipa proactivamente información potencialmente incómoda
+     (titulación propia, trabajos en grupo, etc.) antes de que el lead la descubra → señal
+     de transparencia que previene bajas futuras → refuerza BUENO.
+   - SUMA POSITIVA: el asesor revalida al final que el lead no tiene dudas pendientes sobre
+     lo que se ha explicado → señal de seguridad generada → refuerza BUENO.
    - No es necesario que use técnica perfecta: basta con que la objeción quede resuelta o reducida
 
 TIPOS DE OBJECIONES Y CÓMO LEERLAS:
@@ -242,8 +296,11 @@ FORMATO JSON OBLIGATORIO:
   ],
   "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica qué objeciones surgieron, cómo las gestionó el asesor, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
   "anticipo_objeciones": true/false,
+  "anticipo_posibles_bajas": true/false,
+  "revalido_informacion_explicada": true/false,
   "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "anticipacion" | "ninguna",
   "restriccion_tiempo_detectada": true/false
 }}
@@ -288,9 +345,8 @@ completo. Evalúa el CONJUNTO de la fase, no el mejor instante. Los ejemplos mar
 el estándar para el nivel general, no para un fragmento aislado.
 Tenlo presente al interpretar los fallos del checklist.
 
-Si hay objeciones detectadas, DETENTE. Antes de elegir la calificación, DEBES
-responder SÍ o NO a cada uno de estos 4 puntos. Cuenta cuántos tienen respuesta
-NEGATIVA (= fallo):
+DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno de
+estos 6 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
   1. ¿Validó la preocupación del lead antes de responder (no la ignoró ni minimizó)? → SÍ / NO
   2. ¿Profundizó en el porqué real de la objeción (no se quedó en la superficie)?    → SÍ / NO
@@ -303,6 +359,12 @@ NEGATIVA (= fallo):
      objeción logística. Marca este ítem como SÍ en ese caso.
   3. ¿Usó técnica estructurada o evidencia concreta para resolver?                   → SÍ / NO
   4. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
+  5. ¿El asesor mencionó proactivamente información que podría sorprender negativamente
+     al lead más adelante (titulación propia vs oficial, trabajos en grupo, carga real,
+     etc.) cuando era relevante para este lead? Si el tema no era relevante → SÍ.      → SÍ / NO
+  6. ¿El asesor revalidó al final que el lead no tiene dudas pendientes sobre lo
+     que se ha explicado? ("¿Te ha quedado alguna duda?", "¿Estás cómodo con todo
+     lo que te he contado?")                                                           → SÍ / NO
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.

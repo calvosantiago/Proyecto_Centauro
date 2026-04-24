@@ -44,8 +44,9 @@ class AsesorProfile:
     fecha_ultima_evaluacion: Optional[str] = None
 
     # Análisis por bloque (calculado automáticamente)
-    fortalezas_consistentes: List[str] = field(default_factory=list)  # Bloques mayoritariamente BUENO
-    areas_mejora_consistentes: List[str] = field(default_factory=list)  # Bloques mayoritariamente MALO
+    fortalezas_consistentes: List[str] = field(default_factory=list)   # Bloques mayoritariamente BUENO
+    bloques_en_desarrollo: List[str] = field(default_factory=list)     # Bloques mayoritariamente MEJORABLE
+    areas_mejora_consistentes: List[str] = field(default_factory=list) # Bloques mayoritariamente MALO
 
     # Tendencias recientes (en escala ordinal: MALO=0, MEJORABLE=1, BUENO=2)
     tendencia_global: str = "estable"  # "mejorando" | "empeorando" | "estable"
@@ -84,6 +85,7 @@ class AsesorProfile:
                     bloques_calificaciones[bloque].append(cal)
 
         self.fortalezas_consistentes = []
+        self.bloques_en_desarrollo = []
         self.areas_mejora_consistentes = []
 
         for bloque, calificaciones in bloques_calificaciones.items():
@@ -92,6 +94,8 @@ class AsesorProfile:
                 mayoria = conteo.most_common(1)[0][0]
                 if mayoria == "BUENO":
                     self.fortalezas_consistentes.append(bloque)
+                elif mayoria == "MEJORABLE":
+                    self.bloques_en_desarrollo.append(bloque)
                 elif mayoria == "MALO":
                     self.areas_mejora_consistentes.append(bloque)
 
@@ -143,7 +147,12 @@ class AsesorProfile:
             bloques_str = ", ".join(self.fortalezas_consistentes)
             feedback.append(f"✅ **Fortalezas consolidadas**: {bloques_str}")
 
-        # Áreas de mejora
+        # En desarrollo (MEJORABLE consistente)
+        if self.bloques_en_desarrollo:
+            bloques_str = ", ".join(self.bloques_en_desarrollo)
+            feedback.append(f"🟡 **En desarrollo**: {bloques_str} (nivel MEJORABLE consistente)")
+
+        # Áreas críticas
         if self.areas_mejora_consistentes:
             bloques_str = ", ".join(self.areas_mejora_consistentes)
             feedback.append(f"🎯 **Foco recomendado**: {bloques_str} (área recurrente de mejora)")
@@ -171,6 +180,7 @@ class AsesorProfile:
             fecha_primera_evaluacion=data.get('fecha_primera_evaluacion'),
             fecha_ultima_evaluacion=data.get('fecha_ultima_evaluacion'),
             fortalezas_consistentes=data.get('fortalezas_consistentes', []),
+            bloques_en_desarrollo=data.get('bloques_en_desarrollo', []),
             areas_mejora_consistentes=data.get('areas_mejora_consistentes', []),
             tendencia_global=data.get('tendencia_global', 'estable'),
             cambio_reciente=data.get('cambio_reciente', 0.0)
@@ -282,6 +292,8 @@ class MemoryManager:
                 transcripcion_path=transcripcion_path
             )
             self._agregar_a_rag_historico(evaluacion, transcripcion_path)
+
+        return self.cargar_perfil(nombre_asesor)
 
     def _agregar_a_rag_historico(self, evaluacion: EvaluacionHistorica, transcripcion_path: Optional[str]):
         """

@@ -143,6 +143,9 @@ class EstiloAgent(BaseEvaluatorAgent):
                 problemas_graves.append("Asesor monopoliza la conversación")
                 confianza *= 0.9
 
+            from ..tools.audio_features import calcular_ratio_habla_diarizada
+            ratio_habla_meta = calcular_ratio_habla_diarizada(transcripcion)
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 calificacion=resultado_raw.get("calificacion"),
@@ -152,11 +155,14 @@ class EstiloAgent(BaseEvaluatorAgent):
                 evidencias_extra=resultado_raw.get("evidencias_extra", []),
                 razonamiento=resultado_raw.get("razonamiento", ""),
                 recomendacion_accionable=resultado_raw.get("recomendacion_accionable", ""),
+                mejoras=self._formato_mejoras(resultado_raw.get("mejoras", [])),
                 metadata={
                     "aspectos_evaluados": aspectos,
                     "problemas_graves": problemas_graves,
                     "fortaleza_principal": resultado_raw.get("fortaleza_principal", ""),
-                    "audio_features": audio_features
+                    "audio_features": audio_features,
+                    "pct_asesor": ratio_habla_meta.get("pct_asesor"),
+                    "pct_lead": ratio_habla_meta.get("pct_lead"),
                 }
             )
             
@@ -258,6 +264,12 @@ NO son fallos comunicativos (no penalices esto):
 - Un estilo cercano, cálido o informal si conecta bien con el lead.
 - Usar un tono espontáneo y humano en vez de seguir un guión al pie de la letra.
 - Hablar de tú a tú con un lead de perfil similar al asesor.
+- Cambiar de idioma o usar palabras en otro idioma si hay coherencia con lo que se
+  habla (ej: asesor y lead alternan español/catalán/inglés de forma natural y la
+  conversación tiene sentido). NO penalices el cambio de idioma coherente.
+  EXCEPCIÓN: si aparecen palabras o frases en otro idioma que no encajan con el
+  contexto y parecen errores de transcripción (alucinaciones del motor de STT),
+  sí menciónalos explícitamente para que el equipo pueda detectarlos.
 
 SÍ son señales negativas que debes detectar y mencionar:
 - TONO ROBÓTICO O MONÓTONO: el asesor suena a guión, sin variación ni calor humano,
@@ -322,8 +334,10 @@ naturales para ese perfil específico.
 ⚠️ ADVERTENCIA: MÉTRICAS DE AUDIO PUEDEN ESTAR DISTORSIONADAS POR DESCONEXIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Antes de interpretar métricas de audio, comprueba si el lead se desconectó en algún
-punto de la llamada. Señales: el asesor dice "¿Hola?", "¿Me escuchas?", "¿Sigues ahí?",
-o hay un tramo donde el asesor habla varias veces sin que el lead responda.
+punto de la llamada. Señales en español: el asesor dice "¿Hola?", "¿Me escuchas?",
+"¿Sigues ahí?". Señales en inglés: "Hello?", "Are you there?", "Can you hear me?",
+"Hello, are you still there?". También: hay un tramo donde el asesor habla varias
+veces sin que el lead responda.
 
 Si hay indicios de desconexión (parcial o definitiva):
 ⚠️ Las métricas de silencio y energía pueden estar infladas artificialmente:
@@ -473,6 +487,7 @@ FORMATO JSON OBLIGATORIO:
   ],
   "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo fue el estilo comunicativo del asesor, qué tono usó, si conectó con el lead emocionalmente, qué funcionó y qué no. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en estilo/comunicación, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique al estilo comunicativo, explicando POR QUÉ funciona y dando 2 ejemplos de frases. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "aspectos_evaluados": {{
     "tono": "profesional_cercano" | "mecanico" | "inapropiado",
     "vocabulario": "adaptado" | "generico" | "inadecuado",

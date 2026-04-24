@@ -52,6 +52,7 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
 
             # NOTA: El coaching se integra directamente en el prompt del agente via RAG
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
+            mejoras = self._formato_mejoras(resultado_raw.get("mejoras", []))
 
             return EvaluationResult(
                 bloque=self.nombre_bloque,
@@ -62,10 +63,13 @@ class PropuestaValorAgent(BaseEvaluatorAgent):
                 evidencias_extra=evidencias_extra,
                 razonamiento=resultado_raw.get("razonamiento", ""),
                 recomendacion_accionable=recomendacion_base,
+                mejoras=mejoras,
                 metadata={
                     "personalizacion_detectada": personalizacion,
                     "enfoque": resultado_raw.get("enfoque", "caracteristicas"),
-                    "presenta_institucion": resultado_raw.get("presenta_institucion", False)
+                    "presenta_institucion": resultado_raw.get("presenta_institucion", False),
+                    "afirmaciones_superlativas_detectadas": resultado_raw.get("afirmaciones_superlativas_detectadas", False),
+                    "superlativas_justificadas": resultado_raw.get("superlativas_justificadas", False),
                 }
             )
 
@@ -132,6 +136,32 @@ priorizando lo más importante bajo presión de tiempo merece reconocimiento, no
 Detecta si ocurrió esta situación y reflétala en el razonamiento como circunstancia atípica.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AFIRMACIONES SUPERLATIVAS — DEBEN JUSTIFICARSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cuando el asesor hace afirmaciones superlativas o de liderazgo sobre OBS
+("somos los número 1 online", "somos la mejor escuela online", "somos los primeros
+en formación online en España", "tenemos el mejor claustro"...), esas afirmaciones
+DEBEN ir acompañadas de al menos un argumento concreto que las sostenga.
+
+⚠️ DECIR QUE OBS ES LA MEJOR SIN EXPLICAR POR QUÉ = DISCURSO VACÍO, no propuesta de valor.
+
+Argumentos válidos que justifican afirmaciones de liderazgo:
+- Trayectoria: "llevamos 20 años en formación online, fuimos los primeros"
+- Rankings o reconocimientos: "estamos en el top X de rankings europeos / del FT"
+- Metodología probada: "desarrollamos nuestra metodología específicamente para el formato online"
+- Red alumni: "más de X mil alumni directivos en activo"
+- Claustro: "nuestros profesores son profesionales en activo, no solo académicos"
+- Datos de empleabilidad: "X% de nuestros alumnos mejoran su posición en 12 meses"
+
+✅ Asesor dice "OBS es la #1 online porque llevamos 20 años siendo la primera escuela
+   en desarrollar un modelo exclusivamente online, cuando otras todavía no existían" → BUENO
+❌ Asesor dice "OBS es la número 1 en España online" sin añadir ningún argumento
+   que justifique esa afirmación → oportunidad de valor perdida → penaliza
+
+⚠️ Si el asesor no hace afirmaciones superlativas en esta llamada, esta regla no aplica.
+Solo evalúa si HIZO una afirmación superlativa y si la respaldó o no.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ADAPTACIÓN AL PERFIL DEL LEAD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 El asesor debe adaptar los argumentos al perfil del lead:
@@ -155,6 +185,8 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
      sin ningún punto de contacto con lo que ESTE lead específico dijo o necesita
    - El asesor no hace referencia en ningún momento a algo que el lead mencionó
    - El lead escucha pero no hay ninguna señal de que sienta que el programa es para él/ella
+   - También: el asesor afirma que OBS es la mejor o la #1 pero no da ningún argumento
+     que lo justifique → declaración vacía que no genera credibilidad ni añade valor
    ⚠️ NO marques MEJORABLE solo porque la presentación podría haber sido más personalizada.
    MEJORABLE requiere que la conexión con el lead sea completamente ausente o casi nula.
 
@@ -188,11 +220,14 @@ FORMATO JSON OBLIGATORIO:
   ],
   "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo presentó el asesor la institución y el programa, si conectó con el lead, qué hizo bien y en qué falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente en la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
+  "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "personalizacion_detectada": true/false,
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto",
   "perfil_lead": "JUNIOR" | "SENIOR" | "NO_DETERMINADO",
   "bolsas_trabajo_mencionadas": true/false,
+  "afirmaciones_superlativas_detectadas": true/false,
+  "superlativas_justificadas": true/false,
   "circunstancia_atipica": "Describe si el lead expresó presión de tiempo u otra condición que limitó la presentación. 'Ninguna' si no ocurrió.",
   "distribucion_propuesta_valor": "DESDE_INICIO" | "DISTRIBUIDA_TODA_ENTREVISTA" | "SOLO_BLOQUE_ESPECIFICO" | "AUSENTE"
 }}
@@ -229,13 +264,16 @@ el estándar para el nivel general, no para un fragmento aislado.
 Tenlo presente al interpretar los fallos del checklist.
 
 DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno
-de estos 5 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
+de estos 6 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
   1. ¿Presentó la institución (OBS) con claridad?                                 → SÍ / NO
   2. ¿Explicó el programa con beneficios (no solo características)?                → SÍ / NO
   3. ¿Conectó al menos un punto con el perfil o necesidades del lead?              → SÍ / NO
   4. ¿El lead mostró interés o comprensión genuina?                                → SÍ / NO
   5. ¿Adaptó argumentos al perfil del lead (junior→empleabilidad, senior→ROI)?     → SÍ / NO
+  6. Si el asesor hizo afirmaciones superlativas sobre OBS ("somos el #1", "somos
+     los mejores online"), ¿las justificó con al menos un argumento concreto?
+     Si NO hizo afirmaciones superlativas → SÍ automático.                         → SÍ / NO
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
