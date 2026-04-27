@@ -169,8 +169,12 @@ class GestionAsesores:
         if not all(p[0].isupper() for p in palabras if p and p.lower() not in PARTICULAS):
             return False
 
-        # No palabras sospechosas
-        palabras_invalidas = {'llamada', 'entrevista', 'reunion', 'obs', 'master', 'mba', 'zoom', 'teams'}
+        # No palabras sospechosas ni términos técnicos/contextuales
+        palabras_invalidas = {
+            'llamada', 'entrevista', 'reunion', 'obs', 'master', 'mba', 'zoom', 'teams',
+            'id', 'oportunidad', 'skip', 'omitir', 'nombre', 'asesor', 'lead',
+            'grabacion', 'grabación', 'marca', 'branding', 'máster', 'formacion',
+        }
         if any(p.lower() in palabras_invalidas for p in palabras):
             return False
 

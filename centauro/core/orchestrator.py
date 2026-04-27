@@ -366,20 +366,79 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
 
         prompt_sistema = f"""
 Eres un auditor CRÍTICO que evalúa DOS bloques secundarios simultáneamente.
+Debes ser RIGUROSO: MALO y MEJORABLE son calificaciones distintas con criterios concretos.
 
-CALIFICACIÓN ORDINAL (elige UNA etiqueta por bloque):
-🔴 MALO: Insuficiente, desorganizado o contraproducente
-🟡 MEJORABLE: Correcto pero genérico, mecánico, sin profundidad real
-🟢 BUENO: Personalizado, profesional, conecta con el lead
-
-MANUAL - PROPUESTA DE VALOR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLOQUE A — PROPUESTA DE VALOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MANUAL DE REFERENCIA:
 {ctx_propuesta}
+{ejemplos_bp_texto}
 
-MANUAL - ESTILO:
+CHECKLIST PROPUESTA DE VALOR — responde SÍ/NO a cada pregunta:
+  1. ¿Explicó con claridad qué es OBS y qué incluye el programa?
+  2. ¿Enfatizó beneficios para el lead (no solo características del programa)?
+  3. ¿Conectó al menos un punto de la propuesta con algo que dijo el lead?
+  4. ¿Evitó afirmaciones superlativas sin argumentos ("somos los mejores") o las justificó?
+  5. ¿El lead mostró interés o comprensión genuina durante o después de la propuesta?
+
+CUENTA los NOs → "contador_fallos_criticos" en el JSON.
+🚨 REGLA ABSOLUTA: 3 o más NOs → calificación es MALO. Sin excepciones.
+No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
+
+CRITERIOS:
+🔴 MALO: Presentación confusa o desorganizada, O el lead no entiende qué se le ofrece,
+   O múltiples fallos del checklist acumulados. El lead no recibe información útil.
+🟡 MEJORABLE: Existe propuesta ordenada pero es el MISMO discurso para cualquier lead,
+   sin ningún punto de contacto con lo que ESTE lead dijo o necesita. Catálogo sin anclaje.
+   ⚠️ MEJORABLE requiere que la conexión con el lead sea completamente ausente o casi nula.
+   NO marques MEJORABLE solo porque podría haber sido más personalizada.
+🟢 BUENO: Clara, estructurada y conecta con lo que importa a este lead. No hace falta
+   personalizar cada detalle: basta con que el programa se presente como relevante para
+   ESTE lead, no solo como un catálogo.
+   Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo del perfil o palabras del lead? Si sí → BUENO.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLOQUE B — ESTILO Y COMUNICACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MANUAL DE REFERENCIA:
 {ctx_estilo}
-{bloque_audio_estilo}{ejemplos_bp_texto}
+{bloque_audio_estilo}
 
-⚠️ REGLA CRÍTICA OBLIGATORIA ⚠️
+CHECKLIST ESTILO — responde SÍ/NO a cada pregunta:
+  1. ¿El tono fue profesional y cercano (no mecánico ni inapropiado)?
+  2. ¿Hubo al menos un momento de empatía o cercanía genuina?
+  3. ¿El ritmo permitió al lead participar (no fue monólogo)?
+  4. ¿El vocabulario fue claro y adaptado al perfil del lead?
+  5. ¿El profesionalismo fue alto (sin muletillas excesivas, seguro)?
+
+CUENTA los NOs → "contador_fallos_criticos" en el JSON.
+🚨 REGLA ABSOLUTA: 3 o más NOs → calificación es MALO. Sin excepciones.
+Si no puedes identificar ni UNA fortaleza comunicativa REAL → también es MALO.
+No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
+
+¿QUÉ NO CUENTA COMO FORTALEZA REAL?
+- Hacer alguna pregunta puntual en medio de largos monólogos.
+- Usar el nombre del lead una sola vez en toda la llamada.
+- "El vocabulario fue claro" — claridad mínima es el estándar base, no un positivo.
+Si el único positivo que puedes citar es de estas categorías → la calificación es MALO.
+
+CRITERIOS:
+🔴 MALO (dos vías posibles):
+   VÍA A — Activamente dañino: tono grosero, condescendiente, o tan desorganizado que
+   el lead no entiende la conversación.
+   VÍA B — Sin ninguna fortaleza real: el estilo no es dañino pero falla en todos
+   los frentes sin nada que rescatar. La conversación es mecánica e impersonal.
+🟡 MEJORABLE: Hay al menos UNA fortaleza comunicativa real, pero el conjunto es
+   insuficiente. Tono educado pero robótico, pocos momentos de empatía, pocas preguntas.
+   ⚠️ REQUISITO: para ser MEJORABLE debe existir al menos UNA fortaleza real. Sin ninguna → MALO.
+🟢 BUENO: El estilo genera confianza y el lead se siente cómodo participando. Hay al menos
+   un momento de empatía real o cercanía genuina.
+   Si dudas entre MEJORABLE y MALO: ¿puedes citar al menos UNA fortaleza comunicativa real? Si no → MALO.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLA CRÍTICA — EVIDENCIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
 - Usa COPY-PASTE directo, no parafrasees
 - Incluye SIEMPRE la etiqueta [ASESOR]: o [LEAD]:
@@ -388,20 +447,24 @@ TODAS las evidencias DEBEN ser CITAS LITERALES EXACTAS de la transcripción.
 FORMATO JSON OBLIGATORIO:
 {{
   "propuesta_valor": {{
+    "contador_fallos_criticos": 0,
     "calificacion": "MALO" | "MEJORABLE" | "BUENO",
     "observabilidad": "ALTA",
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA (COPY-PASTE)...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA (COPY-PASTE)..."],
-    "razonamiento": "¿Personalizó? ¿Beneficios o características? ¿Conectó con el lead? ¿Por qué esa calificación?",
-    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar, (2) UNA técnica de los libros del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 frases ejemplo adaptadas a ESTA conversación. Máx 6-8 líneas."
+    "razonamiento": "4-6 líneas fluidas: ¿personalizó? ¿beneficios o características? ¿conectó con el lead? ¿por qué esa calificación? Si MALO o MEJORABLE: incluye al menos una cita literal del fallo principal.",
+    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar, (2) UNA técnica de los libros del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 frases ejemplo adaptadas a ESTA conversación. Máx 6-8 líneas.",
+    "personalizacion_detectada": true | false
   }},
   "estilo": {{
+    "contador_fallos_criticos": 0,
     "calificacion": "MALO" | "MEJORABLE" | "BUENO",
     "observabilidad": "ALTA",
     "evidencia_principal": "[ASESOR]: Cita textual EXACTA...",
     "evidencias_extra": ["[ASESOR]: Otra cita EXACTA..."],
-    "razonamiento": "Análisis del tono, ritmo y empatía. ¿Por qué esa calificación?",
-    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar en estilo, (2) UNA técnica de los libros del CONTEXTO que aplique, dando 2 frases ejemplo. Máx 6-8 líneas."
+    "razonamiento": "4-6 líneas fluidas: tono, ritmo, empatía. ¿por qué esa calificación? Si MALO o MEJORABLE: incluye al menos una cita literal del fallo principal.",
+    "recomendacion_accionable": "Combina en un SOLO texto fluido: (1) qué mejorar en estilo, (2) UNA técnica de los libros del CONTEXTO que aplique, dando 2 frases ejemplo. Máx 6-8 líneas.",
+    "fortaleza_principal": "La fortaleza comunicativa real más destacada, o 'ninguna' si no existe."
   }}
 }}
 
@@ -414,7 +477,7 @@ DEBES integrarlos en cada "recomendacion_accionable" de forma ORGÁNICA:
 - NO copies texto literal del libro, adapta con tus palabras
 - Menciona de qué libro/autor viene
 
-⚠️ REGLAS CRÍTICAS:
+⚠️ REGLAS FINALES:
 - Sé decisivo: elige UNA etiqueta por bloque
 - BUENO no requiere perfección, requiere personalización y conexión real con el lead
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien
@@ -445,17 +508,65 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
 
             evaluaciones = []
 
+            ORDEN_CAL = {"MALO": 0, "MEJORABLE": 1, "BUENO": 2}
+
             if "propuesta_valor" in data:
                 eval_pv = data["propuesta_valor"]
                 eval_pv["bloque"] = "Propuesta de valor Institución y Programa"
                 eval_pv["confianza"] = 0.85
+                # Tope Python: 3+ fallos críticos → MALO
+                fallos_pv = eval_pv.get("contador_fallos_criticos", 0)
+                cal_pv = eval_pv.get("calificacion", "MEJORABLE")
+                if fallos_pv >= 3 and ORDEN_CAL.get(cal_pv, 1) > 0:
+                    nota_pv = (
+                        f"[Ajuste automático] Calificación bajada de {cal_pv} a MALO: "
+                        f"{fallos_pv} fallos críticos en checklist de propuesta de valor."
+                    )
+                    eval_pv["calificacion"] = "MALO"
+                    eval_pv["razonamiento"] = eval_pv.get("razonamiento", "") + f"\n\n{nota_pv}"
+                    print(f"      ⚠️ Tope batch PV: {fallos_pv} fallos → MALO")
+                    self.stats["notas_ajustadas_sheriff"] += 1
                 evaluaciones.append(eval_pv)
 
             if "estilo" in data:
                 eval_estilo = data["estilo"]
                 eval_estilo["bloque"] = "Estilo y comunicación"
                 eval_estilo["confianza"] = 0.85
-                eval_estilo.setdefault("metadata", {})["audio_features"] = audio_features
+                # Tope Python A: 3+ fallos críticos → MALO
+                fallos_est = eval_estilo.get("contador_fallos_criticos", 0)
+                cal_est = eval_estilo.get("calificacion", "MEJORABLE")
+                if fallos_est >= 3 and ORDEN_CAL.get(cal_est, 1) > 0:
+                    nota_est = (
+                        f"[Ajuste automático] Calificación bajada de {cal_est} a MALO: "
+                        f"{fallos_est} fallos críticos en checklist de estilo."
+                    )
+                    eval_estilo["calificacion"] = "MALO"
+                    eval_estilo["razonamiento"] = eval_estilo.get("razonamiento", "") + f"\n\n{nota_est}"
+                    print(f"      ⚠️ Tope batch Estilo A: {fallos_est} fallos → MALO")
+                    self.stats["notas_ajustadas_sheriff"] += 1
+                    cal_est = "MALO"
+                # Tope Python B: MEJORABLE sin fortaleza real → MALO
+                if cal_est == "MEJORABLE":
+                    fortaleza = str(eval_estilo.get("fortaleza_principal", "") or "").strip().lower()
+                    sin_fortaleza = fortaleza in ("", "ninguna", "no identificada", "n/a", "-", "no hay", "ninguno")
+                    if sin_fortaleza:
+                        nota_b = (
+                            "[Ajuste automático] Calificación bajada de MEJORABLE a MALO: "
+                            "no se identificó ninguna fortaleza comunicativa real."
+                        )
+                        eval_estilo["calificacion"] = "MALO"
+                        eval_estilo["razonamiento"] = eval_estilo.get("razonamiento", "") + f"\n\n{nota_b}"
+                        print("      ⚠️ Tope batch Estilo B: sin fortaleza → MALO")
+                        self.stats["notas_ajustadas_sheriff"] += 1
+                meta_estilo = eval_estilo.setdefault("metadata", {})
+                meta_estilo["audio_features"] = audio_features
+                try:
+                    from centauro.tools.audio_features import calcular_ratio_habla_diarizada as _crh
+                    _ratio = _crh(transcripcion)
+                    meta_estilo["pct_asesor"] = _ratio.get("pct_asesor")
+                    meta_estilo["pct_lead"] = _ratio.get("pct_lead")
+                except Exception:
+                    pass
                 evaluaciones.append(eval_estilo)
 
             print(f"      ✓ 2 bloques secundarios en 1 llamada batch")

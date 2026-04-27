@@ -545,7 +545,7 @@ Evalúa el cierre y próximos pasos en JSON.
         # que cuentan contra max_completion_tokens. Con 4000 el thinking seguía agotando el límite
         # en conversaciones largas (prompt_sistema ~3000 tokens + transcripción ~4000 tokens =
         # mucho contexto → mucho thinking). 8000 da margen suficiente para thinking + JSON.
-        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre", max_tokens=8000)
+        resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre", max_tokens=16000)
         return self._extract_json_safe(resp)
     
     def _detectar_fin_abrupto(self, final: str) -> bool:

@@ -263,11 +263,20 @@ OBJECIONES LOGÍSTICAS/TIMING (circunstanciales, no de fondo):
 - Un pago parcial, una reserva, o un aplazamiento acordado = RESOLUCIÓN EXITOSA de este tipo.
 - NO las trates igual que una objeción de precio o de necesidad.
 
-OBJECIÓN DE AUTORIDAD CON PADRES:
-- Cuando los padres intervienen en la decisión económica, el asesor no debe presuponer su apoyo.
-- Debe investigar el rol real de los padres: ¿están informados? ¿tienen dudas propias?
-- Técnica adecuada: ofrecer una sesión con los padres para resolver sus dudas directamente.
-- Si el asesor solo pregunta "¿te ayudan los padres?" sin explorar más → oportunidad perdida.
+OBJECIÓN DE AUTORIDAD (familia, pareja, empresa):
+⚠️ LÍMITE DE SCOPE — REGLA CRÍTICA:
+Profundizar en quién financia exactamente, cuál es el rol de cada familiar o cuánto
+peso tiene cada persona en la decisión es tarea del bloque de INVESTIGACIÓN, no de
+Objeciones. NO penalices al asesor en este bloque por no haber indagado más en la
+dinámica familiar o económica del entorno del lead.
+
+Lo que SÍ evalúa este bloque cuando aparece una objeción de autoridad:
+- ¿El asesor validó la necesidad de consultar (no la minimizó ni presionó)?
+- ¿Ofreció alguna herramienta para facilitar esa consulta? (sesión con la familia,
+  material para compartir, resumen económico, llamada conjunta)
+- ¿Acordó un próximo paso concreto en vez de dejar todo abierto?
+Si el asesor validó + ofreció un camino + acordó seguimiento → BUENO en este bloque,
+independientemente de si preguntó o no quién financia exactamente.
 
 OBJECIONES ADMINISTRATIVAS/DOCUMENTACIÓN:
 - El lead menciona dificultades para obtener su título, expediente académico o certificaciones previas.

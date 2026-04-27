@@ -542,10 +542,18 @@ async def main(message: cl.Message):
 
     # Detectar si el usuario especificó el nombre del asesor explícitamente en el mensaje
     nombre_especificado_en_mensaje = None
+    opp_id_en_mensaje = None  # Opportunity ID escrito por el usuario en el mensaje
     if contexto_usuario:
-        # ── Patrón 1: formato explícito "Asesor: Nombre Apellido" ──────────
+        # ── Extraer opportunity ID del texto del mensaje ──────────────────
+        _m_opp = re.search(r'\b(\d{4}-\d{6,12})\b', contexto_usuario)
+        if _m_opp:
+            opp_id_en_mensaje = _m_opp.group(1)
+            # Limpiar el ID del contexto para no contaminar los prompts de los agentes
+            contexto_usuario = re.sub(r'\b\d{4}-\d{6,12}\b', '', contexto_usuario).strip() or None
+    if contexto_usuario:
+        # ── Patrón 1: formato explícito "Asesor: X", "Asesor es X", "Asesor se llama X" ──
         patron_nombre = re.search(
-            r'(?:asesor|nombre\s+asesor?|advisor)\s*[:=]\s*'
+            r'(?:asesor|nombre\s+asesor?|advisor)\s*(?:[:=]|es|se\s+llama)[,\s]+'
             r'([A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+(?:\s+[A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+)+)',
             contexto_usuario,
             re.IGNORECASE
@@ -554,7 +562,7 @@ async def main(message: cl.Message):
             nombre_especificado_en_mensaje = patron_nombre.group(1).strip().title()
             # Limpiar esa parte del contexto para no contaminar los prompts de los agentes
             contexto_usuario = re.sub(
-                r'(?:asesor|nombre\s+asesor?|advisor)\s*[:=]\s*[^\n,;]+[,;\n]?\s*',
+                r'(?:asesor|nombre\s+asesor?|advisor)\s*(?:[:=]|es|se\s+llama)[^\n,;]+[,;\n]?\s*',
                 '',
                 contexto_usuario,
                 flags=re.IGNORECASE
@@ -622,9 +630,13 @@ async def main(message: cl.Message):
     es_multimedia = Path(file.name).suffix.lower() in ('.mp4', '.mp3')
 
     # ── Pregunta anticipada de asesor (solo multimedia sin nombre ya conocido) ──
-    # Se hace ANTES de transcribir para no tener al usuario esperando sin actividad
+    # Se hace ANTES de transcribir para no tener al usuario esperando sin actividad.
+    # Se omite si ya hay opp_id_en_mensaje o en el nombre del archivo: en ese caso
+    # Supabase resolverá el propietario automáticamente.
     nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
-    if es_multimedia and not nombre_asesor_login and not nombre_especificado_en_mensaje:
+    _opp_id_en_filename = extraer_opportunity_id(file.name) if file else None
+    _opp_id_conocido_ya = bool(opp_id_en_mensaje or _opp_id_en_filename)
+    if es_multimedia and not nombre_asesor_login and not nombre_especificado_en_mensaje and not _opp_id_conocido_ya:
         from centauro.core.gestion_asesores import gestion_asesores as _ga_pre
         sugerencias_pre = _ga_pre.nombres_canonicos[:5] if _ga_pre.nombres_canonicos else []
         sugerencias_pre_txt = (
@@ -647,20 +659,24 @@ async def main(message: cl.Message):
     if file:
         _opp_id_pre = extraer_opportunity_id(file.name)
         if _opp_id_pre:
-            await cl.Message(content=f"🔗 **Opportunity ID detectado:** `{_opp_id_pre}`").send()
+            await cl.Message(content=f"🔗 **Opportunity ID detectado en el nombre del archivo:** `{_opp_id_pre}`").send()
+        elif opp_id_en_mensaje:
+            # El usuario lo escribió en el mensaje junto al archivo
+            _opp_id_pre = opp_id_en_mensaje
+            await cl.Message(content=f"🔗 **Opportunity ID detectado en el mensaje:** `{_opp_id_pre}`").send()
         else:
             try:
                 _opp_res = await cl.AskUserMessage(
                     content=(
                         "🔗 **¿Tienes el ID de oportunidad de esta entrevista?**\n"
-                        "Escríbelo (ej: `2021-002579270`) o escribe **no** para continuar sin él."
+                        "Escríbelo (ej: `2021-002579270`) o escribe **no** para continuar sin él.\n"
+                        "_Tienes 5 minutos para responder._"
                     ),
-                    timeout=30
+                    timeout=300
                 ).send()
                 if _opp_res:
                     _opp_txt = _opp_res.get("output", "").strip()
                     if _opp_txt.lower() not in ("no", "n", "-", ""):
-                        # Validar formato: debe ser AAAA-NNNNNN (ej: 2021-002579270)
                         if re.match(r'^\d{4}-\d{6,12}$', _opp_txt):
                             _opp_id_pre = _opp_txt
                             await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
@@ -700,6 +716,16 @@ async def main(message: cl.Message):
                                 f"· {_datos_lead.get('pais', '')} "
                                 f"· {_datos_lead.get('programa', '')}"
                     ).send()
+                    # ── Auto-usar propietario de Supabase como asesor ─────────
+                    _propietario = _datos_lead.get('propietario')
+                    _tiene_asesor_conocido = bool(
+                        cl.user_session.get("nombre_asesor_login") or nombre_especificado_en_mensaje
+                    )
+                    if _propietario and not _tiene_asesor_conocido:
+                        nombre_especificado_en_mensaje = _propietario
+                        await cl.Message(
+                            content=f"👤 **Asesor identificado:** {_propietario} _(desde Supabase)_"
+                        ).send()
             except Exception as _e_lead:
                 pass  # No bloquear la evaluación si falla el enriquecimiento
 
@@ -962,21 +988,56 @@ async def main(message: cl.Message):
                     asesor_confirmado = "Asesor Desconocido"
         # ── Verificar que el asesor existe en Supabase ──────────────────────
         # Si el nombre no está registrado (no viene del login ni es ya "Desconocido"),
-        # avisar y redirigir al dummy para no crear entradas basura.
+        # preguntar al usuario en lugar de caer silenciosamente a "Asesor Desconocido".
         _nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
         _es_desconocido = asesor_confirmado == "Asesor Desconocido"
         if not _nombre_asesor_login and not _es_desconocido:
             from centauro.core.database import get_database as _get_db_check
             _db_check = _get_db_check()
             if _db_check.disponible and not _db_check.buscar_asesor(asesor_confirmado):
-                await cl.Message(
-                    content=f"⚠️ **Asesor no reconocido:** _{asesor_confirmado}_\n\n"
+                _sugerencias_db = gestion_asesores.nombres_canonicos[:8] if gestion_asesores.nombres_canonicos else []
+                _sugerencias_db_txt = (
+                    "\n\n**Asesores registrados:** " + " · ".join(f"`{s}`" for s in _sugerencias_db)
+                ) if _sugerencias_db else ""
+                try:
+                    _res_nombre_db = await cl.AskUserMessage(
+                        content=(
+                            f"⚠️ **Asesor no reconocido:** _{asesor_confirmado}_\n\n"
                             f"Este nombre no está registrado en el sistema. "
-                            f"La evaluación se procesará y guardará bajo **Asesor Desconocido**.\n\n"
-                            f"Si es un asesor real, añade el nombre al Excel TTAA "
-                            f"y ejecuta la sincronización con Supabase."
-                ).send()
-                asesor_confirmado = "Asesor Desconocido"
+                            f"¿Puedes indicar el nombre correcto?{_sugerencias_db_txt}\n\n"
+                            f"Escribe el nombre exacto o **skip** para continuar como _Asesor Desconocido_."
+                        ),
+                        timeout=60
+                    ).send()
+                except Exception:
+                    _res_nombre_db = None
+
+                if _res_nombre_db and _res_nombre_db.get("output"):
+                    _nombre_corregido = _res_nombre_db["output"].strip()
+                    if _nombre_corregido.lower() in ("skip", "omitir", "-", "n/a", "no"):
+                        asesor_confirmado = "Asesor Desconocido"
+                    else:
+                        # Si el usuario escribió una frase ("El asesor es X"), extraer solo el nombre
+                        _m_frase = re.search(
+                            r'(?:asesor|nombre|advisor|llama)\s*(?:[:=,]|es|se\s+llama)?\s*'
+                            r'([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)',
+                            _nombre_corregido, re.IGNORECASE
+                        ) or re.search(
+                            r'\bes\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)',
+                            _nombre_corregido, re.IGNORECASE
+                        )
+                        if _m_frase:
+                            _nombre_corregido = _m_frase.group(1).strip().title()
+                        try:
+                            asesor_confirmado = gestion_asesores.obtener_nombre_canonico(_nombre_corregido)
+                        except ValueError:
+                            await cl.Message(
+                                content=f"⚠️ `{_nombre_corregido}` no está registrado en el sistema. "
+                                        f"Guardando como **Asesor Desconocido**."
+                            ).send()
+                            asesor_confirmado = "Asesor Desconocido"
+                else:
+                    asesor_confirmado = "Asesor Desconocido"
         # ─────────────────────────────────────────────────────────────────────
         # Mostrar confirmación
         await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
@@ -1129,10 +1190,17 @@ async def main(message: cl.Message):
 📄 **Descarga el reporte completo en PDF** más abajo 👇
 """
         await cl.Message(content=resultado_msg).send()
+        # Nombre base para archivos de salida — evita MAX_PATH (260 chars) en Windows.
+        # Preferencia: opportunity_id (corto y único). Fallback: stem del archivo truncado.
+        _opp_id_base = cl.user_session.get("opportunity_id")
+        if _opp_id_base:
+            _nombre_base = _opp_id_base
+        else:
+            _nombre_base = Path(file.name).stem[:70].replace('.', '_')
         # ==================== GENERAR PDF ====================
         async with cl.Step(name="📄 Generando reporte PDF", type="tool") as step:
             try:
-                pdf_filename = f"Reporte_{file.name.replace('.', '_')}_v3.pdf"
+                pdf_filename = f"Reporte_{_nombre_base}_v3.pdf"
                 datos_oportunidad = reporte.get("datos_oportunidad") if isinstance(reporte, dict) else None
                 generar_pdf(reporte, pdf_filename, datos_oportunidad=datos_oportunidad)
                 pdf_path = settings.OUTPUTS_DIR / "Reportes_PDF" / pdf_filename
@@ -1154,7 +1222,7 @@ async def main(message: cl.Message):
             except Exception as e:
                 step.output = f"❌ Error generando PDF: {e}"
         # ==================== GUARDAR JSON ====================
-        json_path = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{file.name.replace('.', '_')}_v3.json"
+        json_path = settings.OUTPUTS_DIR / "Reportes_JSON" / f"{_nombre_base}_v3.json"
         json_path.parent.mkdir(exist_ok=True, parents=True)
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(reporte, f, indent=2, ensure_ascii=False)
@@ -1170,7 +1238,7 @@ async def main(message: cl.Message):
                     _db_reg = _get_db_reg()
                     _asesor_id_reg = _db_reg.registrar_asesor(asesor_confirmado)
                     if _asesor_id_reg:
-                        _pdf_path_str = str(settings.OUTPUTS_DIR / "Reportes_PDF" / f"Reporte_{file.name.replace('.', '_')}_v3.pdf")
+                        _pdf_path_str = str(settings.OUTPUTS_DIR / "Reportes_PDF" / f"Reporte_{_nombre_base}_v3.pdf")
                         _ok = _db_reg.actualizar_evaluacion(
                             evaluacion_id=_eval_id_sobrescribir,
                             asesor_id=_asesor_id_reg,
