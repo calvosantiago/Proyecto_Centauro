@@ -298,11 +298,13 @@ class BatchProcessor:
         # 1. Opportunity ID
         opp_id = extraer_opportunity_id(archivo.name)
         if not opp_id:
+            # Archivos del watcher de SharePoint no tienen opportunity_id en el nombre.
+            # Generamos un ID temporal para no bloquear el procesamiento.
+            import hashlib as _hl
+            opp_id = "SP-" + _hl.md5(archivo.name.encode()).hexdigest()[:10]
             self.logger.warning(
-                "   Sin opportunity_id en el nombre del archivo → saltando. "
-                "Renombra el archivo con formato: YYYY-NNNNNN_NombreAsesor.ext"
+                f"   Sin opportunity_id en filename → usando ID temporal: {opp_id}"
             )
-            return False
 
         # 2. Deduplicación
         if self._es_ya_procesado(opp_id):

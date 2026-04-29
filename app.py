@@ -724,7 +724,7 @@ async def main(message: cl.Message):
                     if _propietario and not _tiene_asesor_conocido:
                         nombre_especificado_en_mensaje = _propietario
                         await cl.Message(
-                            content=f"👤 **Asesor identificado:** {_propietario} _(desde Supabase)_"
+                            content=f"👤 **Asesor identificado:** {_propietario}"
                         ).send()
             except Exception as _e_lead:
                 pass  # No bloquear la evaluación si falla el enriquecimiento
