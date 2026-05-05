@@ -519,10 +519,39 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
    proceso quedó sin avance real. No puedes detectar múltiples fallos graves en el cierre
    y concluir MEJORABLE: sería incoherente con tu propio análisis.
 
+⚠️ CALIBRACIÓN HONESTA — LEE ESTO ANTES DE DECIDIR:
+Los modelos de lenguaje tienden a suavizar calificaciones buscando compensaciones positivas.
+Si el asesor lideró el cierre, fijó fecha y hora, obtuvo compromiso real e intentó cerrar la
+venta antes del seguimiento → di BUENO con confianza.
+Si faltó cualquiera de los cuatro requisitos (fecha+hora, compromiso, estructura, intento de cierre),
+la calificación debe reflejarlo. Un cierre correcto pero incompleto = MEJORABLE, no BUENO.
+No compenses la ausencia de un requisito con que el resto estuvo bien.
+
+🚨 RECONOCER MALO — INSTRUCCIÓN ESPECÍFICA:
+MALO no significa "el asesor fue grosero" o "el cierre fue caótico". También es MALO
+cuando el asesor no lideró el proceso y lo dejó sin avance real. Di MALO cuando los
+datos lo indiquen:
+  - Si el razonamiento describe que no hubo compromiso del lead, ni fecha, ni próximos
+    pasos definidos, y no puedes citar ningún elemento concreto que avanzó → MALO,
+    no MEJORABLE.
+  - Si el único argumento para no dar MALO es "el lead fue amable al despedirse" o
+    "el asesor intentó cerrar" sin que el lead respondiera nada concreto → eso refleja
+    la cortesía del lead, no el avance del proceso → MALO.
+PATRONES QUE SON MALO DIRECTAMENTE (sin necesidad de contar NOs del checklist):
+  ▸ El asesor termina con "piénsalo y me dices" o equivalente + el lead no acepta ningún
+    próximo paso concreto + no hay fecha ni hora acordada → MALO, aunque la llamada
+    haya ido bien hasta ese momento.
+  ▸ El lead dicta el siguiente paso ("ya te escribo yo", "te mando un mensaje") Y el
+    asesor acepta sin proponer ningún compromiso alternativo ni fecha → el asesor
+    perdió el control del proceso → MALO.
+  ▸ El asesor usó urgencia en algún momento de la conversación (comité, descuento,
+    plazas limitadas) Y en el cierre lo ignoró completamente, dejando todo abierto →
+    incoherencia estratégica + cierre pasivo → MALO.
+
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos y aplicar los topes):
 - MALO: cierre completamente pasivo, O sin próximos pasos ni seguimiento de ningún tipo, O el lead respondió negativamente y el asesor no reaccionó, O sin compromiso del lead NI fecha/hora NI próximos pasos definidos.
-- MEJORABLE: hay un cierre pero le falta al menos uno de los requisitos de BUENO: ya sea la hora concreta, el compromiso explícito del lead, o los próximos pasos bien definidos.
-- BUENO: el asesor lideró el cierre, fijó fecha Y hora concretas, el lead confirmó su compromiso, y el proceso avanzó con un siguiente paso claro. Deben cumplirse los tres requisitos.
+- MEJORABLE: hay un cierre pero le falta al menos uno de los cuatro requisitos de BUENO: hora concreta, compromiso explícito del lead, estructura de cierre, o intento de cierre antes del seguimiento.
+- BUENO: el asesor lideró el cierre, fijó fecha Y hora concretas, el lead confirmó su compromiso, y el proceso avanzó con un siguiente paso claro. Deben cumplirse los cuatro requisitos.
 - Si dudas entre BUENO y MEJORABLE: ¿hay hora concreta Y compromiso del lead? Si falta alguno → MEJORABLE.
 - Si no hay próximos pasos Y tampoco seguimiento → MALO sin excepción.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.

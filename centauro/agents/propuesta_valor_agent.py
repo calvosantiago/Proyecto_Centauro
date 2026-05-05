@@ -162,6 +162,42 @@ Argumentos válidos que justifican afirmaciones de liderazgo:
 Solo evalúa si HIZO una afirmación superlativa y si la respaldó o no.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FACTOR DETERMINANTE DE COMPRA (FDC) — CRITERIO CENTRAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El FDC es la razón más importante, específica y personal por la que ESTE lead podría
+matricularse. No es una motivación genérica ("quiero crecer") sino el dolor, la meta
+o la situación concreta que el lead reveló durante la investigación.
+
+EJEMPLOS DE FDC REAL:
+  ✅ "Necesito el título para acceder al puesto de manager que llevan meses buscando"
+  ✅ "Mi empresa financia si demuestro que el programa es relevante para mi rol"
+  ✅ "Quiero cambiar de carrera hacia marketing digital y necesito credenciales"
+  ✅ "Llevo años en operaciones sin formación formal y siento que me bloquea al ascender"
+
+CÓMO DETECTARLO: Escanea la fase de investigación de la transcripción. Busca el momento
+en que el lead explicó POR QUÉ está buscando el programa ahora y QUÉ cambiaría en su
+situación si lo hiciera. Eso es el FDC.
+
+CÓMO VERIFICAR SI EL ASESOR LO USÓ: Busca en la propuesta de valor frases donde el
+asesor conecte explícitamente el programa con ese FDC específico del lead. No basta
+con mencionar el perfil del lead — el asesor debe vincular el programa a ESA RAZÓN:
+
+  ✅ VINCULACIÓN REAL: "Como me comentabas que necesitas cambiar hacia marketing
+     digital, el máster te da exactamente eso: un título con salida directa al sector
+     y una red de contactos ya en activo en ese ámbito."
+  ✅ VINCULACIÓN REAL: "Dado que tu empresa financia si el programa es relevante para
+     tu rol, te cuento por qué este máster encaja exactamente con lo que haces..."
+  ❌ NO ES VINCULACIÓN: "El programa está muy bien valorado y hay mucha demanda" (genérico)
+  ❌ NO ES VINCULACIÓN: Mencionar el trabajo del lead de pasada sin conectarlo al FDC
+  ❌ NO ES VINCULACIÓN: "Como te decía, el programa te ayudará a crecer" (vago, sin ancla)
+
+⚠️ SI NO HAY FDC CLARO EN LA INVESTIGACIÓN: Si el asesor no investigó bien y no hay FDC
+identificable, el problema principal está en Investigación. Para este bloque, evalúa si
+el asesor al menos conectó la presentación con algo que el lead dijo explícitamente, aunque
+sea una motivación superficial. Sin FDC detectado → la propuesta de valor solo puede ser
+MEJORABLE como máximo (no BUENO), porque sin ese dato el asesor no tenía con qué personalizar.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ADAPTACIÓN AL PERFIL DEL LEAD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 El asesor debe adaptar los argumentos al perfil del lead:
@@ -180,25 +216,30 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
    - No hace ningún intento de conectar con lo que busca el lead
    - La información es confusa, contradictoria o tan genérica que no aporta nada
 
-🟡 MEJORABLE — la presentación existe pero es claramente un discurso de catálogo sin ninguna conexión:
-   - Explica OBS y el programa de forma ordenada, pero es el MISMO discurso para cualquier lead
-     sin ningún punto de contacto con lo que ESTE lead específico dijo o necesita
-   - El asesor no hace referencia en ningún momento a algo que el lead mencionó
-   - El lead escucha pero no hay ninguna señal de que sienta que el programa es para él/ella
+🟡 MEJORABLE — la presentación existe pero no usa el FDC para vincular el programa al lead:
+   - Explica OBS y el programa de forma ordenada, pero no recupera el FDC del lead
+     para conectar la propuesta — es el MISMO discurso que daría a cualquier candidato
+   - Puede mencionar superficialmente el perfil del lead (su trabajo, su sector) pero
+     sin conectar con la razón específica por la que ESTE lead quiere el programa ahora
+   - El lead escucha información útil pero no siente que el programa resuelve SU problema
    - También: el asesor afirma que OBS es la mejor o la #1 pero no da ningún argumento
      que lo justifique → declaración vacía que no genera credibilidad ni añade valor
-   ⚠️ NO marques MEJORABLE solo porque la presentación podría haber sido más personalizada.
-   MEJORABLE requiere que la conexión con el lead sea completamente ausente o casi nula.
+   ⚠️ La diferencia con BUENO no es cuánto habló el asesor, sino si ancló la propuesta
+   al FDC o a un motivo concreto del lead vs. si fue un discurso de catálogo genérico.
 
-🟢 BUENO — la presentación es clara, estructurada y conecta con lo que importa a este lead:
+🟢 BUENO — la presentación conecta el programa con el FDC del lead:
    - Presenta la institución y el programa con claridad y orden
    - Enfatiza beneficios sobre características (qué le aporta, no solo qué incluye)
-   - Conecta al menos un punto clave con el perfil o necesidades del lead
+   - REQUISITO CLAVE: recupera explícitamente el FDC del lead (o al menos su motivación
+     más concreta) y lo vincula con lo que el programa ofrece — el lead siente que el
+     programa fue pensado para resolver SU situación específica
    - Si el lead es junior, destaca empleabilidad y bolsas de trabajo
    - El lead muestra interés o comprensión genuina
-   - También es BUENO si el asesor distribuyó bien la propuesta de valor a lo largo de la llamada
-   - No es necesario personalizar cada detalle: basta con que el programa se presente como
-     relevante para ESTE lead, no solo como un catálogo
+   - También es BUENO si el asesor distribuyó bien la propuesta de valor a lo largo de la
+     llamada siempre que la vinculación con el FDC esté presente en algún momento
+   ⚠️ NO basta con mencionar el nombre del lead o su trabajo de pasada. La vinculación
+   debe ser explícita: el asesor dice (con sus palabras) por qué ESTE programa resuelve
+   ESTA necesidad concreta de ESTE lead.
 
 EVIDENCIA REQUERIDA:
 Debes identificar MÍNIMO:
@@ -222,6 +263,9 @@ FORMATO JSON OBLIGATORIO:
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar en la propuesta de valor, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "personalizacion_detectada": true/false,
+  "fdc_detectado": "El FDC que identificaste en la investigación. Escribe la razón concreta que el lead dio: su meta, su dolor, su situación específica. 'No detectado' si no hay FDC claro en la transcripción.",
+  "fdc_vinculado_programa": true/false,
+  "evidencia_vinculacion_fdc": "[ASESOR]: Cita literal donde el asesor vincula el FDC con el programa (COPY-PASTE). 'No encontrada' si no ocurrió.",
   "presenta_institucion": true/false,
   "enfoque": "caracteristicas" | "beneficios" | "mixto",
   "perfil_lead": "JUNIOR" | "SENIOR" | "NO_DETERMINADO",
@@ -268,7 +312,8 @@ de estos 6 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
   1. ¿Presentó la institución (OBS) con claridad?                                 → SÍ / NO
   2. ¿Explicó el programa con beneficios (no solo características)?                → SÍ / NO
-  3. ¿Conectó al menos un punto con el perfil o necesidades del lead?              → SÍ / NO
+  3. ¿Recuperó el FDC del lead (su motivo o necesidad más concreta) y lo vinculó
+     explícitamente con el programa? (Mención superficial del trabajo = NO)        → SÍ / NO
   4. ¿El lead mostró interés o comprensión genuina?                                → SÍ / NO
   5. ¿Adaptó argumentos al perfil del lead (junior→empleabilidad, senior→ROI)?     → SÍ / NO
   6. Si el asesor hizo afirmaciones superlativas sobre OBS ("somos el #1", "somos
@@ -287,15 +332,53 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
    porque una propuesta que no conecta con el lead ni genera interés no cumple su función.
    No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
 
+⚠️ CALIBRACIÓN HONESTA — LEE ESTO ANTES DE DECIDIR:
+Los modelos de lenguaje tienden a suavizar calificaciones buscando compensaciones positivas.
+Si la propuesta fue genuinamente personalizada y conectó con lo que importa a ESTE lead
+→ di BUENO con confianza.
+Si la propuesta fue correcta y completa pero genérica (válida para cualquier lead), la
+calificación debe reflejarlo. Una presentación extensa no es una presentación personalizada.
+MEJORABLE no es un fracaso: es la evaluación honesta de una propuesta que informó pero no conectó.
+
+🚨 RECONOCER MALO — INSTRUCCIÓN ESPECÍFICA:
+MALO no significa "el asesor no dijo nada" o "la presentación fue caótica". También es
+MALO cuando la propuesta fue tan genérica que no sirvió para que el lead se viera reflejado
+en el programa. Di MALO cuando los datos lo indiquen:
+  - Si el razonamiento describe una presentación en la que el asesor enumeró
+    características sin conectar ninguna con el lead, y no puedes citar ni UN momento
+    donde el lead sintiera que el programa era para él → MALO, no MEJORABLE.
+  - Si el único argumento para no dar MALO es "la presentación fue completa y ordenada"
+    → la extensión o el orden no compensan la ausencia total de conexión con el lead.
+    Una presentación larga y genérica = catálogo de catálogo → MALO si no hay anclaje.
+PATRONES QUE SON MALO DIRECTAMENTE (sin necesidad de contar NOs del checklist):
+  ▸ Presentación de OBS + programa de principio a fin sin recuperar el FDC del lead
+    ni hacer referencia a nada que el lead dijo durante la investigación → MALO.
+    El lead escuchó un catálogo que podría haber recibido cualquier candidato.
+  ▸ El asesor afirmó que OBS "es la mejor" o "la #1" sin ningún argumento que lo
+    respalde + no vinculó el FDC con el programa + el lead no mostró interés genuino
+    → discurso vacío sin impacto → MALO.
+  ▸ El lead es claramente junior/recién graduado y el asesor no mencionó en ningún
+    momento empleabilidad, bolsas de trabajo ni red de contactos, centrándose solo
+    en características del programa sin conexión con la situación del lead → MALO.
+
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
 - MALO: múltiples fallos críticos acumulados, O presentación confusa/desorganizada, O el lead no entiende qué se le ofrece.
-- MEJORABLE: presentación correcta pero genérica, sin conexión real con la situación del lead. El lead escucha pero no se reconoce en lo que le cuentan. Catálogo sin anclaje personal.
-- BUENO: clara, estructurada y conecta con lo que importa a este lead. No es necesario usar todas las técnicas: si la propuesta resonó con el lead y lo movió a avanzar → es BUENO.
-- Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo del perfil o las palabras del lead?
-  Si sí → BUENO. Si la presentación es buena pero sin ningún anclaje personal → MEJORABLE.
-- Si el asesor trabajó elementos de propuesta de valor desde el INICIO de la conversación
-  → BUENO sin excepción, independientemente de si repitió todos los elementos en el bloque.
-- Si hubo presión de tiempo del lead, ajusta la exigencia de profundidad pero no la de claridad.
+- MEJORABLE: presentación correcta y ordenada pero genérica — no recuperó el FDC del lead
+  para anclarlo al programa. El lead escucha información válida pero no siente que el programa
+  resuelve SU situación concreta. Catálogo sin ancla personal al FDC.
+- BUENO: clara, estructurada y vincula explícitamente el FDC del lead con lo que el programa
+  ofrece. El lead siente que el asesor habla de SU caso, no de un candidato genérico.
+  Requiere ancla real al FDC — no menciones superficiales del nombre, trabajo o sector.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor recuperó el FDC y lo vinculó al programa
+  con una frase explícita? Si no hay esa vinculación directa → MEJORABLE, aunque la
+  presentación haya sido extensa, ordenada y haya mencionado el perfil del lead de pasada.
+- Si no hay FDC claro en la investigación (el asesor no investigó bien): la propuesta
+  de valor no puede ser BUENO, porque el asesor no tenía el dato con el que personalizar.
+  Máximo MEJORABLE. El problema raíz está en Investigación, pero este bloque lo refleja.
+- El asesor puede haber trabajado elementos de propuesta desde el inicio; evalúa si el
+  conjunto incluye la vinculación con el FDC, no si empezó antes de lo habitual.
+- Si hubo presión de tiempo del lead, ajusta la exigencia de profundidad pero no la de
+  vinculación al FDC — aunque sea en una sola frase, debe estar presente para ser BUENO.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """
 

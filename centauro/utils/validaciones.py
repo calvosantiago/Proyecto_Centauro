@@ -173,19 +173,28 @@ def detectar_idioma_transcripcion(texto: str) -> str:
 
 def extraer_opportunity_id(filename: str) -> Optional[str]:
     """
-    Extrae el ID de oportunidad del prefijo del nombre de archivo.
+    Extrae el ID de oportunidad del nombre de archivo.
 
-    Formato esperado: 2021-002579270_descripcion.ext
-    El ID tiene el patrón: 4 dígitos de año, guión, 6-12 dígitos.
-    Separadores aceptados tras el ID: "_", "-" o ".", con espacios opcionales alrededor.
+    El ID tiene el patrón: 4 dígitos de año, guión, 6-12 dígitos (ej: 2021-002579270).
+    Se busca en dos posiciones, en este orden de prioridad:
+
+    1. AL INICIO: el ID aparece al principio del nombre, seguido de separador
+       (_/-/.), espacios opcionales, directamente pegado a una letra, o fin.
+         Ej: "2021-002579270_entrevista.mp4"
+         Ej: "2021-002653670Reporte_OBS...mp4"
+
+    2. AL FINAL: el ID aparece al final del stem, precedido de separador
+       (_/-/. o espacio) o directamente de una letra.
+         Ej: "Entrevista Jennifer_2021-002579270.mp4"
+         Ej: "Grabación reunión 2021-002579270.mp4"
 
     Args:
         filename: Nombre del archivo (con o sin path)
 
     Returns:
-        El ID de oportunidad (ej: "2021-002579270") o None si no tiene prefijo válido.
+        El ID de oportunidad (ej: "2021-002579270") o None si no se encuentra.
 
-    Ejemplos:
+    Ejemplos inicio:
         >>> extraer_opportunity_id("2021-002579270_entrevista_MBA.mp4")
         '2021-002579270'
         >>> extraer_opportunity_id("2021-002579270_ Máster en BI.mp4")
@@ -196,12 +205,34 @@ def extraer_opportunity_id(filename: str) -> Optional[str]:
         '2021-002586934'
         >>> extraer_opportunity_id("2021-002579270  _ Máster en BI.mp4")
         '2021-002579270'
+        >>> extraer_opportunity_id("2021-002653670Reporte_OBS Business School.mp4")
+        '2021-002653670'
+
+    Ejemplos final:
+        >>> extraer_opportunity_id("Entrevista Jennifer_2021-002579270.mp4")
+        '2021-002579270'
+        >>> extraer_opportunity_id("Grabación reunión 2021-002579270.mp4")
+        '2021-002579270'
+        >>> extraer_opportunity_id("OBS Neuromarketing2021-002653670.mp4")
+        '2021-002653670'
+
+    Sin ID:
         >>> extraer_opportunity_id("entrevista_sin_id.mp4")
         None
     """
     stem = Path(filename).stem
-    match = re.match(r'^(\d{4}-\d{6,12})(?:\s*[_\-.]\s*|$)', stem)
-    return match.group(1) if match else None
+
+    # 1. Buscar al inicio: separador explícito, letra pegada, o fin de cadena
+    match = re.match(r'^(\d{4}-\d{6,12})(?:\s*[_\-.]\s*|\D|$)', stem)
+    if match:
+        return match.group(1)
+
+    # 2. Buscar al final: precedido por separador/espacio/letra o inicio de cadena
+    match = re.search(r'(?:^|\D)(\d{4}-\d{6,12})$', stem)
+    if match:
+        return match.group(1)
+
+    return None
 
 
 def generar_mensaje_error_usuario(validacion: ValidacionArchivo, contexto: str = "procesamiento") -> str:

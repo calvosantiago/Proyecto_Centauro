@@ -322,14 +322,42 @@ CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
    sino porque es lo que corresponde al impacto real en la conversación. No puedes detectar
    múltiples fallos graves y concluir MEJORABLE: sería incoherente con tu propio análisis.
 
+⚠️ CALIBRACIÓN HONESTA — LEE ESTO ANTES DE DECIDIR:
+Los modelos de lenguaje tienden a suavizar calificaciones buscando compensaciones positivas.
+Si el asesor construyó valor real, hizo análisis financiero y validó la reacción del lead
+→ di BUENO con confianza.
+Si el proceso fue correcto pero plano (cumplió los pasos sin convicción, sin reacción del lead,
+sin urgencia), la calificación debe reflejarlo. Que el lead no protestara no significa que la
+presentación fue excelente — puede haber sido pasiva o el lead simplemente estaba educado.
+MEJORABLE no es un fracaso: es la evaluación honesta de una presentación correcta pero sin impacto real.
+
+🚨 RECONOCER MALO — INSTRUCCIÓN ESPECÍFICA:
+MALO no significa "el asesor fue evasivo o rudo". También es MALO cuando la propuesta
+económica careció de las condiciones mínimas para que el lead tomara una decisión informada.
+Di MALO cuando los datos lo indiquen:
+  - Si el razonamiento describe que el precio se dio sin valor previo, o que el lead
+    mostró resistencia y el asesor no activó ningún argumento, y no puedes citar ningún
+    elemento que compensara esos fallos → MALO, no MEJORABLE.
+  - Si el único argumento para no dar MALO es "el lead escuchó el precio sin quejarse"
+    → la pasividad del lead no valida el proceso del asesor → MALO si el proceso falló.
+PATRONES QUE SON MALO DIRECTAMENTE (sin necesidad de contar NOs del checklist):
+  ▸ El asesor dio el precio en los primeros minutos de la llamada sin ninguna
+    construcción de valor previa + no hizo análisis financiero del lead → MALO.
+  ▸ El lead declaró explícitamente no-intención de compra en esta convocatoria
+    ("no lo tenía planeado para ahora", "no es algo que me plantee") Y el asesor
+    no usó en ningún momento posterior ayudas económicas, consecuencias de no
+    formarse ahora, ni argumentos de urgencia de ningún tipo → MALO.
+  ▸ El lead mostró resistencia al precio y el asesor respondió con cuotas y
+    descuentos sin haber preguntado previamente la situación financiera + no validó
+    la reacción del lead después de presentar la propuesta económica → MALO.
+
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
 - MALO: múltiples fallos críticos acumulados que comprometieron el avance del lead, O precio
   sin contexto, O comité omitido, O evasivo con precio, O deja ir al lead sin activar ningún
   argumento ante resistencia.
 - MEJORABLE: hay estructura mínima pero el impacto es plano: el asesor cumple los pasos pero sin construir valor real ni generar reacción en el lead. Correcta pero no persuasiva.
-- BUENO: construye valor real, valida la reacción del lead y maneja la parte económica con firmeza consultiva. No es necesario cubrir todos los puntos: si el lead avanzó con claridad económica y sin resistencia no resuelta → es BUENO.
-- Si dudas entre BUENO y MEJORABLE: ¿el lead entendió que está haciendo una inversión
-  con sentido y el asesor cerró sobre una propuesta concreta? Si sí → BUENO.
+- BUENO: construye valor real, valida la reacción del lead y maneja la parte económica con firmeza consultiva. Requiere haber hecho análisis financiero, construido valor y validado la reacción.
+- Si dudas entre BUENO y MEJORABLE: ¿el asesor hizo análisis financiero, construyó valor antes del precio Y validó la reacción del lead tras presentarlo? Si no cumplió los tres → MEJORABLE. El resultado (el lead no protestó) no basta si el proceso fue incompleto.
 - Si el lead mostró resistencia a la fecha y el asesor no usó ayudas ni consecuencias → MALO.
 - Si el lead declaró explícitamente no-intención de compra en esta convocatoria ("mi plan
   no era ingresar en ningún programa académico" o equivalente) Y el asesor no activó ningún

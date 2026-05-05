@@ -96,19 +96,27 @@ CONTEXTO ESPECÍFICO DE ESTA EVALUACIÓN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {contexto_usuario.strip()}
 
-⚠️ INSTRUCCIÓN OBLIGATORIA: Este contexto tiene PRIORIDAD sobre las asunciones
-generales del prompt. Úsalo para calibrar tu evaluación de forma específica.
-Ejemplos de cómo aplicarlo:
-- Edad del lead (ej: "22 años", "recién graduado") → ajusta la exigencia de estilo,
-  los argumentos esperados y el lenguaje apropiado. Un lead joven necesita un pitch
-  diferente (aspiracional, empleabilidad) que uno de 45+ años (ROI, ascenso directivo).
+⚠️ INSTRUCCIÓN OBLIGATORIA: Usa este contexto para calibrar tu evaluación, pero
+respeta siempre estas dos reglas absolutas:
+
+1. PRIORIDAD DE LA GRABACIÓN: Si el lead dice algo en la llamada que contradice
+   estos datos (edad, situación financiera, perfil, preferencias, etc.), usa SIEMPRE
+   lo que dice en la grabación. La entrevista es la realidad; estos datos son referencia.
+
+2. SIN MENCIONAR FUENTES INTERNAS: Nunca incluyas en el feedback frases como
+   "según el CRM", "calibrado con los datos del perfil", "el dato del sistema indica",
+   ni ninguna referencia a bases de datos, sistemas o procesos de calibración internos.
+   El feedback debe basarse exclusivamente en lo observado en la llamada.
+
+Ejemplos de cómo aplicar el contexto:
+- Edad del lead → ajusta la exigencia de estilo y los argumentos esperados.
+  Un lead joven necesita un pitch diferente (aspiracional, empleabilidad) que uno
+  de 45+ (ROI, ascenso directivo). Si el lead menciona su edad en la llamada, usa esa.
 - Quién financia (ej: "los padres pagan", "empresa lo cubre") → no penalices por
   referencias a financiación familiar ni por ausencia de análisis financiero propio.
-- Perfil profesional (ej: "directivo con 20 años de experiencia", "estudiante sin experiencia")
-  → ajusta qué estilo comunicativo, argumentos y técnicas son apropiados para ese perfil.
-- Circunstancias especiales (ej: "llamada corta", "lead ya comparó opciones") → úsalas
-  como atenuantes o contexto relevante en la evaluación.
-Refleja explícitamente el uso de este contexto en el campo "razonamiento".
+- Perfil profesional → ajusta qué estilo comunicativo y argumentos son apropiados.
+- Circunstancias especiales (ej: "llamada corta", "lead ya comparó opciones") →
+  úsalas como atenuantes o contexto relevante.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     

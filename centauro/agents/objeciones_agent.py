@@ -37,15 +37,8 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 resultado_raw["calificacion"] = cal_tmp
                 resultado_raw["razonamiento"] = raz_tmp
 
-            # Validar que se detectaron objeciones
+            # Registrar objeciones detectadas (el LLM decide cuándo usar NO_OBSERVABLE)
             objeciones_detectadas = resultado_raw.get("objeciones_identificadas", [])
-            
-            anticipo = resultado_raw.get("anticipo_objeciones", False)
-            if len(objeciones_detectadas) == 0 and not anticipo:
-                print(f"   ℹ️ No se detectaron objeciones ni anticipación en la conversación")
-                # No es malo, simplemente no hubo objeciones ni proactividad evaluable
-                resultado_raw["observabilidad"] = "NO_OBSERVABLE"
-                resultado_raw["calificacion"] = None
 
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
             recomendacion_base = resultado_raw.get("recomendacion_accionable", "")
@@ -64,8 +57,11 @@ class ObjecionesAgent(BaseEvaluatorAgent):
                 metadata={
                     "num_objeciones": len(objeciones_detectadas),
                     "objeciones_identificadas": objeciones_detectadas,
+                    "objeciones_no_abordadas": resultado_raw.get("objeciones_no_abordadas", []),
+                    "pistas_mixtas_detectadas": resultado_raw.get("pistas_mixtas_detectadas", []),
                     "anticipo_objeciones": resultado_raw.get("anticipo_objeciones", False),
                     "anticipo_posibles_bajas": resultado_raw.get("anticipo_posibles_bajas", False),
+                    "venta_preventiva_detectada": resultado_raw.get("venta_preventiva_detectada", False),
                     "revalido_informacion_explicada": resultado_raw.get("revalido_informacion_explicada", False),
                     "tecnica_detectada": resultado_raw.get("tecnica_detectada", "ninguna")
                 }
@@ -100,8 +96,13 @@ y reduce la resistencia del lead → BUENO.
 Lo que evalúas es si se sale de los límites (presionar, ignorar, ponerse defensivo)
 o si navega bien dentro de ellos con su propio estilo.
 
-IMPORTANTE: Si NO hay objeciones claras del [LEAD] NI anticipación del asesor, marca observabilidad "NO_OBSERVABLE" y calificacion: null.
-Si el asesor anticipa objeciones proactivamente (aunque el lead no las plantee explícitamente), sí es evaluable.
+⚠️ CUÁNDO USAR NO_OBSERVABLE:
+Solo cuando la conversación no ofrece ninguna oportunidad evaluable: la llamada fue tan
+corta o el lead tan entusiasta que no hubo resistencias ni señales de duda que pudieran
+anticiparse. En ese caso usa observabilidad "NO_OBSERVABLE" y calificacion: null.
+Si el asesor anticipó objeciones proactivamente (aunque el lead no las planteara), SÍ es evaluable.
+Si hubo una conversación sustancial y el asesor no anticipó ninguna objeción → califica MEJORABLE
+por falta de proactividad, no NO_OBSERVABLE. Reserva NO_OBSERVABLE para casos genuinamente vacíos.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CIRCUNSTANCIAS ATÍPICAS DE LA CONVERSACIÓN
@@ -115,6 +116,36 @@ llamada que tenía poco tiempo ("no tengo mucho tiempo", "tengo que cortar pront
 Un asesor que maneja una objeción de forma más directa y concisa bajo presión de
 tiempo está adaptándose a la situación, no siendo superficial. Detecta y menciona
 esta circunstancia en el razonamiento si ocurrió.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROCESO COMPLETO DE GESTIÓN DE OBJECIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+El estándar del programa evalúa si el asesor sigue un proceso consultivo completo,
+no si simplemente responde a la objeción:
+
+1. EMPATIZAR: Validar la preocupación sin minimizarla.
+   Ej: "Entiendo que eso genera incertidumbre, es completamente normal."
+
+2. PROFUNDIZAR: Hacer preguntas para entender qué hay detrás de la objeción.
+   Ej: "¿Qué es exactamente lo que te preocupa del timing hasta octubre?"
+   ⚠️ No asumas la causa: una objeción de "timing" puede esconder resistencia de
+   fondo (precio, miedo al compromiso, dudas sobre el programa). Preguntar ANTES
+   de responder es obligatorio para una objeción no puramente logística.
+
+3. AISLAR: Confirmar si esa objeción es el freno real o si hay más detrás.
+   Ej: "Si pudiéramos resolver el tema del timing, ¿estarías listo para avanzar?"
+   Ej: "¿Aparte de eso, hay algo más que te genera dudas?"
+   Esto mide el peso real de la objeción y evita resolver la superficie mientras
+   la resistencia de fondo queda sin explorar.
+
+4. REENCUADRAR/RESOLVER: Usar técnica, evidencia o reencuadre del valor para resolver.
+   Solo después de haber profundizado y aislado la causa real.
+
+5. VERIFICAR: Confirmar que la objeción quedó resuelta.
+   Ej: "¿Eso lo resuelve?" / "¿Te quedó más claro con esto?"
+
+El fallo más frecuente: saltar directamente al paso 4 sin haber hecho el 2 y el 3.
+Dar una respuesta técnicamente correcta a una objeción no explorada = MEJORABLE.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ALCANCE: EVALÚA TODA LA CONVERSACIÓN
@@ -147,6 +178,46 @@ OBJECIÓN REAL: el lead expresa resistencia, duda o un motivo por el que no quie
 
 REGLA: solo incluye en "objeciones_identificadas" las resistencias reales al avance,
 no las preguntas de información aunque el lead muestre curiosidad.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PISTAS MIXTAS — OBJECIONES ENCUBIERTAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cuando el lead descarta verbalmente una objeción para destacar otra, NO significa que
+la primera quede neutralizada. Casi siempre es una PISTA MIXTA: el lead está priorizando
+una variable, pero la otra sigue activa como criterio crítico.
+
+PATRONES TÍPICOS DE PISTA MIXTA:
+- "No es tanto por el dinero, sino por el tiempo" → tiempo es la objeción dominante,
+  PERO el dinero sigue siendo variable crítica.
+- "No es que no me interese el programa, lo que pasa es que no sé si ahora es el momento"
+  → la urgencia es la objeción dominante, PERO el interés/encaje sigue por confirmar.
+- "Por mí no hay problema, lo difícil es que mi pareja lo entienda" → autoridad es
+  dominante, PERO la convicción propia del lead también está en cuestión.
+- "El precio no me preocupa tanto, es más el formato online" → formato es dominante,
+  PERO el coste sigue siendo variable que el lead vigila.
+
+SEÑALES DE QUE LA VARIABLE "DESCARTADA" SIGUE VIVA:
+- El lead pregunta poco después por esa variable ("¿y cuánto cuesta exactamente?")
+- El lead vuelve a mencionarla más tarde aunque la haya minimizado al principio
+- El lead reacciona emocionalmente (silencio, cambio de tono) cuando aparece la variable
+- El lead pide opciones, descuentos, alternativas relacionadas con la variable "descartada"
+
+CÓMO DEBE GESTIONARLO EL ASESOR:
+1. RECONOCER la dominante: "Perfecto, entonces el punto más sensible para ti es el tiempo."
+2. REABRIR la otra como pregunta diagnóstica, no como contradicción:
+   "Y a nivel inversión, ¿ya tenías un rango contemplado para esta maestría?"
+3. NO dar por cerrada la variable "descartada" sin haberla explorado.
+
+⚠️ FALLO TÍPICO A PENALIZAR: el asesor toma al pie de la letra la palabra del lead,
+descarta la variable "no era por X", y se centra solo en la dominante. Cuando el lead
+luego pregunta por el precio o reacciona ante el formato, el asesor ya no tiene contexto
+para responder bien porque dio por cerrada esa línea. Esto contribuye a MEJORABLE incluso
+si el resto del manejo fue correcto: significa que el asesor escuchó las palabras pero
+no leyó la pista mixta.
+
+⚠️ NO INVENTES PISTAS MIXTAS: solo márcalas cuando el patrón sea claro (lead descartó
+una variable Y luego dio señales de que sigue activa). Si el lead descartó una variable
+y nunca volvió a mencionarla → no era pista mixta, era información honesta.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ANTICIPACIÓN A LA OBJECIÓN
@@ -221,32 +292,47 @@ CRITERIOS DE CALIFICACIÓN (elige UNA de las 3 etiquetas):
    - También: omite deliberadamente información que el lead claramente necesitaba conocer
      (titulación propia vs oficial, trabajos en grupo, carga real) → posible baja futura
 
-🟡 MEJORABLE — el asesor responde pero de forma reactiva y sin lograr resolución real:
+🟡 MEJORABLE — el asesor responde pero de forma reactiva y sin seguir el proceso completo:
    - Solo reacciona a objeciones explícitas, nunca anticipa
    - Responde con información correcta pero mecánica, sin validar la preocupación del lead
+   - Salta directamente a responder sin profundizar ni aislar: asume la causa de la
+     objeción en vez de preguntar qué hay detrás ("planificación hasta octubre" tratada
+     como logística sin explorar si esconde otra resistencia)
+   - No aísla si la objeción es el freno real: resuelve la superficie pero la resistencia
+     de fondo queda sin explorar
    - No profundiza en el porqué real de la objeción FUNDAMENTAL (precio, necesidad, valor)
-     ⚠️ Para objeciones LOGÍSTICAS: "no profundizar en los detalles" NO es fallo — ver regla
-     de sensibilidad contextual arriba. MEJORABLE solo si el asesor no ofreció ninguna
-     alternativa logística, no si no interrogó la circunstancia personal del lead.
+     ⚠️ Para objeciones LOGÍSTICAS puras: MEJORABLE solo si el asesor no ofreció ninguna
+     alternativa logística. No es fallo no interrogar la circunstancia personal del lead.
+   - En objeción de autoridad: valida pero no arma al lead con argumentos para la
+     conversación con el tercero (venta preventiva ausente)
    - El lead queda igual de dudoso o inseguro tras la respuesta
    - Intenta resolver pero no usa ninguna técnica estructurada
 
 🟢 BUENO — el asesor maneja y/o anticipa objeciones con confianza y el lead suaviza su postura:
    - Anticipa objeciones comunes sin que el lead las plantee (trabaja sin miedo a ellas)
-   - O si el lead objeta: valida la preocupación y profundiza antes de responder
+   - O si el lead objeta: sigue el proceso consultivo: valida la preocupación, profundiza
+     para entender la causa real, aísla si es el freno principal, reencuadra con técnica.
+     Saltarse profundizar y aislar no es "proceso incompleto" — es ausencia de proceso.
+   - En objeción de autoridad: arma proactivamente al lead para la conversación con el
+     tercero (venta preventiva: anticipa los bloqueos del tercero y da herramientas al lead)
    - Usa alguna técnica estructurada (feel-felt-found, boomerang, aislamiento, evidencia concreta, etc.)
    - TÉCNICA DE EVIDENCIA CONCRETA: usar brochure, datos reales, ejemplos de bolsas de empleo,
      casos de alumni, cifras específicas = técnica válida y efectiva. Valórala positivamente.
-   - SEÑAL DEFINITIVA: si el lead confirma explícitamente que sus dudas quedaron resueltas
-     ("no me queda ninguna duda", "estoy de acuerdo", "ya lo entiendo") → BUENO sin excepción.
-   - En objeciones logísticas (timing/viaje): acordar pago parcial, reserva o fecha alternativa
-     = resolución exitosa → BUENO.
+   - SEÑAL POSITIVA (no excepción absoluta): si el lead confirma que sus dudas quedaron
+     resueltas, pesa a favor de BUENO — pero no borra el proceso. Si el asesor no
+     profundizó ni aisló antes de responder, la satisfacción del lead puede ser
+     circunstancial (lead entusiasta de base, no mérito del asesor). Evalúa el PROCESO,
+     no solo el resultado final.
+   - En objeciones logísticas (timing/viaje): acordar pago parcial, reserva o fecha
+     alternativa = resolución exitosa → BUENO si además validó y ofreció alternativa.
    - SUMA POSITIVA: el asesor anticipa proactivamente información potencialmente incómoda
-     (titulación propia, trabajos en grupo, etc.) antes de que el lead la descubra → señal
-     de transparencia que previene bajas futuras → refuerza BUENO.
-   - SUMA POSITIVA: el asesor revalida al final que el lead no tiene dudas pendientes sobre
-     lo que se ha explicado → señal de seguridad generada → refuerza BUENO.
-   - No es necesario que use técnica perfecta: basta con que la objeción quede resuelta o reducida
+     (titulación propia, trabajos en grupo, etc.) → refuerza BUENO.
+   - SUMA POSITIVA: el asesor revalida al final que el lead no tiene dudas pendientes
+     → refuerza BUENO.
+   - ⚠️ BUENO requiere evidencia de PROCESO, no solo de resultado. Una objeción puede
+     quedar mitigada por el entusiasmo del lead o por suerte; lo que evalúas es si el
+     asesor ejecutó el proceso consultivo. Si se saltó profundizar e aislar → MEJORABLE,
+     aunque el lead pareciera satisfecho al final.
 
 TIPOS DE OBJECIONES Y CÓMO LEERLAS:
 
@@ -275,8 +361,26 @@ Lo que SÍ evalúa este bloque cuando aparece una objeción de autoridad:
 - ¿Ofreció alguna herramienta para facilitar esa consulta? (sesión con la familia,
   material para compartir, resumen económico, llamada conjunta)
 - ¿Acordó un próximo paso concreto en vez de dejar todo abierto?
+
+VENTA PREVENTIVA — nivel avanzado para objeciones de autoridad:
+Un asesor de alto nivel no solo facilita la consulta — ARMA al lead para que pueda
+defender la decisión frente a las posibles objeciones del tercero:
+- Anticipar qué dudas o resistencias planteará el tercero (precio, credibilidad,
+  tiempo, necesidad) antes de que el lead lo consulte.
+- Proveer argumentos concretos al lead para rebatirlas:
+  "Si tu pareja pregunta por el precio, recuérdale que tienes la opción de
+  financiación de 200€/mes; eso suele cambiar mucho la perspectiva."
+- Ofrecer material que el lead pueda compartir (brochure, resumen económico, enlace).
+- Proponer, si es apropiado, una llamada conjunta con el tercero.
+
+Señal de BUENO con venta preventiva: el asesor prepara activamente al lead para
+"vender" la decisión a su pareja/familia/empresa, anticipando los bloqueos del tercero.
+Señal de MEJORABLE sin venta preventiva: el asesor solo valida que hay que consultarlo
+y acuerda seguimiento, sin armar al lead para la conversación con el tercero.
+
 Si el asesor validó + ofreció un camino + acordó seguimiento → BUENO en este bloque,
 independientemente de si preguntó o no quién financia exactamente.
+Si además aplicó venta preventiva → refuerza la calificación BUENO.
 
 OBJECIONES ADMINISTRATIVAS/DOCUMENTACIÓN:
 - El lead menciona dificultades para obtener su título, expediente académico o certificaciones previas.
@@ -307,8 +411,20 @@ FORMATO JSON OBLIGATORIO:
   "recomendacion_accionable": "IMPORTANTE: Combina en un SOLO texto fluido: (1) Qué mejorar, (2) UNA técnica de los libros de ventas del CONTEXTO que aplique, explicando POR QUÉ funciona y dando 2 ejemplos de frases adaptadas a ESTA conversación. Máx 6-8 líneas. NO copies texto literal de los libros.",
   "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "objeciones_identificadas": ["tipo de objeción 1", "tipo 2"],
+  "objeciones_no_abordadas": ["objeción que el lead planteó pero el asesor no respondió ni exploró"],
+  "pistas_mixtas_detectadas": [
+    {{
+      "lead_dijo": "Cita literal del lead minimizando una variable (ej: 'No es por dinero, es por tiempo')",
+      "variable_dominante": "tiempo | dinero | autoridad | formato | encaje | otra",
+      "variable_descartada_pero_viva": "dinero | tiempo | otra — la que el lead minimizó pero siguió activa",
+      "evidencia_sigue_viva": "Cita literal o referencia que muestra que la variable 'descartada' siguió siendo crítica (lead la mencionó después, preguntó por ella, reaccionó al tema, etc.). 'Sin evidencia posterior' si nunca volvió a aparecer.",
+      "asesor_la_recogio": true/false,
+      "como_la_gestiono": "Descripción breve de qué hizo el asesor: la reabrió como pregunta diagnóstica, la dio por cerrada, la ignoró, etc."
+    }}
+  ],
   "anticipo_objeciones": true/false,
   "anticipo_posibles_bajas": true/false,
+  "venta_preventiva_detectada": true/false,
   "revalido_informacion_explicada": true/false,
   "tecnica_detectada": "feel-felt-found" | "boomerang" | "aislamiento" | "anticipacion" | "ninguna",
   "restriccion_tiempo_detectada": true/false
@@ -338,7 +454,8 @@ Elige otro aspecto con margen real o, si no hay ninguno, reconoce la buena gesti
 
 REGLAS CRÍTICAS:
 - Evidencias LITERALES de la transcripción (COPY-PASTE exacto)
-- Si no hay objeciones → observabilidad "NO_OBSERVABLE" y calificacion: null
+- Si no hay objeciones ni anticipación Y la conversación fue sustancial → MEJORABLE, no NO_OBSERVABLE
+- Solo usa NO_OBSERVABLE cuando genuinamente no hubo oportunidad evaluable (llamada muy corta, lead 100% entusiasta)
 - NO evalúes si el lead compró, evalúa si el ASESOR manejó bien la resistencia
 - Una objeción bien manejada puede dejar al lead pensando (eso es OK)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -358,43 +475,100 @@ DETENTE. Antes de elegir la calificación, DEBES responder SÍ o NO a cada uno d
 estos 6 puntos. Cuenta cuántos tienen respuesta NEGATIVA (= fallo):
 
   1. ¿Validó la preocupación del lead antes de responder (no la ignoró ni minimizó)? → SÍ / NO
-  2. ¿Profundizó en el porqué real de la objeción (no se quedó en la superficie)?    → SÍ / NO
-     ⚠️ EXCEPCIÓN LOGÍSTICA: Para objeciones de timing/viaje/circunstancia puntual,
-     "profundizar" NO significa interrogar los detalles logísticos del lead (cuándo
-     vuelve, por qué el viaje es urgente, etc.) — eso sería intrusivo e inapropiado.
-     Para estas objeciones, responde SÍ si el asesor: (a) reconoció la circunstancia,
-     y (b) buscó activamente un camino alternativo (fecha anterior, reserva, pago
-     parcial). El asesor que no presiona y ofrece una salida está manejando bien la
-     objeción logística. Marca este ítem como SÍ en ese caso.
-  3. ¿Usó técnica estructurada o evidencia concreta para resolver?                   → SÍ / NO
-  4. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
-  5. ¿El asesor mencionó proactivamente información que podría sorprender negativamente
-     al lead más adelante (titulación propia vs oficial, trabajos en grupo, carga real,
-     etc.) cuando era relevante para este lead? Si el tema no era relevante → SÍ.      → SÍ / NO
-  6. ¿El asesor revalidó al final que el lead no tiene dudas pendientes sobre lo
-     que se ha explicado? ("¿Te ha quedado alguna duda?", "¿Estás cómodo con todo
-     lo que te he contado?")                                                           → SÍ / NO
+  2. ¿Profundizó para entender qué hay detrás de la objeción, en vez de asumir
+     su causa y responder directamente?                                                → SÍ / NO
+     ⚠️ EXCEPCIÓN LOGÍSTICA PURA: Para objeciones claramente logísticas (viaje,
+     fecha puntual donde el lead SÍ quiere avanzar), responde SÍ si el asesor
+     reconoció la circunstancia y buscó un camino alternativo. Pero si la objeción
+     puede esconder resistencia de fondo (precio, compromiso, dudas sobre el programa),
+     NO se aplica la excepción: debe profundizar igualmente.
+  3. ¿Aisló si la objeción era el freno real o si había más detrás?                  → SÍ / NO
+     Ej: "Si pudiéramos resolver esto, ¿avanzarías?" / "¿Hay algo más que te preocupe?"
+     ⚠️ EXCEPCIÓN: Para objeciones logísticas puras donde está claro que el lead SÍ
+     quiere avanzar y solo hay un obstáculo operativo, el aislamiento puede ser
+     implícito. Marca SÍ en ese caso.
+  4. ¿Usó técnica estructurada o evidencia concreta para resolver/reencuadrar?       → SÍ / NO
+  5. ¿El lead suavizó su postura o quedó menos resistente tras la respuesta?          → SÍ / NO
+  6. ¿Abordó TODAS las objeciones que surgieron? ¿No dejó ninguna sin responder
+     ni explorar?                                                                      → SÍ / NO
+     ⚠️ Si el lead planteó una objeción que el asesor ignoró o no abordó → NO.
+     Este fallo es crítico independientemente de cómo manejó las otras objeciones.
+     ⚠️ Si no hubo objeciones explícitas del lead → responde SÍ (no aplica).
+  7. Si hubo PISTAS MIXTAS (lead dijo "no es por X sino por Y" + después dio señales
+     de que X seguía vivo: preguntó por X, pidió alternativas relacionadas con X, etc.),
+     ¿el asesor las recogió y reabrió la variable X como pregunta diagnóstica
+     en vez de darla por cerrada?                                                      → SÍ / NO
+     ⚠️ Si NO hubo pistas mixtas claras → responde SÍ (no aplica).
+     ⚠️ Si las hubo y el asesor tomó las palabras del lead al pie de la letra → NO.
 
 CUENTA los NOs. Ese número es tu "contador_fallos_criticos" en el JSON.
 🚨 REGLA ABSOLUTA: Si hay 3 o más NOs → la calificación es MALO. Sin excepciones.
 (Si observabilidad es NO_OBSERVABLE, pon contador_fallos_criticos = 0.)
 NOTA: El compromiso concreto y el siguiente paso se evalúan en el bloque de Cierre, no aquí.
+NOTA: Información proactiva sobre el programa (titulación, trabajos en grupo) y
+revalidación final de dudas son señales POSITIVAS que refuerzan BUENO, pero no forman
+parte de este checklist de fallos críticos.
 
 🔴 COHERENCIA ENTRE FALLOS Y CALIFICACIÓN:
-   Analiza el peso real de cada fallo. Los 4 criterios son todos relevantes para gestionar
-   las resistencias del lead. No validar la preocupación, no profundizar, no usar técnica
-   y que el lead no suavice su postura son fallos que acumulados dejan la objeción sin
-   resolver o la agravan. Si la mayoría fallaron, la calificación debe ser MALO. No por
-   un umbral mecánico, sino porque múltiples fallos en el manejo de objeciones dejan al
-   lead igualmente o más resistente. No detectes múltiples fallos graves y concluyas
-   MEJORABLE: sería incoherente con tu propio análisis.
+   Analiza el peso real de cada fallo. No validar la preocupación, no profundizar, no aislar,
+   no usar técnica y dejar objeciones sin abordar son fallos que acumulados dejan la resistencia
+   del lead sin resolver. Si la mayoría fallaron → MALO. No detectes múltiples fallos graves y
+   concluyas MEJORABLE: sería incoherente.
+   También a la inversa: si detectas que el asesor se saltó pasos fundamentales del proceso
+   (no profundizó, no aisló), no concluyas BUENO aunque el lead pareciera satisfecho. El proceso
+   refleja la habilidad del asesor, no el entusiasmo o la paciencia del lead.
+
+⚠️ CALIBRACIÓN HONESTA — LEE ESTO ANTES DE DECIDIR:
+Los modelos de lenguaje tienden a suavizar calificaciones buscando compensaciones positivas.
+Si el asesor siguió el proceso consultivo completo (validó, profundizó, aisló, usó técnica)
+→ di BUENO con confianza.
+Si detectaste que se saltó pasos clave (no profundizó, no aisló, dejó objeciones sin abordar),
+la calificación debe reflejarlo. No compenses esos fallos con que el resultado fue aceptable
+o que el lead pareció satisfecho. MEJORABLE no es un fracaso: es la evaluación honesta de
+trabajo reactivo sin proceso consultivo completo.
+
+🚨 RECONOCER MALO — INSTRUCCIÓN ESPECÍFICA:
+MALO no significa "agresivo" o "catastrófico". Significa que el asesor no gestionó las
+objeciones con ningún proceso mínimo. Di MALO cuando los datos lo indiquen:
+  - Si el razonamiento describe fallos en la gestión de varias objeciones y no puede
+    citar ningún manejo correcto → MALO, no MEJORABLE.
+  - Si el único argumento para no dar MALO es "el lead fue comprensivo" o "el lead
+    no insistió más" → eso refleja la tolerancia del lead, no el trabajo del asesor → MALO.
+PATRONES QUE SON MALO DIRECTAMENTE (sin necesidad de contar NOs del checklist):
+  ▸ Objeción fundamental (precio / necesidad / valor) recibida + asesor responde
+    mecánicamente sin validar, sin profundizar, sin aislar + lead queda igual de resistente
+    → MALO aunque la respuesta técnica fuera correcta.
+  ▸ 2 o más objeciones del lead que el asesor no abordó en ningún momento → MALO.
+  ▸ Objeción de autoridad ("debo consultarlo") + asesor dice solo "claro, piénsalo y
+    me dices" sin ofrecer ninguna herramienta, ni acordar seguimiento, ni anticipar
+    los bloqueos del tercero → MALO.
+
+PATRÓN ESPECÍFICO DE PISTA MIXTA NO RECOGIDA (contribuye a MEJORABLE):
+  ▸ El lead minimizó una variable ("no es por el dinero") + más adelante volvió a
+    plantear esa misma variable (preguntó por el precio, pidió descuento, reaccionó
+    al coste) + el asesor NO recogió la pista, no reabrió la variable como pregunta
+    diagnóstica y siguió como si estuviera resuelta → MEJORABLE como mínimo, aunque
+    el resto del manejo de objeciones haya sido correcto.
+    El asesor escuchó las palabras del lead pero no leyó la señal mixta.
+  ▸ Si además el asesor cierra la conversación sin haber explorado nunca la variable
+    que el lead "descartó" pero seguía señalando → contribuye a MALO si se acumula
+    con otros fallos del proceso.
 
 ⚠️ REGLAS PARA CALIFICAR (después de contar los fallos):
-- MALO: múltiples fallos críticos acumulados, O ignora/agrava objeciones, O huye del tema.
-- MEJORABLE: intenta responder pero la objeción queda sin resolver realmente, o la resuelve de forma superficial sin técnica consultiva. El lead sigue resistente o simplemente no la presiona más.
-- BUENO: resuelve o reduce la resistencia con técnica real. No es necesario que el lead quede convencido al 100%: si el asesor aplicó un proceso consultivo y el lead avanzó → es BUENO.
-- Si dudas entre BUENO y MEJORABLE: ¿el lead quedó menos resistente después? Si sí → BUENO.
-- Si el lead confirma explícitamente que sus dudas se resolvieron → BUENO sin excepción.
+- MALO: múltiples fallos críticos acumulados, O ignora/agrava objeciones, O deja objeciones sin abordar.
+- MEJORABLE: intenta responder pero se salta el proceso (no profundiza, no aísla). La objeción
+  puede quedar superficialmente mitigada, pero el asesor no demostró técnica consultiva real.
+  También MEJORABLE si la reacción fue solo reactiva (respondió cuando el lead protestó, pero
+  no anticipó ninguna objeción ni preparó el terreno).
+  También MEJORABLE si tomó al pie de la letra una pista mixta del lead y dio por cerrada una
+  variable que seguía activa (lead dijo "no es por X" pero luego volvió a X y el asesor no lo recogió).
+- BUENO: ejecutó el proceso completo o la mayor parte: validó, profundizó para entender la
+  causa real, aisló si era el freno principal, usó técnica para resolver, verificó resolución.
+  El lead puede no quedar 100% convencido, pero el asesor demostró proceso consultivo real.
+  SUMA: detectó pistas mixtas y reabrió la variable "descartada" como pregunta diagnóstica.
+- Si dudas entre BUENO y MEJORABLE: ¿profundizó? ¿aisló? Si no hizo ambas → MEJORABLE.
+  No resuelvas la duda dando BUENO por defecto.
+- Si hubo pistas mixtas y el asesor las recogió bien → señal positiva que confirma BUENO.
 - Si la objeción era logística (timing/viaje) y se acordó pago parcial o alternativa → BUENO.
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 """

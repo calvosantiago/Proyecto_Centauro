@@ -501,15 +501,42 @@ FORMATO JSON OBLIGATORIO:
   "lead_participa_activamente": true/false
 }}
 
+⚠️ CALIBRACIÓN HONESTA — LEE ESTO ANTES DE DECIDIR:
+Los modelos de lenguaje tienden a suavizar calificaciones buscando compensaciones positivas.
+Si el estilo fue genuinamente cálido y generó conexión real y sostenida → di BUENO con confianza.
+Si el conjunto fue mayormente mecánico o distante, no compenses eso con un momento aislado
+de empatía o informalidad. Un momento positivo en una conversación robótica = MEJORABLE, no BUENO.
+MEJORABLE no es un fracaso: es la evaluación honesta de un estilo correcto pero sin conexión real.
+
+🚨 RECONOCER MALO — INSTRUCCIÓN ESPECÍFICA:
+MALO no significa "el asesor fue grosero o agresivo". También es MALO cuando el estilo
+falló en todos los frentes sin ninguna fortaleza real que lo rescate. Di MALO cuando los
+datos lo indiquen:
+  - Si el razonamiento describe una conversación mecánica, sin empatía, con ritmo
+    monopolizado y sin ningún momento de conexión real, y no puedes citar ni UNA
+    fortaleza comunicativa genuina → MALO, no MEJORABLE.
+  - Si el único argumento para no dar MALO es "no fue descortés" o "el lead no se quejó"
+    → la cortesía mínima no es una fortaleza comunicativa → MALO si el estilo no aportó nada.
+PATRONES QUE SON MALO DIRECTAMENTE (sin necesidad de contar NOs del checklist):
+  ▸ El asesor monopolizó más del 80% de la conversación con bloques informativos
+    encadenados sin invitar al lead a participar + el lead respondió solo con
+    monosílabos o silencios en toda la llamada → MALO.
+  ▸ No hay ni UN momento de empatía real en toda la conversación (ni frases empáticas,
+    ni uso del nombre del lead, ni adaptación de tono, ni empatía inversa) + el tono
+    fue mecánico de principio a fin → MALO.
+  ▸ Jerga técnica constante que el lead claramente no entiende (preguntas de aclaración,
+    silencios ante términos, respuestas que no encajan) + sin adaptación de vocabulario
+    en ningún momento → MALO.
+
 ⚠️ REGLAS FINALES PARA CALIFICAR:
 - MALO: múltiples fallos comunicativos sin ninguna fortaleza real que los compense, O estilo activamente dañino (grosero, agresivo, condescendiente). Si el razonamiento no puede citar ni un aspecto positivo genuino → MALO.
-- MEJORABLE: hay al menos UNA fortaleza comunicativa real, pero el conjunto falla. Educado pero mecánico, sin conexión real ni calidez.
-- BUENO: el estilo suma. El lead se siente cómodo y hay algún momento de conexión real. No hace falta perfección: si el tono ayudó al avance de la conversación → BUENO.
-- Si dudas entre BUENO y MEJORABLE: ¿hay algún momento donde el lead se abre o responde con confianza? Si sí → BUENO.
+- MEJORABLE: hay al menos UNA fortaleza comunicativa real, pero el conjunto falla. Educado pero mecánico, sin conexión real ni calidez sostenida.
+- BUENO: el estilo genera conexión real y sostenida a lo largo de la conversación. No hace falta perfección, pero debe haber un patrón consistente de calidez y participación del lead — no un momento aislado.
+- Si dudas entre BUENO y MEJORABLE: ¿hay un PATRÓN consistente de conexión real y el lead participó activamente? Un momento aislado de empatía en un estilo mayormente mecánico → MEJORABLE. Patrón sostenido → BUENO.
 - Si dudas entre MEJORABLE y MALO: ¿puedes citar al menos UNA fortaleza comunicativa real? Si no → MALO.
-- Si el asesor compartió una experiencia propia (empatía inversa) → empatía real → inclínate por BUENO.
+- La empatía inversa (experiencia propia) cuenta como señal positiva real, pero no convierte por sí sola un estilo mecánico en BUENO.
 - Si el asesor expresó opiniones personales o recomendaciones propias → NO es motivo de MEJORABLE ni MALO.
-- Si el asesor fue cercano o informal pero el lead respondió bien → NO es motivo de MEJORABLE.
+- Si el asesor fue cercano o informal pero el lead respondió bien → señal positiva hacia BUENO.
 - Evidencias LITERALES (COPY-PASTE exacto).
 - En "recomendacion_accionable" NO repitas lo que ya hizo bien.
 

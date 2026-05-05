@@ -86,8 +86,8 @@ class CentauroOrchestrator:
 
         # --- ENRIQUECIMIENTO: DATOS DEL LEAD DESDE SUPABASE ---
         datos_oportunidad = None
-        opp_match = re.match(r'^(\d{4}-\d{6,12})_', nombre_archivo)
-        opportunity_id = opp_match.group(1) if opp_match else None
+        from centauro.utils.validaciones import extraer_opportunity_id
+        opportunity_id = extraer_opportunity_id(nombre_archivo)
         if opportunity_id:
             try:
                 from .database import get_database
@@ -100,15 +100,19 @@ class CentauroOrchestrator:
                     programa = datos_oportunidad.get('programa', 'N/A')
                     pilar = datos_oportunidad.get('pilar', 'N/A')
                     contexto_lead = (
-                        f"\n\n--- PERFIL DEL LEAD (datos verificados de CRM) ---\n"
+                        f"\n\n--- PERFIL DEL LEAD (contexto de referencia) ---\n"
                         f"Nombre: {nombre_lead}\n"
                         f"País: {pais}\n"
-                        f"Edad: {edad} años\n"
+                        f"Edad aproximada: {edad} años\n"
                         f"Programa de interés: {programa}\n"
                         f"Pilar: {pilar}\n"
                         f"---------------------------------------------------\n"
-                        f"Usa estos datos para evaluar si el asesor adaptó su "
-                        f"discurso al perfil concreto de este lead.\n"
+                        f"IMPORTANTE: Si en la grabación el lead menciona datos diferentes "
+                        f"(edad, situación financiera, perfil, etc.), usa SIEMPRE lo que dice "
+                        f"en la grabación — eso es la realidad de la llamada. Estos datos son "
+                        f"contexto de referencia, no reemplazan lo que el lead comunica en directo.\n"
+                        f"Usa este perfil únicamente para entender quién es el lead y evaluar "
+                        f"si el asesor adaptó su discurso a ese perfil concreto.\n"
                     )
                     contexto_usuario = (contexto_usuario or "") + contexto_lead
                     print(f"   ✅ Lead: {nombre_lead} ({pais}, {edad} años, {programa})")
@@ -378,7 +382,8 @@ MANUAL DE REFERENCIA:
 CHECKLIST PROPUESTA DE VALOR — responde SÍ/NO a cada pregunta:
   1. ¿Explicó con claridad qué es OBS y qué incluye el programa?
   2. ¿Enfatizó beneficios para el lead (no solo características del programa)?
-  3. ¿Conectó al menos un punto de la propuesta con algo que dijo el lead?
+  3. ¿Recuperó el FDC del lead (su motivo o necesidad más concreta revelada en la
+     investigación) y lo vinculó explícitamente al programa? Mención superficial = NO.
   4. ¿Evitó afirmaciones superlativas sin argumentos ("somos los mejores") o las justificó?
   5. ¿El lead mostró interés o comprensión genuina durante o después de la propuesta?
 
@@ -389,14 +394,14 @@ No detectes múltiples fallos graves y concluyas MEJORABLE: sería incoherente.
 CRITERIOS:
 🔴 MALO: Presentación confusa o desorganizada, O el lead no entiende qué se le ofrece,
    O múltiples fallos del checklist acumulados. El lead no recibe información útil.
-🟡 MEJORABLE: Existe propuesta ordenada pero es el MISMO discurso para cualquier lead,
-   sin ningún punto de contacto con lo que ESTE lead dijo o necesita. Catálogo sin anclaje.
-   ⚠️ MEJORABLE requiere que la conexión con el lead sea completamente ausente o casi nula.
-   NO marques MEJORABLE solo porque podría haber sido más personalizada.
-🟢 BUENO: Clara, estructurada y conecta con lo que importa a este lead. No hace falta
-   personalizar cada detalle: basta con que el programa se presente como relevante para
-   ESTE lead, no solo como un catálogo.
-   Si dudas entre BUENO y MEJORABLE: ¿el asesor mencionó algo del perfil o palabras del lead? Si sí → BUENO.
+🟡 MEJORABLE: Existe propuesta ordenada pero genérica — el asesor no recuperó el FDC
+   del lead para vincular el programa a SU situación concreta. El lead escucha información
+   válida pero no siente que el programa resuelve SU problema específico.
+🟢 BUENO: Clara, estructurada y vincula explícitamente el FDC del lead con lo que el
+   programa ofrece. El lead siente que el asesor habla de SU caso.
+   Si dudas entre BUENO y MEJORABLE: ¿el asesor vinculó el FDC con el programa
+   en una frase explícita? Si no hay esa vinculación directa → MEJORABLE, aunque
+   haya mencionado el perfil del lead o su trabajo de pasada.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BLOQUE B — ESTILO Y COMUNICACIÓN
@@ -845,6 +850,89 @@ Genera el JSON con la información del lead.
             palabras_encontradas = sum(1 for p in palabras if p in transcripcion.lower())
             return (palabras_encontradas / len(palabras)) >= 0.6
 
+    # ========== TOPE COMERCIAL ==========
+
+    def _aplicar_tope_comercial(self, calificacion_global: str, evaluaciones: List[Dict]) -> dict:
+        """
+        Regla Python que impide que la calificación global sea BUENO cuando
+        los tres bloques comerciales críticos fallan simultáneamente.
+
+        Bloques comerciales críticos (los tres que más acercan a matrícula):
+          - Investigación: sin perfil del lead no hay personalización posible
+          - Proceso de Admisión y Propuesta Económica: inversión y comité
+          - Cierre y próximos pasos: compromiso y siguiente paso con fecha
+
+        El documento maestro OBS exige: diagnóstico, propuesta personalizada,
+        inversión, cierre y siguiente paso. Sin esos momentos no hay BUENO global.
+
+        Regla 1: Si CUALQUIERA de los tres es MALO → global máx MEJORABLE.
+        Regla 2: Si NINGUNO de los tres llegó a BUENO (todos ≤ MEJORABLE) → global máx MEJORABLE.
+
+        Solo actúa cuando la calificación global ya es BUENO (nunca empeora MEJORABLE).
+        Si algún bloque no fue evaluado (desconexión, off-record) no aplica el tope.
+        """
+        ORDEN_CAL = {"MALO": 0, "MEJORABLE": 1, "BUENO": 2}
+
+        if ORDEN_CAL.get(calificacion_global, 0) < 2:
+            return {"ajustada": False, "calificacion": calificacion_global, "motivo": None}
+
+        cal_investigacion = None
+        cal_admision = None
+        cal_cierre = None
+        for e in evaluaciones:
+            bloque = e.get("bloque", "")
+            cal = e.get("calificacion")
+            if bloque == "Investigación" and cal in ORDEN_CAL:
+                cal_investigacion = cal
+            elif bloque == "Proceso de Admisión y Propuesta Económica" and cal in ORDEN_CAL:
+                cal_admision = cal
+            elif bloque == "Cierre y próximos pasos" and cal in ORDEN_CAL:
+                cal_cierre = cal
+
+        # Si algún bloque no tiene calificación válida (off-record / desconexión), no aplicar
+        if cal_investigacion is None or cal_admision is None or cal_cierre is None:
+            return {"ajustada": False, "calificacion": calificacion_global, "motivo": None}
+
+        val_inv = ORDEN_CAL[cal_investigacion]
+        val_adm = ORDEN_CAL[cal_admision]
+        val_cierre = ORDEN_CAL[cal_cierre]
+        motivo = None
+
+        if val_inv == 0 or val_adm == 0 or val_cierre == 0:
+            # Regla 1: alguno de los tres es MALO
+            bloques_malo = []
+            if val_inv == 0:
+                bloques_malo.append("Investigación")
+            if val_adm == 0:
+                bloques_malo.append("Proceso de Admisión y Propuesta Económica")
+            if val_cierre == 0:
+                bloques_malo.append("Cierre y próximos pasos")
+            nombres = " y ".join(bloques_malo)
+            plural = "s" if len(bloques_malo) > 1 else ""
+            motivo = (
+                f"{nombres} calificado{plural} como MALO. Sin los tres momentos "
+                f"comerciales clave (investigación del lead, inversión presentada, "
+                f"cierre con compromiso), la calificación global no puede ser BUENO "
+                f"aunque otros bloques sean sólidos."
+            )
+        elif max(val_inv, val_adm, val_cierre) < 2:
+            # Regla 2: ninguno de los tres llegó a BUENO (todos son MEJORABLE)
+            motivo = (
+                "Ninguno de los tres bloques comerciales críticos (Investigación, "
+                "Admisión y Propuesta Económica, Cierre) alcanzó BUENO. El documento "
+                "maestro OBS exige diagnóstico del lead, inversión y cierre con "
+                "compromiso. Sin al menos uno de esos momentos en BUENO, la "
+                "calificación global no puede ser BUENO aunque la presentación "
+                "del programa haya sido excelente."
+            )
+
+        if motivo:
+            print(f"   📊 Tope comercial: BUENO → MEJORABLE — {motivo[:80]}...")
+            self.stats["notas_ajustadas_sheriff"] += 1
+            return {"ajustada": True, "calificacion": "MEJORABLE", "motivo": motivo}
+
+        return {"ajustada": False, "calificacion": calificacion_global, "motivo": None}
+
     # ========== SÍNTESIS FINAL ==========
 
     def _sintetizar_evaluaciones(self, evaluaciones: List[Dict],
@@ -865,6 +953,17 @@ Genera el JSON con la información del lead.
             calificacion_global = conteo.most_common(1)[0][0]
         else:
             calificacion_global = None
+
+        # ── TOPE COMERCIAL ────────────────────────────────────────────────────
+        # El documento maestro OBS establece que toda entrevista debe incluir:
+        # diagnóstico, presentación personalizada, INVERSIÓN, CIERRE y SIGUIENTE PASO.
+        # Si los bloques que representan esos momentos críticos de avance fallan,
+        # la calificación global no puede ser BUENO aunque el resto vote mayoritariamente
+        # BUENO. Una llamada "bien explicada" ≠ una llamada "bien cerrada comercialmente".
+        tope = self._aplicar_tope_comercial(calificacion_global, evaluaciones)
+        if tope["ajustada"]:
+            calificacion_global = tope["calificacion"]
+        # ─────────────────────────────────────────────────────────────────────
 
         # Generar áreas de mejora: bloques MALO o MEJORABLE con recomendación
         areas_mejora = []
@@ -911,6 +1010,7 @@ Genera el JSON con la información del lead.
             },
             "evaluacion_por_bloques": evaluaciones,
             "calificacion_global": calificacion_global,
+            "tope_comercial": tope if tope["ajustada"] else None,
             "feedback_resumido": {
                 "areas_mejora": areas_mejora if areas_mejora else ["Revisión general de todos los bloques recomendada"]
             }
