@@ -153,14 +153,31 @@ class ChatHandler:
             return "oportunidades"
 
         # ── Contenido de la entrevista actual (si hay una cargada en sesión) ──
-        # Detecta preguntas sobre qué ocurrió en la llamada recién evaluada
+        # Detecta preguntas sobre qué ocurrió en la llamada recién evaluada.
+        # PRIORIDAD sobre "perfil": si hay transcripción cargada y la pregunta es sobre
+        # el contenido ("esta entrevista", "cómo concluyó", etc.) → contenido, no notas.
         if self._transcripcion_actual and any(kw in pregunta_lower for kw in [
+            # Qué se dijo / ocurrió
             "habló", "hablo", "mencionó", "menciono", "dijo", "dijeron",
             "preguntó", "pregunto", "trató", "trato el tema", "tocó", "toco el tema",
             "hubo", "se habló", "se hablo", "se trató", "se trato", "se mencionó", "se menciono",
             "comentó", "comento", "explicó", "explico", "propuso", "ofreció", "ofrecio",
             "en la llamada", "durante la llamada", "durante la entrevista",
             "en la grabación", "en la grabacion", "en el audio",
+            # Cómo concluyó / qué pasó al final
+            "concluyó", "concluyo", "terminó", "termino", "acabó", "acabo",
+            "cómo terminó", "como termino", "cómo acabó", "como acabo",
+            "cómo fue la llamada", "cómo fue la entrevista", "cómo fue la grabación",
+            "qué pasó", "que paso", "qué ocurrió", "que ocurrio",
+            "qué se acordó", "que se acordo", "qué acordaron", "que acordaron",
+            "al final", "al cierre de", "cómo cerró", "como cerro",
+            "se cerró", "se pago", "se pagó", "se vendió", "se vendio",
+            "se matriculó", "se matriculo", "reservó", "reservo",
+            "comprobante", "pago de reserva", "siguiente paso",
+            # Referencia directa a "esta entrevista/llamada" cuando hay transcripción cargada
+            "esta entrevista", "esta llamada", "en esta entrevista", "en esta llamada",
+            "la entrevista", "la llamada", "esta grabación", "esta grabacion",
+            "qué resultado tuvo", "que resultado tuvo", "qué resultado dio", "que resultado dio",
         ]):
             return "entrevista_actual"
 
@@ -1031,7 +1048,6 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
         Responde preguntas sobre el contenido concreto de la entrevista evaluada en esta sesión.
         Combina el resumen por bloques del reporte con un extracto de la transcripción.
         """
-        MAX_TRANSCRIPCION_CHARS = 10_000
         partes: List[str] = []
 
         # ── Parte 1: resumen de evaluación por bloques ───────────────────────
@@ -1059,37 +1075,13 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
             if len(lineas_bloques) > 1:
                 partes.append("\n".join(lineas_bloques))
 
-        # ── Parte 2: extracto de transcripción ──────────────────────────────
+        # ── Parte 2: transcripción completa ─────────────────────────────────
+        # Sin truncamiento: gpt-4o-mini tiene ventana de 128K tokens.
+        # Una entrevista de 90 min ≈ 17K tokens — cabe completa.
+        # Eliminar MAX_TRANSCRIPCION_CHARS evita la zona ciega que provocaba
+        # respuestas incompletas sobre el contenido de la llamada.
         if self._transcripcion_actual:
-            transcripcion = self._transcripcion_actual
-            if len(transcripcion) <= MAX_TRANSCRIPCION_CHARS:
-                extracto = transcripcion
-            elif bloque == "cierre":
-                # Cierre suele estar al final
-                extracto = transcripcion[-MAX_TRANSCRIPCION_CHARS:]
-            elif bloque == "investigacion":
-                # Investigación suele estar al principio
-                extracto = transcripcion[:MAX_TRANSCRIPCION_CHARS]
-            else:
-                # Buscar menciones de palabras clave de la pregunta y extraer ventana
-                palabras = [p for p in pregunta.lower().split() if len(p) > 4]
-                mejor_pos = -1
-                for palabra in palabras:
-                    pos = transcripcion.lower().find(palabra)
-                    if pos != -1:
-                        mejor_pos = pos
-                        break
-                if mejor_pos != -1:
-                    inicio = max(0, mejor_pos - 2000)
-                    fin = min(len(transcripcion), inicio + MAX_TRANSCRIPCION_CHARS)
-                    extracto = transcripcion[inicio:fin]
-                else:
-                    # Sin match → tomar porción central
-                    mitad = len(transcripcion) // 2
-                    inicio = max(0, mitad - MAX_TRANSCRIPCION_CHARS // 2)
-                    extracto = transcripcion[inicio:inicio + MAX_TRANSCRIPCION_CHARS]
-
-            partes.append(f"\nTRANSCRIPCIÓN (extracto):\n{extracto}")
+            partes.append(f"\nTRANSCRIPCIÓN COMPLETA DE LA ENTREVISTA:\n{self._transcripcion_actual}")
 
         if not partes:
             return "No hay transcripción disponible en esta sesión. Sube primero un archivo de audio o texto para evaluarlo."
@@ -1151,12 +1143,29 @@ ESTADÍSTICAS GLOBALES DEL SISTEMA
         ) if bloque else ""
 
         if intencion == "entrevista_actual":
-            prompt_sistema = f"""Eres un analista de entrevistas de ventas. Respondes preguntas concretas sobre el contenido de una llamada específica.
-IMPORTANTE:
-- Responde SOLO basándote en la transcripción y el resumen de evaluación proporcionados en el contexto.
-- Si el tema preguntado NO aparece en la transcripción, responde claramente: "No, no se mencionó en esta llamada."
-- Cuando puedas, cita fragmentos textuales de la transcripción para respaldar tu respuesta.
-- Sé directo y preciso. No inventes ni supongas lo que pudo haberse dicho.
+            prompt_sistema = f"""Eres un analista experto en entrevistas de ventas. Respondes preguntas sobre el contenido concreto de una llamada específica.
+
+REGLAS:
+- Basate EXCLUSIVAMENTE en la transcripción y el resumen de evaluación del contexto. No inventes nada.
+- Si el tema no aparece en la transcripción, dilo claramente: "No se mencionó en esta llamada."
+- Cita frases literales de la transcripción cuando respalden tu respuesta (entre comillas).
+
+CÓMO RESPONDER SEGÚN EL TIPO DE PREGUNTA:
+
+1. Si preguntan cómo concluyó / qué pasó al final / en qué quedaron:
+   Haz un resumen narrativo detallado de los últimos minutos: qué se acordó, qué compromisos
+   se adquirieron, si se realizó algún pago o reserva, qué documentos se solicitaron, cuál
+   es el siguiente paso y cuándo, y cómo quedó emocionalmente el lead. Sé específico con
+   fechas, horas, importes y nombres si aparecen en la transcripción.
+
+2. Si preguntan por un momento concreto (objeciones, propuesta, precio...):
+   Localiza ese momento en la transcripción y descríbelo con detalle, citando las frases clave.
+
+3. Si preguntan algo general sobre la llamada:
+   Sintetiza los puntos más relevantes de forma clara y estructurada.
+
+Usa lenguaje natural y directo. No uses terminología de evaluación interna (bloques, calificaciones,
+BUENO/MEJORABLE/MALO) a menos que te lo pidan explícitamente.
 {bloque_instruccion}"""
 
         elif intencion == "perfil":
