@@ -36,7 +36,7 @@ class CierreAgent(BaseEvaluatorAgent):
 
     def __init__(self):
         super().__init__(nombre_bloque="Cierre y próximos pasos")
-        self.longitud_analisis = 8000  # v5.1: Ampliado de 6000→8000 para capturar compromisos del medio-final
+        self.longitud_analisis = 12000  # v5.2: Usado solo para detección Python (fin abrupto, desconexión)
 
     def evaluate(self, transcripcion: str, contexto_manual: str, contexto_usuario: str = None) -> EvaluationResult:
         """Evalúa el cierre usando principalmente el final de la conversación"""
@@ -560,20 +560,23 @@ PATRONES QUE SON MALO DIRECTAMENTE (sin necesidad de contar NOs del checklist):
         bloque_ctx_usuario = self._construir_bloque_contexto_usuario(contexto_usuario)
 
         prompt_usuario = f"""{bloque_ctx_usuario}
-Contexto completo (para entender el flujo y capturar compromisos del lead):
-{transcripcion_completa[:8000]}
-[...]
+TRANSCRIPCIÓN COMPLETA DE LA ENTREVISTA:
+{transcripcion_completa}
 
-FINAL DE LA CONVERSACIÓN (enfócate aquí):
-{final}
+⚠️ INSTRUCCIÓN DE LECTURA: Lee la transcripción completa. El cierre y los próximos
+pasos ocurren típicamente al FINAL — enfoca tu análisis en esa sección.
+Sin embargo, busca también señales de compromiso, pago o reserva que puedan
+aparecer en cualquier punto (comprobante de pago, confirmación de inscripción,
+mención de transferencia, etc.). Si la venta se cerró en la llamada, debe
+reflejarse en la calificación aunque no haya un "siguiente paso" pendiente.
 
 Evalúa el cierre y próximos pasos en JSON.
 """
-        
-        # max_tokens=8000: gpt-5-mini es reasoning model — usa tokens internos de "thinking"
-        # que cuentan contra max_completion_tokens. Con 4000 el thinking seguía agotando el límite
-        # en conversaciones largas (prompt_sistema ~3000 tokens + transcripción ~4000 tokens =
-        # mucho contexto → mucho thinking). 8000 da margen suficiente para thinking + JSON.
+
+        # max_tokens=16000: gpt-5-mini es reasoning model — usa tokens internos de "thinking".
+        # v5.2: Se eliminó el truncamiento de la transcripción (antes [:8000]).
+        # La transcripción completa se envía al LLM para evitar zona ciega en llamadas largas.
+        # gpt-5-mini tiene ventana de ~200K tokens — no hay límite de contexto relevante.
         resp = consultar_gpt(prompt_sistema, prompt_usuario, "eval_cierre", max_tokens=16000)
         return self._extract_json_safe(resp)
     
