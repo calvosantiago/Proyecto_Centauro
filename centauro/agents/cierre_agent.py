@@ -106,6 +106,10 @@ class CierreAgent(BaseEvaluatorAgent):
 
             # NOTA: El coaching se aplica en batch desde el orchestrator para optimizar llamadas API
 
+            venta_cerrada = resultado_raw.get("venta_cerrada_en_llamada", False)
+            if venta_cerrada:
+                print(f"   🏆 Venta cerrada en llamada detectada por el LLM")
+
             return EvaluationResult(
                 bloque=self.nombre_bloque,
                 calificacion=resultado_raw.get("calificacion"),
@@ -124,7 +128,8 @@ class CierreAgent(BaseEvaluatorAgent):
                     "recepcion_cliente": resultado_raw.get("recepcion_cliente", {}),
                     "tecnicas_detectadas": tecnicas_detectadas,
                     "feedback_personalizado": resultado_raw.get("feedback_personalizado", ""),
-                    "seguimiento_proximos_pasos": resultado_raw.get("seguimiento_proximos_pasos", {})
+                    "seguimiento_proximos_pasos": resultado_raw.get("seguimiento_proximos_pasos", {}),
+                    "venta_cerrada_en_llamada": venta_cerrada
                 }
             )
 
@@ -230,6 +235,33 @@ haya transcurrido el resto de la conversación.
 acepte explícitamente Y sin que quede definida ninguna acción o fecha concreta
 → NO cuenta como cierre. Es un fin de llamada pasivo sin estructura.
 Si el asesor termina así y el lead no confirma nada, la conversación terminó sin avance.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 CASO EXCEPCIONAL: VENTA CERRADA EN LLAMADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+En venta consultiva de formación, la venta raramente se cierra en la misma llamada.
+Cuando SÍ ocurre, es un logro EXCEPCIONAL que debe destacarse como titular del feedback.
+
+Busca en TODA la transcripción señales de cierre real durante la llamada:
+  ✓ Pago de reserva realizado o confirmado durante la llamada
+  ✓ Envío de comprobante de pago mencionado o recibido por el asesor
+  ✓ Transferencia confirmada / realizada
+  ✓ Inscripción formalizada en el acto (formulario enviado + aceptado)
+  ✓ Matrícula avanzada concretamente durante la llamada
+
+Si detectas cualquiera de estas señales:
+  → Marca "venta_cerrada_en_llamada": true en el JSON
+  → COMIENZA el campo "razonamiento" con esta frase (adaptando el detalle):
+     "🏆 VENTA CERRADA EN LLAMADA: [describe qué ocurrió exactamente — pago de reserva,
+      transferencia, comprobante, etc.]. Este resultado es el nivel máximo de cierre
+      posible en venta consultiva y supera cualquier imperfección técnica del proceso."
+  → La calificación NO puede ser inferior a BUENO si hay evidencia clara de pago,
+     reserva o avance formal de matrícula durante la llamada. El resultado real
+     prevalece sobre los defectos de técnica.
+
+⚠️ NOTA: Tras un pago en llamada, los "siguientes pasos" suelen ser de formalización
+(envío de documentación, apostilla, firma de contrato, etc.) — eso NO significa
+que el cierre fue incompleto. El compromiso económico ya se materializó.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SOBRE EL CIERRE EN VENTA CONSULTIVA
@@ -395,6 +427,12 @@ CRITERIOS DE CALIFICACIÓN
    ⚠️ Si falla UN solo requisito de los tres (fecha+hora / compromiso / próximos pasos
      bien definidos), la calificación es MEJORABLE aunque todo lo demás esté bien.
 
+🏆 BUENO AUTOMÁTICO — Venta cerrada en llamada:
+   Si el lead realizó un pago de reserva, envió un comprobante, confirmó una transferencia,
+   o formalizó su inscripción durante la llamada → BUENO sin necesidad de cumplir el resto
+   de requisitos. El resultado real supera cualquier defecto de técnica. El razonamiento
+   debe comenzar con "🏆 VENTA CERRADA EN LLAMADA:" y describir qué ocurrió.
+
 🟢 BUENO — el asesor lidera el cierre y genera un compromiso claro con estructura completa:
    ⚠️ REQUISITOS MÍNIMOS OBLIGATORIOS para ser BUENO (deben cumplirse los cuatro):
      (A) Próximos pasos bien definidos con FECHA Y HORA concretas
@@ -421,6 +459,7 @@ EVIDENCIA REQUERIDA
 FORMATO JSON OBLIGATORIO:
 {{
   "desconexion_definitiva": false,
+  "venta_cerrada_en_llamada": false,
   "contador_fallos_criticos": 0,
   "calificacion": "MALO" | "MEJORABLE" | "BUENO" | null,
   "observabilidad": "ALTA" | "NO_OBSERVABLE_OFF_RECORD",
@@ -430,7 +469,7 @@ FORMATO JSON OBLIGATORIO:
     "[ASESOR]: Resumen de acuerdos... (COPY-PASTE LITERAL)",
     "[LEAD]: Respuesta confirmando compromiso... (COPY-PASTE LITERAL)"
   ],
-  "razonamiento": "En 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo condujo el asesor el cierre, qué hizo bien y en qué aspectos falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente al final de la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
+  "razonamiento": "Si venta_cerrada_en_llamada=true: EMPIEZA SIEMPRE con '🏆 VENTA CERRADA EN LLAMADA: [qué ocurrió — pago, transferencia, comprobante, etc.].' y continúa con el análisis. Si venta_cerrada_en_llamada=false: en 4-6 líneas de texto fluido, sin listas ni SÍ/NO: explica cómo condujo el asesor el cierre, qué hizo bien y en qué aspectos falló. Por qué merece esa calificación. Conecta con lo que ocurrió realmente al final de la conversación. OBLIGATORIO si la calificación es MALO o MEJORABLE: incluye en el texto al menos una cita literal entre comillas de la conversación que muestre el fallo principal.",
   "recomendacion_accionable": "Qué mejorar + UNA técnica concreta de los libros de ventas del CONTEXTO con 2 frases que el asesor podría haber usado en ESTA conversación. Máx 6-8 líneas. No copies texto literal.",
   "mejoras": ["Frase de acción en infinitivo máx 8 palabras (ej: Concretar fecha y hora de seguimiento). Lista vacía [] si BUENO sin fallos relevantes."],
   "proximo_paso_concreto": "Descripción del próximo paso acordado (o 'ninguno' si no lo hubo)",
@@ -616,29 +655,47 @@ Evalúa el cierre y próximos pasos en JSON.
 
         # Patrones donde el asesor habla pero nadie responde
         patrones_asesor_solo = [
+            # Comprobación directa de pérdida de línea
+            "te he perdido",
+            "te perdí",
+            "te me has ido",
+            "los he perdido",
+            "me has perdido",
+            # Comprobación de señal / conexión
+            "parece que se ha cortado",
+            "creo que se cortó",
+            "creo que se ha cortado",
+            "se ha cortado la llamada",
+            "se cortó la llamada",
+            "se ha caído la llamada",
+            "nos hemos quedado sin señal",
+            "parece que se fue",
+            "se ha ido",
+            "se ha caído",
+            # No oigo / no escucho
+            "no te escucho",
+            "no te oigo",
+            "no me escucha",
+            "no te puedo escuchar",
+            # Llamadas al vacío
             "¿hola?", "hola?",
             "¿me escuchas?", "me escuchas?",
             "¿sigues ahí?", "sigues ahí?",
             "¿estás ahí?", "estás ahí?",
-            "parece que se ha cortado",
-            "creo que se cortó",
-            "se ha ido",
-            "se cortó la llamada",
-            "no me escucha",
-            "se ha caído",
         ]
 
         for patron in patrones_asesor_solo:
             if patron in final_lower:
                 return True
 
-        # Patrón: hay intervenciones del asesor pero el lead deja de aparecer
-        # en el último tramo (últimas ~1500 chars)
-        ultimo_tramo = final[-1500:] if len(final) > 1500 else final
+        # Patrón estructural: el asesor habla en solitario en el último tramo
+        # Ventana reducida a 800 chars para evitar que una respuesta anterior
+        # del lead (ej: "[LEAD]: Dólares.") camufle la desconexión real.
+        ultimo_tramo = final[-800:] if len(final) > 800 else final
         lineas_asesor = [l for l in ultimo_tramo.split("\n") if "[ASESOR]" in l.upper()]
         lineas_lead = [l for l in ultimo_tramo.split("\n") if "[LEAD]" in l.upper() or "[CLIENTE]" in l.upper()]
 
-        # Si hay 3+ intervenciones del asesor y 0 del lead en el último tramo → desconexión probable
+        # Si hay 3+ intervenciones del asesor y 0 del lead en el tramo final → desconexión probable
         if len(lineas_asesor) >= 3 and len(lineas_lead) == 0:
             return True
 
