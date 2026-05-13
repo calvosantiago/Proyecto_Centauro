@@ -146,7 +146,9 @@ No hay archivo de audio disponible para esta transcripción.
 El input fue texto (TXT, VTT o DOCX), por lo que no es posible
 analizar métricas acústicas (energía, silencios, ritmo).
 Evalúa el estilo comunicativo únicamente a partir del texto transcrito.{ratio_bloque}
-⚠️ El % de habla es un dato informativo. No lo uses para calificar como bueno o malo.
+⚠️ REGLA DE MONÓLOGO (>80/20): Si el % de habla supera 80/20 en cualquier dirección,
+   menciónalo explícitamente en el razonamiento como fallo de ritmo conversacional.
+   La calificación final se ajustará automáticamente por esta regla.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
 
 
@@ -219,7 +221,8 @@ Estos datos son señales objetivas medidas sobre la onda de audio.
 • Ritmo conversacional: {tempo_desc}
 
 ⚠️ Interpretación orientativa:
-- El % de habla es un dato informativo. No lo uses para calificar como bueno o malo.
+- REGLA DE MONÓLOGO (>80/20): Si el % habla supera 80/20, menciónalo en el razonamiento
+  como fallo de ritmo. La calificación final se ajusta automáticamente por esta regla.
 - Caída de energía al final → posible desenganche o cansancio del asesor
 - Múltiples pausas largas → pueden indicar incomodidad, espera o momentos de reflexión
 - Cadencia muy rápida → riesgo de atropellar al lead sin dejarle espacio

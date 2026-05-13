@@ -377,12 +377,20 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
         except Exception as e:
             print(f"      Info: No se pudieron cargar buenas prácticas para batch: {e}")
 
+        # Ratio de habla asesor/lead (calculado antes del prompt para que el GPT lo vea
+        # y para poder aplicar el tope Python C después del análisis)
+        try:
+            from ..tools.audio_features import calcular_ratio_habla_diarizada as _crh_pre
+            _ratio_habla = _crh_pre(transcripcion)
+        except Exception:
+            _ratio_habla = {"pct_asesor": None, "pct_lead": None}
+
         # Bloque de métricas de audio para el prompt de estilo (siempre presente)
         from ..tools.audio_features import formatear_metricas_para_prompt, formatear_sin_audio_para_prompt
         if audio_features and audio_features.get("disponible"):
-            bloque_audio_estilo = f"\n{formatear_metricas_para_prompt(audio_features)}\n"
+            bloque_audio_estilo = f"\n{formatear_metricas_para_prompt(audio_features, ratio_habla=_ratio_habla)}\n"
         else:
-            bloque_audio_estilo = f"\n{formatear_sin_audio_para_prompt()}\n"
+            bloque_audio_estilo = f"\n{formatear_sin_audio_para_prompt(ratio_habla=_ratio_habla)}\n"
 
         prompt_sistema = f"""
 Eres un auditor CRÍTICO que evalúa DOS bloques secundarios simultáneamente.
@@ -579,15 +587,31 @@ Evalúa los 2 bloques secundarios con CITAS LITERALES y sé CRÍTICO.
                         eval_estilo["razonamiento"] = eval_estilo.get("razonamiento", "") + f"\n\n{nota_b}"
                         print("      ⚠️ Tope batch Estilo B: sin fortaleza → MALO")
                         self.stats["notas_ajustadas_sheriff"] += 1
+                        cal_est = "MALO"
+                # Tope Python C: monólogo detectado (ratio >80/20) → máx MEJORABLE
+                # Si el asesor habla más del 80% o menos del 20%, no puede ser BUENO.
+                # No empeora MEJORABLE ni MALO — solo baja BUENO a MEJORABLE.
+                pct_a = (_ratio_habla or {}).get("pct_asesor") or 0
+                pct_l = (_ratio_habla or {}).get("pct_lead") or 0
+                if (pct_a > 80 or pct_l > 80) and ORDEN_CAL.get(cal_est, 1) > 1:
+                    if pct_a > 80:
+                        direccion = f"asesor {pct_a}% / lead {pct_l}%"
+                    else:
+                        direccion = f"lead {pct_l}% / asesor {pct_a}%"
+                    nota_c = (
+                        f"[Ajuste automático] Calificación bajada de {cal_est} a MEJORABLE: "
+                        f"ratio de habla {direccion} — monólogo detectado (regla >80/20). "
+                        f"El estilo no puede ser BUENO cuando una parte monopoliza la conversación."
+                    )
+                    eval_estilo["calificacion"] = "MEJORABLE"
+                    eval_estilo["razonamiento"] = eval_estilo.get("razonamiento", "") + f"\n\n{nota_c}"
+                    print(f"      ⚠️ Tope Estilo C (monólogo {direccion}): {cal_est} → MEJORABLE")
+                    self.stats["notas_ajustadas_sheriff"] += 1
+                    cal_est = "MEJORABLE"
                 meta_estilo = eval_estilo.setdefault("metadata", {})
                 meta_estilo["audio_features"] = audio_features
-                try:
-                    from centauro.tools.audio_features import calcular_ratio_habla_diarizada as _crh
-                    _ratio = _crh(transcripcion)
-                    meta_estilo["pct_asesor"] = _ratio.get("pct_asesor")
-                    meta_estilo["pct_lead"] = _ratio.get("pct_lead")
-                except Exception:
-                    pass
+                meta_estilo["pct_asesor"] = _ratio_habla.get("pct_asesor")
+                meta_estilo["pct_lead"] = _ratio_habla.get("pct_lead")
                 evaluaciones.append(eval_estilo)
 
             print(f"      ✓ 2 bloques secundarios en 1 llamada batch")
