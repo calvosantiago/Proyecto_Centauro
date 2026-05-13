@@ -235,7 +235,8 @@ class MemoryManager:
         opportunity_id: Optional[str] = None,
         archivo_origen: Optional[str] = None,
         reporte_pdf_path: Optional[str] = None,
-        stats: Optional[Dict] = None
+        stats: Optional[Dict] = None,
+        realizado_por: Optional[str] = None,
     ):
         """
         Registra una nueva evaluación en el perfil del asesor.
@@ -263,7 +264,8 @@ class MemoryManager:
                     opportunity_id=opportunity_id,
                     archivo_origen=archivo_origen,
                     reporte_pdf_path=reporte_pdf_path,
-                    stats=stats
+                    stats=stats,
+                    realizado_por=realizado_por,
                 )
 
         # Si es BUENO, indexar en RAG histórico como ejemplo de aprendizaje

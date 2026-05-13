@@ -84,6 +84,13 @@ CREATE TABLE IF NOT EXISTS predicciones (
     features_json JSONB
 );
 
+-- ============================================================
+-- MIGRACIONES (ejecutar en SQL Editor de Supabase si la tabla ya existe)
+-- ============================================================
+-- Columna para registrar qué usuario de Chainlit realizó la evaluación:
+--   ALTER TABLE evaluaciones ADD COLUMN IF NOT EXISTS realizado_por TEXT;
+
+-- ============================================================
 -- Indices para consultas frecuentes
 CREATE INDEX IF NOT EXISTS idx_evaluaciones_asesor ON evaluaciones(asesor_id);
 CREATE INDEX IF NOT EXISTS idx_evaluaciones_opportunity ON evaluaciones(opportunity_id);

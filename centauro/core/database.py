@@ -93,7 +93,22 @@ class DatabaseManager:
         if result.data:
             return result.data[0]
 
-        # 2. Buscar en aliases: traer todos y comparar
+        # 2. Buscar por prefijo: "Ivan Canale" debe encontrar "Ivan Canale García"
+        # Se usa ilike para que Supabase filtre en el servidor antes de traer todos.
+        result_prefix = (
+            self._client.table("asesores")
+            .select("*")
+            .ilike("nombre_normalizado", f"{nombre_norm}%")
+            .execute()
+        )
+        tokens_entrada = nombre_norm.split()
+        for row in (result_prefix.data or []):
+            tokens_conocido = (row.get("nombre_normalizado") or "").split()
+            n_e, n_c = len(tokens_entrada), len(tokens_conocido)
+            if n_c >= n_e >= 2 and tokens_conocido[:n_e] == tokens_entrada:
+                return row
+
+        # 3. Buscar en aliases: traer todos y comparar
         # (Supabase no soporta búsqueda dentro de strings en JSONB array fácilmente
         # sin RPC, así que traemos todos y filtramos en Python)
         todos = self.listar_asesores()
@@ -101,6 +116,13 @@ class DatabaseManager:
             aliases = asesor.get("aliases") or []
             for alias in aliases:
                 if _normalizar_nombre(alias) == nombre_norm:
+                    return asesor
+            # También comprobar prefijo en aliases
+            for alias in aliases:
+                alias_norm = _normalizar_nombre(alias)
+                tokens_alias = alias_norm.split()
+                n_a = len(tokens_alias)
+                if n_a >= len(tokens_entrada) >= 2 and tokens_alias[:len(tokens_entrada)] == tokens_entrada:
                     return asesor
 
         return None
@@ -159,7 +181,8 @@ class DatabaseManager:
         opportunity_id: Optional[str] = None,
         archivo_origen: Optional[str] = None,
         reporte_pdf_path: Optional[str] = None,
-        stats: Optional[Dict] = None
+        stats: Optional[Dict] = None,
+        realizado_por: Optional[str] = None,
     ) -> Optional[int]:
         """
         Registra una evaluación completa (evaluacion + calificaciones_bloque).
@@ -200,6 +223,9 @@ class DatabaseManager:
         if stats:
             eval_data["llamadas_api"] = stats.get("llamadas_api")
             eval_data["tiempo_analisis_seg"] = stats.get("tiempo_analisis_seg")
+
+        if realizado_por:
+            eval_data["realizado_por"] = realizado_por
 
         # Insertar evaluación
         result = (
@@ -360,6 +386,32 @@ class DatabaseManager:
         result = query.execute()
         return result.data or []
 
+    def obtener_evaluacion_por_opp_id(self, opp_id: str) -> Optional[dict]:
+        """
+        Devuelve la evaluación más reciente asociada a un opportunity_id,
+        incluyendo calificaciones por bloque y nombre del asesor.
+        """
+        if not self._disponible:
+            return None
+
+        result = (
+            self._client.table("evaluaciones")
+            .select("*, asesores(nombre)")
+            .eq("opportunity_id", opp_id)
+            .order("fecha", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if not result.data:
+            return None
+
+        ev = dict(result.data[0])
+        ev["calificaciones_bloque"] = self.obtener_calificaciones_bloque(ev["id"])
+        asesor_join = ev.pop("asesores", None)
+        if isinstance(asesor_join, dict):
+            ev["nombre_asesor"] = asesor_join.get("nombre")
+        return ev
+
     def obtener_calificaciones_bloque(self, evaluacion_id: int) -> List[dict]:
         """Obtiene las calificaciones por bloque de una evaluación."""
         if not self._disponible:
@@ -509,6 +561,33 @@ class DatabaseManager:
         )
 
         return result.data[0] if result.data else None
+
+    def obtener_asesor_por_opp_id(self, opportunity_id: str) -> Optional[dict]:
+        """
+        Busca el asesor asociado a una evaluación previa del mismo opportunity_id.
+        Útil para identificar al asesor cuando el nombre dado no está registrado.
+
+        Returns:
+            Dict del asesor si existe una evaluación previa, None en caso contrario.
+        """
+        if not self._disponible:
+            return None
+
+        result = (
+            self._client.table("evaluaciones")
+            .select("asesor_id, asesores(id, nombre)")
+            .eq("opportunity_id", opportunity_id)
+            .neq("asesor_id", self.obtener_id_asesor_desconocido())
+            .limit(1)
+            .execute()
+        )
+        if result.data:
+            row = result.data[0]
+            # Supabase devuelve el join como row["asesores"]
+            asesor_join = row.get("asesores")
+            if asesor_join and isinstance(asesor_join, dict):
+                return asesor_join
+        return None
 
     def obtener_oportunidades_filtradas(self, filtros: dict = None, limit: int = 5000) -> list:
         """

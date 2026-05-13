@@ -40,10 +40,31 @@ from centauro.config import settings
 ONEDRIVE_FOLDER  = os.getenv("ONEDRIVE_FOLDER", "Centauro/Pendientes")
 SP_POLL_INTERVAL = int(os.getenv("SP_POLL_INTERVAL", "300"))
 
+# Ventana horaria en la que el watcher NO procesa entrevistas.
+# Durante ese bloque sigue comprobando OneDrive (para no perder el delta),
+# pero deja los archivos sin procesar hasta que salga del horario de trabajo.
+# Formato: hora entera (0-23). Por defecto: bloquear de 8 a 19 (8:00 → 19:00).
+# Para desactivar el bloqueo: poner WATCHER_HORA_INICIO=0 y WATCHER_HORA_FIN=0
+WATCHER_HORA_INICIO = int(os.getenv("WATCHER_HORA_INICIO", "8"))   # incluido
+WATCHER_HORA_FIN    = int(os.getenv("WATCHER_HORA_FIN",    "19"))  # excluido
+
 SUPPORTED_EXTENSIONS = {".mp4", ".mp3", ".vtt", ".docx", ".txt"}
 STATE_FILE      = settings.OUTPUTS_DIR / "watcher_state.json"
 BATCH_INPUT_DIR = settings.INPUTS_DIR / "batch"
 GRAPH_BASE      = "https://graph.microsoft.com/v1.0"
+
+
+def _en_horario_trabajo() -> bool:
+    """Devuelve True si ahora mismo estamos dentro de la ventana bloqueada."""
+    if WATCHER_HORA_INICIO == 0 and WATCHER_HORA_FIN == 0:
+        return False  # bloqueo desactivado
+    hora = datetime.now().hour
+    if WATCHER_HORA_INICIO < WATCHER_HORA_FIN:
+        # Ventana normal: ej. 8 → 19
+        return WATCHER_HORA_INICIO <= hora < WATCHER_HORA_FIN
+    else:
+        # Ventana invertida (cruza medianoche): ej. 22 → 6
+        return hora >= WATCHER_HORA_INICIO or hora < WATCHER_HORA_FIN
 
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -276,6 +297,17 @@ class OneDriveWatcher:
 
         if not nuevos:
             self.logger.info("Sin archivos nuevos en OneDrive.")
+            return
+
+        # ── Ventana horaria: no procesar durante el horario de trabajo ────────
+        # Se detectan los archivos y se guarda el delta_url, pero se pospone
+        # la descarga y evaluación hasta fuera del horario configurado.
+        if _en_horario_trabajo():
+            self.logger.info(
+                f"{len(nuevos)} archivo(s) pendiente(s) — "
+                f"horario de trabajo ({WATCHER_HORA_INICIO}:00-{WATCHER_HORA_FIN}:00), "
+                f"procesamiento pospuesto hasta las {WATCHER_HORA_FIN}:00."
+            )
             return
 
         self.logger.info(f"{len(nuevos)} archivo(s) nuevo(s) detectado(s).")

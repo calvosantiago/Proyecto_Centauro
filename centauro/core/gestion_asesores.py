@@ -192,6 +192,9 @@ class GestionAsesores:
             None si no hay match suficientemente similar
         """
         if not self.asesores_conocidos:
+            # Lista vacía: Supabase pudo no estar disponible al arrancar → reintentar carga
+            self._cargar_asesores_conocidos()
+        if not self.asesores_conocidos:
             return None
 
         nombre_norm = self.normalizar_nombre(nombre)

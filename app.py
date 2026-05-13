@@ -29,6 +29,72 @@ from main import leer_word, limpiar_formato_vtt
 
 
 # ---------------------------------------------------------------------------
+# EXTRACCIÓN DE NOMBRE DE ASESOR CON LLM
+# ---------------------------------------------------------------------------
+
+def _extraer_nombre_y_limpiar_contexto(texto: str) -> dict:
+    """
+    Usa GPT-4o-mini para extraer el nombre del asesor del mensaje del usuario
+    y devuelve también el contexto limpio (sin la mención del asesor).
+
+    Mucho más robusto que regex: entiende cualquier formato sin mantenimiento.
+    Ejemplos que maneja:
+      "Asesor: Ivan Canale"         → nombre='Ivan Canale'
+      "asesora es Ivonne Rose"      → nombre='Ivonne Rose'
+      "esto lo lleva Pedro García"  → nombre='Pedro García'
+      "llamada de Juan, MBA online" → nombre='Juan' (si parece nombre de asesor)
+      "lead de México, programa X"  → nombre=null
+
+    Returns:
+        {"nombre": "Nombre Apellido" | None, "contexto_limpio": "texto sin mención del asesor"}
+    """
+    from centauro.llm_client import consultar_gpt
+
+    prompt_sistema = (
+        "Analiza el mensaje de un jefe de equipo que está subiendo una entrevista de ventas.\n"
+        "Tu única tarea:\n"
+        "1. Detecta si menciona el nombre del asesor o asesora (en cualquier formato).\n"
+        "2. Devuelve el mensaje limpiado, eliminando SOLO la parte que identifica al asesor.\n\n"
+        "Ejemplos de menciones a detectar:\n"
+        "  'Asesor: Ivan Canale'              → nombre='Ivan Canale'\n"
+        "  'Asesora: Ivonne Rose'             → nombre='Ivonne Rose'\n"
+        "  'asesora es Ivonne Rose'           → nombre='Ivonne Rose'\n"
+        "  'esto lo lleva Pedro García'       → nombre='Pedro García'\n"
+        "  'la llamada es de Juan Pérez'      → nombre='Juan Pérez'\n"
+        "  'se llama María de la Torre'       → nombre='María de la Torre'\n"
+        "  'MBA online, lead de México'       → nombre=null\n"
+        "  'lead interesado en Marketing'     → nombre=null\n\n"
+        "Reglas:\n"
+        "- El nombre es de una persona real (nombre + apellido mínimo).\n"
+        "- NO incluyas títulos, cargos ni prefijos en el nombre.\n"
+        "- Si no hay nombre de asesor, nombre=null.\n"
+        "- contexto_limpio: el mensaje original sin la frase que menciona al asesor.\n\n"
+        "Devuelve SOLO JSON sin texto adicional:\n"
+        '{"nombre": "Nombre Apellido" | null, "contexto_limpio": "mensaje limpio"}'
+    )
+
+    try:
+        resultado = consultar_gpt(
+            prompt_sistema,
+            texto,
+            referencia_log="extraccion_nombre_mensaje",
+            force_json=True,
+            max_tokens=150,
+        )
+        data = json.loads(resultado)
+        nombre = data.get("nombre") or None
+        # Normalizar: Title Case y quitar espacios extra
+        if nombre:
+            nombre = " ".join(nombre.strip().split()).title()
+        return {
+            "nombre": nombre,
+            "contexto_limpio": (data.get("contexto_limpio") or "").strip(),
+        }
+    except Exception:
+        return {"nombre": None, "contexto_limpio": texto}
+
+
+# ---------------------------------------------------------------------------
 # AUTENTICACIÓN — Chainlit invoca este callback en cada intento de login
 # ---------------------------------------------------------------------------
 
@@ -272,6 +338,8 @@ async def start():
             cl.user_session.set("nombre_asesor_login", nombre_del_login)
         # admin/jefe → NO pre-cargar: evaluarán a cualquier asesor del equipo
         cl.user_session.set("rol_usuario", rol)
+        # Guardar username para auditoría (queda en evaluaciones.realizado_por)
+        cl.user_session.set("username_activo", app_user.identifier)
 
     # Verificar si ya se mostró el mensaje de bienvenida en esta sesión
     already_welcomed = cl.user_session.get("welcomed", False)
@@ -447,8 +515,9 @@ async def main(message: cl.Message):
             msg_espera = await cl.Message(content="🤔 Buscando en la base de conocimiento...").send()
         try:
             nombre_asesor = cl.user_session.get("nombre_asesor", None)
+            opp_id_sesion = cl.user_session.get("opportunity_id", None)
             respuesta = await asyncio.get_event_loop().run_in_executor(
-                None, chat_handler.procesar_consulta, pregunta, nombre_asesor
+                None, chat_handler.procesar_consulta, pregunta, nombre_asesor, opp_id_sesion
             )
             # ── Gráfico: solo si el usuario lo pide explícitamente ───────
             _grafico_kw = [
@@ -501,8 +570,9 @@ async def main(message: cl.Message):
                                 "_Generando DAX → ejecutando consulta → interpretando resultado_"
                     ).send()
                     nombre_asesor = cl.user_session.get("nombre_asesor", None)
+                    opp_id_sesion = cl.user_session.get("opportunity_id", None)
                     respuesta = await asyncio.get_event_loop().run_in_executor(
-                        None, chat_handler.procesar_consulta, pregunta_enriquecida, nombre_asesor
+                        None, chat_handler.procesar_consulta, pregunta_enriquecida, nombre_asesor, opp_id_sesion
                     )
                     await msg_espera2.remove()
                     # Si el agente vuelve a pedir aclaración, mostrar la pregunta limpia
@@ -551,55 +621,20 @@ async def main(message: cl.Message):
             # Limpiar el ID del contexto para no contaminar los prompts de los agentes
             contexto_usuario = re.sub(r'\b\d{4}-\d{6,12}\b', '', contexto_usuario).strip() or None
     if contexto_usuario:
-        # ── Patrón 1: formato explícito "Asesor: X", "Asesor es X", "Asesor se llama X" ──
-        patron_nombre = re.search(
-            r'(?:asesor|nombre\s+asesor?|advisor)\s*(?:[:=]|es|se\s+llama)[,\s]+'
-            r'([A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+(?:\s+[A-ZÁÉÍÓÚÜÑa-záéíóúüñ][a-záéíóúüñ]+)+)',
-            contexto_usuario,
-            re.IGNORECASE
-        )
-        if patron_nombre:
-            nombre_especificado_en_mensaje = patron_nombre.group(1).strip().title()
-            # Limpiar esa parte del contexto para no contaminar los prompts de los agentes
-            contexto_usuario = re.sub(
-                r'(?:asesor|nombre\s+asesor?|advisor)\s*(?:[:=]|es|se\s+llama)[^\n,;]+[,;\n]?\s*',
-                '',
-                contexto_usuario,
-                flags=re.IGNORECASE
-            ).strip() or None
-
-        # ── Patrón 2 (fallback): nombre natural en el mensaje ──────────────
-        # Cubre: "se llama Yanet de la Torre", "llamada de Juan Pérez",
-        # "es de María García", "evalúa a Juan Pérez", "Pedro Martínez,", etc.
-        # Soporta apellidos compuestos: "de la Torre", "del Valle", "van der Berg"
-        if not nombre_especificado_en_mensaje and contexto_usuario:
-            from centauro.core.gestion_asesores import gestion_asesores as _ga_msg
-            # Núcleo de nombre: PrimeraPalabra + opcionalmente partícula + más palabras
-            _NOM = (
-                r'[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+'                             # Nombre/apellido (mayúscula)
-                r'(?:\s+(?:de\s+(?:la\s+|los\s+|las\s+|el\s+)?'        # partícula "de [la/los...]"
-                r'|del\s+|la\s+|van\s+|von\s+)?'                        # o "del/la/van/von"
-                r'[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){1,3}'                       # + siguiente palabra
+        # ── Extracción del nombre con LLM ─────────────────────────────────────
+        # GPT-4o-mini entiende cualquier formato sin necesidad de regex frágiles:
+        # "Asesor: X", "asesora es X", "la lleva X", "se llama X", etc.
+        # También devuelve el contexto limpio (sin la mención del asesor) en la misma llamada.
+        try:
+            _extr = await asyncio.get_event_loop().run_in_executor(
+                None, _extraer_nombre_y_limpiar_contexto, contexto_usuario
             )
-            patrones_naturales = [
-                # "se llama / llama Nombre [de la] Apellido" (NUEVO)
-                r'\bllama\s+(' + _NOM + r')',
-                # "de Nombre [de la] Apellido"
-                r'\bde\s+(' + _NOM + r')',
-                # "a Nombre Apellido" (evalúa a Juan Pérez)
-                r'\ba\s+(' + _NOM + r')',
-                # "es Nombre Apellido"
-                r'\bes\s+(' + _NOM + r')',
-                # Nombre Apellido al inicio del mensaje (sin preposición)
-                r'^(' + _NOM + r')[,\s]',
-            ]
-            for pat in patrones_naturales:
-                m = re.search(pat, contexto_usuario, re.IGNORECASE)
-                if m:
-                    candidato = m.group(1).strip()
-                    if _ga_msg._es_nombre_valido(candidato):
-                        nombre_especificado_en_mensaje = candidato.title()
-                        break
+            nombre_especificado_en_mensaje = _extr.get("nombre")  # None si no encontró
+            _ctx_limpio = _extr.get("contexto_limpio", "").strip()
+            contexto_usuario = _ctx_limpio or None
+        except Exception:
+            # Si el LLM falla, seguimos sin nombre extraído (el contexto queda intacto)
+            pass
 
     if nombre_especificado_en_mensaje or contexto_usuario:
         partes = []
@@ -676,17 +711,29 @@ async def main(message: cl.Message):
                 ).send()
                 if _opp_res:
                     _opp_txt = _opp_res.get("output", "").strip()
-                    if _opp_txt.lower() not in ("no", "n", "-", ""):
-                        if re.match(r'^\d{4}-\d{6,12}$', _opp_txt):
-                            _opp_id_pre = _opp_txt
+                    # Aceptar cualquier forma de "no": "no", "no tengo", "no lo tengo",
+                    # "no tenía", "n", "-", vacío, "skip"…
+                    _es_respuesta_no = (
+                        not _opp_txt
+                        or _opp_txt.lower() in ("no", "n", "-", "skip", "omitir")
+                        or bool(re.match(r'^no\b', _opp_txt, re.IGNORECASE))
+                    )
+                    if _es_respuesta_no:
+                        await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
+                    elif re.match(r'^\d{4}-\d{6,12}$', _opp_txt):
+                        _opp_id_pre = _opp_txt
+                        await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
+                    else:
+                        # Intentar extraer el ID si lo escribió dentro de texto libre
+                        _m_id_inline = re.search(r'\b(\d{4}-\d{6,12})\b', _opp_txt)
+                        if _m_id_inline:
+                            _opp_id_pre = _m_id_inline.group(1)
                             await cl.Message(content=f"✅ **Opportunity ID guardado:** `{_opp_id_pre}`").send()
                         else:
                             await cl.Message(
                                 content=f"⚠️ `{_opp_txt}` no tiene el formato esperado (`2021-002579270`). "
                                         f"Continuando sin Opportunity ID."
                             ).send()
-                    else:
-                        await cl.Message(content="⏭️ Continuando sin Opportunity ID.").send()
             except Exception:
                 pass
         cl.user_session.set("opportunity_id", _opp_id_pre)
@@ -988,56 +1035,82 @@ async def main(message: cl.Message):
                     asesor_confirmado = "Asesor Desconocido"
         # ── Verificar que el asesor existe en Supabase ──────────────────────
         # Si el nombre no está registrado (no viene del login ni es ya "Desconocido"),
-        # preguntar al usuario en lugar de caer silenciosamente a "Asesor Desconocido".
+        # intentar resolver por opp_id antes de preguntar al usuario.
         _nombre_asesor_login = cl.user_session.get("nombre_asesor_login")
         _es_desconocido = asesor_confirmado == "Asesor Desconocido"
         if not _nombre_asesor_login and not _es_desconocido:
             from centauro.core.database import get_database as _get_db_check
             _db_check = _get_db_check()
             if _db_check.disponible and not _db_check.buscar_asesor(asesor_confirmado):
-                _sugerencias_db = gestion_asesores.nombres_canonicos[:8] if gestion_asesores.nombres_canonicos else []
-                _sugerencias_db_txt = (
-                    "\n\n**Asesores registrados:** " + " · ".join(f"`{s}`" for s in _sugerencias_db)
-                ) if _sugerencias_db else ""
-                try:
-                    _res_nombre_db = await cl.AskUserMessage(
-                        content=(
-                            f"⚠️ **Asesor no reconocido:** _{asesor_confirmado}_\n\n"
-                            f"Este nombre no está registrado en el sistema. "
-                            f"¿Puedes indicar el nombre correcto?{_sugerencias_db_txt}\n\n"
-                            f"Escribe el nombre exacto o **skip** para continuar como _Asesor Desconocido_."
-                        ),
-                        timeout=60
-                    ).send()
-                except Exception:
-                    _res_nombre_db = None
+                # ── Intento 1: buscar asesor por opp_id (evaluaciones previas) ──
+                _asesor_por_opp = None
+                if _opp_id_pre:
+                    _asesor_por_opp = _db_check.obtener_asesor_por_opp_id(_opp_id_pre)
+                    if _asesor_por_opp:
+                        asesor_confirmado = _asesor_por_opp["nombre"]
+                        await cl.Message(
+                            content=f"👤 **Asesor identificado por Opportunity ID:** {asesor_confirmado}"
+                        ).send()
 
-                if _res_nombre_db and _res_nombre_db.get("output"):
-                    _nombre_corregido = _res_nombre_db["output"].strip()
-                    if _nombre_corregido.lower() in ("skip", "omitir", "-", "n/a", "no"):
-                        asesor_confirmado = "Asesor Desconocido"
-                    else:
-                        # Si el usuario escribió una frase ("El asesor es X"), extraer solo el nombre
-                        _m_frase = re.search(
-                            r'(?:asesor|nombre|advisor|llama)\s*(?:[:=,]|es|se\s+llama)?\s*'
-                            r'([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)',
-                            _nombre_corregido, re.IGNORECASE
-                        ) or re.search(
-                            r'\bes\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)',
-                            _nombre_corregido, re.IGNORECASE
-                        )
-                        if _m_frase:
-                            _nombre_corregido = _m_frase.group(1).strip().title()
-                        try:
-                            asesor_confirmado = gestion_asesores.obtener_nombre_canonico(_nombre_corregido)
-                        except ValueError:
-                            await cl.Message(
-                                content=f"⚠️ `{_nombre_corregido}` no está registrado en el sistema. "
-                                        f"Guardando como **Asesor Desconocido**."
-                            ).send()
+                # ── Intento 2: el usuario ya especificó el nombre, no preguntar de nuevo ──
+                # Si el nombre vino explícito en el mensaje original (con o sin opp_id),
+                # confiamos en él. Solo se avisa si realmente no está registrado.
+                if not _asesor_por_opp and nombre_especificado_en_mensaje:
+                    _detalle = (
+                        f"pero tienes el Opportunity ID `{_opp_id_pre}`. "
+                        f"Se guardará bajo la oportunidad indicada."
+                        if _opp_id_pre
+                        else "Continuando con ese nombre — puede que haya una variante registrada."
+                    )
+                    await cl.Message(
+                        content=f"⚠️ _{asesor_confirmado}_ no está registrado en el sistema, {_detalle}"
+                    ).send()
+
+                # ── Intento 3: sin nombre explícito ni resolución → preguntar al usuario ──
+                elif not _asesor_por_opp and not nombre_especificado_en_mensaje:
+                    _sugerencias_db = gestion_asesores.nombres_canonicos[:8] if gestion_asesores.nombres_canonicos else []
+                    _sugerencias_db_txt = (
+                        "\n\n**Asesores registrados:** " + " · ".join(f"`{s}`" for s in _sugerencias_db)
+                    ) if _sugerencias_db else ""
+                    try:
+                        _res_nombre_db = await cl.AskUserMessage(
+                            content=(
+                                f"⚠️ **Asesor no reconocido:** _{asesor_confirmado}_\n\n"
+                                f"Este nombre no está registrado en el sistema. "
+                                f"¿Puedes indicar el nombre correcto?{_sugerencias_db_txt}\n\n"
+                                f"Escribe el nombre exacto o **skip** para continuar como _Asesor Desconocido_."
+                            ),
+                            timeout=60
+                        ).send()
+                    except Exception:
+                        _res_nombre_db = None
+
+                    if _res_nombre_db and _res_nombre_db.get("output"):
+                        _nombre_corregido = _res_nombre_db["output"].strip()
+                        if _nombre_corregido.lower() in ("skip", "omitir", "-", "n/a", "no"):
                             asesor_confirmado = "Asesor Desconocido"
-                else:
-                    asesor_confirmado = "Asesor Desconocido"
+                        else:
+                            # Si el usuario escribió una frase ("El asesor es X"), extraer solo el nombre
+                            _m_frase = re.search(
+                                r'(?:asesor|nombre|advisor|llama)\s*(?:[:=,]|es|se\s+llama)?\s*'
+                                r'([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)',
+                                _nombre_corregido, re.IGNORECASE
+                            ) or re.search(
+                                r'\bes\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)',
+                                _nombre_corregido, re.IGNORECASE
+                            )
+                            if _m_frase:
+                                _nombre_corregido = _m_frase.group(1).strip().title()
+                            try:
+                                asesor_confirmado = gestion_asesores.obtener_nombre_canonico(_nombre_corregido)
+                            except ValueError:
+                                await cl.Message(
+                                    content=f"⚠️ `{_nombre_corregido}` no está registrado en el sistema. "
+                                            f"Guardando como **Asesor Desconocido**."
+                                ).send()
+                                asesor_confirmado = "Asesor Desconocido"
+                    else:
+                        asesor_confirmado = "Asesor Desconocido"
         # ─────────────────────────────────────────────────────────────────────
         # Mostrar confirmación
         await cl.Message(content=f"✅ **Asesor confirmado:** {asesor_confirmado}").send()
@@ -1227,6 +1300,13 @@ async def main(message: cl.Message):
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(reporte, f, indent=2, ensure_ascii=False)
         # ==================== REGISTRAR EN MEMORIA (NUEVO v4.0) ====================
+        # Calcular tiempo antes del registro para que quede en Supabase
+        _segundos_totales = int(_time.time() - _tiempo_inicio)
+        _stats_evaluacion = {
+            "tiempo_analisis_seg": _segundos_totales,
+            "llamadas_api": orchestrator.stats.get("llamadas_api"),
+        }
+
         async with cl.Step(name="🧠 Actualizando perfil del asesor", type="tool") as step:
             try:
                 opp_id = cl.user_session.get("opportunity_id")
@@ -1246,7 +1326,7 @@ async def main(message: cl.Message):
                             opportunity_id=opp_id,
                             archivo_origen=file.name if file else None,
                             reporte_pdf_path=_pdf_path_str,
-                            stats=orchestrator.stats,
+                            stats=_stats_evaluacion,
                         )
                         step.output = "✅ Evaluación sobreescrita en Supabase" if _ok else "⚠️ Error sobreescribiendo en Supabase"
                     else:
@@ -1259,13 +1339,13 @@ async def main(message: cl.Message):
                         transcripcion_path=str(file_path),
                         opportunity_id=opp_id,
                         archivo_origen=file.name if file else None,
+                        stats=_stats_evaluacion,
+                        realizado_por=cl.user_session.get("username_activo"),
                     )
                     feedback_personalizado = perfil.obtener_feedback_personalizado()
                     step.output = f"✅ Perfil actualizado\n\n{feedback_personalizado}"
             except Exception as e:
                 step.output = f"⚠️ Error actualizando perfil: {e}"
-        # Calcular tiempo total del análisis
-        _segundos_totales = int(_time.time() - _tiempo_inicio)
         _mins_analisis = _segundos_totales // 60
         _segs_analisis = _segundos_totales % 60
         if _mins_analisis > 0:

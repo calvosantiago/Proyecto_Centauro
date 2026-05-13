@@ -13,6 +13,7 @@ CAMBIOS EN v3.0:
 from typing import Dict, List
 import json
 import re
+import concurrent.futures
 
 # Importar TODOS los agentes v3.0
 from ..agents import (
@@ -256,54 +257,69 @@ NOTA: Esta es la transcripción que los agentes evaluadores reciben.
 
     def _evaluar_bloques_criticos(self, transcripcion: str, cache_key: str, contexto_usuario: str = None) -> List[Dict]:
         """
-        Evalúa bloques críticos con agentes individuales especializados
+        Evalúa bloques críticos con agentes individuales en PARALELO.
 
-        Bloques críticos (v5.1):
-        1. Investigación (transcripción completa — necesita evaluar aprovechamiento posterior)
-        2. Proceso de Admisión y Propuesta Económica (transcripción completa)
-        3. Manejo de objeciones (transcripción completa)
-        4. Cierre y próximos pasos (inicio + final via CierreAgent interno)
+        Los 4 agentes se lanzan simultáneamente con ThreadPoolExecutor.
+        El tiempo total es el del agente más lento (~1.5-2 min en vez de ~5-6 min).
+
+        Orden preservado: Investigación → Admisión → Objeciones → Cierre
+        Thread-safety: cada agente crea su propia instancia; ChromaDB y OpenAI son thread-safe.
         """
-        evaluaciones = []
 
-        # 1. INVESTIGACIÓN (con extracto)
-        print("      1️⃣ Investigación (agente individual)")
-        extracto_investigacion = self.config.get_extracto("Investigación", transcripcion)
-        contexto_investigacion = self.rag_agent.buscar_contexto_para_bloque("Investigación", transcripcion, cache_key)
+        # ── Definición de cada tarea ──────────────────────────────────────────
+        def _tarea_investigacion():
+            extracto = self.config.get_extracto("Investigación", transcripcion)
+            ctx = self.rag_agent.buscar_contexto_para_bloque(
+                "Investigación", transcripcion, cache_key
+            )
+            return InvestigacionAgent().evaluate(extracto, ctx, contexto_usuario).to_dict()
 
-        agente_investigacion = InvestigacionAgent()
-        resultado = agente_investigacion.evaluate(extracto_investigacion, contexto_investigacion, contexto_usuario)
-        evaluaciones.append(resultado.to_dict())
+        def _tarea_admision():
+            ctx = self.rag_agent.buscar_contexto_para_bloque(
+                "Proceso de Admisión y Propuesta Económica", transcripcion, cache_key
+            )
+            return AdmisionEconomicaAgent().evaluate(transcripcion, ctx, contexto_usuario).to_dict()
 
-        # 2. PROCESO ADMISIÓN/ECONÓMICA (completo)
-        print("      2️⃣ Proceso Admisión y Propuesta Económica (agente individual)")
-        contexto_admision = self.rag_agent.buscar_contexto_para_bloque(
-            "Proceso de Admisión y Propuesta Económica",
-            transcripcion,
-            cache_key
-        )
+        def _tarea_objeciones():
+            ctx = self.rag_agent.buscar_contexto_para_bloque(
+                "Manejo de objeciones", transcripcion, cache_key
+            )
+            return ObjecionesAgent().evaluate(transcripcion, ctx, contexto_usuario).to_dict()
 
-        agente_admision = AdmisionEconomicaAgent()
-        resultado = agente_admision.evaluate(transcripcion, contexto_admision, contexto_usuario)
-        evaluaciones.append(resultado.to_dict())
+        def _tarea_cierre():
+            ctx = self.rag_agent.buscar_contexto_para_bloque(
+                "Cierre y próximos pasos", transcripcion, cache_key
+            )
+            # CierreAgent maneja el extracto internamente
+            return CierreAgent().evaluate(transcripcion, ctx, contexto_usuario).to_dict()
 
-        # 3. MANEJO DE OBJECIONES (completo)
-        print("      3️⃣ Manejo de objeciones (agente individual)")
-        contexto_objeciones = self.rag_agent.buscar_contexto_para_bloque("Manejo de objeciones", transcripcion, cache_key)
+        tareas = [
+            ("1️⃣  Investigación",                         _tarea_investigacion),
+            ("2️⃣  Proceso Admisión y Propuesta Económica", _tarea_admision),
+            ("3️⃣  Manejo de objeciones",                  _tarea_objeciones),
+            ("4️⃣  Cierre y próximos pasos",               _tarea_cierre),
+        ]
 
-        agente_objeciones = ObjecionesAgent()
-        resultado = agente_objeciones.evaluate(transcripcion, contexto_objeciones, contexto_usuario)
-        evaluaciones.append(resultado.to_dict())
+        # ── Ejecución paralela ────────────────────────────────────────────────
+        print(f"      ⚡ Lanzando {len(tareas)} agentes críticos en paralelo...")
+        resultados: List = [None] * len(tareas)
 
-        # 4. CIERRE Y PRÓXIMOS PASOS (con extracto)
-        print("      4️⃣ Cierre y próximos pasos (agente individual)")
-        extracto_cierre = self.config.get_extracto("Cierre y próximos pasos", transcripcion)
-        contexto_cierre = self.rag_agent.buscar_contexto_para_bloque("Cierre y próximos pasos", transcripcion, cache_key)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(tareas)) as executor:
+            futuros = {
+                executor.submit(fn): idx
+                for idx, (_, fn) in enumerate(tareas)
+            }
+            for futuro in concurrent.futures.as_completed(futuros):
+                idx = futuros[futuro]
+                nombre = tareas[idx][0]
+                try:
+                    resultados[idx] = futuro.result()
+                    print(f"      ✓ {nombre}")
+                except Exception as exc:
+                    print(f"      ⚠️ Error en {nombre}: {exc}")
+                    # El slot queda en None; el bloque se omite del reporte
 
-        agente_cierre = CierreAgent()
-        resultado = agente_cierre.evaluate(transcripcion, contexto_cierre, contexto_usuario)  # CierreAgent maneja extracto interno
-        evaluaciones.append(resultado.to_dict())
-
+        evaluaciones = [r for r in resultados if r is not None]
         print(f"      ✓ {len(evaluaciones)} bloques críticos evaluados")
         return evaluaciones
 

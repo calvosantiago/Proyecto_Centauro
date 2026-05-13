@@ -80,17 +80,29 @@ class ChatHandler:
         self._transcripcion_actual = transcripcion
         self._resumen_bloques = bloques_evaluacion
 
-    def procesar_consulta(self, pregunta_usuario: str, nombre_asesor: Optional[str] = None) -> str:
+    def procesar_consulta(
+        self,
+        pregunta_usuario: str,
+        nombre_asesor: Optional[str] = None,
+        opp_id: Optional[str] = None,
+    ) -> str:
         """
         Procesa una pregunta del usuario y devuelve respuesta contextualizada.
 
         Args:
             pregunta_usuario: Pregunta en lenguaje natural
             nombre_asesor: Nombre del asesor (si se quiere consultar su perfil)
+            opp_id: Opportunity ID de la entrevista (si se conoce)
 
         Returns:
             Respuesta generada por el LLM con contexto del RAG
         """
+        # Si el usuario menciona un opp_id en el propio mensaje, extraerlo
+        import re as _re
+        _m_opp = _re.search(r'\b(\d{4}-\d{6,12})\b', pregunta_usuario)
+        if _m_opp and not opp_id:
+            opp_id = _m_opp.group(1)
+
         # Identificar intención y bloque temático
         intencion = self._clasificar_intencion(pregunta_usuario)
         bloque_detectado = self._detectar_bloque(pregunta_usuario)
@@ -110,7 +122,7 @@ class ChatHandler:
 
         # Buscar contexto relevante (flujo RAG normal)
         contexto = self._buscar_contexto_relevante(
-            pregunta_usuario, intencion, bloque_detectado, nombre_asesor
+            pregunta_usuario, intencion, bloque_detectado, nombre_asesor, opp_id
         )
 
         # Generar respuesta (incluye historial)
@@ -311,8 +323,15 @@ class ChatHandler:
         intencion: str,
         bloque_detectado: Optional[str],
         nombre_asesor: Optional[str],
+        opp_id: Optional[str] = None,
     ) -> str:
         """Busca contexto en las colecciones apropiadas según intención y bloque."""
+
+        # Si hay opp_id, priorizar la evaluación específica de esa oportunidad
+        if opp_id and intencion in ("entrevista_actual", "perfil", "general"):
+            ctx_opp = self._obtener_evaluacion_por_opp_id(opp_id)
+            if ctx_opp:
+                return ctx_opp
 
         if intencion == "entrevista_actual":
             return self._consultar_contenido_entrevista(pregunta, bloque_detectado)
@@ -595,6 +614,53 @@ class ChatHandler:
             return "\n".join(lineas)
         except Exception as e:
             return f"Error consultando evaluaciones de {nombre_asesor}: {e}"
+
+    def _obtener_evaluacion_por_opp_id(self, opp_id: str) -> Optional[str]:
+        """
+        Devuelve el contexto completo de la evaluación asociada a un opportunity_id.
+        Útil cuando el usuario o la sesión indican el ID de oportunidad explícitamente.
+        """
+        try:
+            db = get_database()
+            if not db.disponible:
+                return None
+
+            ev = db.obtener_evaluacion_por_opp_id(opp_id)
+            if not ev:
+                return None
+
+            EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+            nombre_asesor = ev.get("nombre_asesor") or "Asesor desconocido"
+            cal_global = ev.get("calificacion_global") or "N/A"
+            fecha = (ev.get("fecha") or "")[:10]
+
+            bloques = ev.get("calificaciones_bloque") or []
+            bloques_txt = "\n".join(
+                f"  {EMOJI.get(b.get('calificacion',''), '⚪')} **{b.get('bloque','?')}**: "
+                f"{b.get('calificacion','N/A')} — {b.get('razonamiento','') or ''}"
+                for b in bloques
+            )
+
+            lineas = [
+                f"## Evaluación oportunidad `{opp_id}`",
+                f"**Asesor:** {nombre_asesor} | **Fecha:** {fecha} | "
+                f"**Global:** {EMOJI.get(cal_global,'⚪')} {cal_global}",
+            ]
+            if bloques_txt:
+                lineas += ["", "### Bloques evaluados", bloques_txt]
+            for campo, label in [
+                ("perfil_lead", "Perfil lead"),
+                ("objetivo_del_lead", "Objetivo"),
+                ("factor_determinante_compra", "Factor determinante"),
+            ]:
+                val = ev.get(campo)
+                if val:
+                    lineas.append(f"**{label}:** {val}")
+
+            return "\n".join(lineas)
+
+        except Exception as e:
+            return None
 
     def _obtener_resumen_ultima_evaluacion(self, nombre_asesor: str) -> str:
         """
