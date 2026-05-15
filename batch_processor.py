@@ -166,6 +166,22 @@ def _extraer_nombre_de_filename(
     return None
 
 
+# ── Validación de calidad antes de generar PDF ───────────────────────────────
+def _evaluacion_valida(reporte: dict) -> bool:
+    """
+    Devuelve True solo si el reporte tiene suficiente calidad para enviar al asesor.
+    Si falla, la evaluación se guarda en Supabase pero no se genera ni envía PDF.
+    """
+    bloques = reporte.get("evaluacion_por_bloques", [])
+    if len(bloques) < 6:
+        return False
+    if any(b.get("calificacion") is None for b in bloques if isinstance(b, dict)):
+        return False
+    if not reporte.get("calificacion_global"):
+        return False
+    return True
+
+
 # ── Procesador principal ─────────────────────────────────────────────────────
 class BatchProcessor:
     """
@@ -194,6 +210,29 @@ class BatchProcessor:
         if self._orchestrator is None:
             self._orchestrator = CentauroOrchestrator()
         return self._orchestrator
+
+    # ── Supabase Storage ─────────────────────────────────────────────────────
+    def _subir_pdf_storage(self, pdf_path: Path, nombre_asesor: str, opp_id: str) -> Optional[str]:
+        """
+        Sube el PDF al bucket 'reportes' de Supabase Storage.
+        Devuelve el nombre del archivo en Storage, o None si falla.
+        El PDF es temporal: Power Automate lo borra tras enviar el email.
+        """
+        if not self.db.disponible:
+            return None
+        try:
+            nombre_seguro = nombre_asesor.replace(" ", "_").replace("/", "-")
+            storage_filename = f"{opp_id}_{nombre_seguro}.pdf"
+            with open(pdf_path, "rb") as f:
+                self.db._client.storage.from_("Reportes_PDF").upload(
+                    path=storage_filename,
+                    file=f,
+                    file_options={"content-type": "application/pdf", "upsert": "true"},
+                )
+            return storage_filename
+        except Exception as e:
+            self.logger.error(f"   Error subiendo PDF a Supabase Storage: {e}")
+            return None
 
     # ── Deduplicación ────────────────────────────────────────────────────────
     def _es_ya_procesado(self, opportunity_id: str) -> bool:
@@ -351,7 +390,33 @@ class BatchProcessor:
         self.logger.info(f"   Asesor: {nombre_final}")
         self.logger.info(f"   Calificación global: {cal_global}")
 
-        # 7. Guardar en Supabase (sin PDF, sin JSON local)
+        # 7. Generar PDF y subir a Supabase Storage (si la evaluación es válida)
+        storage_path = None
+        if _evaluacion_valida(reporte):
+            from centauro.reports import generar_pdf
+            pdf_filename = f"Reporte_{archivo.stem}_v3.pdf"
+            pdf_dir = settings.OUTPUTS_DIR / "Reportes_PDF"
+            pdf_dir.mkdir(parents=True, exist_ok=True)
+            pdf_path = pdf_dir / pdf_filename
+            try:
+                datos_oportunidad = reporte.get("datos_oportunidad")
+                generar_pdf(reporte, str(pdf_path), datos_oportunidad=datos_oportunidad)
+                self.logger.info(f"   PDF generado: {pdf_filename}")
+
+                storage_path = self._subir_pdf_storage(pdf_path, nombre_final, opp_id)
+                if storage_path:
+                    self.logger.info(f"   PDF subido a Storage: {storage_path}")
+                    pdf_path.unlink(missing_ok=True)  # borrar local tras subir
+                else:
+                    self.logger.warning("   No se pudo subir PDF a Storage — evaluación guardada sin notificación")
+            except Exception as e:
+                self.logger.error(f"   Error generando/subiendo PDF: {e}")
+        else:
+            self.logger.warning(
+                f"   Evaluación incompleta para '{nombre_final}' — no se genera PDF ni se envía email"
+            )
+
+        # 8. Guardar en Supabase
         try:
             stats = reporte.get("meta", {}).get("stats_optimizacion")
             self.memory_manager.registrar_evaluacion(
@@ -360,7 +425,8 @@ class BatchProcessor:
                 transcripcion_path=str(archivo),
                 opportunity_id=opp_id,
                 archivo_origen=archivo.name,
-                reporte_pdf_path=None,  # modo batch: sin PDF
+                reporte_pdf_path=None,
+                storage_path=storage_path,
                 stats=stats,
             )
             self.logger.info("   Guardado en Supabase")

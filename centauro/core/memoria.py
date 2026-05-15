@@ -235,6 +235,7 @@ class MemoryManager:
         opportunity_id: Optional[str] = None,
         archivo_origen: Optional[str] = None,
         reporte_pdf_path: Optional[str] = None,
+        storage_path: Optional[str] = None,
         stats: Optional[Dict] = None,
         realizado_por: Optional[str] = None,
     ):
@@ -264,6 +265,7 @@ class MemoryManager:
                     opportunity_id=opportunity_id,
                     archivo_origen=archivo_origen,
                     reporte_pdf_path=reporte_pdf_path,
+                    storage_path=storage_path,
                     stats=stats,
                     realizado_por=realizado_por,
                 )

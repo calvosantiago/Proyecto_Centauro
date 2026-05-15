@@ -181,6 +181,7 @@ class DatabaseManager:
         opportunity_id: Optional[str] = None,
         archivo_origen: Optional[str] = None,
         reporte_pdf_path: Optional[str] = None,
+        storage_path: Optional[str] = None,
         stats: Optional[Dict] = None,
         realizado_por: Optional[str] = None,
     ) -> Optional[int]:
@@ -218,6 +219,8 @@ class DatabaseManager:
             "barreras_principales": barreras if barreras else [],
             "fecha_seguimiento": resumen.get("fecha_seguimiento"),
             "reporte_pdf_path": reporte_pdf_path,
+            "storage_path": storage_path,
+            "email_enviado": False,
         }
 
         if stats:

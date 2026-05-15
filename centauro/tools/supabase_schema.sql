@@ -90,6 +90,11 @@ CREATE TABLE IF NOT EXISTS predicciones (
 -- Columna para registrar qué usuario de Chainlit realizó la evaluación:
 --   ALTER TABLE evaluaciones ADD COLUMN IF NOT EXISTS realizado_por TEXT;
 
+-- Mar 2026 - Flujo notificación email automática por asesor:
+--   ALTER TABLE asesores ADD COLUMN IF NOT EXISTS email TEXT;
+--   ALTER TABLE evaluaciones ADD COLUMN IF NOT EXISTS email_enviado BOOLEAN DEFAULT FALSE;
+--   ALTER TABLE evaluaciones ADD COLUMN IF NOT EXISTS storage_path TEXT;
+
 -- ============================================================
 -- Indices para consultas frecuentes
 CREATE INDEX IF NOT EXISTS idx_evaluaciones_asesor ON evaluaciones(asesor_id);
