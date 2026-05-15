@@ -2,11 +2,14 @@ import csv
 import os
 import datetime
 import time
+import threading
 from pathlib import Path
 from typing import Any, Dict, List
 from openai import OpenAI, APITimeoutError, APIConnectionError, RateLimitError, APIError
 from .config import settings
 from dotenv import load_dotenv
+
+_csv_lock = threading.Lock()
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -213,9 +216,10 @@ def _append_cost_row(row: Dict[str, Any]) -> None:
             writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
             writer.writeheader()
 
-    with open(archivo_csv, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
-        writer.writerow(row)
+    with _csv_lock:
+        with open(archivo_csv, mode="a", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
+            writer.writerow(row)
 
 
 def registrar_gasto_chat(

@@ -98,6 +98,108 @@ def _extraer_nombre_y_limpiar_contexto(texto: str) -> dict:
 # AUTENTICACIÓN — Chainlit invoca este callback en cada intento de login
 # ---------------------------------------------------------------------------
 
+def _generar_msg_stats_semana(
+    nombre_asesor: str,
+    stats_semana: dict,
+    bloques_evaluacion_actual: list,
+) -> str:
+    """
+    Genera el mensaje de estadísticas semanales con síntesis LLM del Top 3 a mejorar.
+    El Top 3 se basa en los razonamientos de los peores bloques de la semana.
+    """
+    from centauro.llm_client import consultar_gpt
+
+    total = stats_semana["total_entrevistas"]
+    bloques_debiles = stats_semana["bloques_debiles"]
+    evaluaciones = stats_semana["evaluaciones"]
+
+    EMOJI = {"BUENO": "🟢", "MEJORABLE": "🟡", "MALO": "🔴"}
+
+    lineas = [
+        f"## 📊 Tendencia semanal — {nombre_asesor}",
+        f"🗓️ **Entrevistas evaluadas esta semana:** {total}",
+        "",
+    ]
+
+    # Apartados a revisar: bloques con más del 40% de evaluaciones no BUENO
+    bloques_a_revisar = [(b, pct, c) for b, pct, c in bloques_debiles if pct > 0.4]
+    if bloques_a_revisar:
+        lineas.append("### ⚠️ Apartados a revisar")
+        for bloque, _pct, conteo in bloques_a_revisar[:4]:
+            total_b = sum(conteo.values())
+            partes_cal = []
+            for cal in ("MALO", "MEJORABLE", "BUENO"):
+                if conteo.get(cal, 0) > 0:
+                    partes_cal.append(f"{EMOJI[cal]} {cal}: {conteo[cal]}/{total_b}")
+            lineas.append(f"- **{bloque}**: " + " | ".join(partes_cal))
+        lineas.append("")
+
+    # Top 3 bloques más débiles de la semana para síntesis
+    top3_bloques = [b for b, _pct, _c in bloques_debiles[:3]]
+
+    # Recopilar razonamientos de los bloques débiles desde las evaluaciones de la semana
+    razonamientos_por_bloque: dict = {}
+    for ev in evaluaciones:
+        for b in ev.get("_bloques", []):
+            nombre_b = b.get("bloque", "")
+            cal = b.get("calificacion", "")
+            razon = (b.get("razonamiento") or "").strip()
+            if nombre_b in top3_bloques and cal in ("MALO", "MEJORABLE") and razon:
+                razonamientos_por_bloque.setdefault(nombre_b, []).append(razon)
+
+    # Fallback: usar razonamientos de la evaluación actual si no hay datos históricos suficientes
+    for b in bloques_evaluacion_actual:
+        nombre_b = b.get("bloque", "")
+        cal = b.get("calificacion", "")
+        razon = (b.get("razonamiento") or "").strip()
+        if nombre_b in top3_bloques and cal in ("MALO", "MEJORABLE") and razon:
+            razonamientos_por_bloque.setdefault(nombre_b, []).append(razon)
+
+    if not top3_bloques:
+        lineas.append("✅ _Sin áreas críticas esta semana. ¡Buen ritmo!_")
+        return "\n".join(lineas)
+
+    # Síntesis LLM con los razonamientos de los bloques más débiles
+    contexto_razonamientos = ""
+    for bloque in top3_bloques:
+        razones = razonamientos_por_bloque.get(bloque, [])
+        if razones:
+            razones_txt = " | ".join(r[:350] for r in razones[-3:])
+            contexto_razonamientos += f"**{bloque}**: {razones_txt}\n\n"
+
+    if contexto_razonamientos:
+        prompt_sistema = (
+            "Eres un coach de ventas consultivas. Basándote en los razonamientos de evaluación "
+            "de los apartados más débiles de un asesor durante la semana, genera exactamente "
+            "3 recomendaciones de mejora concretas y accionables. "
+            "Formato: lista numerada (1. 2. 3.), una frase clara por punto. "
+            "Lenguaje directo, sin jerga técnica ni términos de evaluación interna. "
+            "Cada punto debe indicar qué hacer, no solo qué está mal."
+        )
+        prompt_usuario = (
+            f"Asesor: {nombre_asesor}\n"
+            f"Entrevistas esta semana: {total}\n\n"
+            f"Razonamientos de los bloques más débiles:\n{contexto_razonamientos}"
+        )
+        try:
+            top3_texto = consultar_gpt(
+                prompt_sistema,
+                prompt_usuario,
+                referencia_log="stats_semana_top3",
+                force_json=False,
+                max_tokens=300,
+            )
+            lineas.append("### 🎯 Top 3 a trabajar esta semana")
+            lineas.append(top3_texto)
+        except Exception:
+            # Fallback sin síntesis: listar bloques directamente
+            lineas.append("### 🎯 Bloques a priorizar esta semana")
+            for i, bloque in enumerate(top3_bloques[:3], 1):
+                lineas.append(f"{i}. **{bloque}**")
+
+    return "\n".join(lineas)
+
+
 @cl.password_auth_callback
 def auth_callback(username: str, password: str) -> cl.User | None:
     """
@@ -1346,6 +1448,35 @@ async def main(message: cl.Message):
                     step.output = f"✅ Perfil actualizado\n\n{feedback_personalizado}"
             except Exception as e:
                 step.output = f"⚠️ Error actualizando perfil: {e}"
+
+        # ==================== ESTADÍSTICAS SEMANALES ====================
+        if asesor_confirmado and asesor_confirmado != "Asesor Desconocido":
+            try:
+                from centauro.core.database import get_database as _get_db_stats
+                _db_stats = _get_db_stats()
+                if _db_stats.disponible:
+                    _asesor_stats_row = _db_stats.buscar_asesor(asesor_confirmado)
+                    if _asesor_stats_row:
+                        _stats_sem = await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            _db_stats.obtener_stats_semana_asesor,
+                            _asesor_stats_row["id"],
+                            7,
+                        )
+                        if _stats_sem["total_entrevistas"] > 0:
+                            _bloques_actuales = reporte.get("evaluacion_por_bloques", [])
+                            _stats_msg = await asyncio.get_event_loop().run_in_executor(
+                                None,
+                                _generar_msg_stats_semana,
+                                asesor_confirmado,
+                                _stats_sem,
+                                _bloques_actuales,
+                            )
+                            if _stats_msg:
+                                await cl.Message(content=_stats_msg, author="Sistema").send()
+            except Exception as _e_stats:
+                pass  # no bloquear el flujo si falla la sección de estadísticas
+
         _mins_analisis = _segundos_totales // 60
         _segs_analisis = _segundos_totales % 60
         if _mins_analisis > 0:

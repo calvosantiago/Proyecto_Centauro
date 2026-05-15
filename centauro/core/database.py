@@ -609,6 +609,55 @@ class DatabaseManager:
         result = query.limit(limit).execute()
         return result.data if result.data else []
 
+    def obtener_stats_semana_asesor(self, asesor_id: int, dias: int = 7) -> dict:
+        """
+        Estadísticas del asesor en los últimos N días.
+
+        Returns:
+            {
+                "total_entrevistas": int,
+                "evaluaciones": [...],  # cada una con "_bloques" añadido
+                "bloques_frecuencia": {bloque: {"BUENO": n, "MEJORABLE": n, "MALO": n}},
+                "bloques_debiles": [(bloque, pct_debil, conteo), ...],
+            }
+        """
+        if not self._disponible:
+            return {
+                "total_entrevistas": 0,
+                "evaluaciones": [],
+                "bloques_frecuencia": {},
+                "bloques_debiles": [],
+            }
+
+        desde = (datetime.now() - timedelta(days=dias)).isoformat()
+        evaluaciones = self.obtener_evaluaciones(asesor_id, desde=desde)
+
+        frecuencia: dict = {}
+        for ev in evaluaciones:
+            bloques = self.obtener_calificaciones_bloque(ev["id"])
+            ev["_bloques"] = bloques
+            for b in bloques:
+                bloque = b.get("bloque", "")
+                cal = b.get("calificacion")
+                if bloque and cal in ("BUENO", "MEJORABLE", "MALO"):
+                    if bloque not in frecuencia:
+                        frecuencia[bloque] = {"BUENO": 0, "MEJORABLE": 0, "MALO": 0}
+                    frecuencia[bloque][cal] += 1
+
+        bloques_debiles = []
+        for bloque, conteo in frecuencia.items():
+            total_b = sum(conteo.values())
+            pct_debil = (conteo["MEJORABLE"] + conteo["MALO"]) / total_b if total_b > 0 else 0
+            bloques_debiles.append((bloque, pct_debil, conteo))
+        bloques_debiles.sort(key=lambda x: x[1], reverse=True)
+
+        return {
+            "total_entrevistas": len(evaluaciones),
+            "evaluaciones": evaluaciones,
+            "bloques_frecuencia": frecuencia,
+            "bloques_debiles": bloques_debiles,
+        }
+
 
 # Instancia global (lazy init)
 _db_instance = None

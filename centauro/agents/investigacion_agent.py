@@ -125,6 +125,8 @@ los hallazgos clave que el asesor obtuvo del lead.
 
 TONO DE REDACCIÓN: Escribe SIEMPRE en TERCERA PERSONA al referirte al asesor ("el asesor hizo...", "el asesor podría..."). NUNCA uses segunda persona ("hiciste...", "podrías...", "tu objetivo...").
 
+VOCABULARIO PROHIBIDO: Nunca uses el verbo "presionar" ni sus derivados ("presionó", "debería haber presionado") para describir lo que el asesor debería hacer con el lead. La venta consultiva es exploración, no presión. Usa en su lugar: "exploró", "indagó", "profundizó en", "preguntó por", "investigó", "siguió la línea de".
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚫 LÍMITES DUROS — LEE ESTO ANTES DE ANALIZAR NADA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -140,6 +142,9 @@ ni la propuesta económica ni el posicionamiento frente a la competencia.
 
 🟡 Si perfil_financiero = "No explorado" O competidores = "No explorado" (uno de los dos)
    → La calificación MÁXIMA es MEJORABLE. No puede ser BUENO.
+   ⚠️ EXCEPCIÓN competidores: si `competidores_profundidad = "primer_contacto_sin_comparacion"`,
+   NO aplica este tope — el asesor investigó y obtuvo información válida (el lead está en
+   fase inicial sin comparación activa). Solo aplica el tope si fue "no_explorado" real.
 
 🟡 Si perfil_financiero o competidores se preguntaron pero el asesor aceptó una respuesta
    vaga ("alguna escuela", "eso ya lo veo yo", "no sé") sin profundizar
@@ -147,7 +152,8 @@ ni la propuesta económica ni el posicionamiento frente a la competencia.
    es MEJORABLE. Preguntar por preguntar no es investigar.
 
 🟢 Solo puede ser BUENO si AMBOS aspectos fueron explorados con profundidad real
-   (al menos una repregunta que arrancó información concreta).
+   (al menos una repregunta que arrancó información concreta, O el lead confirmó ser
+   primer contacto sin comparación activa en el caso de competidores).
 
 Escribe en el razonamiento qué aspecto faltó y por qué eso limita la calificación.
 
@@ -167,7 +173,8 @@ usa ese conteo como "contador_fallos_criticos" en el JSON:
 
   1. ¿Exploró el Factor de Compra (dolor/necesidad real, no solo "quiero crecer")?
   2. ¿Exploró el perfil financiero DURANTE la fase de investigación (no más adelante)? ← CRÍTICO
-  3. ¿Profundizó en competidores u opciones que el lead está evaluando (no solo "alguna")? ← CRÍTICO
+  3. ¿Investigó qué otras opciones evalúa el lead, O confirmó que aún no está en fase comparativa? ← CRÍTICO
+     (Si el lead indicó ser un primer contacto sin comparación activa → respuesta SÍ)
   4. ¿Indagó en la información relevante cuando el lead se abrió o la aportó espontáneamente?
   5. ¿El lead tuvo espacio real para hablar y abrirse?
   6. ¿Obtuvo información aprovechable para personalizar la propuesta después?
@@ -239,18 +246,38 @@ para personalizar la propuesta y el cierre. Los datos clave a detectar son:
 
 3. COMPETIDORES EXPLORADOS: ¿Está comparando con otras instituciones o programas?
    ¿Qué otras opciones está evaluando?
-   ⚠️ TRES NIVELES de exploración (importa la profundidad, no solo la pregunta):
+
+   CASO ESPECIAL — LEAD EN FASE INICIAL SIN COMPARACIÓN ACTIVA:
+   Hay leads que llegan a la llamada en una etapa muy temprana de su proceso de decisión:
+   aún no han buscado activamente otras opciones, no han contactado a otras escuelas y
+   no están en modo comparativo todavía. En estos casos el lead puede decir cosas como
+   "sois el primero con quien hablo", "acabo de empezar a mirar", "no he contactado
+   a nadie más", "estoy en fase muy inicial", "no tengo otras opciones en mente todavía".
+   Lo que tienen en común es que el lead NO está ocultando competidores — simplemente
+   todavía no ha entrado en fase de comparación. Es información legítima y útil sobre
+   su etapa de decisión.
+   → En este caso: registra `competidores_profundidad = "primer_contacto_sin_comparacion"`.
+   → NO cuenta como fallo de investigación. El asesor investigó y obtuvo un dato valioso:
+      sabe que tiene ventana para posicionarse antes de que el lead empiece a comparar.
+   → IMPORTANTE: esto aplica SOLO cuando el lead lo expresa de forma clara y activa,
+      no cuando simplemente no se habló del tema. Si el lead no dijo nada sobre estar
+      en fase inicial → sigue siendo "no_explorado" si el asesor no preguntó.
+
+   ⚠️ CUATRO NIVELES de exploración (importa la profundidad, no solo la pregunta):
    - "explorado_profundo": el asesor preguntó, el lead nombró instituciones/programas
      concretos, Y el asesor profundizó (qué le interesa de ellas, en qué etapa de
      comparación está, qué le frena o atrae de cada opción). O bien el lead dio toda
      esa información espontáneamente. → cuenta para BUENO.
    - "explorado_superficial": el asesor preguntó pero el lead respondió de forma vaga
-     ("alguna", "estoy mirando", "tengo otras opciones") y el asesor no insistió ni
+     ("alguna", "estoy mirando", "tengo otras opciones") y el asesor no indagó ni
      profundizó. Sabe que hay competencia pero no qué competencia ni qué importa al lead.
      → cuenta como fallo. Calificación MÁXIMA: MEJORABLE.
-   - "no_explorado": no hubo ninguna referencia en toda la llamada. → cuenta como fallo
-     crítico. Aplica el límite duro: máximo MEJORABLE (o MALO si también falta el perfil
-     financiero).
+   - "primer_contacto_sin_comparacion": el lead indicó de forma explícita que está en
+     fase muy inicial y aún no ha comparado con ninguna otra institución. El asesor
+     obtuvo un dato válido sobre la etapa del lead. → NO cuenta como fallo.
+   - "no_explorado": no hubo ninguna referencia al tema en toda la llamada. → cuenta como
+     fallo crítico. Aplica el límite duro: máximo MEJORABLE (o MALO si también falta el
+     perfil financiero).
    Preguntar y aceptar una respuesta vaga NO es investigar competidores: es marcarlo en
    un check-list sin obtener el dato útil.
 
@@ -465,7 +492,7 @@ FORMATO JSON OBLIGATORIO
     "perfil_financiero_momento": "investigacion_temprana | tardio_resto_llamada | no_explorado — indica cuándo se obtuvo esta información en la llamada",
     "iniciativa_perfil_financiero": "asesor_pregunto_proactivamente | lead_espontaneo_asesor_indago | lead_espontaneo_asesor_no_indago | no_explorado — quién inició la discusión financiera y cómo respondió el asesor",
     "competidores": "Otras opciones que el lead mencionó estar evaluando. Escribe las instituciones o referencias mencionadas. 'No explorado' SOLO si no hubo ninguna referencia en toda la llamada.",
-    "competidores_profundidad": "explorado_profundo (asesor preguntó + lead nombró opciones concretas + asesor profundizó) | explorado_superficial (asesor preguntó pero aceptó respuesta vaga sin insistir) | no_explorado (no hubo ninguna referencia)",
+    "competidores_profundidad": "explorado_profundo (asesor preguntó + lead nombró opciones concretas + asesor profundizó) | explorado_superficial (asesor preguntó pero aceptó respuesta vaga sin indagar más) | primer_contacto_sin_comparacion (el lead indicó explícitamente que está en fase inicial y aún no ha comparado con otras instituciones — no es un fallo) | no_explorado (no hubo ninguna referencia al tema en toda la llamada)",
     "reconduccion": "Si el asesor detectó que el lead venía interesado en un programa/formato diferente y lo recondujo exitosamente, describe cómo lo gestionó. 'No aplica' si no ocurrió.",
     "motivacion_principal": "Por qué quiere el máster y por qué ahora.",
     "fortalezas_debilidades": "Lo que el lead dijo sobre sí mismo. 'No explorado' si no se preguntó.",
@@ -629,10 +656,11 @@ Genera la evaluación en JSON.
             or iniciativa == "lead_espontaneo_asesor_no_indago"
             or momento_perfil == "tardio_resto_llamada"
         )
-        # Competidores falta si: no se mencionaron, o se preguntó pero sin profundizar
+        # Competidores falta si: no se mencionaron, o se preguntó pero sin profundizar.
+        # NO falta si el lead indicó ser primer contacto sin comparación activa.
         falta_competidores = (
-            es_no_explorado(competidores)
-            or profundidad_comp == "explorado_superficial"
+            profundidad_comp == "explorado_superficial"
+            or (es_no_explorado(competidores) and profundidad_comp != "primer_contacto_sin_comparacion")
         )
         num_faltantes = sum([falta_perfil, falta_competidores])
 
@@ -669,7 +697,7 @@ Genera la evaluación en JSON.
                           "acabó apareciendo, pero la fase de investigación quedó incompleta "
                           "cuando el asesor pasó a presentar.")
             elif falta_competidores and profundidad_comp == "explorado_superficial":
-                sufijo = (" El asesor preguntó por competidores pero aceptó una respuesta vaga "
+                sufijo = (" El asesor indagó por competidores pero aceptó una respuesta vaga "
                           "del lead sin profundizar. Marcar el check-list no es investigar: "
                           "no obtuvo información útil sobre la competencia que enfrenta.")
             nota = (
