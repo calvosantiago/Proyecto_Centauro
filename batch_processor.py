@@ -492,7 +492,8 @@ class BatchProcessor:
 
         # 8. Guardar en Supabase
         try:
-            stats = reporte.get("meta", {}).get("stats_optimizacion")
+            stats = dict(reporte.get("meta", {}).get("stats_optimizacion") or {})
+            stats["tiempo_analisis_seg"] = round(tiempo)
             self.memory_manager.registrar_evaluacion(
                 nombre_asesor=nombre_final,
                 resultado_evaluacion=reporte,

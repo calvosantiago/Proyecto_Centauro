@@ -23,6 +23,7 @@ from centauro.config import settings
 from centauro.utils.validaciones import extraer_opportunity_id
 from centauro.auth import autenticar
 from centauro.llm_client import set_usuario_activo
+from centauro.core.queue_manager import ejecutar_con_cola, adquirir_slot
 import json
 # Importar funciones de lectura desde main.py (raíz del proyecto)
 from main import leer_word, limpiar_formato_vtt
@@ -1026,6 +1027,24 @@ async def main(message: cl.Message):
             # Guardar transcripción en sesión para descarga bajo demanda
             cl.user_session.set("ultima_transcripcion", transcripcion_diarizada)
             cl.user_session.set("nombre_archivo_evaluado", file.name)
+            # Detección de idioma (equivalente a analizar_entrevista_completa en batch)
+            from centauro.utils.validaciones import detectar_idioma_transcripcion
+            _idioma_entrevista = detectar_idioma_transcripcion(transcripcion_diarizada)
+            if _idioma_entrevista == "en":
+                step.output += "\n\n🌐 Entrevista detectada en **INGLÉS** — ajustando evaluación"
+                _contexto_idioma = (
+                    "\n\nIDIOMA DE LA ENTREVISTA: INGLÉS\n"
+                    "Esta entrevista fue conducida en inglés. Evalúa los comportamientos "
+                    "del asesor y del lead en inglés. Los criterios de evaluación son "
+                    "exactamente los mismos, pero aplicados al contexto lingüístico inglés. "
+                    "Los ejemplos de frases del prompt están en español como referencia "
+                    "conceptual — busca sus equivalentes en inglés en la transcripción. "
+                    "Devuelve el JSON de evaluación con los campos de texto en español, "
+                    "excepto las citas literales de evidencia (evidencia_principal, "
+                    "evidencias_extra), que deben reproducirse en inglés tal como "
+                    "aparecen en la transcripción.\n"
+                )
+                contexto_usuario = (contexto_usuario or "") + _contexto_idioma
             # Si aún no tenemos un nombre válido, preguntar al usuario
             if not asesor_detectado_inicial or not gestion_asesores._es_nombre_valido(asesor_detectado_inicial):
                 step.output += "\n\n⚠️ No se pudo detectar el nombre del asesor automáticamente"
@@ -1221,6 +1240,14 @@ async def main(message: cl.Message):
 
         # opportunity_id ya fue preguntado antes de la transcripción
         opp_id = cl.user_session.get("opportunity_id")
+
+        # ── Cola: esperar turno antes de las fases LLM pesadas ────────────────
+        # Solo un análisis corre a la vez para evitar rate limits de OpenAI.
+        # Si hay análisis en curso, el usuario ve su posición y espera su turno.
+        _liberar_slot_analisis = await adquirir_slot()
+        cl.user_session.set("_slot_analisis", _liberar_slot_analisis)
+        _tiempo_inicio = _time.time()  # resetear: mide solo el análisis, no la espera en cola
+
         # ==================== FASE 2: EXTRACCIÓN DE TEMAS ====================
         async with cl.Step(name="🧠 FASE 2: Extracción de temas (RAG Dinámico)", type="tool") as step:
             try:
@@ -1519,6 +1546,14 @@ Por favor, verifica:
         ).send()
     finally:
         cl.user_session.set("procesando_archivo", False)
+        # Liberar slot de análisis si lo habíamos adquirido
+        _slot = cl.user_session.get("_slot_analisis")
+        if _slot:
+            try:
+                _slot()
+            except Exception:
+                pass
+            cl.user_session.set("_slot_analisis", None)
 if __name__ == "__main__":
     # Esto solo se ejecuta si corres directamente python app.py
     # Lo normal es usar: chainlit run app.py
