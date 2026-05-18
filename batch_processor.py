@@ -56,6 +56,81 @@ from centauro.utils.validaciones import extraer_opportunity_id
 # ── Configuración ────────────────────────────────────────────────────────────
 BATCH_INPUT_DIR = settings.INPUTS_DIR / "batch"
 SUPPORTED_EXTENSIONS = {".txt", ".vtt", ".docx", ".mp3", ".mp4"}
+ASSEMBLYAI_COST_PER_SECOND = 0.0002  # $0.012/min (transcripción + diarización)
+
+
+# ── AssemblyAI helpers (misma lógica que app.py) ─────────────────────────────
+def _get_transcripcion_cache_path(audio_path: Path) -> Path:
+    cache_dir = settings.OUTPUTS_DIR / "transcripciones_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir / f"{audio_path.stem}.txt"
+
+
+def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
+    import datetime
+    try:
+        from centauro.llm_client import _append_cost_row
+        coste = duracion_seg * ASSEMBLYAI_COST_PER_SECOND
+        now = datetime.datetime.now()
+        row = {
+            "Timestamp": now.isoformat(timespec="seconds"),
+            "Fecha": now.strftime("%Y-%m-%d"),
+            "Hora": now.strftime("%H:%M:%S"),
+            "Usuario": "batch",
+            "Archivo/Referencia": referencia,
+            "Operacion": "transcripcion_assemblyai",
+            "Endpoint": "assemblyai/v2/transcript",
+            "Modelo": "assemblyai-best",
+            "Prompt Tokens": "", "Prompt Tokens Cacheados": "",
+            "Prompt Tokens No Cacheados": "", "Completion Tokens": "",
+            "Embedding Tokens": "", "Total Tokens": "",
+            "Coste Input (USD)": "", "Coste Input Cacheado (USD)": "",
+            "Coste Output (USD)": "", "Coste Embedding (USD)": "",
+            "Coste Total (USD)": f"{duracion_seg * ASSEMBLYAI_COST_PER_SECOND:.6f}",
+            "Request ID": "",
+        }
+        _append_cost_row(row)
+    except Exception:
+        pass
+
+
+def _transcribir_con_assemblyai(audio_path: Path, api_key: str, referencia: str = "") -> str:
+    cache_stem = Path(referencia).stem if referencia else audio_path.stem
+    cache_path = _get_transcripcion_cache_path(Path(cache_stem))
+    if cache_path.exists():
+        print(f"   💾 Transcripción en caché: {cache_path.name}")
+        return cache_path.read_text(encoding="utf-8")
+
+    import assemblyai as aai
+    aai.settings.api_key = api_key
+    config = aai.TranscriptionConfig(
+        speaker_labels=True,
+        language_code="es",
+        speech_models=["universal-3-pro"],
+    )
+    print("   📡 Enviando a AssemblyAI (transcripción + diarización)...")
+    transcript = aai.Transcriber().transcribe(str(audio_path), config=config)
+
+    if transcript.status == aai.TranscriptStatus.error:
+        raise RuntimeError(f"AssemblyAI error: {transcript.error}")
+
+    if not transcript.utterances:
+        print("   ⚠️ AssemblyAI no devolvió utterances, usando texto plano")
+        return transcript.text or ""
+
+    duracion_seg = transcript.utterances[-1].end / 1000
+    _registrar_gasto_assemblyai(referencia or audio_path.name, duracion_seg)
+
+    lineas = [f"[Speaker_{utt.speaker}]: {utt.text}" for utt in transcript.utterances]
+    resultado = "\n\n".join(lineas)
+    print(f"   ✅ AssemblyAI: {len(transcript.utterances)} utterances, {duracion_seg/60:.1f} min")
+
+    try:
+        cache_path.write_text(resultado, encoding="utf-8")
+    except Exception:
+        pass
+
+    return resultado
 
 
 # ── Logging (consola + archivo) ──────────────────────────────────────────────
@@ -191,10 +266,10 @@ class BatchProcessor:
       1. Validar opportunity_id (requerido para dedup)
       2. Comprobar si ya existe en Supabase → saltar si sí
       3. Extraer nombre del asesor del filename (fuzzy matching)
-      4. Cargar texto (txt/vtt/docx/mp3/mp4)
+      4. Cargar texto: AssemblyAI para MP4/MP3, lectura directa para txt/vtt/docx
       5. Ejecutar CentauroOrchestrator (mismos agentes que Chainlit)
-      6. Guardar en Supabase vía MemoryManager.registrar_evaluacion()
-         (sin PDF, sin JSON local)
+      6. Generar PDF y subir a Supabase Storage (si evaluación válida)
+      7. Guardar en Supabase vía MemoryManager.registrar_evaluacion()
     """
 
     def __init__(self) -> None:
@@ -243,85 +318,70 @@ class BatchProcessor:
         return existing is not None
 
     # ── Carga de texto ───────────────────────────────────────────────────────
-    def _cargar_texto(self, archivo: Path) -> Optional[str]:
+    def _cargar_texto(self, archivo: Path) -> tuple[Optional[str], Optional[dict]]:
+        """Devuelve (texto, audio_features). audio_features es None para formatos no-audio."""
         ext = archivo.suffix.lower()
 
-        if ext == ".mp4":
-            return self._cargar_desde_video(archivo)
-        if ext == ".mp3":
-            return self._cargar_desde_audio(archivo)
+        if ext in (".mp4", ".mp3"):
+            return self._cargar_desde_multimedia(archivo)
         if ext == ".docx":
             texto = _leer_docx(archivo)
             if not texto:
                 self.logger.error(f"   No se pudo extraer texto del DOCX: {archivo.name}")
-            return texto
+            return texto, None
 
         # .txt / .vtt → leer crudo (el DiarizationAgent necesita el VTT sin limpiar)
         try:
-            return archivo.read_text(encoding="utf-8")
+            return archivo.read_text(encoding="utf-8"), None
         except Exception as e:
             self.logger.error(f"   Error leyendo {archivo.name}: {e}")
-            return None
+            return None, None
 
-    def _cargar_desde_video(self, video_path: Path) -> Optional[str]:
-        """MP4 → extrae MP3 en inputs/audios/ → transcribe → devuelve texto."""
-        from centauro.tools.extract_audio import (
-            extraer_audio,
-            _ffmpeg_disponible,
-            AUDIOS_DIR,
-        )
+    def _cargar_desde_multimedia(self, archivo: Path) -> tuple[Optional[str], Optional[dict]]:
+        """MP4/MP3 → AssemblyAI (transcripción + diarización nativa) + métricas acústicas."""
+        import subprocess
+        import tempfile
+        from centauro.tools.extract_audio import FFMPEG_PATH
 
-        if not _ffmpeg_disponible():
-            self.logger.error("   ffmpeg no disponible, no se puede procesar vídeo")
-            return None
-
-        AUDIOS_DIR.mkdir(parents=True, exist_ok=True)
-        ok = extraer_audio(video_path)  # guarda en inputs/audios/
-        if not ok:
-            self.logger.error(f"   ffmpeg falló extrayendo audio de {video_path.name}")
-            return None
-
-        mp3_path = AUDIOS_DIR / f"{video_path.stem}.mp3"
-        if not mp3_path.exists():
-            self.logger.error(f"   MP3 no encontrado tras extracción: {mp3_path.name}")
-            return None
-
-        return self._cargar_desde_audio(mp3_path)
-
-    def _cargar_desde_audio(self, mp3_path: Path) -> Optional[str]:
-        """MP3 → transcribe con Groq Whisper → devuelve texto."""
-        from centauro.tools.whisper_transcribe import (
-            transcribir_audio,
-            TRANSCRIPTS_DIR,
-        )
-
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = os.getenv("ASSEMBLYAI_API_KEY")
         if not api_key:
-            self.logger.error("   GROQ_API_KEY no configurada en .env")
-            return None
+            self.logger.error("   ASSEMBLYAI_API_KEY no configurada en .env")
+            return None, None
 
-        # Si ya existe la transcripción Whisper, reutilizarla
-        nombre_limpio = mp3_path.stem.replace("_", " ")
-        whisper_txt = TRANSCRIPTS_DIR / f"{nombre_limpio}_whisper.txt"
-        if whisper_txt.exists():
-            self.logger.info(f"   Reutilizando transcripción existente: {whisper_txt.name}")
-            return whisper_txt.read_text(encoding="utf-8")
+        audio_path = archivo
 
-        # Transcribir con Groq
+        # MP4 → extraer MP3 con ffmpeg (igual que app.py)
+        if archivo.suffix.lower() == ".mp4":
+            if not FFMPEG_PATH.exists():
+                self.logger.error(f"   ffmpeg no encontrado en {FFMPEG_PATH}")
+                return None, None
+            mp3_tmp = Path(tempfile.gettempdir()) / f"centauro_{archivo.stem}.mp3"
+            resultado = subprocess.run(
+                [str(FFMPEG_PATH), "-i", str(archivo), "-vn", "-c:a", "libmp3lame",
+                 "-b:a", "32k", "-ac", "1", "-ar", "16000", "-y", str(mp3_tmp)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, encoding="utf-8", errors="replace",
+            )
+            if resultado.returncode != 0:
+                self.logger.error(f"   ffmpeg falló: {resultado.stderr[-200:]}")
+                return None, None
+            audio_path = mp3_tmp
+
+        # Métricas acústicas (opcional — no bloquea si falla)
+        audio_features = None
         try:
-            from groq import Groq
+            from centauro.tools.audio_features import extraer_metricas_audio
+            audio_features = extraer_metricas_audio(audio_path)
+        except Exception:
+            pass
 
-            client = Groq(api_key=api_key)
-            transcribir_audio(client, mp3_path)  # guarda en TRANSCRIPTS_DIR
+        # Transcripción + diarización con AssemblyAI
+        try:
+            texto = _transcribir_con_assemblyai(audio_path, api_key, archivo.name)
+            return texto, audio_features
         except Exception as e:
-            self.logger.error(f"   Error en transcripción Groq: {e}")
-            return None
-
-        if whisper_txt.exists():
-            return whisper_txt.read_text(encoding="utf-8")
-
-        self.logger.error(f"   Transcripción Whisper no generada: {whisper_txt.name}")
-        return None
+            self.logger.error(f"   Error en AssemblyAI: {e}")
+            return None, None
 
     # ── Procesamiento de un archivo ──────────────────────────────────────────
     def procesar_archivo(self, archivo: Path) -> bool:
@@ -355,9 +415,9 @@ class BatchProcessor:
         # 3. Nombre del asesor desde el filename
         nombre_asesor = _extraer_nombre_de_filename(archivo.name, self.gestion, self.logger)
 
-        # 4. Cargar texto
+        # 4. Cargar texto + audio_features
         self.logger.info("   Cargando transcripción...")
-        texto = self._cargar_texto(archivo)
+        texto, audio_features = self._cargar_texto(archivo)
         if not texto or len(texto.strip()) < 100:
             self.logger.error("   Transcripción vacía o demasiado corta → saltando")
             return False
@@ -370,7 +430,7 @@ class BatchProcessor:
                 nombre_archivo=archivo.stem,
                 texto_crudo=texto,
                 contexto_usuario=None,
-                audio_features=None,
+                audio_features=audio_features,
             )
         except Exception as e:
             self.logger.error(f"   Error en análisis: {e}")
@@ -384,11 +444,25 @@ class BatchProcessor:
         self.logger.info(f"   Análisis completado en {tiempo / 60:.1f} min")
 
         # 6. Resolver nombre definitivo del asesor
-        #    Prioridad: filename fuzzy match > orquestador > stem del archivo
+        #    Prioridad: filename fuzzy match > propietario en oportunidades > orquestador > stem
+        if not nombre_asesor and self.db.disponible:
+            opp = self.db.obtener_oportunidad(opp_id)
+            propietario = opp.get("propietario") if opp else None
+            if propietario:
+                match = self.gestion.buscar_asesor_similar(propietario)
+                if match:
+                    nombre_asesor = match[0]
+                    self.logger.info(f"   Asesor resuelto desde oportunidad: '{nombre_asesor}' (propietario: '{propietario}')")
+                else:
+                    self.logger.warning(f"   Propietario '{propietario}' no reconocido en Supabase")
+
         nombre_final = nombre_asesor or reporte.get("asesor") or archivo.stem
         cal_global = reporte.get("calificacion_global", "N/A")
         self.logger.info(f"   Asesor: {nombre_final}")
         self.logger.info(f"   Calificación global: {cal_global}")
+
+        # Inyectar nombre resuelto en el reporte para que el PDF lo muestre correctamente
+        reporte["asesor"] = nombre_final
 
         # 7. Generar PDF y subir a Supabase Storage (si la evaluación es válida)
         storage_path = None
@@ -428,6 +502,7 @@ class BatchProcessor:
                 reporte_pdf_path=None,
                 storage_path=storage_path,
                 stats=stats,
+                realizado_por="batch",
             )
             self.logger.info("   Guardado en Supabase")
         except Exception as e:
