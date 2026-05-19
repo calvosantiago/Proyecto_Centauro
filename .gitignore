@@ -41,3 +41,6 @@ __pycache__/
 
 # Debug prompts (nunca subir)
 debug_prompts/
+
+# Documentación operativa (puede contener credenciales)
+DOX_CENTAURO.html

@@ -31,7 +31,8 @@
       "Bash(.venv/Scripts/python \"C:\\\\Users\\\\uscp9a\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\82d4c73e-8736-4c02-9996-fe7951401924\\\\8a50a81c-2eb8-4c39-94cc-0bdf730fea56\\\\skills\\\\xlsx\\\\gen_pbi_template.py\")",
       "Bash(.venv/Scripts/python \"C:\\\\Users\\\\uscp9a\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\82d4c73e-8736-4c02-9996-fe7951401924\\\\8a50a81c-2eb8-4c39-94cc-0bdf730fea56\\\\skills\\\\xlsx\\\\gen_pbi_obs.py\")",
       "Bash(.venv\\\\Scripts\\\\python.exe -m py_compile app.py)",
-      "Bash(.venv\\\\Scripts\\\\python.exe -m py_compile centauro/core/queue_manager.py)"
+      "Bash(.venv\\\\Scripts\\\\python.exe -m py_compile centauro/core/queue_manager.py)",
+      "Bash(git rm *)"
     ]
   }
 }
