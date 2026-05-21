@@ -702,13 +702,12 @@ class ChatHandler:
             factor_compra = ev.get("factor_determinante_compra") or "—"
             fecha_seguimiento = ev.get("fecha_seguimiento") or "—"
             barreras = ev.get("barreras_principales")
-            if isinstance(barreras, str):
-                import json as _json
-                try:
-                    barreras = _json.loads(barreras)
-                except Exception:
-                    barreras = []
-            barreras_txt = ", ".join(barreras) if barreras else "—"
+            if isinstance(barreras, list):
+                barreras_txt = ", ".join(barreras) if barreras else "—"
+            elif isinstance(barreras, str) and barreras:
+                barreras_txt = barreras.replace(" | ", ", ")
+            else:
+                barreras_txt = "—"
 
             # Calificaciones por bloque de la evaluación actual
             bloques_raw = db.obtener_calificaciones_bloque(ev["id"])

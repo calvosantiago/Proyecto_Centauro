@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS evaluaciones (
     perfil_lead TEXT,
     objetivo_del_lead TEXT,
     factor_determinante_compra TEXT,    -- factor clave que determinará la compra del lead
-    barreras_principales JSONB DEFAULT '[]',
+    barreras_principales TEXT,              -- barreras separadas por " | ", ej: "Precio | Tiempo"
     fecha_seguimiento TIMESTAMPTZ,      -- fecha y hora del seguimiento comprometido
     -- Stats de procesamiento
     llamadas_api INTEGER,

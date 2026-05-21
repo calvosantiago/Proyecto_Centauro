@@ -42,10 +42,11 @@ SELECT
     e.perfil_lead,
     e.objetivo_del_lead,
     e.factor_determinante_compra,
-    e.barreras_principales,
+    e.barreras_principales,         -- TEXT: barreras separadas por " | "
     e.fecha_seguimiento,
     e.llamadas_api,
     e.tiempo_analisis_seg,
+    e.storage_path,
     a.nombre                        AS asesor_nombre
 FROM evaluaciones e
 JOIN asesores a ON a.id = e.asesor_id;
