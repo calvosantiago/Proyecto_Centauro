@@ -224,7 +224,9 @@ def auth_callback(username: str, password: str) -> cl.User | None:
 # Transcripción de audio/vídeo (AssemblyAI con diarización nativa, o Groq Whisper como fallback)
 # ---------------------------------------------------------------------------
 
-ASSEMBLYAI_COST_PER_SECOND = 0.0002  # $0.012/min = $0.72/hora (transcripción $0.0001 + diarización $0.0001)
+ASSEMBLYAI_COST_PER_SECOND = 0.21 / 3600  # $0.21/hora — tarifa pública Universal-3.5 Pro con diarización
+# incluida (verificado en assemblyai.com/pricing, sep 2026). El valor anterior ($0.72/hora) estaba
+# desactualizado. Si tenéis tarifa negociada/enterprise distinta a la pública, ajustar aquí.
 
 
 def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
@@ -1399,6 +1401,10 @@ async def main(message: cl.Message):
             _nombre_base = _opp_id_base
         else:
             _nombre_base = Path(file.name).stem[:70].replace('.', '_')
+        # Sufijo por proveedor (rama gemini_pruebas): evita que una entrevista ya evaluada
+        # con OpenAI se sobrescriba silenciosamente al re-evaluarla con Gemini, y viceversa.
+        if settings.LLM_PROVIDER.lower() != "openai":
+            _nombre_base = f"{_nombre_base}_{settings.LLM_PROVIDER.lower()}"
         # ==================== GENERAR PDF ====================
         async with cl.Step(name="📄 Generando reporte PDF", type="tool") as step:
             try:

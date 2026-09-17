@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     MODEL_NAME: str = "gpt-4o-mini"
     MODELO_EMBEDDING: str = "text-embedding-3-small"
 
+    # Proveedor de LLM para chat/evaluaciones: "openai" (default) o "gemini"
+    # RAG (embeddings) y transcripción de audio siguen siempre en OpenAI/AssemblyAI-Groq,
+    # este switch solo afecta a consultar_gpt() en llm_client.py
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "openai")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+
     # Configuración Supabase
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")

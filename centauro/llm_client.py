@@ -6,6 +6,9 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, List
 from openai import OpenAI, APITimeoutError, APIConnectionError, RateLimitError, APIError
+from google import genai
+from google.genai import types as genai_types
+from google.genai.errors import ClientError as GeminiClientError, ServerError as GeminiServerError
 from .config import settings
 from dotenv import load_dotenv
 
@@ -15,6 +18,17 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 GPT_TIMEOUT_SECONDS = 180  # Aumentado para transcripciones largas (diarización batch)
 GPT_MAX_RETRIES = 2
+
+# --- Cliente Gemini (rama gemini_pruebas: comparativa OpenAI vs Gemini free tier) ---
+_gemini_client = None
+GEMINI_MAX_RETRIES = 3  # Tier gratuito tiene RPM bajo, más reintentos que OpenAI
+
+
+def _get_gemini_client():
+    global _gemini_client
+    if _gemini_client is None:
+        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY"))
+    return _gemini_client
 
 # --- TARIFAS OPENAI (Standard API, Mar 2026) ---
 # gpt-4o-mini: input $0.15/M, cached input $0.075/M, output $0.60/M
@@ -36,13 +50,23 @@ MODEL_PRICING_USD_PER_1M = {
         "cached_input": 0.025,
         "output": 2.00,
     },
+    # Gemini free tier (AI Studio, sep 2026): tokens de entrada/salida "sin costo".
+    # OJO: gemini-2.5-pro y gemini-2.5-flash devuelven 404 "no longer available to
+    # new users" en proyectos nuevos (verificado sep 2026) — se usan los 3.x vigentes.
+    # gemini-3.7-flash y gemini-3.8-flash (recién lanzado) devolvían 503 "high demand"
+    # de forma consistente al probar (sep 2026); se usa gemini-3.5-flash, verificado
+    # estable, para el rol crítico. Si la disponibilidad mejora, cambiar aquí y en
+    # MODEL_BY_REFERENCE_EXACT_GEMINI/_get_model_for_reference es lo único necesario.
+    "gemini-3.5-flash": {"input": 0.0, "cached_input": 0.0, "output": 0.0},
+    "gemini-3.6-flash": {"input": 0.0, "cached_input": 0.0, "output": 0.0},
 }
 COST_PER_EMBEDDING_TOKEN = 0.02 / 1_000_000
 
 # Modelo por defecto para rutas no mapeadas
 DEFAULT_CHAT_MODEL = settings.MODEL_NAME
+DEFAULT_CHAT_MODEL_GEMINI = "gemini-3.6-flash"
 
-# Enrutado por referencia_log: referencias críticas en gpt-5-mini
+# Enrutado por referencia_log: referencias críticas en el modelo "grande" de cada proveedor
 MODEL_BY_REFERENCE_EXACT = {
     "eval_investigacion": "gpt-5-mini",
     "eval_admision_economica": "gpt-5-mini",
@@ -58,21 +82,46 @@ MODEL_BY_REFERENCE_EXACT = {
     "rag_temas": "gpt-4o-mini",
 }
 
+# Mismo enrutado que MODEL_BY_REFERENCE_EXACT pero con los equivalentes gratuitos de Gemini:
+# gpt-5-mini (razonamiento, 6 agentes críticos) -> gemini-3.5-flash (no hay Pro gratis en la
+#             familia 3.x; 3.7/3.8-flash son más nuevos pero devolvían 503 "high demand" al
+#             probar en sep 2026 — ver MODEL_PRICING_USD_PER_1M)
+# gpt-4o-mini (tareas ligeras: diarización, temas, resumen) -> gemini-3.6-flash
+MODEL_BY_REFERENCE_EXACT_GEMINI = {
+    "eval_investigacion": "gemini-3.5-flash",
+    "eval_admision_economica": "gemini-3.5-flash",
+    "eval_objeciones": "gemini-3.5-flash",
+    "eval_cierre": "gemini-3.5-flash",
+    "eval_propuesta_valor": "gemini-3.5-flash",
+    "eval_estilo": "gemini-3.5-flash",
+    "diar_batch": "gemini-3.6-flash",
+    "diar_classify": "gemini-3.6-flash",
+    "diar_timbrado": "gemini-3.6-flash",
+    "eval_deteccion": "gemini-3.6-flash",
+    "chat_interactivo": "gemini-3.6-flash",
+    "rag_temas": "gemini-3.6-flash",
+}
+
 
 def _get_model_for_reference(referencia_log: str) -> str:
-    """Resuelve el modelo de chat según la referencia del flujo."""
+    """Resuelve el modelo de chat según la referencia del flujo y el proveedor activo (settings.LLM_PROVIDER)."""
     ref = (referencia_log or "").strip()
+    es_gemini = settings.LLM_PROVIDER.lower() == "gemini"
+    tabla = MODEL_BY_REFERENCE_EXACT_GEMINI if es_gemini else MODEL_BY_REFERENCE_EXACT
+    modelo_grande = "gemini-3.5-flash" if es_gemini else "gpt-5-mini"
+    modelo_ligero = "gemini-3.6-flash" if es_gemini else "gpt-4o-mini"
+    default = DEFAULT_CHAT_MODEL_GEMINI if es_gemini else DEFAULT_CHAT_MODEL
 
-    if ref in MODEL_BY_REFERENCE_EXACT:
-        return MODEL_BY_REFERENCE_EXACT[ref]
+    if ref in tabla:
+        return tabla[ref]
 
     if ref.endswith("_batch_secundarios"):
-        return "gpt-5-mini"
+        return modelo_grande
 
     if ref.endswith("_resumen_contextual"):
-        return "gpt-4o-mini"
+        return modelo_ligero
 
-    return DEFAULT_CHAT_MODEL
+    return default
 
 
 def _get_token_costs_for_model(model_name: str):
@@ -357,7 +406,8 @@ def _log_prompt_debug(referencia_log: str, prompt_sistema: str, prompt_usuario: 
 
 def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", force_json=None, max_tokens=None):
     """
-    Envía la consulta a OpenAI y registra el gasto asociado al archivo 'referencia_log'.
+    Envía la consulta al proveedor de LLM activo (settings.LLM_PROVIDER: "openai" o "gemini")
+    y registra el gasto asociado al archivo 'referencia_log'.
 
     Args:
         prompt_sistema: Prompt del sistema
@@ -375,6 +425,16 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
 
     model_name = _get_model_for_reference(referencia_log)
 
+    if settings.LLM_PROVIDER.lower() == "gemini":
+        return _consultar_gemini(
+            prompt_sistema, prompt_usuario, referencia_log, force_json, max_tokens, model_name
+        )
+    return _consultar_openai(
+        prompt_sistema, prompt_usuario, referencia_log, force_json, max_tokens, model_name
+    )
+
+
+def _consultar_openai(prompt_sistema, prompt_usuario, referencia_log, force_json, max_tokens, model_name):
     # Modelos de razonamiento no soportan temperature ni seed
     REASONING_MODELS = {"o1", "o1-mini", "o1-preview", "o3", "o3-mini", "gpt-5-mini"}
 
@@ -459,6 +519,102 @@ def consultar_gpt(prompt_sistema, prompt_usuario, referencia_log="Desconocido", 
         )
 
     # Log de debug con respuesta incluida
+    _log_prompt_debug(referencia_log, prompt_sistema, prompt_usuario, resultado)
+
+    return resultado
+
+
+class _GeminiUsageAdapter:
+    """Adapta usage_metadata de google-genai a la interfaz (prompt_tokens, completion_tokens, ...)
+    que espera registrar_gasto_chat, pensada originalmente para el objeto usage de OpenAI."""
+
+    def __init__(self, usage_metadata):
+        self.prompt_tokens = getattr(usage_metadata, "prompt_token_count", 0) or 0
+        self.completion_tokens = getattr(usage_metadata, "candidates_token_count", 0) or 0
+        self.total_tokens = getattr(usage_metadata, "total_token_count", 0) or (
+            self.prompt_tokens + self.completion_tokens
+        )
+        self.prompt_tokens_details = None
+
+
+GEMINI_THINKING_HEADROOM_TOKENS = 4096  # Verificado empíricamente (sep 2026): los modelos
+# 3.x son "thinking" híbridos y sus tokens de razonamiento salen del mismo presupuesto que
+# max_output_tokens. Con max_tokens=100 (heredado de los límites de OpenAI) el JSON de
+# salida se cortaba a mitad de camino porque el thinking se comía el presupuesto antes de
+# emitir texto. Se suma este colchón solo para Gemini; no aplica al lado OpenAI.
+
+
+def _consultar_gemini(prompt_sistema, prompt_usuario, referencia_log, force_json, max_tokens, model_name):
+    config_kwargs = {
+        "system_instruction": prompt_sistema,
+        "temperature": 0.0,
+    }
+    if max_tokens is not None:
+        config_kwargs["max_output_tokens"] = max_tokens + GEMINI_THINKING_HEADROOM_TOKENS
+    if force_json:
+        config_kwargs["response_mime_type"] = "application/json"
+
+    response = None
+    ultimo_error = None
+
+    for intento in range(1, GEMINI_MAX_RETRIES + 2):
+        try:
+            response = _get_gemini_client().models.generate_content(
+                model=model_name,
+                contents=prompt_usuario,
+                config=genai_types.GenerateContentConfig(**config_kwargs),
+            )
+            break
+        except GeminiServerError as e:
+            ultimo_error = e
+            if intento > GEMINI_MAX_RETRIES:
+                break
+            espera = min(2 ** intento, 30)
+            print(
+                f"AVISO: Gemini intento {intento}/{GEMINI_MAX_RETRIES + 1} fallo "
+                f"(error de servidor {getattr(e, 'code', '?')}). Reintentando en {espera}s..."
+            )
+            time.sleep(espera)
+        except GeminiClientError as e:
+            ultimo_error = e
+            codigo = getattr(e, "code", None)
+            # Solo 429 (RESOURCE_EXHAUSTED, límite de frecuencia del tier gratis) es transitorio.
+            # El resto (400, 401, 403...) son errores de configuración: cortar directamente.
+            if codigo != 429 or intento > GEMINI_MAX_RETRIES:
+                break
+            espera = min(2 ** intento, 30)
+            print(
+                f"AVISO: Gemini intento {intento}/{GEMINI_MAX_RETRIES + 1} fallo "
+                f"(429 RESOURCE_EXHAUSTED, limite del tier gratis). Reintentando en {espera}s..."
+            )
+            time.sleep(espera)
+
+    if response is None:
+        raise RuntimeError(
+            f"Fallo al consultar Gemini ({model_name}) tras {GEMINI_MAX_RETRIES + 1} intentos: {ultimo_error}"
+        )
+
+    # --- REGISTRO AUTOMÁTICO DE GASTOS (coste 0 en tier gratis, pero se registran tokens) ---
+    usage = getattr(response, "usage_metadata", None)
+    if usage:
+        registrar_gasto_chat(
+            referencia=referencia_log,
+            uso=_GeminiUsageAdapter(usage),
+            model_name=model_name,
+            request_id=getattr(response, "response_id", "") or "",
+        )
+    # -------------------------------------
+
+    resultado = response.text
+
+    if resultado is None:
+        candidatos = getattr(response, "candidates", None) or []
+        finish_reason = getattr(candidatos[0], "finish_reason", "unknown") if candidatos else "unknown"
+        raise RuntimeError(
+            f"El modelo ({model_name}) devolvió texto vacío [finish_reason={finish_reason}]. "
+            f"Posible causa: bloqueo por filtros de seguridad o max_output_tokens insuficiente."
+        )
+
     _log_prompt_debug(referencia_log, prompt_sistema, prompt_usuario, resultado)
 
     return resultado

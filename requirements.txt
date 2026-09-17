@@ -5,6 +5,8 @@ python-dotenv
 chromadb
 # Agente PBI (OpenAI GPT-5-mini — consultas DAX sobre modelo semántico Power BI)
 openai>=1.0.0
+# Proveedor alternativo de LLM para pruebas comparativas (rama gemini_pruebas)
+google-genai>=0.3.0
 pydantic>=2.0.0
 pydantic-settings
 fpdf

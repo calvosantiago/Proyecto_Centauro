@@ -35,7 +35,14 @@
       "Bash(git rm *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\uscp9a\\\\Grupo Planeta\\\\BI POWER - General\\\\PBI\\\\PROYECTOS\\\\Proyecto_Centauro\" -Recurse -Directory)",
       "Bash(Select-Object FullName)",
-      "Bash(Sort-Object FullName)"
+      "Bash(Sort-Object FullName)",
+      "Bash(curl -s -X GET https://fhywaoyvfjfqgjznzugk.supabase.co/rest/v1/oportunidades?select=opportunity_id -H 'apikey: __CMDSUB_OUTPUT__')",
+      "WebSearch",
+      "WebFetch(domain:ai.google.dev)",
+      "WebFetch(domain:googleapis.github.io)",
+      "Bash(git checkout *)",
+      "mcp__visualize__read_me",
+      "Bash(sort -k2)"
     ]
   }
 }
