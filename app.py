@@ -264,14 +264,17 @@ def _registrar_gasto_assemblyai(referencia: str, duracion_seg: float) -> None:
         print(f"  ⚠️ No se pudo registrar gasto AssemblyAI: {e}")
 
 
-def _get_transcripcion_cache_path(audio_path: Path) -> Path:
-    """Devuelve la ruta del archivo de caché para una transcripción."""
+def _get_transcripcion_cache_path(audio_path: Path, sufijo: str = "") -> Path:
+    """Devuelve la ruta del archivo de caché para una transcripción.
+
+    `sufijo` evita que la caché de un proveedor pise la de otro cuando se compara el mismo
+    archivo con AssemblyAI y Gemini (ej. "_gemini")."""
     from centauro.config import settings
     cache_dir = settings.OUTPUTS_DIR / "transcripciones_cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     # Clave: nombre del archivo (sin extensión) — suficiente para archivos con nombre único.
     # Si quisieramos comparar por contenido usaríamos hash MD5 del fichero.
-    return cache_dir / f"{audio_path.stem}.txt"
+    return cache_dir / f"{audio_path.stem}{sufijo}.txt"
 
 
 def _transcribir_con_assemblyai(audio_path: Path, api_key: str, referencia: str = "") -> str:
@@ -323,6 +326,87 @@ def _transcribir_con_assemblyai(audio_path: Path, api_key: str, referencia: str 
     print(f"   ✅ AssemblyAI: {len(transcript.utterances)} utterances, {duracion_seg/60:.1f} min")
 
     # ── Guardar en caché para evitar re-transcribir si se vuelve a evaluar ──
+    try:
+        cache_path.write_text(resultado, encoding="utf-8")
+        print(f"   💾 Transcripción guardada en caché: {cache_path.name}")
+    except Exception as e:
+        print(f"   ⚠️ No se pudo guardar caché de transcripción: {e}")
+
+    return resultado
+
+
+PROMPT_TRANSCRIPCION_GEMINI = (
+    "Transcribe este audio completo en español, palabra por palabra, tal como se escucha "
+    "(incluye muletillas y repeticiones; no corrijas errores de pronunciación del hablante). "
+    "Identifica a los interlocutores por su voz, no por el contenido de lo que dicen. "
+    'Devuelve el resultado como un array JSON, sin nada mas alrededor del array, con esta '
+    'forma exacta: [{"hablante": "A", "texto": "..."}, {"hablante": "B", "texto": "..."}]. '
+    "Un objeto por cada intervencion, en orden cronologico. La misma persona debe usar siempre "
+    "la misma letra de hablante durante todo el audio."
+)
+
+
+def _transcribir_con_gemini(audio_path: Path, referencia: str = "") -> str:
+    """
+    Transcribe y diariza el audio usando Gemini (audio nativo + salida JSON estructurada).
+    Devuelve texto en formato [Hablante_A]: texto / [Hablante_B]: texto — el DiarizationAgent
+    reconoce cualquier patrón [ETIQUETA]: de forma genérica, igual que con AssemblyAI.
+
+    Se pide JSON en vez de texto libre porque, en pruebas (rama gemini_pruebas), Gemini no
+    siempre respeta un salto de línea por turno en texto libre — con JSON el formato es
+    siempre parseable sin depender de que el modelo mantenga esa convención.
+
+    Usa una caché separada de la de AssemblyAI (sufijo _gemini) para poder comparar el mismo
+    archivo con ambos proveedores sin que uno pise la caché del otro.
+    """
+    import json as _json
+    from google.genai import types as genai_types
+    from centauro.llm_client import gemini_generate_con_reintentos, registrar_gasto_chat, _GeminiUsageAdapter
+
+    cache_stem = Path(referencia).stem if referencia else audio_path.stem
+    cache_path = _get_transcripcion_cache_path(Path(cache_stem), sufijo="_gemini")
+    if cache_path.exists():
+        print(f"   💾 Transcripción en caché encontrada — omitiendo llamada a Gemini ({cache_path.name})")
+        return cache_path.read_text(encoding="utf-8")
+
+    print("   📡 Enviando a Gemini (transcripción + diarización)...")
+    audio_bytes = audio_path.read_bytes()
+    response = gemini_generate_con_reintentos(
+        "gemini-3.6-flash",
+        [
+            genai_types.Part.from_bytes(data=audio_bytes, mime_type="audio/mp3"),
+            PROMPT_TRANSCRIPCION_GEMINI,
+        ],
+        genai_types.GenerateContentConfig(temperature=0.0, response_mime_type="application/json"),
+    )
+
+    usage = getattr(response, "usage_metadata", None)
+    if usage:
+        registrar_gasto_chat(
+            referencia=referencia or audio_path.name,
+            uso=_GeminiUsageAdapter(usage),
+            model_name="gemini-3.6-flash",
+            request_id=getattr(response, "response_id", "") or "",
+        )
+
+    if not response.text:
+        raise RuntimeError("Gemini no devolvio texto al transcribir")
+
+    try:
+        turnos = _json.loads(response.text)
+    except _json.JSONDecodeError as e:
+        raise RuntimeError(
+            f"Gemini no devolvio JSON valido al transcribir: {e}\nRespuesta: {response.text[:500]}"
+        )
+
+    if not turnos:
+        print("   ⚠️ Gemini no devolvió turnos, usando texto plano")
+        return response.text
+
+    lineas = [f"[Hablante_{t['hablante']}]: {t['texto']}" for t in turnos]
+    resultado = "\n\n".join(lineas)
+    print(f"   ✅ Gemini: {len(turnos)} turnos")
+
     try:
         cache_path.write_text(resultado, encoding="utf-8")
         print(f"   💾 Transcripción guardada en caché: {cache_path.name}")
@@ -392,7 +476,12 @@ def _procesar_archivo_multimedia(file_path: Path, original_name: str = None) -> 
     except Exception:
         pass
 
-    # --- AssemblyAI (transcripción + diarización nativa) ---
+    # --- Proveedor de transcripción: Gemini o AssemblyAI (settings.TRANSCRIPTION_PROVIDER) ---
+    from centauro.config import settings as _settings
+    if _settings.TRANSCRIPTION_PROVIDER.lower() == "gemini":
+        texto = _transcribir_con_gemini(audio_path, original_name or file_path.name)
+        return texto, audio_features
+
     assemblyai_key = os.getenv("ASSEMBLYAI_API_KEY")
     if not assemblyai_key:
         raise RuntimeError(
@@ -964,11 +1053,19 @@ async def main(message: cl.Message):
         elif es_multimedia:
             # MP4 o MP3: extraer audio (si MP4) y transcribir
             import os as _os
-            _usar_assemblyai = bool(_os.getenv("ASSEMBLYAI_API_KEY"))
-            _step_name = "🎙️ Transcribiendo con AssemblyAI (diarización nativa)" if _usar_assemblyai else "🎙️ Transcribiendo audio con Groq Whisper"
+            _usar_gemini_transcripcion = settings.TRANSCRIPTION_PROVIDER.lower() == "gemini"
+            _usar_assemblyai = bool(_os.getenv("ASSEMBLYAI_API_KEY")) and not _usar_gemini_transcripcion
+            if _usar_gemini_transcripcion:
+                _step_name = "🎙️ Transcribiendo con Gemini (diarización nativa)"
+            elif _usar_assemblyai:
+                _step_name = "🎙️ Transcribiendo con AssemblyAI (diarización nativa)"
+            else:
+                _step_name = "🎙️ Transcribiendo audio con Groq Whisper"
             async with cl.Step(name=_step_name, type="tool") as step:
                 if Path(file.name).suffix.lower() == '.mp4':
                     step.output = "⏳ Extrayendo audio con ffmpeg..."
+                elif _usar_gemini_transcripcion:
+                    step.output = "⏳ Enviando a Gemini..."
                 elif _usar_assemblyai:
                     step.output = "⏳ Subiendo a AssemblyAI..."
                 else:

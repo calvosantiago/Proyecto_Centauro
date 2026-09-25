@@ -544,16 +544,10 @@ GEMINI_THINKING_HEADROOM_TOKENS = 4096  # Verificado empíricamente (sep 2026): 
 # emitir texto. Se suma este colchón solo para Gemini; no aplica al lado OpenAI.
 
 
-def _consultar_gemini(prompt_sistema, prompt_usuario, referencia_log, force_json, max_tokens, model_name):
-    config_kwargs = {
-        "system_instruction": prompt_sistema,
-        "temperature": 0.0,
-    }
-    if max_tokens is not None:
-        config_kwargs["max_output_tokens"] = max_tokens + GEMINI_THINKING_HEADROOM_TOKENS
-    if force_json:
-        config_kwargs["response_mime_type"] = "application/json"
-
+def gemini_generate_con_reintentos(model_name, contents, config):
+    """Llama a client.models.generate_content con reintentos (503 de servidor, 429 del tier
+    gratis). Reutilizable por cualquier llamada a Gemini (texto, audio, etc.) que necesite la
+    misma política de reintentos que _consultar_gemini."""
     response = None
     ultimo_error = None
 
@@ -561,8 +555,8 @@ def _consultar_gemini(prompt_sistema, prompt_usuario, referencia_log, force_json
         try:
             response = _get_gemini_client().models.generate_content(
                 model=model_name,
-                contents=prompt_usuario,
-                config=genai_types.GenerateContentConfig(**config_kwargs),
+                contents=contents,
+                config=config,
             )
             break
         except GeminiServerError as e:
@@ -593,6 +587,22 @@ def _consultar_gemini(prompt_sistema, prompt_usuario, referencia_log, force_json
         raise RuntimeError(
             f"Fallo al consultar Gemini ({model_name}) tras {GEMINI_MAX_RETRIES + 1} intentos: {ultimo_error}"
         )
+    return response
+
+
+def _consultar_gemini(prompt_sistema, prompt_usuario, referencia_log, force_json, max_tokens, model_name):
+    config_kwargs = {
+        "system_instruction": prompt_sistema,
+        "temperature": 0.0,
+    }
+    if max_tokens is not None:
+        config_kwargs["max_output_tokens"] = max_tokens + GEMINI_THINKING_HEADROOM_TOKENS
+    if force_json:
+        config_kwargs["response_mime_type"] = "application/json"
+
+    response = gemini_generate_con_reintentos(
+        model_name, prompt_usuario, genai_types.GenerateContentConfig(**config_kwargs)
+    )
 
     # --- REGISTRO AUTOMÁTICO DE GASTOS (coste 0 en tier gratis, pero se registran tokens) ---
     usage = getattr(response, "usage_metadata", None)

@@ -1026,6 +1026,20 @@ Genera el JSON con la información del lead.
 
         bloques_con_calificacion = len(calificaciones_validas)
 
+        # FIX: fecha_seguimiento de resumen_contextual casi siempre queda null porque se le
+        # pide a la LLM un ISO datetime absoluto sin darle la fecha real de la llamada como
+        # referencia — no puede convertir "mañana a las 9" o "lunes 9:30" a una fecha concreta
+        # sin ese ancla. El bloque de Cierre ya extrae la misma información en texto natural
+        # (seguimiento_proximos_pasos.fecha_hora), así que se reutiliza aquí en vez de duplicar
+        # la extracción con otro intento de LLM.
+        if resumen_contextual and not resumen_contextual.get("fecha_seguimiento"):
+            for e in evaluaciones:
+                if "cierre" in (e.get("bloque") or "").lower():
+                    fecha_cierre = (e.get("seguimiento_proximos_pasos") or {}).get("fecha_hora")
+                    if fecha_cierre:
+                        resumen_contextual["fecha_seguimiento"] = fecha_cierre
+                    break
+
         # Construir reporte final
         reporte = {
             "asesor": asesor,
